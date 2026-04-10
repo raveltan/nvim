@@ -23,13 +23,25 @@ return {
     config = function()
       require("neotest").setup({
         adapters = {
-          require("neotest-phpunit"),
+          require("neotest-phpunit")({
+            phpunit_cmd = function()
+              -- Use neotest wrapper for fl-gaf projects (handles Docker infra via bin/run-tests)
+              local cwd = vim.fn.getcwd()
+              if cwd:match("fl%-gaf") and vim.fn.filereadable(cwd .. "/bin/run-tests") == 1 then
+                return vim.fn.stdpath("config") .. "/scripts/neotest-run-tests.sh"
+              end
+              return "vendor/bin/phpunit"
+            end,
+          }),
           require("neotest-jest")({
             jestCommand = "npx jest",
           }),
           require("neotest-python")({
             dap = { justMyCode = false },
           }),
+        },
+        discovery = {
+          enabled = false,
         },
         status = {
           virtual_text = true,
