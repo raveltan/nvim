@@ -13,9 +13,17 @@ return {
         typescript = { "prettierd", "prettier", stop_after_first = true },
         javascriptreact = { "prettierd", "prettier", stop_after_first = true },
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
-        php = in_freelancer and { "php_cs_fixer" } or {},
+        php = in_freelancer and { "php_cs_fixer" } or { "pint" },
+        blade = { "blade-formatter" },
       },
       formatters = in_freelancer and {
+        pint = {
+          command = function()
+            local pint = vim.fn.getcwd() .. "/vendor/bin/pint"
+            if vim.fn.executable(pint) == 1 then return pint end
+            return "pint"
+          end,
+        },
         php_cs_fixer = {
           command = vim.fn.expand("~/freelancer-dev/fl-gaf/support/php-cs-fixer/vendor/bin/php-cs-fixer"),
           args = {

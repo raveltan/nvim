@@ -170,6 +170,22 @@ return {
     end,
   },
 
+  -- HTTP client (REST API testing)
+  {
+    "mistweaverco/kulala.nvim",
+    keys = {
+      { "<leader>Rs", desc = "Send request" },
+      { "<leader>Ra", desc = "Send all requests" },
+      { "<leader>Rb", desc = "Open scratchpad" },
+    },
+    ft = { "http", "rest" },
+    opts = {
+      global_keymaps = true,
+      global_keymaps_prefix = "<leader>R",
+      kulala_keymaps_prefix = "",
+    },
+  },
+
   -- Better quickfix window with preview + fzf filter
   {
     "kevinhwang91/nvim-bqf",
@@ -277,6 +293,8 @@ return {
         { "<leader>o", group = "overseer" },
         { "<leader>r", group = "refactor" },
         { "<leader>S", group = "snippets" },
+        { "<leader>l", group = "laravel" },
+        { "<leader>R", group = "rest" },
         { "g", group = "goto" },
         { "gs", group = "surround" },
       },

@@ -12,7 +12,7 @@ return {
     "mason-org/mason-lspconfig.nvim",
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     opts = {
-      ensure_installed = { "vtsls", "eslint", "pyright" },
+      ensure_installed = { "vtsls", "eslint", "pyright", "tailwindcss" },
     },
   },
 
@@ -112,7 +112,25 @@ return {
         root_markers = { "composer.json", ".git" },
       })
 
-      vim.lsp.enable({ "vtsls", "eslint", "pyright", "phpantom" })
+      -- Tailwind CSS (used with Livewire/Blade views)
+      vim.lsp.config("tailwindcss", {
+        capabilities = capabilities,
+        filetypes = { "html", "css", "blade", "php", "javascript", "typescript", "javascriptreact", "typescriptreact" },
+        settings = {
+          tailwindCSS = {
+            includeLanguages = {
+              blade = "html",
+            },
+            experimental = {
+              classRegex = {
+                { "@apply\\s+([^;]*)", "" },
+              },
+            },
+          },
+        },
+      })
+
+      vim.lsp.enable({ "vtsls", "eslint", "pyright", "phpantom", "tailwindcss" })
 
       vim.diagnostic.config({
         virtual_text = false, -- tiny-inline-diagnostic handles this
@@ -210,6 +228,18 @@ return {
         },
       },
       appearance = { nerd_font_variant = "mono" },
+      snippets = {
+        -- Wrap snippet expansion to gracefully handle broken snippets (e.g. blade loop first/last)
+        expand = function(snippet)
+          local ok, err = pcall(vim.snippet.expand, snippet)
+          if not ok then
+            -- Fall back to inserting the snippet as plain text
+            vim.notify("Snippet parse error: " .. tostring(err), vim.log.levels.WARN)
+            local cursor = vim.api.nvim_win_get_cursor(0)
+            vim.api.nvim_put({ snippet }, "c", true, true)
+          end
+        end,
+      },
       completion = {
         accept = { resolve_timeout_ms = 500 },
         documentation = { auto_show = true },

@@ -3,10 +3,18 @@ return {
     "nvim-treesitter/nvim-treesitter",
     lazy = false,
     build = ":TSUpdate",
+    init = function()
+      -- Register blade filetype early so FileType autocmds fire correctly
+      vim.filetype.add({
+        pattern = {
+          [".*%.blade%.php"] = "blade",
+        },
+      })
+    end,
     config = function()
       require("nvim-treesitter").install({
         "bash", "css", "html", "javascript", "json", "lua",
-        "markdown", "markdown_inline", "php", "python", "regex",
+        "markdown", "markdown_inline", "php", "php_only", "python", "regex",
         "tsx", "typescript", "vim", "vimdoc", "yaml",
       })
 
