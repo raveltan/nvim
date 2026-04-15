@@ -162,6 +162,9 @@ return {
       "MunifTanjim/nui.nvim",
     },
     opts = {
+      cmdline = {
+        view = "cmdline", -- use inline cmdline to avoid E11 split errors in command-line window
+      },
       lsp = {
         override = {
           ["vim.lsp.util.convert_input_to_markdown_lines"] = true,

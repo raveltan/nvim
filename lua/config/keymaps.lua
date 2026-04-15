@@ -1,11 +1,5 @@
 local map = vim.keymap.set
 
--- Window navigation
-map("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
-map("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
-map("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
-map("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
-
 -- Window splits
 map("n", "<leader>|", "<cmd>vsplit<cr>", { desc = "Vertical split" })
 map("n", "<leader>-", "<cmd>split<cr>", { desc = "Horizontal split" })

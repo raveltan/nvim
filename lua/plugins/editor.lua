@@ -13,8 +13,8 @@ return {
       end,
     },
     keys = {
-      { "zR", function() require("ufo").openAllFolds() end, desc = "Open all folds" },
-      { "zM", function() require("ufo").closeAllFolds() end, desc = "Close all folds" },
+      { "zR", function() require("ufo").openAllFolds() end,               desc = "Open all folds" },
+      { "zM", function() require("ufo").closeAllFolds() end,              desc = "Close all folds" },
       { "zp", function() require("ufo").peekFoldedLinesUnderCursor() end, desc = "Peek fold" },
     },
   },
@@ -45,10 +45,10 @@ return {
     "ThePrimeagen/refactoring.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
     keys = {
-      { "<leader>re", function() require("refactoring").select_refactor() end, mode = "v", desc = "Refactor (select)" },
-      { "<leader>rf", function() require("refactoring").refactor("Extract Function") end, mode = "v", desc = "Extract function" },
-      { "<leader>rv", function() require("refactoring").refactor("Extract Variable") end, mode = "v", desc = "Extract variable" },
-      { "<leader>ri", function() require("refactoring").refactor("Inline Variable") end, mode = { "n", "v" }, desc = "Inline variable" },
+      { "<leader>re", function() require("refactoring").select_refactor() end,            mode = "v",          desc = "Refactor (select)" },
+      { "<leader>rf", function() require("refactoring").refactor("Extract Function") end, mode = "v",          desc = "Extract function" },
+      { "<leader>rv", function() require("refactoring").refactor("Extract Variable") end, mode = "v",          desc = "Extract variable" },
+      { "<leader>ri", function() require("refactoring").refactor("Inline Variable") end,  mode = { "n", "v" }, desc = "Inline variable" },
     },
     opts = {},
   },
@@ -97,7 +97,7 @@ return {
       },
     },
     keys = {
-      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end,       desc = "Flash" },
       { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
     },
   },
@@ -118,7 +118,7 @@ return {
     "echasnovski/mini.bufremove",
     keys = {
       { "<leader>bd", function() require("mini.bufremove").delete(0, false) end, desc = "Delete buffer" },
-      { "<leader>bD", function() require("mini.bufremove").delete(0, true) end, desc = "Delete buffer (force)" },
+      { "<leader>bD", function() require("mini.bufremove").delete(0, true) end,  desc = "Delete buffer (force)" },
     },
   },
 
@@ -137,11 +137,11 @@ return {
       ring = { history_length = 100 },
     },
     keys = {
-      { "y", "<Plug>(YankyYank)", mode = { "n", "x" }, desc = "Yank" },
-      { "p", "<Plug>(YankyPutAfter)", mode = { "n", "x" }, desc = "Put after" },
-      { "P", "<Plug>(YankyPutBefore)", mode = { "n", "x" }, desc = "Put before" },
+      { "y",     "<Plug>(YankyYank)",          mode = { "n", "x" },     desc = "Yank" },
+      { "p",     "<Plug>(YankyPutAfter)",      mode = { "n", "x" },     desc = "Put after" },
+      { "P",     "<Plug>(YankyPutBefore)",     mode = { "n", "x" },     desc = "Put before" },
       { "<C-p>", "<Plug>(YankyPreviousEntry)", desc = "Prev yank entry" },
-      { "<C-n>", "<Plug>(YankyNextEntry)", desc = "Next yank entry" },
+      { "<C-n>", "<Plug>(YankyNextEntry)",     desc = "Next yank entry" },
     },
   },
 
@@ -208,8 +208,8 @@ return {
     keys = {
       { "<C-a>", function() require("dial.map").manipulate("increment", "normal") end, desc = "Increment" },
       { "<C-x>", function() require("dial.map").manipulate("decrement", "normal") end, desc = "Decrement" },
-      { "<C-a>", function() require("dial.map").manipulate("increment", "visual") end, mode = "v", desc = "Increment" },
-      { "<C-x>", function() require("dial.map").manipulate("decrement", "visual") end, mode = "v", desc = "Decrement" },
+      { "<C-a>", function() require("dial.map").manipulate("increment", "visual") end, mode = "v",        desc = "Increment" },
+      { "<C-x>", function() require("dial.map").manipulate("decrement", "visual") end, mode = "v",        desc = "Decrement" },
     },
     config = function()
       local augend = require("dial.augend")
@@ -253,8 +253,8 @@ return {
     "chrisgrieser/nvim-scissors",
     dependencies = { "rafamadriz/friendly-snippets" },
     keys = {
-      { "<leader>Se", function() require("scissors").editSnippet() end, desc = "Edit snippet" },
-      { "<leader>Sa", function() require("scissors").addNewSnippet() end, mode = { "n", "x" }, desc = "Add snippet" },
+      { "<leader>Se", function() require("scissors").editSnippet() end,   desc = "Edit snippet" },
+      { "<leader>Sa", function() require("scissors").addNewSnippet() end, mode = { "n", "x" },  desc = "Add snippet" },
     },
     opts = {
       snippetDir = vim.fn.stdpath("data") .. "/lazy/friendly-snippets",
@@ -276,28 +276,35 @@ return {
     event = "VeryLazy",
     opts = {
       spec = {
-        { "<leader>f", group = "find" },
-        { "<leader>s", group = "search" },
-        { "<leader>g", group = "git" },
+        { "<leader>f",  group = "find" },
+        { "<leader>s",  group = "search" },
+        { "<leader>g",  group = "git" },
         { "<leader>gh", group = "hunks" },
-        { "<leader>b", group = "buffer" },
-        { "<leader>q", group = "quit/session" },
-        { "<leader>t", group = "toggle" },
-        { "<leader>u", group = "ui" },
-        { "<leader>x", group = "diagnostics" },
-        { "<leader>c", group = "code" },
+        { "<leader>b",  group = "buffer" },
+        { "<leader>q",  group = "quit/session" },
+        { "<leader>t",  group = "toggle" },
+        { "<leader>u",  group = "ui" },
+        { "<leader>x",  group = "diagnostics" },
+        { "<leader>c",  group = "code" },
         { "<leader>cs", group = "swap" },
-        { "<leader>d", group = "debug" },
-        { "<leader>T", group = "test" },
-        { "<leader>h", group = "harpoon" },
-        { "<leader>o", group = "overseer" },
-        { "<leader>r", group = "refactor" },
-        { "<leader>S", group = "snippets" },
-        { "<leader>l", group = "laravel" },
-        { "<leader>R", group = "rest" },
-        { "g", group = "goto" },
-        { "gs", group = "surround" },
+        { "<leader>d",  group = "debug" },
+        { "<leader>T",  group = "test" },
+        { "<leader>h",  group = "harpoon" },
+        { "<leader>o",  group = "overseer" },
+        { "<leader>r",  group = "refactor" },
+        { "<leader>S",  group = "snippets" },
+        { "<leader>l",  group = "laravel" },
+        { "<leader>R",  group = "rest" },
+        { "g",          group = "goto" },
+        { "gs",         group = "surround" },
       },
     },
   },
+  {
+    "bngarren/checkmate.nvim",
+    ft = "markdown", -- Lazy loads for Markdown files matching patterns in 'files'
+    opts = {
+      -- files = { "*.md" }, -- any .md file (instead of defaults)
+    },
+  }
 }

@@ -130,7 +130,11 @@ return {
         },
       })
 
-      vim.lsp.enable({ "vtsls", "eslint", "pyright", "phpantom", "tailwindcss" })
+      local servers = { "vtsls", "eslint", "pyright", "phpantom" }
+      if not in_freelancer then
+        table.insert(servers, "tailwindcss")
+      end
+      vim.lsp.enable(servers)
 
       vim.diagnostic.config({
         virtual_text = false, -- tiny-inline-diagnostic handles this
@@ -149,6 +153,15 @@ return {
         float = { border = "rounded" },
         severity_sort = true,
       })
+
+      -- Ensure diagnostic underlines work even when terminal lacks undercurl support
+      for _, level in ipairs({ "Error", "Warn", "Info", "Hint", "Ok" }) do
+        local hl = vim.api.nvim_get_hl(0, { name = "DiagnosticUnderline" .. level, link = false })
+        if hl.undercurl and not hl.underline then
+          hl.underline = true
+          vim.api.nvim_set_hl(0, "DiagnosticUnderline" .. level, hl)
+        end
+      end
     end,
   },
 
@@ -210,6 +223,7 @@ return {
     opts = {
       keymap = {
         preset = "default",
+        ["<C-Space>"] = { "show", "hide", "show_documentation", "hide_documentation" },
         ["<CR>"] = {
           function(cmp)
             if cmp.is_visible() then return false end

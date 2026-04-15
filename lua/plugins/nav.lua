@@ -1,4 +1,21 @@
 return {
+  -- Seamless navigation between nvim splits and tmux panes
+  {
+    "christoomey/vim-tmux-navigator",
+    cmd = {
+      "TmuxNavigateLeft",
+      "TmuxNavigateDown",
+      "TmuxNavigateUp",
+      "TmuxNavigateRight",
+    },
+    keys = {
+      { "<C-h>", "<cmd>TmuxNavigateLeft<cr>",  desc = "Window left" },
+      { "<C-j>", "<cmd>TmuxNavigateDown<cr>",  desc = "Window down" },
+      { "<C-k>", "<cmd>TmuxNavigateUp<cr>",    desc = "Window up" },
+      { "<C-l>", "<cmd>TmuxNavigateRight<cr>", desc = "Window right" },
+    },
+  },
+
   -- File explorer (edit filesystem like a buffer)
   {
     "stevearc/oil.nvim",
