@@ -1048,5 +1048,69 @@ return {
         },
       },
     },
-  }
+  },
+
+  -- Makes `.` repeat plugin mappings (mini.surround, yanky, etc.)
+  { "tpope/vim-repeat", event = "VeryLazy" },
+
+  -- Case-preserving :Subvert/:S and `crs`/`crc`/`crm`/`cru`/`cr-`/`cr.` case coercions
+  { "tpope/vim-abolish", event = "VeryLazy" },
+
+  -- Structural (Treesitter) search & replace
+  {
+    "cshuaimin/ssr.nvim",
+    keys = {
+      { "<leader>sS", function() require("ssr").open() end, mode = { "n", "x" }, desc = "Structural replace (SSR)" },
+    },
+    opts = {
+      border = "rounded",
+      min_width = 50,
+      min_height = 5,
+      keymaps = {
+        close = "q",
+        next_match = "n",
+        prev_match = "N",
+        replace_confirm = "<cr>",
+        replace_all = "<leader><cr>",
+      },
+    },
+    config = function(_, opts)
+      require("ssr").setup(opts)
+    end,
+  },
+
+  -- Highlight other uses of the symbol under cursor (LSP/Treesitter/regex)
+  {
+    "RRethy/vim-illuminate",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      require("illuminate").configure({
+        providers = { "lsp", "treesitter", "regex" },
+        delay = 120,
+        filetypes_denylist = { "oil", "trouble", "lazy", "mason", "help", "noice", "checkhealth", "snacks_picker_list" },
+        min_count_to_highlight = 2,
+      })
+      vim.keymap.set("n", "]]", function() require("illuminate").goto_next_reference(false) end, { desc = "Next reference" })
+      vim.keymap.set("n", "[[", function() require("illuminate").goto_prev_reference(false) end, { desc = "Prev reference" })
+    end,
+  },
+
+  -- Better macro UX (edit, yank, named slots, status)
+  {
+    "chrisgrieser/nvim-recorder",
+    event = "VeryLazy",
+    opts = {
+      slots = { "a", "b" },
+      mapping = {
+        startStopRecording = "q",
+        playMacro = "Q",
+        switchSlot = "<leader>qs",
+        editMacro = "<leader>qe",
+        yankMacro = "<leader>qy",
+        addBreakPoint = "##",
+      },
+      clear = false,
+      logLevel = vim.log.levels.INFO,
+    },
+  },
 }
