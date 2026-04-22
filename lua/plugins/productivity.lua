@@ -39,11 +39,17 @@ return {
     },
   },
 
-  -- Human-readable TS errors
+  -- Readable TS errors: translates cryptic messages AND expands collapsed types
   {
-    "dmmulroy/ts-error-translator.nvim",
-    ft = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
-    opts = {},
+    "OlegGulevskyy/better-ts-errors.nvim",
+    ft = { "typescript", "typescriptreact" },
+    dependencies = { "MunifTanjim/nui.nvim" },
+    opts = {
+      keymaps = {
+        toggle = "<leader>dd",
+        go_to_definition = "<leader>dx",
+      },
+    },
   },
 
   -- Project-wide async `tsc --noEmit` into quickfix
@@ -93,13 +99,20 @@ return {
     },
   },
 
-  -- VSCode-style breadcrumb winbar with click-to-navigate
+  -- LSP progress/loading indicator in corner
   {
-    "Bekaboo/dropbar.nvim",
-    event = "BufReadPost",
-    keys = {
-      { "<leader>;", function() require("dropbar.api").pick() end, desc = "Pick breadcrumb" },
+    "j-hui/fidget.nvim",
+    event = "LspAttach",
+    opts = {
+      progress = {
+        display = {
+          progress_icon = { pattern = "dots" },
+          done_icon = "✓",
+        },
+      },
+      notification = {
+        window = { winblend = 0 },
+      },
     },
-    opts = {},
   },
 }

@@ -55,4 +55,21 @@ return {
       require("harpoon"):setup()
     end,
   },
+
+  -- VSCode-style peek: floating window showing definition/type source with all members
+  {
+    "dnlhc/glance.nvim",
+    cmd = "Glance",
+    keys = {
+      { "gD", "<cmd>Glance definitions<cr>", desc = "Peek definitions" },
+      { "gR", "<cmd>Glance references<cr>", desc = "Peek references" },
+      { "gY", "<cmd>Glance type_definitions<cr>", desc = "Peek type definitions" },
+      { "gM", "<cmd>Glance implementations<cr>", desc = "Peek implementations" },
+    },
+    opts = {
+      border = { enable = true },
+      theme = { enable = true, mode = "darken" },
+      detached = true,
+    },
+  },
 }

@@ -53,31 +53,85 @@ return {
 
   -- Statusline
   {
-    "echasnovski/mini.statusline",
+    "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
     opts = {
-      content = {
-        active = function()
-          local MiniStatusline = require("mini.statusline")
-          local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
-          local git = MiniStatusline.section_git({ trunc_width = 40, icon = "" })
-          local diagnostics = MiniStatusline.section_diagnostics({ trunc_width = 75 })
-          local filename = MiniStatusline.section_filename({ trunc_width = 140 })
-          local location = MiniStatusline.section_location({ trunc_width = 75 })
-          local lsp = MiniStatusline.section_lsp({ trunc_width = 75, icon = "" })
-
-          return MiniStatusline.combine_groups({
-            { hl = mode_hl, strings = { mode } },
-            { hl = "MiniStatuslineDevinfo", strings = { git, diagnostics, lsp } },
-            "%<",
-            { hl = "MiniStatuslineFilename", strings = { filename } },
-            "%=",
-            { hl = mode_hl, strings = { location } },
-          })
-        end,
+      options = {
+        theme = "rose-pine",
+        globalstatus = true,
+        section_separators = { left = "", right = "" },
+        component_separators = { left = "", right = "" },
       },
-      use_icons = true,
-      set_vim_settings = false,
+      sections = {
+        lualine_a = { "mode" },
+        lualine_b = { "branch", "diff", "diagnostics" },
+        lualine_c = { { "filename", path = 1 } },
+        lualine_x = { "encoding", "fileformat", "filetype" },
+        lualine_y = { "progress" },
+        lualine_z = { "location" },
+      },
+    },
+  },
+
+  -- Minimal, beautiful bufferline
+  {
+    "willothy/nvim-cokeline",
+    event = "VeryLazy",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+    },
+    keys = {
+      { "<S-h>", "<Plug>(cokeline-focus-prev)", desc = "Prev buffer" },
+      { "<S-l>", "<Plug>(cokeline-focus-next)", desc = "Next buffer" },
+      { "<leader>bp", "<Plug>(cokeline-pick-focus)", desc = "Pick buffer" },
+    },
+    config = function()
+      local get_hex = require("cokeline.hlgroups").get_hl_attr
+      require("cokeline").setup({
+        default_hl = {
+          fg = function(buffer)
+            return buffer.is_focused and get_hex("Normal", "fg") or get_hex("Comment", "fg")
+          end,
+          bg = "NONE",
+        },
+        components = {
+          { text = " " },
+          {
+            text = function(buffer) return (buffer.devicon.icon or "") .. " " end,
+            fg = function(buffer) return buffer.devicon.color end,
+          },
+          { text = function(buffer) return buffer.filename .. " " end,
+            bold = function(buffer) return buffer.is_focused end },
+          {
+            text = function(buffer) return buffer.is_modified and "● " or "  " end,
+            fg = function(buffer) return buffer.is_modified and "#f6c177" or nil end,
+          },
+        },
+      })
+    end,
+  },
+
+  -- TODO/FIX/NOTE highlighting
+  {
+    "folke/todo-comments.nvim",
+    event = "BufReadPost",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {},
+    keys = {
+      { "<leader>st", "<cmd>TodoTelescope<cr>", desc = "Todo comments" },
+    },
+  },
+
+  -- Code chunk / scope highlighting
+  {
+    "shellRaining/hlchunk.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    opts = {
+      chunk = { enable = true, style = "#c4a7e7" },
+      indent = { enable = false }, -- snacks.indent handles this
+      line_num = { enable = true, style = "#c4a7e7" },
+      blank = { enable = false },
     },
   },
 
