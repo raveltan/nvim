@@ -116,4 +116,65 @@ return {
       },
     },
   },
+
+  -- Break bad habits: blocks hjkl spam and arrow keys, nudges toward real motions
+  {
+    "m4xshen/hardtime.nvim",
+    event = "VeryLazy",
+    dependencies = { "MunifTanjim/nui.nvim" },
+    opts = {
+      max_count = 4,
+      disable_mouse = false,
+      restriction_mode = "hint",
+      disabled_filetypes = {
+        "qf", "netrw", "NvimTree", "lazy", "mason", "oil", "help", "trouble",
+        "TelescopePrompt", "snacks_picker_input", "snacks_picker_list",
+        "dbee", "dbui", "dap-repl", "dapui_scopes", "dapui_breakpoints",
+        "dapui_stacks", "dapui_watches", "dapui_console", "aerial",
+      },
+    },
+  },
+
+  -- Decorated scrollbar: diagnostics, search, git hunks, marks
+  {
+    "lewis6991/satellite.nvim",
+    event = "VeryLazy",
+    opts = {
+      current_only = false,
+      winblend = 50,
+      handlers = {
+        cursor = { enable = true },
+        search = { enable = true },
+        diagnostic = { enable = true },
+        gitsigns = { enable = true },
+        marks = { enable = true },
+      },
+    },
+  },
+
+  -- Code action indicator in sign column
+  {
+    "kosayoda/nvim-lightbulb",
+    event = "LspAttach",
+    opts = {
+      autocmd = { enabled = true },
+      sign = { enabled = true, text = "💡" },
+      virtual_text = { enabled = false },
+      ignore = { ft = { "neo-tree", "oil", "snacks_picker_list" } },
+    },
+  },
+
+  -- Navigate code by AST: siblings, parent, child
+  {
+    "aaronik/treewalker.nvim",
+    keys = {
+      { "<A-k>", "<cmd>Treewalker Up<cr>",         mode = { "n", "v" }, desc = "AST up" },
+      { "<A-j>", "<cmd>Treewalker Down<cr>",       mode = { "n", "v" }, desc = "AST down" },
+      { "<A-h>", "<cmd>Treewalker Left<cr>",       mode = { "n", "v" }, desc = "AST parent" },
+      { "<A-l>", "<cmd>Treewalker Right<cr>",      mode = { "n", "v" }, desc = "AST child" },
+      { "<A-S-k>", "<cmd>Treewalker SwapUp<cr>",   desc = "AST swap up" },
+      { "<A-S-j>", "<cmd>Treewalker SwapDown<cr>", desc = "AST swap down" },
+    },
+    opts = { highlight = true, highlight_duration = 250 },
+  },
 }

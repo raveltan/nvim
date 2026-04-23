@@ -205,19 +205,33 @@ return {
     end,
   },
 
-  -- HTTP client (REST API testing)
+  -- HTTP client (REST API testing via Hurl)
   {
-    "mistweaverco/kulala.nvim",
-    keys = {
-      { "<leader>Rs", desc = "Send request" },
-      { "<leader>Ra", desc = "Send all requests" },
-      { "<leader>Rb", desc = "Open scratchpad" },
+    "jellydn/hurl.nvim",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
     },
-    ft = { "http", "rest" },
+    ft = "hurl",
+    cmd = { "HurlRunner", "HurlRunnerAt", "HurlRunnerToEntry", "HurlToggleMode", "HurlVerbose" },
+    keys = {
+      { "<leader>Ra", "<cmd>HurlRunner<CR>", desc = "Run all requests" },
+      { "<leader>Rs", "<cmd>HurlRunnerAt<CR>", desc = "Run request at cursor" },
+      { "<leader>Re", "<cmd>HurlRunnerToEntry<CR>", desc = "Run up to entry" },
+      { "<leader>Rm", "<cmd>HurlToggleMode<CR>", desc = "Toggle result mode" },
+      { "<leader>Rv", "<cmd>HurlVerbose<CR>", desc = "Run in verbose mode" },
+      { "<leader>R", "<cmd>HurlRunner<CR>", desc = "Run selection", mode = "v" },
+    },
     opts = {
-      global_keymaps = true,
-      global_keymaps_prefix = "<leader>R",
-      kulala_keymaps_prefix = "",
+      debug = false,
+      show_notifications = true,
+      mode = "split",
+      formatters = {
+        json = { "jq" },
+        html = { "prettier", "--parser", "html" },
+        xml = { "tidy", "-xml", "-i", "-q" },
+      },
     },
   },
 
