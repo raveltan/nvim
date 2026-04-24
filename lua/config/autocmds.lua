@@ -41,36 +41,6 @@ autocmd("BufReadPost", {
   end,
 })
 
--- Project selection on startup (when opened with no args)
-autocmd("VimEnter", {
-  group = augroup("project_selection", { clear = true }),
-  nested = true,
-  callback = function()
-    if vim.fn.argc() > 0 then return end
-    if vim.fn.line2byte("$") ~= -1 then return end
-    if not vim.tbl_isempty(vim.v.argv and vim.tbl_filter(function(a) return a == "-" end, vim.v.argv) or {}) then return end
-
-    vim.schedule(function()
-      local ok, Snacks = pcall(require, "snacks")
-      if not ok then return end
-      Snacks.picker.projects({
-        confirm = function(picker, item)
-          picker:close()
-          if not item then
-            Snacks.dashboard.open()
-            return
-          end
-          local dir = item.file or item._path or item.dir
-          if dir and vim.fn.isdirectory(dir) == 1 then
-            vim.fn.chdir(dir)
-          end
-          Snacks.dashboard.open()
-        end,
-      })
-    end)
-  end,
-})
-
 -- Close specific filetypes with q
 autocmd("FileType", {
   group = augroup("close_with_q", { clear = true }),

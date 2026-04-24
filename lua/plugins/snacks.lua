@@ -58,14 +58,6 @@ return {
           {
             pane = 1,
             icon = " ",
-            title = "Projects",
-            section = "projects",
-            indent = 2,
-            padding = 1,
-          },
-          {
-            pane = 1,
-            icon = " ",
             title = "Quick Actions",
             section = "keys",
             indent = 2,
