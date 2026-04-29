@@ -48,6 +48,262 @@ return {
       },
       mappings = {
         -- ============================================================
+        -- Ruby on Rails — comprehensive symmetrical navigation
+        --
+        -- Plural/singular bridge: Rails uses plural controller/view folder
+        -- names (users_controller, views/users/) but singular model names
+        -- (user.rb). Two pattern families handle both directions:
+        --   • "(.+)s_controller" strips the trailing s → reaches the model
+        --   • model targets append s → reach the controller
+        -- showMissingFiles=false hides any path that doesn't exist, so
+        -- offering both forms costs nothing.
+        -- ============================================================
+
+        -- Model → spec · controller (plural) · policy · serializer · decorator · form
+        { pattern = "/app/models/(.+)%.rb$",
+          target = {
+            { target = "/spec/models/%1_spec.rb",              context = "spec" },
+            { target = "/test/models/%1_test.rb",              context = "test" },
+            { target = "/app/controllers/%1s_controller.rb",   context = "controller" },
+            { target = "/app/controllers/%1_controller.rb",    context = "controller" },
+            { target = "/app/policies/%1_policy.rb",           context = "policy" },
+            { target = "/app/serializers/%1_serializer.rb",    context = "serializer" },
+            { target = "/app/decorators/%1_decorator.rb",      context = "decorator" },
+            { target = "/app/forms/%1_form.rb",                context = "form" },
+          },
+        },
+        { pattern = "/spec/models/(.+)_spec%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                    context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",   context = "controller" },
+            { target = "/app/controllers/%1_controller.rb",    context = "controller" },
+          },
+        },
+        { pattern = "/test/models/(.+)_test%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                    context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",   context = "controller" },
+          },
+        },
+
+        -- Controller (regular plural: users_controller) → model · spec · views · helper
+        -- Pattern captures base WITHOUT trailing s so %1 = "user"
+        { pattern = "/app/controllers/(.+)s_controller%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/spec/models/%1_spec.rb",                  context = "model spec" },
+            { target = "/spec/controllers/%1s_controller_spec.rb", context = "spec" },
+            { target = "/spec/requests/%1s_spec.rb",               context = "request spec" },
+            { target = "/test/controllers/%1s_controller_test.rb", context = "test" },
+            { target = "/app/views/%1s/index.html.erb",            context = "view:index" },
+            { target = "/app/views/%1s/show.html.erb",             context = "view:show" },
+            { target = "/app/views/%1s/new.html.erb",              context = "view:new" },
+            { target = "/app/views/%1s/edit.html.erb",             context = "view:edit" },
+            { target = "/app/views/%1s/_form.html.erb",            context = "view:_form" },
+            { target = "/app/helpers/%1s_helper.rb",               context = "helper" },
+            { target = "/app/policies/%1_policy.rb",               context = "policy" },
+            { target = "/app/serializers/%1_serializer.rb",        context = "serializer" },
+          },
+        },
+        -- Controller (same-name / non-plural) → spec · views · helper
+        -- Separate pattern so it doesn't double-match plural controllers above
+        { pattern = "/app/controllers/([^s].+)_controller%.rb$",
+          target = {
+            { target = "/spec/controllers/%1_controller_spec.rb",  context = "spec" },
+            { target = "/spec/requests/%1_spec.rb",                context = "request spec" },
+            { target = "/test/controllers/%1_controller_test.rb",  context = "test" },
+            { target = "/app/views/%1/index.html.erb",             context = "view:index" },
+            { target = "/app/views/%1/show.html.erb",              context = "view:show" },
+            { target = "/app/views/%1/new.html.erb",               context = "view:new" },
+            { target = "/app/views/%1/edit.html.erb",              context = "view:edit" },
+            { target = "/app/views/%1/_form.html.erb",             context = "view:_form" },
+            { target = "/app/helpers/%1_helper.rb",                context = "helper" },
+          },
+        },
+        -- Controller spec (plural) → model · controller · request spec · views
+        { pattern = "/spec/controllers/(.+)s_controller_spec%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",       context = "controller" },
+            { target = "/spec/requests/%1s_spec.rb",               context = "request spec" },
+            { target = "/app/views/%1s/index.html.erb",            context = "view:index" },
+          },
+        },
+        { pattern = "/spec/controllers/(.+)_controller_spec%.rb$",
+          target = {
+            { target = "/app/controllers/%1_controller.rb",        context = "controller" },
+            { target = "/spec/requests/%1_spec.rb",                context = "request spec" },
+            { target = "/app/views/%1/index.html.erb",             context = "view:index" },
+          },
+        },
+        -- Request spec (plural) → model · controller · controller spec
+        { pattern = "/spec/requests/(.+)s_spec%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",       context = "controller" },
+            { target = "/spec/controllers/%1s_controller_spec.rb", context = "controller spec" },
+          },
+        },
+        { pattern = "/spec/requests/(.+)_spec%.rb$",
+          target = {
+            { target = "/app/controllers/%1_controller.rb",        context = "controller" },
+            { target = "/spec/controllers/%1_controller_spec.rb",  context = "controller spec" },
+          },
+        },
+        { pattern = "/test/controllers/(.+)_controller_test%.rb$",
+          target = {
+            { target = "/app/controllers/%1_controller.rb",        context = "controller" },
+          },
+        },
+
+        -- View (plural folder) → model · controller · specs
+        -- Pattern strips trailing s from folder: views/users/ → user
+        { pattern = "/app/views/(.+)s/[^/]+%.html%.erb$",
+          target = {
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",       context = "controller" },
+            { target = "/spec/controllers/%1s_controller_spec.rb", context = "spec" },
+            { target = "/spec/requests/%1s_spec.rb",               context = "request spec" },
+          },
+        },
+        -- View (non-plural / namespaced fallback) → controller · specs
+        { pattern = "/app/views/(.+)/[^/]+%.html%.erb$",
+          target = {
+            { target = "/app/controllers/%1_controller.rb",        context = "controller" },
+            { target = "/spec/controllers/%1_controller_spec.rb",  context = "spec" },
+            { target = "/spec/requests/%1_spec.rb",                context = "request spec" },
+          },
+        },
+        { pattern = "/spec/views/(.+)/[^/]+_spec%.rb$",
+          target = {
+            { target = "/app/views/%1/index.html.erb",             context = "view:index" },
+            { target = "/app/views/%1/show.html.erb",              context = "view:show" },
+            { target = "/app/controllers/%1_controller.rb",        context = "controller" },
+          },
+        },
+
+        -- Helper (plural: users_helper) → model · controller · spec
+        { pattern = "/app/helpers/(.+)s_helper%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",       context = "controller" },
+            { target = "/spec/helpers/%1s_helper_spec.rb",         context = "spec" },
+          },
+        },
+        { pattern = "/app/helpers/(.+)_helper%.rb$",
+          target = {
+            { target = "/app/controllers/%1_controller.rb",        context = "controller" },
+            { target = "/spec/helpers/%1_helper_spec.rb",          context = "spec" },
+          },
+        },
+        { pattern = "/spec/helpers/(.+)_helper_spec%.rb$",
+          target = {
+            { target = "/app/helpers/%1_helper.rb",                context = "helper" },
+            { target = "/app/controllers/%1_controller.rb",        context = "controller" },
+          },
+        },
+
+        -- Mailer ↔ spec
+        { pattern = "/app/mailers/(.+)%.rb$",
+          target = {
+            { target = "/spec/mailers/%1_spec.rb",                 context = "spec" },
+            { target = "/test/mailers/%1_test.rb",                 context = "test" },
+          },
+        },
+        { pattern = "/spec/mailers/(.+)_spec%.rb$",
+          target = { { target = "/app/mailers/%1.rb",              context = "mailer" } },
+        },
+        { pattern = "/test/mailers/(.+)_test%.rb$",
+          target = { { target = "/app/mailers/%1.rb",              context = "mailer" } },
+        },
+
+        -- Job ↔ spec
+        { pattern = "/app/jobs/(.+)%.rb$",
+          target = {
+            { target = "/spec/jobs/%1_spec.rb",                    context = "spec" },
+            { target = "/test/jobs/%1_test.rb",                    context = "test" },
+          },
+        },
+        { pattern = "/spec/jobs/(.+)_spec%.rb$",
+          target = { { target = "/app/jobs/%1.rb",                 context = "job" } },
+        },
+        { pattern = "/test/jobs/(.+)_test%.rb$",
+          target = { { target = "/app/jobs/%1.rb",                 context = "job" } },
+        },
+
+        -- Service ↔ spec
+        { pattern = "/app/services/(.+)%.rb$",
+          target = {
+            { target = "/spec/services/%1_spec.rb",                context = "spec" },
+          },
+        },
+        { pattern = "/spec/services/(.+)_spec%.rb$",
+          target = { { target = "/app/services/%1.rb",             context = "service" } },
+        },
+
+        -- Policy ↔ model · controller · spec  (Pundit)
+        { pattern = "/app/policies/(.+)_policy%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",       context = "controller" },
+            { target = "/app/controllers/%1_controller.rb",        context = "controller" },
+            { target = "/spec/policies/%1_policy_spec.rb",         context = "spec" },
+          },
+        },
+        { pattern = "/spec/policies/(.+)_policy_spec%.rb$",
+          target = {
+            { target = "/app/policies/%1_policy.rb",               context = "policy" },
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",       context = "controller" },
+          },
+        },
+
+        -- Serializer ↔ model · controller · spec
+        { pattern = "/app/serializers/(.+)_serializer%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",       context = "controller" },
+            { target = "/app/controllers/%1_controller.rb",        context = "controller" },
+            { target = "/spec/serializers/%1_serializer_spec.rb",  context = "spec" },
+          },
+        },
+        { pattern = "/spec/serializers/(.+)_serializer_spec%.rb$",
+          target = {
+            { target = "/app/serializers/%1_serializer.rb",        context = "serializer" },
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/app/controllers/%1s_controller.rb",       context = "controller" },
+          },
+        },
+
+        -- Decorator ↔ model · spec  (Draper)
+        { pattern = "/app/decorators/(.+)_decorator%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/spec/decorators/%1_decorator_spec.rb",    context = "spec" },
+          },
+        },
+        { pattern = "/spec/decorators/(.+)_decorator_spec%.rb$",
+          target = {
+            { target = "/app/decorators/%1_decorator.rb",          context = "decorator" },
+            { target = "/app/models/%1.rb",                        context = "model" },
+          },
+        },
+
+        -- Form ↔ model · spec
+        { pattern = "/app/forms/(.+)_form%.rb$",
+          target = {
+            { target = "/app/models/%1.rb",                        context = "model" },
+            { target = "/spec/forms/%1_form_spec.rb",              context = "spec" },
+          },
+        },
+        { pattern = "/spec/forms/(.+)_form_spec%.rb$",
+          target = {
+            { target = "/app/forms/%1_form.rb",                    context = "form" },
+            { target = "/app/models/%1.rb",                        context = "model" },
+          },
+        },
+
+        -- ============================================================
         -- PHP legacy (src/)
         -- ============================================================
         {

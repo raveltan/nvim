@@ -13,9 +13,9 @@ return {
     end,
     config = function()
       require("nvim-treesitter").install({
-        "bash", "css", "html", "javascript", "json", "lua",
+        "bash", "css", "eruby", "html", "javascript", "json", "lua",
         "markdown", "markdown_inline", "php", "php_only", "python", "regex",
-        "tsx", "typescript", "vim", "vimdoc", "yaml",
+        "ruby", "tsx", "typescript", "vim", "vimdoc", "yaml",
       })
 
       -- Enable treesitter highlighting and indentation for buffers with an available parser
