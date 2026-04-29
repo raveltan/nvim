@@ -2,9 +2,10 @@ return {
   -- Task runner
   {
     "stevearc/overseer.nvim",
-    cmd = { "OverseerRun", "OverseerToggle", "OverseerTaskAction" },
+    cmd = { "OverseerRun", "OverseerRunCmd", "OverseerToggle", "OverseerTaskAction" },
     keys = {
       { "<leader>or", "<cmd>OverseerRun<cr>", desc = "Run task" },
+      { "<leader>oc", "<cmd>OverseerRunCmd<cr>", desc = "Run shell command" },
       { "<leader>ot", "<cmd>OverseerToggle<cr>", desc = "Toggle task list" },
       { "<leader>ol", "<cmd>OverseerTaskAction<cr>", desc = "Task action" },
     },
