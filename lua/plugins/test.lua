@@ -18,9 +18,10 @@ return {
       "nvim-neotest/neotest-jest",
       "marilari88/neotest-vitest",
       "nvim-neotest/neotest-python",
+      "olimorris/neotest-rspec",
+      "zidhuss/neotest-minitest",
     },
     keys = {
-      -- General neotest bindings (always visible)
       { "<leader>Tr", function() require("neotest").run.run() end, desc = "Run nearest test" },
       { "<leader>Tf", function() require("neotest").run.run(vim.fn.expand("%")) end, desc = "Run file tests" },
       { "<leader>Ts", function() require("neotest").summary.toggle() end, desc = "Toggle summary" },
@@ -30,56 +31,10 @@ return {
       { "<leader>Tl", function() require("neotest").run.run_last() end, desc = "Run last test" },
       { "<leader>TS", function() require("neotest").run.stop() end, desc = "Stop test" },
     },
-    ft = { "php", "typescript", "javascript", "python" },
-    config = function()
-      -- Custom UI test adapter for fl-gaf/fl-gfa webapp projects
+    ft = { "php", "typescript", "javascript", "python", "ruby" },
+    opts = function()
       local ui_tests_adapter = require("config.neotest-ui-tests")
-
-      -- Context-aware buffer-local keybindings
-      vim.api.nvim_create_autocmd("BufEnter", {
-        pattern = "*/ui-tests/src/*.spec.ts",
-        callback = function(ev)
-          local opts = { buffer = ev.buf }
-          vim.keymap.set("n", "<leader>Tm", function()
-            require("neotest").run.run({ extra_args = { "--mobile" } })
-          end, vim.tbl_extend("force", opts, { desc = "Run test (mobile)" }))
-          vim.keymap.set("n", "<leader>Tw", function()
-            require("neotest").run.run({ extra_args = { "--watch" } })
-          end, vim.tbl_extend("force", opts, { desc = "Run test (watch)" }))
-        end,
-      })
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = "php",
-        callback = function(ev)
-          local cwd = vim.fn.getcwd()
-          if not cwd:match("fl%-gaf") then
-            return
-          end
-          vim.keymap.set("n", "<leader>Tx", function()
-            local dir = cwd
-            while dir ~= "/" do
-              if vim.fn.executable(dir .. "/bin/run-tests") == 1 then
-                vim.notify("Setting up test infrastructure...", vim.log.levels.INFO)
-                vim.fn.jobstart({ dir .. "/bin/run-tests", "setup" }, {
-                  cwd = dir,
-                  on_exit = function(_, code)
-                    if code == 0 then
-                      vim.notify("Test infrastructure ready", vim.log.levels.INFO)
-                    else
-                      vim.notify("Test setup failed (exit " .. code .. ")", vim.log.levels.ERROR)
-                    end
-                  end,
-                })
-                return
-              end
-              dir = vim.fn.fnamemodify(dir, ":h")
-            end
-            vim.notify("No bin/run-tests found", vim.log.levels.WARN)
-          end, { buffer = ev.buf, desc = "Setup test infra" })
-        end,
-      })
-
-      require("neotest").setup({
+      return {
         adapters = {
           ui_tests_adapter,
           require("neotest-phpunit")({
@@ -114,7 +69,6 @@ return {
               if not (file_path:match("%.test%.[jt]sx?$") or file_path:match("%.spec%.[jt]sx?$")) then
                 return false
               end
-              -- Heuristic: only claim files whose project uses vitest
               local dir = vim.fs.dirname(file_path)
               local pkg = vim.fs.find("package.json", { upward = true, path = dir })[1]
               if not pkg then return false end
@@ -126,18 +80,62 @@ return {
           require("neotest-python")({
             dap = { justMyCode = false },
           }),
+          require("neotest-rspec")({
+            rspec_cmd = { "bundle", "exec", "rspec" },
+          }),
+          require("neotest-minitest")({
+            test_cmd = { "bundle", "exec", "rails", "test" },
+          }),
         },
-        discovery = {
-          enabled = false,
-        },
-        status = {
-          virtual_text = true,
-          signs = true,
-        },
-        output = {
-          open_on_run = "short",
-        },
+        discovery = { enabled = false },
+        status = { virtual_text = true, signs = true },
+        output = { open_on_run = "short" },
+      }
+    end,
+    config = function(_, opts)
+      -- Context-aware buffer-local keybindings
+      vim.api.nvim_create_autocmd("BufEnter", {
+        pattern = "*/ui-tests/src/*.spec.ts",
+        callback = function(ev)
+          local o = { buffer = ev.buf }
+          vim.keymap.set("n", "<leader>Tm", function()
+            require("neotest").run.run({ extra_args = { "--mobile" } })
+          end, vim.tbl_extend("force", o, { desc = "Run test (mobile)" }))
+          vim.keymap.set("n", "<leader>Tw", function()
+            require("neotest").run.run({ extra_args = { "--watch" } })
+          end, vim.tbl_extend("force", o, { desc = "Run test (watch)" }))
+        end,
       })
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "php",
+        callback = function(ev)
+          local cwd = vim.fn.getcwd()
+          if not cwd:match("fl%-gaf") then return end
+          vim.keymap.set("n", "<leader>Tx", function()
+            local dir = cwd
+            while dir ~= "/" do
+              if vim.fn.executable(dir .. "/bin/run-tests") == 1 then
+                vim.notify("Setting up test infrastructure...", vim.log.levels.INFO)
+                vim.fn.jobstart({ dir .. "/bin/run-tests", "setup" }, {
+                  cwd = dir,
+                  on_exit = function(_, code)
+                    if code == 0 then
+                      vim.notify("Test infrastructure ready", vim.log.levels.INFO)
+                    else
+                      vim.notify("Test setup failed (exit " .. code .. ")", vim.log.levels.ERROR)
+                    end
+                  end,
+                })
+                return
+              end
+              dir = vim.fn.fnamemodify(dir, ":h")
+            end
+            vim.notify("No bin/run-tests found", vim.log.levels.WARN)
+          end, { buffer = ev.buf, desc = "Setup test infra" })
+        end,
+      })
+
+      require("neotest").setup(opts)
     end,
   },
 }
