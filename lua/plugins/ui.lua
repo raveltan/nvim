@@ -140,6 +140,14 @@ return {
           ["cmp.entry.get_documentation"] = true,
         },
       },
+      views = {
+        -- Override noice default hover view (max_height=20, no border) which
+        -- otherwise truncates long TypeScript signatures and shows '@@@' tail.
+        hover = {
+          size = { max_height = 40, max_width = 180 },
+          border = { style = "rounded", padding = { 0, 1 } },
+        },
+      },
       presets = {
         long_message_to_split = true,
       },
