@@ -41,4 +41,4 @@ opt.confirm = true
 opt.inccommand = "split"
 opt.jumpoptions = "view"
 opt.shortmess:append("I")
-
+opt.wrap = true
