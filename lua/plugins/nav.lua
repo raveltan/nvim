@@ -56,6 +56,24 @@ return {
     end,
   },
 
+  -- Floating preview picker for jumplist (transparent <C-o>/<C-i> replacement)
+  {
+    "suliatis/Jumppack.nvim",
+    event = "VeryLazy",
+    dependencies = { "echasnovski/mini.icons" },
+    opts = {
+      options = {
+        global_mappings = true,
+        cwd_only = false,
+        wrap_edges = true,
+        default_view = "preview",
+      },
+    },
+    config = function(_, opts)
+      require("Jumppack").setup(opts)
+    end,
+  },
+
   -- VSCode-style peek: floating window showing definition/type source with all members
   {
     "dnlhc/glance.nvim",
