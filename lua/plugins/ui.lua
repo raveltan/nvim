@@ -1,25 +1,21 @@
 return {
   -- Colorscheme
   {
-    "rose-pine/neovim",
-    name = "rose-pine",
+    "EdenEast/nightfox.nvim",
+    name = "nightfox",
     priority = 1000,
     lazy = false,
     config = function()
-      require("rose-pine").setup({
-        variant = "main",
-        palette = {
-          main = {
-            base = "#15141b",
-            surface = "#1f1d28",
-            overlay = "#29263c",
+      require("nightfox").setup({
+        options = {
+          transparent = true,
+          styles = {
+            comments = "italic",
+            keywords = "bold",
           },
         },
-        styles = {
-          transparency = true,
-        },
       })
-      vim.cmd.colorscheme("rose-pine")
+      vim.cmd.colorscheme("carbonfox")
 
       -- Clear backgrounds for full terminal transparency
       local transparent_groups = {
@@ -57,7 +53,7 @@ return {
     event = "VeryLazy",
     opts = {
       options = {
-        theme = "rose-pine",
+        theme = "carbonfox",
         globalstatus = true,
         section_separators = { left = "", right = "" },
         component_separators = { left = "", right = "" },
