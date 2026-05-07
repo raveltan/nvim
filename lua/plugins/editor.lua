@@ -45,10 +45,10 @@ return {
     "ThePrimeagen/refactoring.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
     keys = {
-      { "<leader>Re", function() require("refactoring").select_refactor() end,            mode = "v",          desc = "Refactor (select)" },
-      { "<leader>Rf", function() require("refactoring").refactor("Extract Function") end, mode = "v",          desc = "Extract function" },
-      { "<leader>Rv", function() require("refactoring").refactor("Extract Variable") end, mode = "v",          desc = "Extract variable" },
-      { "<leader>Ri", function() require("refactoring").refactor("Inline Variable") end,  mode = { "n", "v" }, desc = "Inline variable" },
+      { "<leader>Re", function() require("refactoring").select_refactor() end, mode = "v",          desc = "Refactor (select)" },
+      { "<leader>Rf", function() require("refactoring").extract_func() end,    mode = "v",          desc = "Extract function" },
+      { "<leader>Rv", function() require("refactoring").extract_var() end,     mode = "v",          desc = "Extract variable" },
+      { "<leader>Ri", function() require("refactoring").inline_var() end,      mode = { "n", "v" }, desc = "Inline variable" },
     },
     opts = {},
   },
@@ -202,7 +202,7 @@ return {
     },
     opts = {
       debug = false,
-      show_notifications = true,
+      show_notification = true,
       mode = "split",
       formatters = {
         json = { "jq" },
@@ -346,7 +346,7 @@ return {
         ["<leader>t-"] = { rhs = "<cmd>Checkmate cycle_previous<CR>",  desc = "Cycle previous state",    modes = { "n", "v" } },
         ["<leader>tn"] = { rhs = "<cmd>Checkmate create<CR>",          desc = "New todo item",           modes = { "n", "v" } },
         ["<leader>tx"] = { rhs = "<cmd>Checkmate remove<CR>",          desc = "Remove todo marker",      modes = { "n", "v" } },
-        ["<leader>tR"] = { rhs = "<cmd>Checkmate metadata remove_all<CR>", desc = "Remove all metadata", modes = { "n", "v" } },
+        ["<leader>tR"] = { rhs = "<cmd>Checkmate remove_all_metadata<CR>", desc = "Remove all metadata", modes = { "n", "v" } },
         ["<leader>ta"] = { rhs = "<cmd>Checkmate archive<CR>",         desc = "Archive completed",       modes = { "n" } },
         ["<leader>tf"] = { rhs = "<cmd>Checkmate select_todo<CR>",     desc = "Find todo (picker)",      modes = { "n" } },
         ["<leader>tv"] = { rhs = "<cmd>Checkmate metadata select_value<CR>", desc = "Set metadata value", modes = { "n" } },

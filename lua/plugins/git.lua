@@ -51,7 +51,8 @@ return {
           map("v", "<leader>ghr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Reset hunk" })
           map("n", "<leader>ghS", gs.stage_buffer, { desc = "Stage buffer" })
           map("n", "<leader>ghR", gs.reset_buffer, { desc = "Reset buffer" })
-          map("n", "<leader>ghu", gs.undo_stage_hunk, { desc = "Undo stage hunk" })
+          -- gs.stage_hunk on a staged hunk now toggles (unstages); reuse for "undo".
+          map("n", "<leader>ghu", gs.stage_hunk, { desc = "Toggle stage hunk (unstage)" })
 
           -- Preview / Diff
           map("n", "<leader>ghp", gs.preview_hunk, { desc = "Preview hunk" })

@@ -27,7 +27,6 @@ opt.smartcase = true
 opt.mouse = "a"
 opt.winborder = "rounded"
 opt.laststatus = 3
-opt.wrap = false
 opt.smoothscroll = true
 opt.foldcolumn = "1"
 opt.foldlevel = 99

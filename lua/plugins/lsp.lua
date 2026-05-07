@@ -12,16 +12,23 @@ return {
     "mason-org/mason-lspconfig.nvim",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
-    opts = {
-      -- Note: TypeScript is handled by typescript-tools.nvim (productivity.lua), not vtsls/ts_ls.
-      ensure_installed = { "eslint", "basedpyright", "ruff", "tailwindcss", "jsonls", "yamlls", "html", "cssls", "intelephense" },
-    },
+    opts = function()
+      -- Gate tailwindcss out of ensure_installed when in freelancer (defeats the
+      -- prior `vim.lsp.enable` gate that didn't actually prevent install/enable).
+      local servers = { "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense" }
+      if not in_freelancer then
+        table.insert(servers, "tailwindcss")
+      end
+      return { ensure_installed = servers }
+    end,
   },
 
   -- LSP config (needed for mason-lspconfig integration)
   {
     "neovim/nvim-lspconfig",
-    event = { "BufReadPost", "BufNewFile" },
+    -- Load before mason-lspconfig fires `vim.lsp.enable()` so vim.lsp.config()
+    -- calls below register first. BufReadPre matches mason-lspconfig's event.
+    event = { "BufReadPre", "BufNewFile" },
     dependencies = { "saghen/blink.cmp" },
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
@@ -127,7 +134,7 @@ return {
       -- leaving this on causes duplicate `</tag>` (one from autotag, one from LSP completion).
       vim.lsp.config("html", {
         capabilities = capabilities,
-        filetypes = { "html", "blade", "php" },
+        filetypes = { "html" },
         init_options = {
           provideFormatter = false,
           configurationSection = { "html", "css", "javascript" },
@@ -148,11 +155,8 @@ return {
         filetypes = { "css", "scss", "less" },
       })
 
-      local servers = { "eslint", "basedpyright", "ruff", "intelephense", "jsonls", "yamlls", "html", "cssls" }
-      if not in_freelancer then
-        table.insert(servers, "tailwindcss")
-      end
-      vim.lsp.enable(servers)
+      -- mason-lspconfig 2.x `automatic_enable=true` (default) enables every
+      -- server in `ensure_installed` automatically — no manual vim.lsp.enable.
 
       vim.diagnostic.config({
         virtual_text = false, -- tiny-inline-diagnostic handles this
@@ -290,9 +294,14 @@ return {
       },
       signature = { enabled = true },
       sources = {
-        default = { "lsp", "path", "snippets", "buffer" },
+        default = { "lsp", "path", "snippets", "buffer", "blade-nav" },
+        per_filetype = {
+          blade = { "blade-nav", "lsp", "path", "snippets", "buffer" },
+          php = { "blade-nav", "lsp", "path", "snippets", "buffer" },
+        },
         providers = {
           lsp = { max_items = 50 },
+          ["blade-nav"] = { module = "blade-nav.blink", name = "blade-nav" },
         },
       },
       fuzzy = { implementation = "prefer_rust" },

@@ -78,13 +78,10 @@ return {
       },
     },
     config = function()
-      local wt = require("git-worktree")
-      wt.setup({})
-      -- Hook: after switching worktree, cwd is already changed; refresh UI.
-      wt.on_tree_change(function(op, metadata)
-        if op == wt.Operations.Switch then
-          vim.notify("Worktree: " .. metadata.path, vim.log.levels.INFO)
-        end
+      require("git-worktree").setup({})
+      local Hooks = require("git-worktree.hooks")
+      Hooks.register(Hooks.type.SWITCH, function(path, _prev_path)
+        vim.notify("Worktree: " .. path, vim.log.levels.INFO)
       end)
     end,
   },

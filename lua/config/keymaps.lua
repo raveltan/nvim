@@ -99,9 +99,6 @@ map("n", "gw", function()
   Snacks.picker.grep({ search = vim.fn.expand("<cword>") })
 end, { desc = "Grep word under cursor" })
 
--- Terminal escape
-map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
-
 -- Center after jumps
 map("n", "<C-d>", "<C-d>zz", { desc = "Half page down (centered)" })
 map("n", "<C-u>", "<C-u>zz", { desc = "Half page up (centered)" })

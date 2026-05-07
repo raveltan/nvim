@@ -40,9 +40,9 @@ return {
       showMissingFiles = false,
       style = {
         border = "rounded",
-        minWidth = 30,
         width = 0.4,
-        maxHeight = 0.3,
+        minHeight = 8,
+        -- `seperator` is the upstream key (sic — typo in plugin source); not a bug here.
         seperator = "|",
         newFileIndicator = "(+)",
       },
