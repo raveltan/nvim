@@ -1,21 +1,29 @@
 #!/usr/bin/env bash
 # Wrapper for fl-gaf neotest integration.
 #
-# bin/run-tests cannot be used directly because it word-splits flags internally
-# (read -r -a flag_args <<< "$1"), breaking any flag value that contains spaces
-# (e.g. --filter='::testName( with data set .*)?$').
+# Delegates to bin/run-tests so that Docker infrastructure namespacing
+# (GAF_TEST_WORKER_ID), setup, and teardown are handled by the upstream
+# tool — we don't reimplement any of it here.
 #
-# Instead, this wrapper:
-# 1. Ensures Docker infrastructure is running (via bin/run-tests setup)
-# 2. Runs bin/gaf-php vendor/bin/phpunit directly (preserving all arg quoting)
-# 3. Redirects --log-junit to a project-local path (Docker only mounts project dir)
-# 4. Tears down infrastructure after the test run
+# Two transformations:
+# 1. --filter values are re-encoded so spaces become \s. bin/run-tests
+#    word-splits flags via `read -r -a flag_args <<< "$1"`, which would
+#    otherwise shred the value (neotest-phpunit emits filters like
+#    "::testName( with data set .*)?$"). PHPUnit's --filter is PCRE so
+#    \s matches the same characters.
+# 2. --log-junit is redirected to a project-local temp file (Docker only
+#    mounts the project dir), then copied to the path neotest expects.
+#
+# Always runs with SETUP=false. Infrastructure must be brought up explicitly
+# via <leader>Tx (which calls `bin/run-tests setup`). bin/run-tests recovers
+# the worker ID from .cache/gaf_session_* and reuses the namespaced silo.
+# If no session exists, bin/run-tests bails with "Services are not running".
 
 set -eo pipefail
 
 find_project_root() {
     local dir="$1"
-    while [[ "$dir" != "/" ]]; do
+    while [[ "$dir" != "/" && -n "$dir" ]]; do
         if [[ -x "$dir/bin/run-tests" ]]; then
             echo "$dir"
             return 0
@@ -25,65 +33,77 @@ find_project_root() {
     return 1
 }
 
-# Parse args: separate test path, intercept --log-junit, pass rest through
 TEST_PATH=""
-PHPUNIT_ARGS=()
+PASSTHROUGH=()
 ORIGINAL_JUNIT=""
+NEXT_IS_FILTER=0
 
 for arg in "$@"; do
-    if [[ "$arg" == --log-junit=* ]]; then
+    if [[ $NEXT_IS_FILTER -eq 1 ]]; then
+        # Re-encode spaces in filter regex so bin/run-tests' word-split keeps it intact.
+        PASSTHROUGH+=("${arg// /\\s}")
+        NEXT_IS_FILTER=0
+    elif [[ "$arg" == --filter=* ]]; then
+        value="${arg#--filter=}"
+        PASSTHROUGH+=("--filter=${value// /\\s}")
+    elif [[ "$arg" == "--filter" ]]; then
+        PASSTHROUGH+=("$arg")
+        NEXT_IS_FILTER=1
+    elif [[ "$arg" == --log-junit=* ]]; then
         ORIGINAL_JUNIT="${arg#--log-junit=}"
     elif [[ -z "$TEST_PATH" && "$arg" != --* ]]; then
         TEST_PATH="$arg"
     else
-        PHPUNIT_ARGS+=("$arg")
+        PASSTHROUGH+=("$arg")
     fi
 done
 
 if [[ -z "$TEST_PATH" ]]; then
-    echo "Error: No test path provided"
+    echo "Error: No test path provided" >&2
     exit 1
 fi
+
+# Canonicalize TEST_PATH (resolve symlinks + relative segments) so prefix
+# stripping works whether neotest gave us an absolute or relative path,
+# and whether the project root was reached via a symlink (e.g. worktree).
+if [[ ! -e "$TEST_PATH" ]]; then
+    echo "Error: Test path does not exist: $TEST_PATH" >&2
+    exit 1
+fi
+TEST_PATH=$(realpath "$TEST_PATH")
 
 PROJECT_ROOT=$(find_project_root "$TEST_PATH")
 if [[ -z "$PROJECT_ROOT" ]]; then
-    echo "Error: Could not find project root (no bin/run-tests found)"
+    PROJECT_ROOT=$(find_project_root "$(pwd)")
+fi
+if [[ -z "$PROJECT_ROOT" ]]; then
+    echo "Error: Could not find project root (no bin/run-tests found)" >&2
     exit 1
 fi
+PROJECT_ROOT=$(realpath "$PROJECT_ROOT")
 
 cd "$PROJECT_ROOT"
 
-# Redirect --log-junit to a project-local temp file (inside the Docker mount)
+# bin/run-tests requires a relative path matching ^test/{functional,unit}, etc.
+# Strip project root prefix.
+if [[ "$TEST_PATH" != "$PROJECT_ROOT/"* ]]; then
+    echo "Error: Test path '$TEST_PATH' is outside project root '$PROJECT_ROOT'" >&2
+    exit 1
+fi
+TEST_PATH="${TEST_PATH#$PROJECT_ROOT/}"
+
+# Redirect --log-junit to a path inside the Docker bind-mount.
+LOCAL_JUNIT=""
 if [[ -n "$ORIGINAL_JUNIT" ]]; then
+    mkdir -p "${PROJECT_ROOT}/.cache"
     LOCAL_JUNIT="${PROJECT_ROOT}/.cache/neotest-junit-$$.xml"
-    PHPUNIT_ARGS+=("--log-junit=${LOCAL_JUNIT}")
+    PASSTHROUGH+=("--log-junit=${LOCAL_JUNIT}")
 fi
 
-# Detect test type for environment setup
-OS="$(uname)"
-if [[ "$OS" == "Darwin" ]]; then
-    GAF_INTEGRATION_MYSQL_HOST="127.0.0.1"
-    GAF_INTEGRATION_RABBIT_HOST="127.0.0.1"
-    GAF_INTEGRATION_REDIS_HOST="127.0.0.1"
-else
-    GAF_INTEGRATION_MYSQL_HOST="gaf_integration_mysql"
-    GAF_INTEGRATION_RABBIT_HOST="gaf_integration_rabbitmq"
-    GAF_INTEGRATION_REDIS_HOST="gaf_integration_redis"
-fi
-
-# Run phpunit directly (assumes containers are already running via <leader>Tx)
 EXIT_CODE=0
-CONTAINER_NAME="fl-gaf-phpunit" \
-EXTRA_ARGS="--network gaf_integration_network" \
-GAF_INTEGRATION_MYSQL_HOST="$GAF_INTEGRATION_MYSQL_HOST" \
-GAF_INTEGRATION_RABBIT_HOST="$GAF_INTEGRATION_RABBIT_HOST" \
-GAF_INTEGRATION_REDIS_HOST="$GAF_INTEGRATION_REDIS_HOST" \
-GAF_TEST_DOUBLES_ENABLED="true" \
-SETUP=false \
-bin/gaf-php vendor/bin/phpunit "$TEST_PATH" "${PHPUNIT_ARGS[@]}" || EXIT_CODE=$?
+SETUP=false ./bin/run-tests "$TEST_PATH" "${PASSTHROUGH[@]}" || EXIT_CODE=$?
 
-# Copy JUnit XML back to where neotest expects it
-if [[ -n "$ORIGINAL_JUNIT" && -f "$LOCAL_JUNIT" ]]; then
+if [[ -n "$LOCAL_JUNIT" && -f "$LOCAL_JUNIT" && -n "$ORIGINAL_JUNIT" ]]; then
     mkdir -p "$(dirname "$ORIGINAL_JUNIT")"
     cp "$LOCAL_JUNIT" "$ORIGINAL_JUNIT"
     rm -f "$LOCAL_JUNIT"

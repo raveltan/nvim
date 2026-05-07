@@ -1,11 +1,3 @@
-local function is_ui_test()
-  return vim.fn.expand("%"):match("ui%-tests/src/.+%.spec%.ts$") ~= nil
-end
-
-local function is_php_test()
-  return vim.bo.filetype == "php"
-end
-
 return {
   {
     "nvim-neotest/neotest",
@@ -132,6 +124,28 @@ return {
             end
             vim.notify("No bin/run-tests found", vim.log.levels.WARN)
           end, { buffer = ev.buf, desc = "Setup test infra" })
+
+          vim.keymap.set("n", "<leader>TX", function()
+            local dir = cwd
+            while dir ~= "/" do
+              if vim.fn.executable(dir .. "/bin/run-tests") == 1 then
+                vim.notify("Tearing down test infrastructure...", vim.log.levels.INFO)
+                vim.fn.jobstart({ dir .. "/bin/run-tests", "shutdown" }, {
+                  cwd = dir,
+                  on_exit = function(_, code)
+                    if code == 0 then
+                      vim.notify("Test infrastructure torn down", vim.log.levels.INFO)
+                    else
+                      vim.notify("Test shutdown failed (exit " .. code .. ")", vim.log.levels.ERROR)
+                    end
+                  end,
+                })
+                return
+              end
+              dir = vim.fn.fnamemodify(dir, ":h")
+            end
+            vim.notify("No bin/run-tests found", vim.log.levels.WARN)
+          end, { buffer = ev.buf, desc = "Shutdown test infra" })
         end,
       })
 
