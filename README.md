@@ -46,7 +46,7 @@ A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.co
 **Tools you must install yourself**
 - `stylua`, `prettierd` / `prettier`, `php-cs-fixer` / `pint`, `blade-formatter` (formatters)
 - `phpcs`, `phpstan` (linters — Freelancer projects only)
-- `rubocop`, `erb_format`, `haml-lint` (Ruby)
+- `rubocop` (gem), `erb-formatter` gem (provides `erb_format`), `@herb-tools/language-server` (npm) for Rails ERB
 - `mmdc`, `d2`, `plantuml`, `gnuplot`, `imagemagick` (diagram rendering, optional)
 
 ---
@@ -263,7 +263,7 @@ UI test runners (fl-gaf webapp) — eight Overseer templates in [`lua/overseer/t
 
 ### Framework-specific
 - `laravel.lua` — `laravel.nvim` + `blade-nav.nvim` (`gf` on Blade includes/components/routes). Activates only when `artisan` exists at root.
-- `ror.lua` — `ror.nvim`, `vim-projectionist` (Rails heuristics), `vim-endwise`, `vim-haml`. Activates on `Gemfile` + `config/environment.rb`.
+- `ror.lua` — `ror.nvim`, `vim-projectionist` (Rails heuristics), `vim-endwise`, **Herb LSP** (HTML+ERB language server, auto-enabled when `herb-language-server` on `$PATH`). Activates on `Gemfile` + `config/environment.rb`.
 - `other.lua` — pattern-based related-file navigation (`<leader>oo`/`os`/`ov`) with 50+ Rails patterns, PHP `src/`/`src2/` patterns, and Angular component/datastore patterns.
 - `diagram.lua` — Mermaid/PlantUML/D2/Gnuplot inline rendering via Kitty + ImageMagick.
 
@@ -500,6 +500,101 @@ This config detects a few project layouts and adjusts behavior automatically:
 **Rails** — `ror.nvim` + projectionist activate on `Gemfile` + `config/environment.rb`. REPL auto-prefers `bin/rails console` → `pry` → `irb`.
 
 To remove project-specific behavior, search the codebase for `freelancer-dev` / `flnltd` and either remove or replace the gates.
+
+---
+
+## Ruby / Rails / ERB Snippets
+
+All snippets ship via [`friendly-snippets`](https://github.com/rafamadriz/friendly-snippets) and surface through `blink.cmp`'s `snippets` source. Triggers are word-based — type the prefix, then `<Tab>` or `<CR>` accepts the highlighted match. blink.cmp does **not** auto-show the menu on symbol-only prefixes (`=`, `%`); use a word trigger (`pe`, `er`) for ERB output/exec tags.
+
+To add custom snippets: `<leader>Sa` (scissors). To edit: `<leader>Se`.
+
+### Plain Ruby (filetype `ruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `cla` | `class Name ... end` |
+| `mod` | `module Name ... end` |
+| `def` | `def name(args) ... end` |
+| `defs` | `def self.name ... end` |
+| `ata` / `atr` / `atw` | `attr_accessor` / `attr_reader` / `attr_writer` |
+| `each` | `coll.each do \|item\| ... end` |
+| `map` / `sel` / `inj` | `map` / `select` / `inject` block |
+| `if` / `ife` | `if ... end` / `if/else/end` |
+| `unless` / `unlesse` | `unless ... end` / `unless/else/end` |
+| `beg` | `begin / rescue => e / end` |
+| `req` / `reqr` | `require '...'` / `require_relative '...'` |
+| `do` | `do \|args\| ... end` |
+
+### Rails models
+
+| Trigger | Expands to |
+|---|---|
+| `val` / `vali` | `validates :attr, presence: true` |
+| `vap` | `validates_presence_of :attr` |
+| `hm` / `hmt` / `ho` / `bt` / `habtm` | association macros |
+| `sco` | `scope :name, -> { where(...) }` |
+| `bfs` / `bfv` / `afs` | `before_save` / `before_validation` / `after_save` |
+| `enum` | `enum status: { active: 0, archived: 1 }` |
+
+### Rails controllers
+
+| Trigger | Expands to |
+|---|---|
+| `cont` | controller class skeleton |
+| `defi` / `defsh` / `defc` / `defu` / `defd` | `index` / `show` / `create` / `update` / `destroy` actions |
+| `pp` / `params` | `params.require(:m).permit(:a, :b)` |
+| `ba` | `before_action :method, only: [...]` |
+| `respond` | `respond_to do \|format\| ... end` |
+
+### Migrations
+
+| Trigger | Expands to |
+|---|---|
+| `mcc` | `create_table :name do \|t\| ... t.timestamps end` |
+| `mac` | `add_column :table, :col, :type` |
+| `mcc2` | `change_column :table, :col, :type` |
+| `mrc` | `remove_column :table, :col` |
+| `mai` | `add_index :table, :col` |
+| `mrf` | `t.references :model, foreign_key: true` |
+| `tst` / `tint` / `tbool` / `tdt` / `ttxt` | `t.string` / `t.integer` / `t.boolean` / `t.datetime` / `t.text` |
+
+### RSpec (filetype `ruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `desc` | `describe ClassName do ... end` |
+| `cont` | `context "when ..." do ... end` |
+| `it` | `it "does X" do ... end` |
+| `bef` | `before(:each) do ... end` |
+| `let` / `let!` | `let(:n) { v }` / eager `let!` |
+| `exp` | `expect(actual).to eq(expected)` |
+| `sub` | `subject { described_class.new(...) }` |
+
+### ERB (filetype `eruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `pe` (or `=`) | `<%= %>` output tag |
+| `er` (or `%`) | `<% %>` silent tag |
+| `pc` | `<%# %>` comment tag |
+| `if` / `ife` / `elsif` / `else` / `end` | flow control wrapped in ERB |
+| `unless` / `unlesse` | unless block |
+| `each` | `<% items.each do \|i\| %> ... <% end %>` |
+| `lt` | `<%= link_to text, path %>` |
+
+> Symbol prefixes `=` / `%` exist in `friendly-snippets/erb.json` but blink.cmp's keyword regex won't auto-trigger the menu on them. Type `pe` / `er` instead for reliable expansion. To force the menu, press `<C-Space>`.
+
+### FactoryBot
+
+| Trigger | Expands to |
+|---|---|
+| `fact` | `factory :model do ... end` |
+| `trait` | `trait :name do ... end` |
+| `seq` | `sequence(:attr) { \|n\| "v#{n}" }` |
+| `assoc` | `association :model` |
+
+Source files: `~/.local/share/nvim/lazy/friendly-snippets/snippets/ruby/{ruby,rspec,rdoc}.json` and `.../snippets/erb.json`.
 
 ---
 

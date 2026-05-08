@@ -67,7 +67,6 @@ return {
       opts.formatters_by_ft = opts.formatters_by_ft or {}
       opts.formatters_by_ft.ruby = { "rubocop" }
       opts.formatters_by_ft.eruby = { "erb_format" }
-      opts.formatters_by_ft.haml = { "haml-lint" }
     end,
   },
 
@@ -153,12 +152,27 @@ return {
   -- Auto-insert `end` for `def`/`do`/`if`/`class`/`module`. Treesitter doesn't.
   {
     "tpope/vim-endwise",
-    ft = { "ruby", "eruby", "haml", "lua", "vim" },
+    ft = { "ruby", "eruby", "lua", "vim" },
   },
 
-  -- HAML / Sass / SCSS syntax + indent (for Rails apps still on HAML views)
+  -- Herb: HTML+ERB language server (parser, linter, formatter via LSP)
+  -- Requires: npm install -g @herb-tools/language-server
+  -- Docs: https://herb-tools.dev
   {
-    "tpope/vim-haml",
-    ft = { "haml", "sass", "scss" },
+    "neovim/nvim-lspconfig",
+    ft = { "eruby", "html" },
+    config = function()
+      if vim.fn.executable("herb-language-server") ~= 1 then
+        return
+      end
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
+      vim.lsp.config("herb_ls", {
+        capabilities = capabilities,
+        cmd = { "herb-language-server", "--stdio" },
+        filetypes = { "eruby", "html" },
+        root_markers = { "Gemfile", ".git" },
+      })
+      vim.lsp.enable("herb_ls")
+    end,
   },
 }
