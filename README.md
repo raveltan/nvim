@@ -19,6 +19,7 @@ A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.co
 - [How to Configure Things](#how-to-configure-things)
 - [Support Files](#support-files)
 - [Project-Specific Behavior](#project-specific-behavior)
+- [Snippets](#snippets)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -503,13 +504,122 @@ To remove project-specific behavior, search the codebase for `freelancer-dev` / 
 
 ---
 
+## Snippets
+
+Two sources surface through `blink.cmp`'s `snippets` provider (configured in `lsp.lua` via `search_paths`):
+
+1. **`friendly-snippets`** — community pack (Ruby/Rails/ERB/PHP basics/etc.) under `~/.local/share/nvim/lazy/friendly-snippets/snippets/`.
+2. **`~/.config/nvim/snippets/`** — repo-tracked custom snippets, survives plugin updates. Currently ships:
+   - `typescript.json` — 41 Angular + RxJS + GAF datastore snippets (`a-*` matches John Papa convention; `fl-ds-*` for company datastore)
+   - `php.json` — 40 PHP + GAF Phoenix snippets (bare JetBrains-style: `puf`, `fclass`, `match`; `fl-*` for GAF Controller/Handler/Repository/DTO/Enum/Test/Consumer)
+   - `ruby.json` — 93 Rails + Devise + CanCanCan + ActiveAdmin + RSpec + Capybara + HTTP clients + Stimulus + Turbo (bare names: `controller`, `model`, `migration`, `ability`, `aaregister`, `reqspec`, `visit`, `faraday`, `stimcontroller`, `broadcaststo`)
+   - `eruby.json` — 29 ERB view helpers + Devise/CanCanCan + Turbo Frames/Streams + Stimulus data attrs (bare: `formwith`, `linkto`, `turboframe`, `datactrl`)
+
+**Trigger naming convention** — researched against industry packs:
+- **TypeScript/Angular** — prefix dominates (John Papa `a-*` ~3M installs, BeastCode `ng-*`). Kept `a-*` to match expected muscle memory.
+- **PHP/Ruby/ERB** — bare abbreviations dominate (RubyMine, PhpStorm live templates, friendly-snippets, honza/vim-snippets). No `r-` / `p-` namespace in any mainstream pack. Filetype scoping isolates instead.
+- **Company-specific** — `fl-*` retained for GAF since company-namespace prefixes are idiomatic when patterns won't generalize beyond the org.
+
+Triggers are word-based — type the prefix, then `<Tab>` or `<CR>` accepts the highlighted match. blink.cmp does **not** auto-show the menu on symbol-only prefixes (`=`, `%`); use a word trigger (`pe`, `er`) for ERB output/exec tags.
+
+To add custom snippets: `<leader>Sa` (scissors writes to `~/.config/nvim/snippets/`). To edit: `<leader>Se`.
+
+### Angular / TypeScript (filetype `typescript`)
+
+Custom prefixes — Freelancer-style components default to `standalone: false`, `OnPush`, `inject()` (matches `webapp/` codebase).
+
+| Trigger | Expands to |
+|---|---|
+| `a-comp` | Non-standalone component, OnPush, `templateUrl` + `styleUrls` |
+| `a-comp-sa` | Standalone component with `imports: []` array |
+| `a-service` | `@Injectable({providedIn:'root'})` class |
+| `a-pipe` | Standalone `@Pipe` w/ `transform()` |
+| `a-directive` | Standalone `@Directive` skeleton |
+| `a-module` | `@NgModule` w/ `imports`/`declarations`/`exports` |
+| `a-guard` / `a-resolver` | Functional `CanActivateFn` / `ResolveFn` |
+| `a-input` / `a-output` | `input.required<T>()` / `output<T>()` signal API |
+| `a-inject` | `private x = inject(X);` |
+| `a-oninit` / `a-ondestroy` | Lifecycle hooks |
+
+RxJS:
+
+| Trigger | Expands to |
+|---|---|
+| `a-bs` | `BehaviorSubject<T>` private + public `asObservable()` pair |
+| `a-subj` / `a-replay` | `Subject<T>` / `ReplaySubject<T>(1)` |
+| `a-fvf` | `await firstValueFrom(...)` |
+| `a-obs` | `Observable<T>` field declaration |
+| `a-combine` | `combineLatest([...]).pipe(map(...))` |
+| `a-tud` | `.pipe(takeUntilDestroyed())` |
+| `a-pmap` / `a-pfilter` | `.pipe(map(...))` / `.pipe(filter(isDefined))` |
+| `a-switch` / `a-merge` | `switchMap` / `mergeMap` |
+
+GAF datastore (matches `webapp/src/@freelancer/datastore/collections/*` patterns):
+
+| Trigger | Expands to |
+|---|---|
+| `fl-ds-inject` | `private datastore = inject(Datastore);` |
+| `fl-ds-coll` | `datastore.collection<XCollection>('x').valueChanges()` |
+| `fl-ds-coll-q` | Collection w/ `query.where(field, op, value)` |
+| `fl-ds-doc` | `datastore.document<XCollection>('x', id$).valueChanges()` |
+| `fl-ds-push` / `fl-ds-set` / `fl-ds-update` / `fl-ds-remove` | Mutation calls |
+| `fl-ds-types` | `XCollection` interface (Name/DocumentType/Backend Fetch/Push/Set/Update/Delete/Websocket) |
+| `fl-ds-backend` | `Backend<XCollection>` factory w/ `defaultOrder`/`fetch` |
+| `fl-ds-reducer` | Reducer w/ `mergeDocuments` + `transformIntoDocuments` |
+| `fl-ds-effect` | `@Injectable` effect w/ `createEffect` |
+| `fl-ds-module` | `DatastoreXModule` (`StoreModule`/`BackendModule`/`EffectsModule.forFeature`) |
+| `fl-ds-transformer` | `transformX(api): X` skeleton |
+| `fl-ds-seed` | `generateXObject(overrides)` seed fn |
+| `fl-ds-model` | Document interface |
+| `fl-ds-index` | Barrel exports (seed/model/module/types) |
+
+### PHP (filetype `php`)
+
+Bare JetBrains-style abbreviations (complement to `friendly-snippets/php/php.json` — collisions resolved by being non-overlapping with defaults):
+
+| Trigger | Expands to |
+|---|---|
+| `phpns` | `<?php` + `namespace` |
+| `fclass` / `aclass` / `iface` | `final class` / `abstract class` / `interface` |
+| `puf` / `prf` / `psf` | `public function` / `private function` / `public static function` w/ return type |
+| `afn` | Arrow fn `fn(\$x) => ...` |
+| `match` | `match` expression |
+| `tryl` | try/catch + Logger::error + rethrow |
+| `roprop` | `/** @readonly */` private prop |
+| `attr` | `#[Attribute]` |
+| `sqlhd` | `<<<'SQL' ... SQL;` heredoc |
+| `logerr` / `loginfo` / `logwarn` | Logger calls |
+| `docthrows` / `docapi` / `doccovers` | PHPDoc blocks |
+
+GAF Phoenix patterns (matches `src2/` conventions — `final class`, namespace `Freelancer\Phoenix\...`, MyCLabs enums, `MySql::` service, `?Dep \$d = null` constructor injection):
+
+| Trigger | Expands to |
+|---|---|
+| `fl-controller` | Phoenix Controller w/ `MethodNotAllowedException` guard, promoted handler injection |
+| `fl-handler` | Phoenix Handler w/ optional injected dep + `??` fallback, `@readonly` prop |
+| `fl-repo` | Phoenix Repository (uses `MySql` + DTO + Logger) |
+| `fl-dto` | `final class XxxDTO` w/ `@psalm-immutable`, promoted public props |
+| `fl-enum` | MyCLabs string Enum w/ `EnumPrettyPrintTrait`, `@method static self X()` docs |
+| `fl-enum-native` | PHP 8.1 native backed enum |
+| `fl-mysql-one` / `fl-mysql-all` | `MySql::fetchOne` / `MySql::fetchAll` w/ named args |
+| `fl-mysql-insert` / `fl-mysql-exec` | `MySql::insert` / `MySql::executeStatement` |
+| `fl-repo-fetch` | Full repo fetch fn: heredoc SQL + try/catch DBQueryException/Exception + Logger |
+| `fl-test-fn` | `FunctionalTestCase` + `IsolateAndRollbackTestCase` skeleton |
+| `fl-test-unit` | `PHPUnit\Framework\TestCase` skeleton |
+| `fl-test-method` | `public function testX(): void` |
+| `fl-test-provider` | `@dataProvider iterable<string, array{...}>` provider |
+| `fl-assert` | `self::assertSame(expected, actual)` |
+| `fl-consumer` | Legacy RabbitMQ consumer script (callback w/ basic_ack/reject + DBConnect/Rabbit/Exception handling) |
+| `fl-inject` | Constructor optional dep + `\$this->x = \$x ?? new X()` |
+| `fl-bad-req` / `fl-not-found` / `fl-mna` | Throw `BadRequestException` / `NotFoundException` / `MethodNotAllowedException` guard |
+
+---
+
 ## Ruby / Rails / ERB Snippets
 
-All snippets ship via [`friendly-snippets`](https://github.com/rafamadriz/friendly-snippets) and surface through `blink.cmp`'s `snippets` source. Triggers are word-based — type the prefix, then `<Tab>` or `<CR>` accepts the highlighted match. blink.cmp does **not** auto-show the menu on symbol-only prefixes (`=`, `%`); use a word trigger (`pe`, `er`) for ERB output/exec tags.
+Default Ruby/RSpec/ERB and basic Rails (associations, validations, simple migrations) ship via `friendly-snippets`. Custom additions cover modern Rails 7+ patterns and common gems.
 
-To add custom snippets: `<leader>Sa` (scissors). To edit: `<leader>Se`.
-
-### Plain Ruby (filetype `ruby`)
+### Plain Ruby (filetype `ruby`, friendly-snippets defaults)
 
 | Trigger | Expands to |
 |---|---|
@@ -595,6 +705,140 @@ To add custom snippets: `<leader>Sa` (scissors). To edit: `<leader>Se`.
 | `assoc` | `association :model` |
 
 Source files: `~/.local/share/nvim/lazy/friendly-snippets/snippets/ruby/{ruby,rspec,rdoc}.json` and `.../snippets/erb.json`.
+
+### Custom Rails additions (filetype `ruby`)
+
+Bare descriptive triggers (matching honza/vim-snippets + RubyMine convention — no `r-` prefix). Filetype scoping isolates them.
+
+| Trigger | Expands to |
+|---|---|
+| `controller` | Full RESTful controller (index/show/new/create/edit/update/destroy + set + strong params) |
+| `apicontroller` | API-only controller w/ JSON responses |
+| `renderjson` / `rendererr` | `render json:` w/ status / error JSON |
+| `redir` / `headresp` | `redirect_to` w/ flash / `head :no_content` |
+| `strongparams` | strong params method |
+| `baction` / `baexcept` | `before_action only:` / `except:` |
+| `rescuefrom` | `rescue_from` block |
+| `model` | Model w/ associations + validations + scope + callback |
+| `concern` | `ActiveSupport::Concern` module skeleton |
+| `delegate` / `hsp` / `aftercommit` | `delegate to:` / `has_secure_password` / `after_commit` |
+| `valength` / `vauniq` / `vaformat` / `vainclusion` / `vanum` | length / uniqueness / format / inclusion / numericality validations |
+| `migration` | `create_table` migration w/ references + index + timestamps |
+| `migud` | `up` / `down` reversible migration |
+| `addref` / `addfk` / `adduniq` / `ccnull` / `reversible` | add_reference / add_foreign_key / unique index / change_column_null / reversible block |
+| `resources` / `nestedres` / `namespace` / `rscope` / `rroot` / `constraints` | resources w/ member+collection / nested / namespace / scope module / root / constraints |
+| `job` | `ApplicationJob` w/ `queue_as` + `retry_on` |
+| `mailer` | `ApplicationMailer` w/ default + `mail` call |
+| `service` | PORO service w/ `.call` class method |
+| `channel` | `ApplicationCable::Channel` |
+
+### Devise (filetype `ruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `authuser` | `before_action :authenticate_user!` |
+| `signedin` | `if user_signed_in?` guard |
+| `devisepermit` | `configure_permitted_parameters` w/ devise_parameter_sanitizer |
+| `devisemodel` | Devise User model (modules) |
+| `devisefor` | `devise_for :users` route |
+
+### CanCanCan (filetype `ruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `ability` | `Ability` class w/ `include CanCan::Ability` and admin/user split |
+| `loadauth` | `load_and_authorize_resource` |
+| `authres` / `authbang` | `authorize_resource` / `authorize! :action, resource` |
+| `canq` | `can? :action, resource` |
+| `rescueaccess` | `rescue_from CanCan::AccessDenied` |
+
+### ActiveAdmin (filetype `ruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `aaregister` | `ActiveAdmin.register` w/ permit_params + index + form + show |
+| `aafilter` / `aascope` | `filter` / `scope` |
+| `aaaction` | `action_item only: :show` |
+| `aabatch` / `aamember` | `batch_action` / `member_action` |
+| `aasidebar` | `sidebar` block |
+
+### RSpec extras (filetype `ruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `reqspec` | Request spec (`type: :request`) |
+| `modelspec` | Model spec w/ shoulda matchers |
+| `sysspec` | System spec w/ `driven_by` |
+| `sharedex` / `behaveslike` | `shared_examples` / `it_behaves_like` |
+| `ctxlet` | `context` w/ `let` + `it` |
+| `fbcreate` / `fbbuild` / `fblist` | FactoryBot `create` / `build` / `create_list` |
+| `stubi` / `stubc` | Stub instance / `allow_any_instance_of` |
+| `expchange` / `expraise` | `expect { }.to change` / `to raise_error` |
+| `expstatus` / `jsonbody` | `have_http_status` / `JSON.parse(response.body)` |
+
+### Capybara (filetype `ruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `visit` | `visit path` |
+| `fillin` / `clickbtn` / `clicklink` | `fill_in` / `click_button` / `click_link` |
+| `selectopt` / `checkbox` / `attachfile` | `select`/`check`/`attach_file` |
+| `havecontent` / `havecss` / `havepath` | `have_content` / `have_css` / `have_current_path` |
+| `within` | `within '.selector' do ... end` |
+
+### HTTP clients (filetype `ruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `nethttpget` | `Net::HTTP.get_response` w/ JSON parse |
+| `nethttppost` | `Net::HTTP::Post` w/ JSON body + SSL |
+| `faraday` | Faraday connection w/ json req/resp middleware |
+| `httparty` | HTTParty client class skeleton |
+| `restclient` | RestClient call |
+
+### Stimulus (filetype `ruby` — JS files inside Rails projects)
+
+> Snippets currently registered under `ruby` filetype since Rails devs edit in the Rails project. To use in `.js` files, set filetype manually or copy to `typescript.json`.
+
+| Trigger | Expands to |
+|---|---|
+| `stimcontroller` | Full Stimulus controller (targets/values/classes/connect/disconnect/action) |
+| `stimaction` | Action method w/ `event.preventDefault()` |
+| `stimtarget` | `this.nameTarget` accessor |
+
+### Custom ERB additions (filetype `eruby`)
+
+Rails view helpers, Devise/CanCanCan view guards, Turbo Frames + Streams, Stimulus data attributes.
+
+| Trigger | Expands to |
+|---|---|
+| `formwith` | `form_with model:` w/ field + submit |
+| `formwithurl` | `form_with url:` |
+| `ffield` / `fsubmit` | form field row / submit button |
+| `renderpartial` / `rendercollection` | partial / collection render |
+| `linkto` / `linkdelete` | `link_to` / delete w/ `turbo_method`+`turbo_confirm` |
+| `buttonto` | `button_to` w/ method |
+| `imagetag` / `assetpath` | `image_tag` / `asset_path` |
+| `contentfor` / `yieldblock` | `content_for` block / `yield :title` |
+| `flasheach` | flash each loop |
+| `csrfmeta` | `csrf_meta_tags` + `csp_meta_tag` |
+| `deviselinks` | Devise sign in/out links |
+| `canqif` | ERB `<% if can? %>` guard |
+| `turboframe` / `turboframelazy` | `turbo_frame_tag` / lazy variant |
+| `turbostreamfrom` | `turbo_stream_from` |
+| `turboreplace` / `turboappend` / `turboremove` | turbo_stream actions |
+| `datactrl` / `dataaction` / `datatarget` / `datavalue` | Stimulus data-* attributes |
+| `stimwrap` | div wrapper w/ controller + target + action |
+| `aainput` | ActiveAdmin `f.input` line |
+
+### Turbo (model-side, filetype `ruby`)
+
+| Trigger | Expands to |
+|---|---|
+| `broadcaststo` | `broadcasts_to` w/ array stream key |
+| `broadcastsrefresh` | `broadcasts_refreshes` |
+| `respondturbo` | controller `respond_to` w/ turbo_stream + html |
+| `renderturbo` | `render turbo_stream: turbo_stream.replace(...)` |
 
 ---
 

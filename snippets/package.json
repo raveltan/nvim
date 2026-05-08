@@ -1,0 +1,23 @@
+{
+  "name": "rtanjaya-snippets",
+  "contributes": {
+    "snippets": [
+      {
+        "language": ["typescript"],
+        "path": "./typescript.json"
+      },
+      {
+        "language": ["php"],
+        "path": "./php.json"
+      },
+      {
+        "language": ["ruby"],
+        "path": "./ruby.json"
+      },
+      {
+        "language": ["eruby"],
+        "path": "./eruby.json"
+      }
+    ]
+  }
+}

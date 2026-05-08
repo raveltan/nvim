@@ -1,0 +1,201 @@
+{
+  "form_with model": {
+    "prefix": "formwith",
+    "description": "form_with model",
+    "body": [
+      "<%= form_with model: ${1:@resource}${2:, local: true} do |f| %>",
+      "\t$0",
+      "\t<div class=\"field\">",
+      "\t\t<%= f.label :${3:name} %>",
+      "\t\t<%= f.text_field :${3} %>",
+      "\t</div>",
+      "\t<%= f.submit %>",
+      "<% end %>"
+    ]
+  },
+  "form_with url": {
+    "prefix": "formwithurl",
+    "description": "form_with url",
+    "body": [
+      "<%= form_with url: ${1:path}, method: :${2:post} do |f| %>",
+      "\t$0",
+      "<% end %>"
+    ]
+  },
+  "form field": {
+    "prefix": "ffield",
+    "description": "form field row",
+    "body": [
+      "<div class=\"field\">",
+      "\t<%= f.label :${1:name} %>",
+      "\t<%= f.${2:text_field} :${1}${3:, class: 'form-control'} %>",
+      "</div>$0"
+    ]
+  },
+  "Form submit": {
+    "prefix": "fsubmit",
+    "description": "form submit",
+    "body": ["<%= f.submit ${1:'Save'}${2:, class: 'btn btn-primary'} %>$0"]
+  },
+  "render partial": {
+    "prefix": "renderpartial",
+    "description": "render partial",
+    "body": ["<%= render '${1:partial}'${2:, ${3:item}: @${3}} %>$0"]
+  },
+  "render collection": {
+    "prefix": "rendercollection",
+    "description": "render collection",
+    "body": ["<%= render partial: '${1:item}', collection: ${2:@items} %>$0"]
+  },
+  "link_to path": {
+    "prefix": "linkto",
+    "description": "link_to text path",
+    "body": ["<%= link_to '${1:Label}', ${2:path}${3:, class: 'btn'} %>$0"]
+  },
+  "link_to method delete": {
+    "prefix": "linkdelete",
+    "description": "link_to delete data-confirm",
+    "body": [
+      "<%= link_to '${1:Delete}', ${2:path}, data: { turbo_method: :delete, turbo_confirm: '${3:Sure?}' } %>$0"
+    ]
+  },
+  "button_to": {
+    "prefix": "buttonto",
+    "description": "button_to with method",
+    "body": ["<%= button_to '${1:Label}', ${2:path}, method: :${3:post} %>$0"]
+  },
+  "image_tag": {
+    "prefix": "imagetag",
+    "description": "image_tag",
+    "body": ["<%= image_tag '${1:img.png}'${2:, class: ''} %>$0"]
+  },
+  "asset_path": {
+    "prefix": "assetpath",
+    "description": "asset_path",
+    "body": ["<%= asset_path('${1:file}') %>$0"]
+  },
+  "content_for": {
+    "prefix": "contentfor",
+    "description": "content_for block",
+    "body": [
+      "<% content_for :${1:title} do %>",
+      "\t$0",
+      "<% end %>"
+    ]
+  },
+  "yield": {
+    "prefix": "yieldblock",
+    "description": "yield block",
+    "body": ["<%= yield ${1::title} %>$0"]
+  },
+  "flash messages": {
+    "prefix": "flasheach",
+    "description": "flash each",
+    "body": [
+      "<% flash.each do |type, msg| %>",
+      "\t<div class=\"flash flash-<%= type %>\"><%= msg %></div>",
+      "<% end %>$0"
+    ]
+  },
+  "csrf meta": {
+    "prefix": "csrfmeta",
+    "description": "csrf meta + csp",
+    "body": ["<%= csrf_meta_tags %>", "<%= csp_meta_tag %>$0"]
+  },
+  "Devise links": {
+    "prefix": "deviselinks",
+    "description": "Devise sign in/out links",
+    "body": [
+      "<% if user_signed_in? %>",
+      "\t<%= link_to 'Sign out', destroy_user_session_path, data: { turbo_method: :delete } %>",
+      "<% else %>",
+      "\t<%= link_to 'Sign in', new_user_session_path %>",
+      "\t<%= link_to 'Sign up', new_user_registration_path %>",
+      "<% end %>$0"
+    ]
+  },
+  "CanCanCan can?": {
+    "prefix": "canqif",
+    "description": "ERB can? guard",
+    "body": [
+      "<% if can? :${1:action}, ${2:resource} %>",
+      "\t$0",
+      "<% end %>"
+    ]
+  },
+  "Turbo frame": {
+    "prefix": "turboframe",
+    "description": "turbo_frame_tag",
+    "body": [
+      "<%= turbo_frame_tag '${1:id}'${2:, src: ${3:path}} do %>",
+      "\t$0",
+      "<% end %>"
+    ]
+  },
+  "Turbo frame lazy": {
+    "prefix": "turboframelazy",
+    "description": "turbo_frame_tag lazy load",
+    "body": [
+      "<%= turbo_frame_tag '${1:id}', src: ${2:path}, loading: :lazy %>$0"
+    ]
+  },
+  "Turbo stream from": {
+    "prefix": "turbostreamfrom",
+    "description": "turbo_stream_from",
+    "body": ["<%= turbo_stream_from ${1::room} %>$0"]
+  },
+  "Turbo stream replace": {
+    "prefix": "turboreplace",
+    "description": "turbo_stream replace partial",
+    "body": [
+      "<%= turbo_stream.replace '${1:dom_id}', partial: '${2:partial}', locals: { ${3:item}: @${3} } %>$0"
+    ]
+  },
+  "Turbo stream append": {
+    "prefix": "turboappend",
+    "description": "turbo_stream append",
+    "body": [
+      "<%= turbo_stream.append '${1:dom_id}', partial: '${2:partial}', locals: { ${3:item}: @${3} } %>$0"
+    ]
+  },
+  "Turbo stream remove": {
+    "prefix": "turboremove",
+    "description": "turbo_stream remove dom_id",
+    "body": ["<%= turbo_stream.remove ${1:@resource} %>$0"]
+  },
+  "Stimulus data-controller": {
+    "prefix": "datactrl",
+    "description": "data-controller attribute",
+    "body": ["data-controller=\"${1:name}\"$0"]
+  },
+  "Stimulus action": {
+    "prefix": "dataaction",
+    "description": "data-action attribute",
+    "body": ["data-action=\"${1:click}->${2:controller}#${3:method}\"$0"]
+  },
+  "Stimulus target": {
+    "prefix": "datatarget",
+    "description": "data-target attribute",
+    "body": ["data-${1:controller}-target=\"${2:name}\"$0"]
+  },
+  "Stimulus value": {
+    "prefix": "datavalue",
+    "description": "data-value attribute",
+    "body": ["data-${1:controller}-${2:url}-value=\"${3:value}\"$0"]
+  },
+  "Stimulus wrapper div": {
+    "prefix": "stimwrap",
+    "description": "div w/ controller + targets",
+    "body": [
+      "<div data-controller=\"${1:name}\">",
+      "\t<input data-${1}-target=\"${2:input}\">",
+      "\t<button data-action=\"click->${1}#${3:submit}\">${4:Go}</button>",
+      "</div>$0"
+    ]
+  },
+  "ActiveAdmin form input": {
+    "prefix": "aainput",
+    "description": "AA f.input (in form do)",
+    "body": ["f.input :${1:attr}${2:, as: :${3:select}, collection: ${4:[]}}$0"]
+  }
+}

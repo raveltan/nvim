@@ -283,7 +283,7 @@ return {
       { "<leader>Sa", function() require("scissors").addNewSnippet() end, mode = { "n", "x" },  desc = "Add snippet" },
     },
     opts = {
-      snippetDir = vim.fn.stdpath("data") .. "/lazy/friendly-snippets",
+      snippetDir = vim.fn.stdpath("config") .. "/snippets",
     },
   },
 

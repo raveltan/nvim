@@ -1,0 +1,907 @@
+{
+  "Rails Controller": {
+    "prefix": "controller",
+    "description": "Rails controller w/ before_action + actions",
+    "body": [
+      "class ${1:Name}Controller < ApplicationController",
+      "\tbefore_action :set_${2:resource}, only: %i[show edit update destroy]",
+      "",
+      "\tdef index",
+      "\t\t@${2}s = ${3:Model}.all",
+      "\tend",
+      "",
+      "\tdef show; end",
+      "",
+      "\tdef new",
+      "\t\t@${2} = ${3}.new",
+      "\tend",
+      "",
+      "\tdef create",
+      "\t\t@${2} = ${3}.new(${2}_params)",
+      "\t\tif @${2}.save",
+      "\t\t\tredirect_to @${2}, notice: '${3} was successfully created.'",
+      "\t\telse",
+      "\t\t\trender :new, status: :unprocessable_entity",
+      "\t\tend",
+      "\tend",
+      "",
+      "\tdef edit; end",
+      "",
+      "\tdef update",
+      "\t\tif @${2}.update(${2}_params)",
+      "\t\t\tredirect_to @${2}, notice: '${3} was successfully updated.'",
+      "\t\telse",
+      "\t\t\trender :edit, status: :unprocessable_entity",
+      "\t\tend",
+      "\tend",
+      "",
+      "\tdef destroy",
+      "\t\t@${2}.destroy",
+      "\t\tredirect_to ${2}s_url, notice: '${3} was successfully destroyed.'",
+      "\tend",
+      "",
+      "\tprivate",
+      "",
+      "\tdef set_${2}",
+      "\t\t@${2} = ${3}.find(params[:id])",
+      "\tend",
+      "",
+      "\tdef ${2}_params",
+      "\t\tparams.require(:${2}).permit(${4::name})",
+      "\tend",
+      "end"
+    ]
+  },
+  "Rails API Controller": {
+    "prefix": "apicontroller",
+    "description": "API-only controller w/ JSON responses",
+    "body": [
+      "class Api::${1:V1}::${2:Name}Controller < ApplicationController",
+      "\tbefore_action :set_${3:resource}, only: %i[show update destroy]",
+      "",
+      "\tdef index",
+      "\t\trender json: ${4:Model}.all",
+      "\tend",
+      "",
+      "\tdef show",
+      "\t\trender json: @${3}",
+      "\tend",
+      "",
+      "\tdef create",
+      "\t\t@${3} = ${4}.new(${3}_params)",
+      "\t\tif @${3}.save",
+      "\t\t\trender json: @${3}, status: :created",
+      "\t\telse",
+      "\t\t\trender json: @${3}.errors, status: :unprocessable_entity",
+      "\t\tend",
+      "\tend",
+      "",
+      "\tdef update",
+      "\t\tif @${3}.update(${3}_params)",
+      "\t\t\trender json: @${3}",
+      "\t\telse",
+      "\t\t\trender json: @${3}.errors, status: :unprocessable_entity",
+      "\t\tend",
+      "\tend",
+      "",
+      "\tdef destroy",
+      "\t\t@${3}.destroy",
+      "\t\thead :no_content",
+      "\tend",
+      "",
+      "\tprivate",
+      "",
+      "\tdef set_${3}",
+      "\t\t@${3} = ${4}.find(params[:id])",
+      "\tend",
+      "",
+      "\tdef ${3}_params",
+      "\t\tparams.require(:${3}).permit($0)",
+      "\tend",
+      "end"
+    ]
+  },
+  "Render JSON": {
+    "prefix": "renderjson",
+    "description": "render json w/ status",
+    "body": ["render json: ${1:object}, status: :${2:ok}$0"]
+  },
+  "Render error": {
+    "prefix": "rendererr",
+    "description": "render error JSON",
+    "body": [
+      "render json: { error: '${1:message}' }, status: :${2:unprocessable_entity}$0"
+    ]
+  },
+  "Redirect with flash": {
+    "prefix": "redir",
+    "description": "redirect_to with flash",
+    "body": ["redirect_to ${1:path}, ${2:notice}: '${3:message}'$0"]
+  },
+  "Head response": {
+    "prefix": "headresp",
+    "description": "head status",
+    "body": ["head :${1:no_content}$0"]
+  },
+  "Strong params": {
+    "prefix": "strongparams",
+    "description": "strong params method",
+    "body": [
+      "def ${1:resource}_params",
+      "\tparams.require(:${1}).permit($0)",
+      "end"
+    ]
+  },
+  "before_action only": {
+    "prefix": "baction",
+    "description": "before_action only %i[]",
+    "body": ["before_action :${1:method}, only: %i[${2:show}]$0"]
+  },
+  "before_action except": {
+    "prefix": "baexcept",
+    "description": "before_action except",
+    "body": ["before_action :${1:method}, except: %i[${2:index}]$0"]
+  },
+  "rescue_from": {
+    "prefix": "rescuefrom",
+    "description": "controller rescue_from",
+    "body": [
+      "rescue_from ${1:ActiveRecord::RecordNotFound} do |${2:e}|",
+      "\t$0",
+      "end"
+    ]
+  },
+  "Rails Model": {
+    "prefix": "model",
+    "description": "Full ApplicationRecord model",
+    "body": [
+      "class ${1:Name} < ApplicationRecord",
+      "\t# Associations",
+      "\tbelongs_to :${2:parent}",
+      "",
+      "\t# Validations",
+      "\tvalidates :${3:name}, presence: true",
+      "",
+      "\t# Scopes",
+      "\tscope :${4:active}, -> { where(${5:active: true}) }",
+      "",
+      "\t# Callbacks",
+      "\tbefore_save :${6:normalize}",
+      "",
+      "\tprivate",
+      "",
+      "\tdef ${6}",
+      "\t\t$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "Concern": {
+    "prefix": "concern",
+    "description": "ActiveSupport::Concern module",
+    "body": [
+      "module ${1:Name}",
+      "\textend ActiveSupport::Concern",
+      "",
+      "\tincluded do",
+      "\t\t$0",
+      "\tend",
+      "",
+      "\tclass_methods do",
+      "\tend",
+      "end"
+    ]
+  },
+  "delegate": {
+    "prefix": "delegate",
+    "description": "delegate to: w/ allow_nil",
+    "body": ["delegate :${1:attr}, to: :${2:assoc}, allow_nil: ${3:true}$0"]
+  },
+  "has_secure_password": {
+    "prefix": "hsp",
+    "description": "has_secure_password",
+    "body": ["has_secure_password$0"]
+  },
+  "after_commit": {
+    "prefix": "aftercommit",
+    "description": "after_commit on:",
+    "body": ["after_commit :${1:method}, on: :${2:create}$0"]
+  },
+  "validates length": {
+    "prefix": "valength",
+    "description": "validates length",
+    "body": ["validates :${1:attr}, length: { ${2:maximum: 255} }$0"]
+  },
+  "validates uniq": {
+    "prefix": "vauniq",
+    "description": "validates uniqueness scope",
+    "body": [
+      "validates :${1:attr}, uniqueness: { scope: :${2:other}, case_sensitive: ${3:false} }$0"
+    ]
+  },
+  "validates format": {
+    "prefix": "vaformat",
+    "description": "validates format with regex",
+    "body": ["validates :${1:attr}, format: { with: /${2:\\\\A.+\\\\z}/ }$0"]
+  },
+  "validates inclusion": {
+    "prefix": "vainclusion",
+    "description": "validates inclusion in",
+    "body": ["validates :${1:attr}, inclusion: { in: ${2:%w[a b]} }$0"]
+  },
+  "validates numericality": {
+    "prefix": "vanum",
+    "description": "validates numericality",
+    "body": ["validates :${1:attr}, numericality: { ${2:greater_than: 0} }$0"]
+  },
+  "Rails Migration": {
+    "prefix": "migration",
+    "description": "create_table migration",
+    "body": [
+      "class ${1:CreateName} < ActiveRecord::Migration[${2:7.1}]",
+      "\tdef change",
+      "\t\tcreate_table :${3:names} do |t|",
+      "\t\t\tt.string :${4:name}, null: false",
+      "\t\t\tt.references :${5:user}, null: false, foreign_key: true",
+      "$0",
+      "\t\t\tt.timestamps",
+      "\t\tend",
+      "",
+      "\t\tadd_index :${3}, :${4}, unique: true",
+      "\tend",
+      "end"
+    ]
+  },
+  "Migration up/down": {
+    "prefix": "migud",
+    "description": "reversible migration up/down",
+    "body": [
+      "class ${1:Name} < ActiveRecord::Migration[${2:7.1}]",
+      "\tdef up",
+      "\t\t$0",
+      "\tend",
+      "",
+      "\tdef down",
+      "\tend",
+      "end"
+    ]
+  },
+  "add_reference migration": {
+    "prefix": "addref",
+    "description": "add_reference fk",
+    "body": [
+      "add_reference :${1:table}, :${2:other}, null: false, foreign_key: true$0"
+    ]
+  },
+  "add_foreign_key": {
+    "prefix": "addfk",
+    "description": "add_foreign_key",
+    "body": ["add_foreign_key :${1:from}, :${2:to}$0"]
+  },
+  "add_index unique": {
+    "prefix": "adduniq",
+    "description": "add_index unique",
+    "body": [
+      "add_index :${1:table}, %i[${2:col_a col_b}], unique: true$0"
+    ]
+  },
+  "change_column_null": {
+    "prefix": "ccnull",
+    "description": "change_column_null",
+    "body": [
+      "change_column_null :${1:table}, :${2:col}, ${3:false}$0"
+    ]
+  },
+  "reversible block": {
+    "prefix": "reversible",
+    "description": "reversible up/down block",
+    "body": [
+      "reversible do |dir|",
+      "\tdir.up   { $1 }",
+      "\tdir.down { $2 }",
+      "end$0"
+    ]
+  },
+  "Routes resources": {
+    "prefix": "resources",
+    "description": "resources w/ member/collection",
+    "body": [
+      "resources :${1:items} do",
+      "\tmember do",
+      "\t\t${2:get :archive}",
+      "\tend",
+      "\tcollection do",
+      "\t\t${3:get :search}",
+      "\tend",
+      "end$0"
+    ]
+  },
+  "Routes nested": {
+    "prefix": "nestedres",
+    "description": "nested resources",
+    "body": [
+      "resources :${1:parents} do",
+      "\tresources :${2:children}, only: %i[${3:index show}]",
+      "end$0"
+    ]
+  },
+  "Routes namespace": {
+    "prefix": "namespace",
+    "description": "namespace block",
+    "body": [
+      "namespace :${1:api} do",
+      "\tnamespace :${2:v1} do",
+      "\t\t$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "Routes scope": {
+    "prefix": "rscope",
+    "description": "scope module",
+    "body": [
+      "scope module: :${1:admin}, path: '${2:admin}' do",
+      "\t$0",
+      "end"
+    ]
+  },
+  "Routes root": {
+    "prefix": "rroot",
+    "description": "root to:",
+    "body": ["root to: '${1:home}#${2:index}'$0"]
+  },
+  "Routes constraints": {
+    "prefix": "constraints",
+    "description": "constraints block",
+    "body": [
+      "constraints(${1:Subdomain}) do",
+      "\t$0",
+      "end"
+    ]
+  },
+  "ActiveJob": {
+    "prefix": "job",
+    "description": "ActiveJob ApplicationJob",
+    "body": [
+      "class ${1:Name}Job < ApplicationJob",
+      "\tqueue_as :${2:default}",
+      "",
+      "\tretry_on ${3:StandardError}, wait: ${4:5.seconds}, attempts: ${5:3}",
+      "",
+      "\tdef perform(${6:args})",
+      "\t\t$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "Mailer class": {
+    "prefix": "mailer",
+    "description": "ActionMailer ApplicationMailer",
+    "body": [
+      "class ${1:Name}Mailer < ApplicationMailer",
+      "\tdefault from: '${2:no-reply@example.com}'",
+      "",
+      "\tdef ${3:welcome}(user)",
+      "\t\t@user = user",
+      "\t\tmail(to: @user.email, subject: '${4:Welcome}')",
+      "\tend$0",
+      "end"
+    ]
+  },
+  "Service object": {
+    "prefix": "service",
+    "description": "PORO service w/ .call",
+    "body": [
+      "class ${1:Name}Service",
+      "\tdef self.call(${2:args})",
+      "\t\tnew(${2}).call",
+      "\tend",
+      "",
+      "\tdef initialize(${2})",
+      "\t\t@${2} = ${2}",
+      "\tend",
+      "",
+      "\tdef call",
+      "\t\t$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "ActionCable Channel": {
+    "prefix": "channel",
+    "description": "ActionCable channel",
+    "body": [
+      "class ${1:Name}Channel < ApplicationCable::Channel",
+      "\tdef subscribed",
+      "\t\tstream_from '${2:room}_#{params[:id]}'",
+      "\tend",
+      "",
+      "\tdef unsubscribed",
+      "\tend$0",
+      "end"
+    ]
+  },
+  "Devise authenticate_user": {
+    "prefix": "authuser",
+    "description": "Devise authenticate_user!",
+    "body": ["before_action :authenticate_user!$0"]
+  },
+  "Devise current_user check": {
+    "prefix": "signedin",
+    "description": "user_signed_in? guard",
+    "body": [
+      "if user_signed_in?",
+      "\t$0",
+      "end"
+    ]
+  },
+  "Devise permit params": {
+    "prefix": "devisepermit",
+    "description": "configure_permitted_parameters",
+    "body": [
+      "before_action :configure_permitted_parameters, if: :devise_controller?",
+      "",
+      "protected",
+      "",
+      "def configure_permitted_parameters",
+      "\tdevise_parameter_sanitizer.permit(:sign_up, keys: %i[${1:name}])",
+      "\tdevise_parameter_sanitizer.permit(:account_update, keys: %i[${1}])$0",
+      "end"
+    ]
+  },
+  "Devise model": {
+    "prefix": "devisemodel",
+    "description": "Devise User model",
+    "body": [
+      "class ${1:User} < ApplicationRecord",
+      "\tdevise :database_authenticatable, :registerable,",
+      "\t\t   :recoverable, :rememberable, :validatable${2:, :confirmable, :lockable, :trackable}",
+      "$0",
+      "end"
+    ]
+  },
+  "Devise route": {
+    "prefix": "devisefor",
+    "description": "devise_for routes",
+    "body": [
+      "devise_for :${1:users}${2:, controllers: { sessions: 'users/sessions' }}$0"
+    ]
+  },
+  "CanCanCan Ability": {
+    "prefix": "ability",
+    "description": "CanCanCan Ability class",
+    "body": [
+      "class Ability",
+      "\tinclude CanCan::Ability",
+      "",
+      "\tdef initialize(user)",
+      "\t\tuser ||= User.new",
+      "",
+      "\t\tif user.${1:admin?}",
+      "\t\t\tcan :manage, :all",
+      "\t\telse",
+      "\t\t\tcan :read, :all",
+      "\t\t\tcan :manage, ${2:Model}, user_id: user.id",
+      "\t\tend$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "CanCanCan load_and_authorize": {
+    "prefix": "loadauth",
+    "description": "load_and_authorize_resource",
+    "body": ["load_and_authorize_resource${1: class: ${2:Model}}$0"]
+  },
+  "CanCanCan authorize_resource": {
+    "prefix": "authres",
+    "description": "authorize_resource",
+    "body": ["authorize_resource$0"]
+  },
+  "CanCanCan authorize!": {
+    "prefix": "authbang",
+    "description": "authorize! action, resource",
+    "body": ["authorize! :${1:action}, ${2:@resource}$0"]
+  },
+  "CanCanCan can?": {
+    "prefix": "canq",
+    "description": "can? helper",
+    "body": ["can? :${1:action}, ${2:resource}$0"]
+  },
+  "CanCanCan rescue access denied": {
+    "prefix": "rescueaccess",
+    "description": "rescue_from CanCan::AccessDenied",
+    "body": [
+      "rescue_from CanCan::AccessDenied do |exception|",
+      "\tredirect_to ${1:root_path}, alert: exception.message",
+      "end$0"
+    ]
+  },
+  "ActiveAdmin register": {
+    "prefix": "aaregister",
+    "description": "ActiveAdmin.register",
+    "body": [
+      "ActiveAdmin.register ${1:Model} do",
+      "\tpermit_params ${2::name, :description}",
+      "",
+      "\tindex do",
+      "\t\tselectable_column",
+      "\t\tid_column",
+      "\t\tcolumn :${3:name}",
+      "\t\tactions",
+      "\tend",
+      "",
+      "\tform do |f|",
+      "\t\tf.inputs do",
+      "\t\t\tf.input :${3}",
+      "\t\tend",
+      "\t\tf.actions",
+      "\tend",
+      "",
+      "\tshow do",
+      "\t\tattributes_table do",
+      "\t\t\trow :${3}",
+      "\t\tend",
+      "\tend$0",
+      "end"
+    ]
+  },
+  "ActiveAdmin filter": {
+    "prefix": "aafilter",
+    "description": "AA filter",
+    "body": ["filter :${1:attr}${2:, as: :select}$0"]
+  },
+  "ActiveAdmin scope": {
+    "prefix": "aascope",
+    "description": "AA scope",
+    "body": ["scope :${1:active}${2:, default: true}$0"]
+  },
+  "ActiveAdmin action_item": {
+    "prefix": "aaaction",
+    "description": "AA action_item",
+    "body": [
+      "action_item :${1:name}, only: :${2:show} do",
+      "\tlink_to '${3:Label}', ${4:path}",
+      "end$0"
+    ]
+  },
+  "ActiveAdmin batch_action": {
+    "prefix": "aabatch",
+    "description": "AA batch_action",
+    "body": [
+      "batch_action :${1:name} do |ids|",
+      "\t${2:Model}.where(id: ids).${3:update_all(active: true)}",
+      "\tredirect_to collection_path, notice: '${4:Done}'",
+      "end$0"
+    ]
+  },
+  "ActiveAdmin member_action": {
+    "prefix": "aamember",
+    "description": "AA member_action",
+    "body": [
+      "member_action :${1:name}, method: :${2:put} do",
+      "\t$0",
+      "end"
+    ]
+  },
+  "ActiveAdmin sidebar": {
+    "prefix": "aasidebar",
+    "description": "AA sidebar",
+    "body": [
+      "sidebar '${1:Title}', only: :${2:show} do",
+      "\t$0",
+      "end"
+    ]
+  },
+  "RSpec Rails request spec": {
+    "prefix": "reqspec",
+    "description": "RSpec request spec",
+    "body": [
+      "require 'rails_helper'",
+      "",
+      "RSpec.describe '${1:Name}', type: :request do",
+      "\tdescribe 'GET /${2:path}' do",
+      "\t\tit 'returns 200' do",
+      "\t\t\tget ${3:path}",
+      "\t\t\texpect(response).to have_http_status(:ok)",
+      "\t\tend$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "RSpec model spec": {
+    "prefix": "modelspec",
+    "description": "RSpec model spec",
+    "body": [
+      "require 'rails_helper'",
+      "",
+      "RSpec.describe ${1:Model}, type: :model do",
+      "\tit { is_expected.to validate_presence_of(:${2:attr}) }",
+      "\tit { is_expected.to belong_to(:${3:assoc}) }$0",
+      "end"
+    ]
+  },
+  "RSpec system spec": {
+    "prefix": "sysspec",
+    "description": "RSpec system spec",
+    "body": [
+      "require 'rails_helper'",
+      "",
+      "RSpec.describe '${1:Feature}', type: :system do",
+      "\tbefore { driven_by(:${2:rack_test}) }",
+      "",
+      "\tit '${3:does X}' do",
+      "\t\tvisit ${4:root_path}",
+      "\t\t$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "RSpec shared_examples": {
+    "prefix": "sharedex",
+    "description": "shared_examples block",
+    "body": [
+      "shared_examples '${1:name}' do",
+      "\tit '${2:behaves}' do",
+      "\t\t$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "RSpec it_behaves_like": {
+    "prefix": "behaveslike",
+    "description": "it_behaves_like",
+    "body": ["it_behaves_like '${1:name}'$0"]
+  },
+  "RSpec context with let": {
+    "prefix": "ctxlet",
+    "description": "context block w/ let + before",
+    "body": [
+      "context 'when ${1:condition}' do",
+      "\tlet(:${2:var}) { ${3:value} }",
+      "",
+      "\tit '${4:does X}' do",
+      "\t\t$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "RSpec FactoryBot create": {
+    "prefix": "fbcreate",
+    "description": "create factory",
+    "body": ["${1:var} = create(:${2:factory}${3:, attr: value})$0"]
+  },
+  "RSpec FactoryBot build": {
+    "prefix": "fbbuild",
+    "description": "build factory",
+    "body": ["${1:var} = build(:${2:factory})$0"]
+  },
+  "RSpec FactoryBot list": {
+    "prefix": "fblist",
+    "description": "create_list",
+    "body": ["create_list(:${1:factory}, ${2:3})$0"]
+  },
+  "RSpec stub instance": {
+    "prefix": "stubi",
+    "description": "stub instance method",
+    "body": [
+      "allow(${1:object}).to receive(:${2:method}).and_return(${3:value})$0"
+    ]
+  },
+  "RSpec stub class": {
+    "prefix": "stubc",
+    "description": "stub class any_instance",
+    "body": [
+      "allow_any_instance_of(${1:Class}).to receive(:${2:method}).and_return(${3:value})$0"
+    ]
+  },
+  "RSpec expect to change": {
+    "prefix": "expchange",
+    "description": "expect change",
+    "body": [
+      "expect { $1 }.to change { ${2:Model}.count }.by(${3:1})$0"
+    ]
+  },
+  "RSpec expect to raise": {
+    "prefix": "expraise",
+    "description": "expect raise_error",
+    "body": [
+      "expect { $1 }.to raise_error(${2:StandardError}${3:, /msg/})$0"
+    ]
+  },
+  "RSpec http status": {
+    "prefix": "expstatus",
+    "description": "have_http_status",
+    "body": ["expect(response).to have_http_status(:${1:ok})$0"]
+  },
+  "RSpec json body": {
+    "prefix": "jsonbody",
+    "description": "parse JSON response",
+    "body": ["JSON.parse(response.body)$0"]
+  },
+  "Capybara visit": {
+    "prefix": "visit",
+    "description": "visit page",
+    "body": ["visit ${1:root_path}$0"]
+  },
+  "Capybara fill_in": {
+    "prefix": "fillin",
+    "description": "fill_in field",
+    "body": ["fill_in '${1:Label}', with: ${2:value}$0"]
+  },
+  "Capybara click button": {
+    "prefix": "clickbtn",
+    "description": "click_button",
+    "body": ["click_button '${1:Submit}'$0"]
+  },
+  "Capybara click link": {
+    "prefix": "clicklink",
+    "description": "click_link",
+    "body": ["click_link '${1:Edit}'$0"]
+  },
+  "Capybara select": {
+    "prefix": "selectopt",
+    "description": "select option",
+    "body": ["select '${1:Option}', from: '${2:Label}'$0"]
+  },
+  "Capybara check": {
+    "prefix": "checkbox",
+    "description": "check checkbox",
+    "body": ["check '${1:Label}'$0"]
+  },
+  "Capybara expect content": {
+    "prefix": "havecontent",
+    "description": "expect have_content",
+    "body": ["expect(page).to have_content(${1:'text'})$0"]
+  },
+  "Capybara expect selector": {
+    "prefix": "havecss",
+    "description": "expect have_css",
+    "body": ["expect(page).to have_css('${1:.selector}'${2:, text: '${3:t}'})$0"]
+  },
+  "Capybara expect path": {
+    "prefix": "havepath",
+    "description": "expect current_path",
+    "body": ["expect(page).to have_current_path(${1:root_path})$0"]
+  },
+  "Capybara within": {
+    "prefix": "within",
+    "description": "within block",
+    "body": [
+      "within '${1:.selector}' do",
+      "\t$0",
+      "end"
+    ]
+  },
+  "Capybara attach_file": {
+    "prefix": "attachfile",
+    "description": "attach_file",
+    "body": [
+      "attach_file '${1:Label}', Rails.root.join('${2:spec/fixtures/file.png}')$0"
+    ]
+  },
+  "Net::HTTP get": {
+    "prefix": "nethttpget",
+    "description": "Net::HTTP get JSON",
+    "body": [
+      "require 'net/http'",
+      "require 'json'",
+      "",
+      "uri = URI('${1:https://api.example.com/path}')",
+      "res = Net::HTTP.get_response(uri)",
+      "data = JSON.parse(res.body) if res.is_a?(Net::HTTPSuccess)$0"
+    ]
+  },
+  "Net::HTTP post": {
+    "prefix": "nethttppost",
+    "description": "Net::HTTP post JSON",
+    "body": [
+      "uri = URI('${1:https://api.example.com/path}')",
+      "http = Net::HTTP.new(uri.host, uri.port)",
+      "http.use_ssl = true",
+      "req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')",
+      "req.body = ${2:payload}.to_json",
+      "res = http.request(req)$0"
+    ]
+  },
+  "Faraday client": {
+    "prefix": "faraday",
+    "description": "Faraday connection",
+    "body": [
+      "conn = Faraday.new(url: '${1:https://api.example.com}') do |f|",
+      "\tf.request :json",
+      "\tf.response :json, content_type: /\\\\bjson$/",
+      "\tf.adapter Faraday.default_adapter",
+      "end",
+      "",
+      "res = conn.${2:get}('${3:/path}'${4:, params})$0"
+    ]
+  },
+  "HTTParty class": {
+    "prefix": "httparty",
+    "description": "HTTParty client class",
+    "body": [
+      "class ${1:Name}Client",
+      "\tinclude HTTParty",
+      "\tbase_uri '${2:https://api.example.com}'",
+      "",
+      "\tdef ${3:get_thing}(id)",
+      "\t\tself.class.get(\"/${4:things}/#{id}\")",
+      "\tend$0",
+      "end"
+    ]
+  },
+  "RestClient request": {
+    "prefix": "restclient",
+    "description": "RestClient call",
+    "body": [
+      "RestClient.${1:get}('${2:url}'${3:, headers})$0"
+    ]
+  },
+  "Stimulus controller": {
+    "prefix": "stimcontroller",
+    "description": "Stimulus controller class (JS)",
+    "body": [
+      "import { Controller } from '@hotwired/stimulus'",
+      "",
+      "export default class extends Controller {",
+      "\tstatic targets = ['${1:name}']",
+      "\tstatic values = { ${2:url}: String }",
+      "\tstatic classes = ['${3:active}']",
+      "",
+      "\tconnect() {",
+      "\t\t$0",
+      "\t}",
+      "",
+      "\tdisconnect() {}",
+      "",
+      "\t${4:action}(event) {",
+      "\t\tevent.preventDefault()",
+      "\t}",
+      "}"
+    ]
+  },
+  "Stimulus action": {
+    "prefix": "stimaction",
+    "description": "Stimulus action method",
+    "body": [
+      "${1:action}(event) {",
+      "\tevent.preventDefault()",
+      "\t$0",
+      "}"
+    ]
+  },
+  "Stimulus target getter": {
+    "prefix": "stimtarget",
+    "description": "Stimulus target ref",
+    "body": ["this.${1:name}Target$0"]
+  },
+  "Turbo broadcast model": {
+    "prefix": "broadcaststo",
+    "description": "Model broadcasts_to",
+    "body": [
+      "broadcasts_to ->(${1:record}) { [${1}.${2:user}, '${3:items}'] }${4:, inserts_by: :prepend}$0"
+    ]
+  },
+  "Turbo broadcast refreshes": {
+    "prefix": "broadcastsrefresh",
+    "description": "broadcasts_refreshes",
+    "body": ["broadcasts_refreshes$0"]
+  },
+  "Turbo Stream respond_to": {
+    "prefix": "respondturbo",
+    "description": "respond_to with turbo_stream",
+    "body": [
+      "respond_to do |format|",
+      "\tformat.turbo_stream",
+      "\tformat.html { redirect_to ${1:path} }",
+      "end$0"
+    ]
+  },
+  "Turbo Stream render": {
+    "prefix": "renderturbo",
+    "description": "render turbo_stream replace",
+    "body": [
+      "render turbo_stream: turbo_stream.${1:replace}('${2:dom_id}', partial: '${3:partial}', locals: { ${4:item}: @${4} })$0"
+    ]
+  }
+}

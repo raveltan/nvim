@@ -302,6 +302,14 @@ return {
         providers = {
           lsp = { max_items = 50 },
           ["blade-nav"] = { module = "blade-nav.blink", name = "blade-nav" },
+          snippets = {
+            opts = {
+              search_paths = {
+                vim.fn.stdpath("data") .. "/lazy/friendly-snippets",
+                vim.fn.stdpath("config") .. "/snippets",
+              },
+            },
+          },
         },
       },
       fuzzy = { implementation = "prefer_rust" },

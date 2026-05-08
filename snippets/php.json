@@ -1,0 +1,517 @@
+{
+  "PHP file header": {
+    "prefix": "phpns",
+    "description": "PHP open tag + namespace",
+    "body": ["<?php", "", "namespace ${1:Freelancer\\\\Phoenix\\\\${2:Module}};", "", "$0"]
+  },
+  "PHP final class": {
+    "prefix": "fclass",
+    "description": "final class with constructor",
+    "body": [
+      "final class ${1:Name} {",
+      "\tpublic function __construct(",
+      "\t\t$2",
+      "\t) {}",
+      "",
+      "\t$0",
+      "}"
+    ]
+  },
+  "PHP abstract class": {
+    "prefix": "aclass",
+    "description": "abstract class",
+    "body": ["abstract class ${1:Name} {", "\t$0", "}"]
+  },
+  "PHP interface": {
+    "prefix": "iface",
+    "description": "interface",
+    "body": ["interface ${1:Name} {", "\t$0", "}"]
+  },
+  "PHP public function": {
+    "prefix": "puf",
+    "description": "public method with return type",
+    "body": [
+      "public function ${1:name}(${2}): ${3:void} {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "PHP private function": {
+    "prefix": "prf",
+    "description": "private method",
+    "body": [
+      "private function ${1:name}(${2}): ${3:void} {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "PHP public static function": {
+    "prefix": "psf",
+    "description": "public static method",
+    "body": [
+      "public static function ${1:name}(${2}): ${3:void} {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "PHP arrow fn": {
+    "prefix": "afn",
+    "description": "arrow fn",
+    "body": ["fn(${1:\\$x}) => ${0}"]
+  },
+  "PHP match": {
+    "prefix": "match",
+    "description": "match expression",
+    "body": [
+      "match (${1:\\$value}) {",
+      "\t${2:'a'} => ${3:expr},",
+      "\tdefault => ${4:expr},",
+      "};$0"
+    ]
+  },
+  "PHP try logger": {
+    "prefix": "tryl",
+    "description": "try/catch with logger rethrow",
+    "body": [
+      "try {",
+      "\t$1",
+      "} catch (${2:Exception} \\$e) {",
+      "\tLogger::error('${3:msg}', ['exception' => \\$e]);",
+      "\tthrow \\$e;",
+      "}$0"
+    ]
+  },
+  "PHP readonly prop": {
+    "prefix": "roprop",
+    "description": "/** @readonly */ private property",
+    "body": ["/** @readonly */", "private ${1:Type} \\$${2:name};$0"]
+  },
+  "PHP attribute": {
+    "prefix": "attr",
+    "description": "PHP attribute",
+    "body": ["#[${1:Attribute}]$0"]
+  },
+  "PHP heredoc SQL": {
+    "prefix": "sqlhd",
+    "description": "heredoc SQL block",
+    "body": [
+      "\\$sql = <<<'SQL'",
+      "\t${1:SELECT * FROM ${2:table}}",
+      "\tSQL;$0"
+    ]
+  },
+  "PHP Logger error": {
+    "prefix": "logerr",
+    "description": "Logger::error with exception",
+    "body": ["Logger::error('${1:message}', ['exception' => \\$${2:e}]);$0"]
+  },
+  "PHP Logger info": {
+    "prefix": "loginfo",
+    "description": "Logger::info",
+    "body": ["Logger::info('${1:message}', [${2}]);$0"]
+  },
+  "PHP Logger warning": {
+    "prefix": "logwarn",
+    "description": "Logger::warning",
+    "body": ["Logger::warning('${1:message}', [${2}]);$0"]
+  },
+  "PHPDoc throws": {
+    "prefix": "docthrows",
+    "description": "@throws docblock",
+    "body": ["/**", " * @throws ${1:Exception}", " */$0"]
+  },
+  "PHPDoc api immutable": {
+    "prefix": "docapi",
+    "description": "@api @psalm-immutable docblock",
+    "body": ["/**", " * @api", " *", " * @psalm-immutable", " */$0"]
+  },
+  "PHPDoc covers": {
+    "prefix": "doccovers",
+    "description": "PHPUnit @covers",
+    "body": ["/**", " * @covers \\\\${1:Fully\\\\Qualified\\\\Class}", " */$0"]
+  },
+  "GAF Controller": {
+    "prefix": "fl-controller",
+    "description": "GAF Phoenix controller skeleton",
+    "body": [
+      "<?php",
+      "",
+      "namespace Freelancer\\\\Phoenix\\\\Controller\\\\${1:Module};",
+      "",
+      "use Freelancer\\\\GAF\\\\Core\\\\Exception\\\\Response\\\\MethodNotAllowedException;",
+      "use Symfony\\\\Component\\\\HttpFoundation\\\\Request;",
+      "",
+      "/**",
+      " * ${2:Description}.",
+      " *",
+      " * @api",
+      " */",
+      "final class ${3:Name}Controller {",
+      "\tpublic function __construct(",
+      "\t\tprivate ${4:Handler}Handler \\$${5:handler} = new ${4}Handler(),",
+      "\t) {}",
+      "",
+      "\t/**",
+      "\t * ${6:Method description}.",
+      "\t *",
+      "\t * @throws MethodNotAllowedException",
+      "\t */",
+      "\tpublic function ${7:action}(Request \\$request): array {",
+      "\t\tif (\\$request->getMethod() !== '${8:GET}') {",
+      "\t\t\tthrow new MethodNotAllowedException(",
+      "\t\t\t\t\"Method {\\$request->getMethod()} is not allowed.\"",
+      "\t\t\t);",
+      "\t\t}",
+      "",
+      "\t\t$0",
+      "",
+      "\t\treturn [];",
+      "\t}",
+      "}"
+    ]
+  },
+  "GAF Handler": {
+    "prefix": "fl-handler",
+    "description": "GAF Phoenix handler with optional injected deps",
+    "body": [
+      "<?php",
+      "",
+      "namespace Freelancer\\\\Phoenix\\\\Handler\\\\${1:Module};",
+      "",
+      "use Freelancer\\\\GAF\\\\Core\\\\Log\\\\Logger;",
+      "",
+      "/**",
+      " * ${2:Description}.",
+      " */",
+      "final class ${3:Name}Handler {",
+      "\t/** @readonly */",
+      "\tprivate ${4:Repository} \\$${5:repository};",
+      "",
+      "\tpublic function __construct(",
+      "\t\t?${4} \\$${5} = null,",
+      "\t) {",
+      "\t\t\\$this->${5} = \\$${5} ?? new ${4}();",
+      "\t}",
+      "",
+      "\tpublic function ${6:method}(${7}): ${8:void} {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ]
+  },
+  "GAF Repository": {
+    "prefix": "fl-repo",
+    "description": "GAF Phoenix repository (MySql + DTO)",
+    "body": [
+      "<?php",
+      "",
+      "namespace Freelancer\\\\Phoenix\\\\Repository\\\\${1:Module};",
+      "",
+      "use DBException;",
+      "use DBQueryException;",
+      "use Exception;",
+      "use Freelancer\\\\GAF\\\\Core\\\\Log\\\\Logger;",
+      "use Freelancer\\\\Phoenix\\\\DTO\\\\${1}\\\\${2:Name}DTO;",
+      "use Freelancer\\\\Phoenix\\\\Service\\\\MySql;",
+      "",
+      "/**",
+      " * Data access layer for the ${3:table_name} table.",
+      " */",
+      "final class ${2}Repository {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "GAF DTO": {
+    "prefix": "fl-dto",
+    "description": "GAF Phoenix DTO (immutable, promoted constructor)",
+    "body": [
+      "<?php",
+      "",
+      "namespace Freelancer\\\\Phoenix\\\\DTO\\\\${1:Module};",
+      "",
+      "/**",
+      " * @api",
+      " *",
+      " * @psalm-immutable",
+      " */",
+      "final class ${2:Name}DTO {",
+      "\tpublic function __construct(",
+      "\t\tpublic ${3:int} \\$${4:id},",
+      "\t\t$0",
+      "\t) {}",
+      "}"
+    ]
+  },
+  "GAF Enum": {
+    "prefix": "fl-enum",
+    "description": "GAF MyCLabs string enum",
+    "body": [
+      "<?php",
+      "",
+      "namespace Freelancer\\\\Phoenix\\\\Enum\\\\${1:Module};",
+      "",
+      "use Freelancer\\\\Phoenix\\\\Traits\\\\EnumPrettyPrintTrait;",
+      "use MyCLabs\\\\Enum\\\\Enum;",
+      "",
+      "/**",
+      " * ${2:Description}.",
+      " *",
+      " * @psalm-immutable",
+      " *",
+      " * @extends Enum<string>",
+      " *",
+      " * @method static self ${3:VARIANT_A}()",
+      " * @method static self ${4:VARIANT_B}()",
+      " */",
+      "final class ${5:Name}Enum extends Enum {",
+      "\tuse EnumPrettyPrintTrait;",
+      "",
+      "\tprivate const ${3} = '${3}';",
+      "\tprivate const ${4} = '${4}';$0",
+      "}"
+    ]
+  },
+  "GAF native enum": {
+    "prefix": "fl-enum-native",
+    "description": "PHP 8.1 native backed enum",
+    "body": [
+      "<?php",
+      "",
+      "namespace Freelancer\\\\Phoenix\\\\Enum\\\\${1:Module};",
+      "",
+      "enum ${2:Name}Enum: ${3:string} {",
+      "\tcase ${4:Variant} = '${4}';$0",
+      "}"
+    ]
+  },
+  "GAF MySql fetchOne": {
+    "prefix": "fl-mysql-one",
+    "description": "MySql::fetchOne -> DTO",
+    "body": [
+      "return MySql::fetchOne(",
+      "\tsql: \\$sql,",
+      "\tdtoClassName: ${1:Name}DTO::class,",
+      "\tbinds: [${2}],",
+      ");$0"
+    ]
+  },
+  "GAF MySql fetchAll": {
+    "prefix": "fl-mysql-all",
+    "description": "MySql::fetchAll -> DTO list",
+    "body": [
+      "return MySql::fetchAll(",
+      "\tsql: \\$sql,",
+      "\tdtoClassName: ${1:Name}DTO::class,",
+      "\tbinds: [${2}],",
+      ");$0"
+    ]
+  },
+  "GAF MySql insert": {
+    "prefix": "fl-mysql-insert",
+    "description": "MySql::insert",
+    "body": [
+      "MySql::insert(",
+      "\tsql: \\$sql,",
+      "\tbinds: [${1}],",
+      ");$0"
+    ]
+  },
+  "GAF MySql execute": {
+    "prefix": "fl-mysql-exec",
+    "description": "MySql::executeStatement",
+    "body": [
+      "MySql::executeStatement(",
+      "\tsql: \\$sql,",
+      "\tbinds: [${1}],",
+      ");$0"
+    ]
+  },
+  "GAF Repo try-fetch": {
+    "prefix": "fl-repo-fetch",
+    "description": "Repository fetch fn w/ try/catch",
+    "body": [
+      "/**",
+      " * @throws DBException",
+      " */",
+      "public function get${1:Name}(${2:int \\$id}): ?${3:Name}DTO {",
+      "\t\\$sql = <<<'SQL'",
+      "\t\tSELECT *",
+      "\t\tFROM ${4:table}",
+      "\t\tWHERE id = %d",
+      "\t\tSQL;",
+      "\ttry {",
+      "\t\treturn MySql::fetchOne(",
+      "\t\t\tsql: \\$sql,",
+      "\t\t\tdtoClassName: ${3}DTO::class,",
+      "\t\t\tbinds: [\\$id],",
+      "\t\t);",
+      "\t} catch (DBQueryException \\$e) {",
+      "\t\treturn null;",
+      "\t} catch (Exception \\$e) {",
+      "\t\tLogger::error('failed to fetch from ${4}', ['exception' => \\$e]);",
+      "\t\tthrow \\$e;",
+      "\t}",
+      "}$0"
+    ]
+  },
+  "GAF Functional Test": {
+    "prefix": "fl-test-fn",
+    "description": "GAF FunctionalTestCase skeleton",
+    "body": [
+      "<?php",
+      "",
+      "namespace ${1:Freelancer\\\\GAF\\\\Test\\\\${2:Module}};",
+      "",
+      "use Freelancer\\\\GAF\\\\Core\\\\Test\\\\FunctionalTestCase;",
+      "use Freelancer\\\\GAF\\\\Core\\\\Test\\\\Traits\\\\IsolateAndRollbackTestCase;",
+      "",
+      "/**",
+      " * @covers \\\\${3:Fully\\\\Qualified\\\\Class}",
+      " */",
+      "class ${4:Name}FunctionalTest extends FunctionalTestCase {",
+      "\tuse IsolateAndRollbackTestCase;",
+      "",
+      "\tprotected function setUp(): void {",
+      "\t\tparent::setUp();",
+      "\t\t$0",
+      "\t}",
+      "",
+      "\tpublic function test${5:Behaviour}(): void {",
+      "\t\t// arrange",
+      "\t\t",
+      "\t\t// act",
+      "\t\t",
+      "\t\t// assert",
+      "\t\t",
+      "\t}",
+      "}"
+    ]
+  },
+  "GAF Unit Test": {
+    "prefix": "fl-test-unit",
+    "description": "PHPUnit TestCase skeleton",
+    "body": [
+      "<?php",
+      "",
+      "namespace ${1:Freelancer\\\\Phoenix\\\\Test\\\\${2:Module}};",
+      "",
+      "use PHPUnit\\\\Framework\\\\TestCase;",
+      "",
+      "/**",
+      " * @covers \\\\${3:Fully\\\\Qualified\\\\Class}",
+      " */",
+      "class ${4:Name}Test extends TestCase {",
+      "\tprotected function setUp(): void {",
+      "\t\tparent::setUp();",
+      "\t\t$0",
+      "\t}",
+      "",
+      "\tpublic function test${5:Behaviour}(): void {",
+      "\t\t",
+      "\t}",
+      "}"
+    ]
+  },
+  "PHPUnit test method": {
+    "prefix": "fl-test-method",
+    "description": "PHPUnit test method",
+    "body": [
+      "public function test${1:Behaviour}(): void {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "PHPUnit data provider": {
+    "prefix": "fl-test-provider",
+    "description": "@dataProvider method",
+    "body": [
+      "/**",
+      " * @return iterable<string, array{${1:int}}>",
+      " */",
+      "public static function ${2:caseProvider}(): iterable {",
+      "\tyield '${3:case}' => [${4:value}];$0",
+      "}"
+    ]
+  },
+  "PHPUnit assertions": {
+    "prefix": "fl-assert",
+    "description": "common assertions cluster",
+    "body": [
+      "self::assertSame(${1:expected}, ${2:actual});$0"
+    ]
+  },
+  "GAF Consumer": {
+    "prefix": "fl-consumer",
+    "description": "RabbitMQ consumer (legacy script style)",
+    "body": [
+      "<?php",
+      "",
+      "use Freelancer\\\\GAF\\\\Core\\\\Log\\\\Logger;",
+      "use PhpAmqpLib\\\\Message\\\\AMQPMessage;",
+      "",
+      "require_once __DIR__.'/../public/lib/common.php';",
+      "",
+      "ini_set('memory_limit', '${1:1000M}');",
+      "",
+      "\\$callback = static function (AMQPMessage \\$msg): void {",
+      "\t\\$channel = \\$msg->get('channel');",
+      "\t\\$delivery_tag = \\$msg->get('delivery_tag');",
+      "\ttry {",
+      "\t\t\\$body = json_decode(\\$msg->body);",
+      "\t\t$0",
+      "\t\t\\$channel->basic_ack(\\$delivery_tag);",
+      "\t} catch (DBConnectException \\$e) {",
+      "\t\tLogger::warning(\\$e);",
+      "\t\t\\$channel->basic_reject(\\$delivery_tag, true);",
+      "\t} catch (RabbitException \\$e) {",
+      "\t\tLogger::info(\\$e);",
+      "\t\t\\$channel->basic_reject(\\$delivery_tag, \\$e->getRequeue());",
+      "\t} catch (Exception \\$e) {",
+      "\t\tLogger::info(\\$e);",
+      "\t\t\\$channel->basic_reject(\\$delivery_tag, true);",
+      "\t\texit;",
+      "\t}",
+      "};"
+    ]
+  },
+  "GAF inject dep optional": {
+    "prefix": "fl-inject",
+    "description": "constructor with optional injected dep + ?? fallback",
+    "body": [
+      "/** @readonly */",
+      "private ${1:Type} \\$${2:name};",
+      "",
+      "public function __construct(",
+      "\t?${1} \\$${2} = null,",
+      ") {",
+      "\t\\$this->${2} = \\$${2} ?? new ${1}();",
+      "}$0"
+    ]
+  },
+  "GAF BadRequest": {
+    "prefix": "fl-bad-req",
+    "description": "throw BadRequestException",
+    "body": [
+      "throw new BadRequestException('${1:message}');$0"
+    ]
+  },
+  "GAF NotFound": {
+    "prefix": "fl-not-found",
+    "description": "throw NotFoundException",
+    "body": [
+      "throw new NotFoundException('${1:message}');$0"
+    ]
+  },
+  "GAF MethodNotAllowed": {
+    "prefix": "fl-mna",
+    "description": "MethodNotAllowedException guard",
+    "body": [
+      "if (\\$request->getMethod() !== '${1:GET}') {",
+      "\tthrow new MethodNotAllowedException(",
+      "\t\t\"Method {\\$request->getMethod()} is not allowed.\"",
+      "\t);",
+      "}$0"
+    ]
+  }
+}
