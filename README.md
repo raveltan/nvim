@@ -20,6 +20,7 @@ A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.co
 - [Support Files](#support-files)
 - [Project-Specific Behavior](#project-specific-behavior)
 - [Snippets](#snippets)
+- [Multicursor](#multicursor)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -839,6 +840,121 @@ Rails view helpers, Devise/CanCanCan view guards, Turbo Frames + Streams, Stimul
 | `broadcastsrefresh` | `broadcasts_refreshes` |
 | `respondturbo` | controller `respond_to` w/ turbo_stream + html |
 | `renderturbo` | `render turbo_stream: turbo_stream.replace(...)` |
+
+---
+
+## Multicursor
+
+Plugin: [`jake-stewart/multicursor.nvim`](https://github.com/jake-stewart/multicursor.nvim) (branch `1.0`), configured in [`lua/plugins/editor.lua`](lua/plugins/editor.lua). VSCode-style multi-cursor editing for Neovim — `Cmd+D` style match-add, column edit, mouse picks, regex split, transpose, align.
+
+### Bindings
+
+**Match-based (VSCode `Cmd+D`)** — operate on word under cursor or visual selection:
+
+| Key | Mode | Action |
+|---|---|---|
+| `<leader>mn` | n, x | Add cursor at next match |
+| `<leader>mN` | n, x | Add cursor at prev match |
+| `<leader>ms` | n, x | Skip current match (forward) |
+| `<leader>mS` | n, x | Skip current match (backward) |
+| `<leader>ma` | n, x | Add cursor at every match in buffer |
+
+**Column edit (line-based)** — sticky column, walks vertically:
+
+| Key | Mode | Action |
+|---|---|---|
+| `<leader>mj` | n, x | Add cursor on line below |
+| `<leader>mk` | n, x | Add cursor on line above |
+| `<leader>mJ` | n, x | Skip line down (move main cursor) |
+| `<leader>mK` | n, x | Skip line up |
+
+**Utilities:**
+
+| Key | Mode | Action |
+|---|---|---|
+| `<leader>mx` | n, x | Delete cursor under main |
+| `<leader>mr` | n | Restore cursors (after accidental clear) |
+| `<leader>ml` | n, x | Align cursors to same column (insert spaces) |
+| `<leader>mp` | x | Split visual selection by regex → cursor per match |
+| `<leader>mt` | x | Transpose text between cursors (rotate) |
+| `<C-q>` | n, x | Toggle cursor at current position |
+| `<C-LeftMouse>` | n | Toggle cursor at clicked location |
+
+**Cursor layer** (active **only** while extra cursors exist — does not affect normal-mode keys otherwise):
+
+| Key | Action |
+|---|---|
+| `<Tab>` / `<Right>` | Cycle main cursor → next |
+| `<S-Tab>` / `<Left>` | Cycle main cursor → prev |
+| `<Esc>` | Clear all cursors (or re-enable if disabled) |
+
+### Workflows
+
+**1. Rename variable across visible scope (VSCode `Cmd+D`)**
+```
+foo = 1; foo + foo  →  bar = 1; bar + bar
+```
+- Cursor on `foo`
+- `<leader>mn` `<leader>mn` — add cursor at each next `foo`
+- `cw bar <Esc>` — replace all
+- `<Esc>` — clear cursors
+
+**2. Add trailing comma to a list (column edit)**
+```
+apple
+banana
+cherry
+```
+- End of `apple` (`$`)
+- `<leader>mj` `<leader>mj` — three cursors stacked at line end
+- `a, <Esc>` — comma appended to each
+- `<Esc>`
+
+**3. Wrap every occurrence of a token in quotes**
+- Visual-select `id`
+- `<leader>ma` — cursor at every `id`
+- `c"<C-r>""<Esc>` — wraps each
+
+**4. Split CSV into per-item cursors**
+```
+a,b,c,d
+```
+- Visual-select the whole CSV
+- `<leader>mp` — prompts for regex; enter `,`
+- One cursor per item — edit independently
+
+**5. Align assignment operators**
+```
+x = 1
+yy = 2
+zzz = 3
+```
+- Cursor on first `=`, `<leader>mj` chain to add cursor on each `=`
+- `<leader>ml` — pads with spaces so all `=` line up
+
+**6. Transpose values between cursors**
+- Place cursors on `A`, `B`, `C` in visual mode
+- `<leader>mt` — content rotates: `A→B→C→A`
+
+**7. Pick scattered locations with mouse**
+- `<C-LeftMouse>` at line 5, line 23, line 47
+- Edit all three simultaneously
+
+**8. Recover from fat-fingered Esc**
+- Accidental `<Esc>` cleared cursors? — `<leader>mr` brings them back
+
+**9. Match in selection only**
+- Visual-select a function body
+- `<leader>ma` — adds cursor at every match **inside** the selection (not whole buffer)
+
+### Notes / gotchas
+
+- **`<C-q>`** previously meant quickfix toggle in some setups. Here it's claimed by multicursor (no other plugin in this config uses it).
+- **`<Esc>`** in normal mode globally is `:noh` ([`keymaps.lua:29`](lua/config/keymaps.lua)). The cursor-layer `<Esc>` only overrides while cursors exist; `:noh` works as before otherwise.
+- **`<Tab>`/`<S-Tab>`** are not globally remapped, and blink.cmp's Tab handling is insert-mode only — no conflict in cursor layer.
+- **Treesitter incremental selection** uses `<CR>`/`<BS>`, not Tab — also no conflict.
+- which-key labels the `<leader>m` group as `multicursor` ([`editor.lua:320`](lua/plugins/editor.lua)).
+- The plugin is lazy-loaded via the `keys =` table, so no startup cost until first use.
 
 ---
 

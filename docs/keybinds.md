@@ -221,8 +221,17 @@ Leader key: `<space>`. Modes: `n` normal, `i` insert, `v` visual, `x` visual-blo
 | `<leader>mn` / `<leader>mN` | n, x | Add cursor at next/prev match | multicursor |
 | `<leader>ms` / `<leader>mS` | n, x | Skip match next/prev | multicursor |
 | `<leader>ma` | n, x | Add cursor at all matches | multicursor |
+| `<leader>mj` / `<leader>mk` | n, x | Add cursor on line below/above | multicursor |
+| `<leader>mJ` / `<leader>mK` | n, x | Skip line down/up | multicursor |
 | `<leader>mx` | n, x | Delete cursor under main | multicursor |
+| `<leader>mr` | n | Restore cursors | multicursor |
+| `<leader>ml` | n, x | Align cursors to same column | multicursor |
+| `<leader>mp` | x | Split visual selection by regex | multicursor |
+| `<leader>mt` | x | Transpose text between cursors | multicursor |
 | `<C-q>` | n, x | Toggle cursor | multicursor |
+| `<C-LeftMouse>` | n | Toggle cursor at click | multicursor |
+| `<Tab>` / `<S-Tab>` | n, x | Cycle main cursor (in cursor layer) | multicursor |
+| `<Esc>` | n | Clear all cursors (in cursor layer) | multicursor |
 | `<leader>Se` | n | Edit snippet | luasnip |
 | `<leader>Sa` | n, x | Add snippet | luasnip |
 | `q` | n | Start/stop recording | nvim-recorder |
