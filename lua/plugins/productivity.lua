@@ -103,27 +103,6 @@ return {
     },
   },
 
-  -- Decorated scrollbar: diagnostics, search, git hunks, marks
-  {
-    "lewis6991/satellite.nvim",
-    event = { "BufReadPost", "BufNewFile" },
-    keys = {
-      { "<leader>us", "<cmd>SatelliteEnable<cr>", desc = "Enable scrollbar" },
-      { "<leader>uS", "<cmd>SatelliteDisable<cr>", desc = "Disable scrollbar" },
-    },
-    opts = {
-      current_only = false,
-      winblend = 50,
-      handlers = {
-        cursor = { enable = true },
-        search = { enable = true },
-        diagnostic = { enable = true },
-        gitsigns = { enable = true },
-        marks = { enable = true },
-      },
-    },
-  },
-
   -- Code action indicator in sign column
   {
     "kosayoda/nvim-lightbulb",

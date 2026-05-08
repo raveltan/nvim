@@ -175,10 +175,35 @@ return {
       { "<leader>mS", function() require("multicursor-nvim").matchSkipCursor(-1) end, mode = { "n", "x" }, desc = "Skip match (prev)" },
       { "<leader>ma", function() require("multicursor-nvim").matchAllAddCursors() end, mode = { "n", "x" }, desc = "Add cursor at all matches" },
       { "<leader>mx", function() require("multicursor-nvim").deleteCursor() end, mode = { "n", "x" }, desc = "Delete cursor under main" },
+      { "<leader>mj", function() require("multicursor-nvim").lineAddCursor(1) end, mode = { "n", "x" }, desc = "Add cursor down" },
+      { "<leader>mk", function() require("multicursor-nvim").lineAddCursor(-1) end, mode = { "n", "x" }, desc = "Add cursor up" },
+      { "<leader>mJ", function() require("multicursor-nvim").lineSkipCursor(1) end, mode = { "n", "x" }, desc = "Skip line down" },
+      { "<leader>mK", function() require("multicursor-nvim").lineSkipCursor(-1) end, mode = { "n", "x" }, desc = "Skip line up" },
+      { "<leader>mr", function() require("multicursor-nvim").restoreCursors() end, mode = "n", desc = "Restore cursors" },
+      { "<leader>ml", function() require("multicursor-nvim").alignCursors() end, mode = { "n", "x" }, desc = "Align cursors" },
+      { "<leader>mp", function() require("multicursor-nvim").splitCursors() end, mode = "x", desc = "Split selection by regex" },
+      { "<leader>mt", function() require("multicursor-nvim").transposeCursors(1) end, mode = "x", desc = "Transpose cursors" },
       { "<C-q>", function() require("multicursor-nvim").toggleCursor() end, mode = { "n", "x" }, desc = "Toggle cursor" },
+      { "<C-LeftMouse>", function() require("multicursor-nvim").handleMouse() end, mode = "n", desc = "Toggle cursor at click" },
     },
     config = function()
-      require("multicursor-nvim").setup()
+      local mc = require("multicursor-nvim")
+      mc.setup()
+
+      -- Cursor layer: bindings active only while extra cursors exist
+      mc.addKeymapLayer(function(layerSet)
+        layerSet({ "n", "x" }, "<left>", mc.prevCursor)
+        layerSet({ "n", "x" }, "<right>", mc.nextCursor)
+        layerSet({ "n", "x" }, "<tab>", mc.nextCursor)
+        layerSet({ "n", "x" }, "<s-tab>", mc.prevCursor)
+        layerSet("n", "<esc>", function()
+          if not mc.cursorsEnabled() then
+            mc.enableCursors()
+          else
+            mc.clearCursors()
+          end
+        end)
+      end)
     end,
   },
 
