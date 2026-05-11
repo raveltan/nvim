@@ -33,59 +33,6 @@ return {
     },
   },
 
-  -- Git worktree switcher (chdirs into selected worktree)
-  {
-    "polarmutex/git-worktree.nvim",
-    version = "^2",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    keys = {
-      {
-        "<leader>gwl",
-        function()
-          local wt = require("git-worktree")
-          -- Simple picker using vim.ui.select
-          local branches = vim.fn.systemlist("git worktree list")
-          vim.ui.select(branches, { prompt = "Switch worktree" }, function(choice)
-            if not choice then return end
-            local path = choice:match("^(%S+)")
-            if path then wt.switch_worktree(path) end
-          end)
-        end,
-        desc = "List / switch worktree",
-      },
-      {
-        "<leader>gwc",
-        function()
-          vim.ui.input({ prompt = "New worktree path: " }, function(path)
-            if not path or path == "" then return end
-            vim.ui.input({ prompt = "Upstream branch: " }, function(branch)
-              if not branch or branch == "" then return end
-              require("git-worktree").create_worktree(path, branch)
-            end)
-          end)
-        end,
-        desc = "Create worktree",
-      },
-      {
-        "<leader>gwd",
-        function()
-          vim.ui.input({ prompt = "Delete worktree path: " }, function(path)
-            if not path or path == "" then return end
-            require("git-worktree").delete_worktree(path)
-          end)
-        end,
-        desc = "Delete worktree",
-      },
-    },
-    config = function()
-      require("git-worktree").setup({})
-      local Hooks = require("git-worktree.hooks")
-      Hooks.register(Hooks.type.SWITCH, function(path, _prev_path)
-        vim.notify("Worktree: " .. path, vim.log.levels.INFO)
-      end)
-    end,
-  },
-
   -- Claude Code terminal toggle
   {
     "greggh/claude-code.nvim",

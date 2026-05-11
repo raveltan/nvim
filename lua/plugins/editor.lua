@@ -351,7 +351,6 @@ return {
         { "<leader>H",  group = "hurl" },
         { "<leader>a",  group = "ai/claude" },
         { "<leader>D",  group = "database" },
-        { "<leader>gw", group = "worktree" },
         { "g",          group = "goto" },
         { "gs",         group = "surround" },
       },
