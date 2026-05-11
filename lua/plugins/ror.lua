@@ -11,24 +11,21 @@ return {
       { "nvim-telescope/telescope-ui-select.nvim" },
     },
     keys = {
-      -- Command palette
+      -- Command palette — covers infrequent commands (destroy, migrate status,
+      -- bundle update, sync routes, coverage) so they don't need top-level keys.
       { "<leader>rc", function() require("ror.commands").list_commands() end,          desc = "Rails commands" },
-      -- Generate / destroy
+      -- Generate
       { "<leader>rg", function() require("ror.generators").select_generators() end,    desc = "Generate" },
-      { "<leader>rd", function() require("ror.destroyers").select_destroyers() end,    desc = "Destroy" },
       -- Routes
       { "<leader>rr", function() require("ror.routes").list_routes() end,              desc = "List routes" },
-      { "<leader>rR", function() require("ror.routes").sync_routes() end,              desc = "Sync routes" },
       -- Schema
       { "<leader>rs", function() require("ror.schema").list_table_columns() end,       desc = "Schema columns" },
       -- DB
       { "<leader>rm", function() require("ror.runners.db_migrate").run() end,          desc = "DB migrate" },
-      { "<leader>rM", function() require("ror.runners.db_migrate_status").run() end,   desc = "DB migrate status" },
       { "<leader>rk", function() require("ror.runners.db_rollback").run() end,         desc = "DB rollback" },
       -- Bundle
       { "<leader>rb", function() require("ror.runners.bundle_install").run() end,      desc = "Bundle install" },
-      { "<leader>rB", function() require("ror.runners.bundle_update").run() end,       desc = "Bundle update" },
-      -- Console (terminal split)
+      -- Console / credentials (terminal splits)
       {
         "<leader>rC",
         function()
@@ -37,6 +34,15 @@ return {
           vim.cmd("startinsert")
         end,
         desc = "Rails console",
+      },
+      {
+        "<leader>re",
+        function()
+          local cmd = vim.fn.filereadable("bin/rails") == 1 and "bin/rails credentials:edit" or "rails credentials:edit"
+          vim.cmd("botright split | resize 15 | terminal " .. cmd)
+          vim.cmd("startinsert")
+        end,
+        desc = "Edit credentials",
       },
     },
     config = function()
