@@ -36,8 +36,42 @@ map("n", "<leader>cA", function()
   vim.lsp.buf.code_action({ context = { only = { "source" }, diagnostics = {} } })
 end, { desc = "Source action" })
 map("n", "<leader>cr", function()
-  return ":IncRename " .. vim.fn.expand("<cword>")
-end, { expr = true, desc = "Rename symbol (inc)" })
+  local bufnr = vim.api.nvim_get_current_buf()
+  local clients = vim.lsp.get_clients({ bufnr = bufnr, method = "textDocument/rename" })
+  if #clients == 0 then
+    vim.notify("No LSP client supports rename", vim.log.levels.WARN)
+    return
+  end
+  local client = clients[1]
+
+  -- PHP/intelephense: rename range starts after `$` sigil. If cursor sits on `$`, advance one column.
+  if vim.bo[bufnr].filetype == "php" then
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local line = vim.api.nvim_buf_get_lines(bufnr, row - 1, row, false)[1] or ""
+    if line:sub(col + 1, col + 1) == "$" then
+      vim.api.nvim_win_set_cursor(0, { row, col + 1 })
+    end
+  end
+
+  local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+  local cword = vim.fn.expand("<cword>")
+
+  vim.ui.input({ prompt = "Rename: ", default = cword }, function(new_name)
+    if not new_name or new_name == "" or new_name == cword then return end
+    params.newName = new_name
+    client:request("textDocument/rename", params, function(err, result)
+      if err then
+        vim.notify("Rename failed: " .. err.message, vim.log.levels.ERROR)
+        return
+      end
+      if not result then
+        vim.notify("Language server returned no rename result", vim.log.levels.WARN)
+        return
+      end
+      vim.lsp.util.apply_workspace_edit(result, client.offset_encoding)
+    end, bufnr)
+  end)
+end, { desc = "Rename symbol" })
 map("n", "<leader>cf", function() require("conform").format({ async = true }) end, { desc = "Format file" })
 map("n", "K", vim.lsp.buf.hover, { desc = "Hover docs" })
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })

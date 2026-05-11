@@ -1,6 +1,6 @@
 # Neovim Configuration
 
-A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.com/folke/lazy.nvim). Optimized for polyglot development across TypeScript/Angular, PHP/Laravel, Ruby on Rails, and Python, with first-class support for the Freelancer.com monorepo (`fl-gaf`) and Phabricator workflows.
+A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.com/folke/lazy.nvim). Optimized for polyglot development across TypeScript/Angular, PHP/Laravel, Ruby on Rails, and Python, with first-class support for the GAF monorepo (`fl-gaf`) and Phabricator workflows.
 
 > Looking for the keybind cheatsheet? See [`docs/keybinds.md`](docs/keybinds.md).
 
@@ -47,7 +47,7 @@ A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.co
 
 **Tools you must install yourself**
 - `stylua`, `prettierd` / `prettier`, `php-cs-fixer` / `pint`, `blade-formatter` (formatters)
-- `phpcs`, `phpstan` (linters — Freelancer projects only)
+- `phpcs`, `phpstan` (linters — GAF monorepo only)
 - `rubocop` (gem), `erb-formatter` gem (provides `erb_format`), `@herb-tools/language-server` (npm) for Rails ERB
 - `mmdc`, `d2`, `plantuml`, `gnuplot`, `imagemagick` (diagram rendering, optional)
 
@@ -211,7 +211,7 @@ Full reference: [`docs/keybinds.md`](docs/keybinds.md).
 
 ### Formatting & Linting — `formatting.lua`
 - `conform.nvim`: `stylua` (Lua), `prettierd`/`prettier` (JS/TS), `php-cs-fixer`/`pint` (PHP), `blade-formatter` (Blade), `ruff_organize_imports` + `ruff_format` (Python)
-- `nvim-lint`: PHP `phpcs` + `phpstan` — **only enabled inside Freelancer projects**, with project-specific configs (`phpcs_gaf.xml`, `phpstan.neon`)
+- `nvim-lint`: PHP `phpcs` + `phpstan` — **only enabled inside the GAF monorepo**, with project-specific configs (`phpcs_gaf.xml`, `phpstan.neon`)
 - Format-on-save: enabled (3s timeout, LSP fallback). Toggle with `<leader>uf`.
 
 ### Navigation — `nav.lua`
@@ -314,7 +314,7 @@ Ensure the binary is on `$PATH` (Mason can install many: `:Mason`).
 
 ### Add a linter
 
-Edit the `linters_by_ft` block in `formatting.lua`. The current setup gates linters on Freelancer-project detection — if your linter should run everywhere, add it outside the `if in_freelancer` block.
+Edit the `linters_by_ft` block in `formatting.lua`. The current setup gates linters on GAF monorepo detection — if your linter should run everywhere, add it outside the `if in_freelancer` block.
 
 ### Add a treesitter parser
 
@@ -488,7 +488,7 @@ Plugin lockfile pinning all 106 plugins. Always commit after `:Lazy sync`.
 
 This config detects a few project layouts and adjusts behavior automatically:
 
-**Freelancer monorepo (`fl-gaf`)** — detected via path containing `freelancer-dev/fl-gaf`:
+**GAF monorepo (`fl-gaf`)** — detected via path containing `freelancer-dev/fl-gaf`:
 - PHP linters (`phpcs`, `phpstan`) enable with project configs (`phpcs_gaf.xml`, `phpstan.neon`)
 - `php-cs-fixer` used instead of `pint`
 - `basedpyright` adds `extraPaths` for `libgafthrift` and `restutils`
@@ -527,7 +527,7 @@ To add custom snippets: `<leader>Sa` (scissors writes to `~/.config/nvim/snippet
 
 ### Angular / TypeScript (filetype `typescript`)
 
-Custom prefixes — Freelancer-style components default to `standalone: false`, `OnPush`, `inject()` (matches `webapp/` codebase).
+Custom prefixes — GAF webapp components default to `standalone: false`, `OnPush`, `inject()` (matches `webapp/` codebase).
 
 | Trigger | Expands to |
 |---|---|

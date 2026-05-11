@@ -87,6 +87,13 @@ return {
             },
           },
         },
+        on_attach = function(client, _)
+          -- Disable prepareRename: intelephense's prepare range is unreliable on `$var`.
+          -- Raw rename request (see <leader>cr in keymaps.lua) handles position correctly.
+          if client.server_capabilities.renameProvider then
+            client.server_capabilities.renameProvider = { prepareProvider = false }
+          end
+        end,
       })
 
       -- JSON LSP with SchemaStore catalog (package.json, tsconfig, composer.json, GH Actions, ...)
