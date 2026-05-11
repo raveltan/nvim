@@ -3,17 +3,9 @@ return {
     "nvim-treesitter/nvim-treesitter",
     lazy = false,
     build = ":TSUpdate",
-    init = function()
-      -- Register blade filetype early so FileType autocmds fire correctly
-      vim.filetype.add({
-        pattern = {
-          [".*%.blade%.php"] = "blade",
-        },
-      })
-    end,
     config = function()
       require("nvim-treesitter").install({
-        "bash", "blade", "css", "eruby", "html", "javascript", "json", "lua",
+        "bash", "css", "eruby", "html", "javascript", "json", "lua",
         "markdown", "markdown_inline", "php", "php_only", "python", "regex",
         "ruby", "tsx", "typescript", "vim", "vimdoc", "yaml",
       })
@@ -21,7 +13,7 @@ return {
       -- Filetypes whose runtime indent/<ft>.{vim,lua} beats treesitter's indents.scm.
       -- ruby/eruby: built-in GetRubyIndent handles continuations, hanging args,
       -- method chains, when/elsif, hash rockets — treesitter's query is minimal.
-      local skip_ts_indent = { blade = true, ruby = true, eruby = true }
+      local skip_ts_indent = { ruby = true, eruby = true }
 
       -- Enable treesitter highlighting and indentation for buffers with an available parser
       vim.api.nvim_create_autocmd("FileType", {

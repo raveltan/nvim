@@ -348,7 +348,6 @@ return {
         { "<leader>r",  group = "rails" },
         { "<leader>R",  group = "refactor" },
         { "<leader>S",  group = "snippets" },
-        { "<leader>l",  group = "laravel" },
         { "<leader>H",  group = "hurl" },
         { "<leader>a",  group = "ai/claude" },
         { "<leader>D",  group = "database" },

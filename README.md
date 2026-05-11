@@ -1,6 +1,6 @@
 # Neovim Configuration
 
-A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.com/folke/lazy.nvim). Optimized for polyglot development across TypeScript/Angular, PHP/Laravel, Ruby on Rails, and Python, with first-class support for the GAF monorepo (`fl-gaf`) and Phabricator workflows.
+A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.com/folke/lazy.nvim). Optimized for polyglot development across TypeScript/Angular, PHP, Ruby on Rails, and Python, with first-class support for the GAF monorepo (`fl-gaf`) and Phabricator workflows.
 
 > Looking for the keybind cheatsheet? See [`docs/keybinds.md`](docs/keybinds.md).
 
@@ -46,7 +46,7 @@ A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.co
 - DAP adapters: `debugpy` (Python), `vscode-php-debug` (PHP)
 
 **Tools you must install yourself**
-- `stylua`, `prettierd` / `prettier`, `php-cs-fixer` / `pint`, `blade-formatter` (formatters)
+- `stylua`, `prettierd` / `prettier`, `php-cs-fixer` (formatters)
 - `phpcs`, `phpstan` (linters — GAF monorepo only)
 - `rubocop` (gem), `erb-formatter` gem (provides `erb_format`), `@herb-tools/language-server` (npm) for Rails ERB
 - `mmdc`, `d2`, `plantuml`, `gnuplot`, `imagemagick` (diagram rendering, optional)
@@ -93,12 +93,10 @@ Lockfile: [`lazy-lock.json`](lazy-lock.json) pins **106 plugins**. Use `:Lazy sy
 │   │   ├── dap.lua               # Debugger
 │   │   ├── git.lua               # gitsigns, diffview, git-conflict
 │   │   ├── test.lua              # neotest + adapters
-│   │   ├── laravel.lua           # Laravel-specific
 │   │   ├── ror.lua               # Rails-specific
 │   │   ├── other.lua             # other.nvim — related-file navigation
 │   │   └── diagram.lua           # mermaid/d2/plantuml inline render
 │   └── overseer/template/user/   # Custom overseer task templates (auto-discovered)
-├── queries/php/injections.scm    # Treesitter: inject Blade into Livewire PHP files
 ├── scripts/neotest-run-tests.sh  # PHPUnit wrapper for fl-gaf Docker test infra
 └── docs/keybinds.md              # 150+ keybind cheatsheet
 ```
@@ -163,7 +161,6 @@ Leader-prefixed groups (registered with `which-key`):
 | `<leader>h` | **H**arpoon | `ha` add, `hh` toggle |
 | `<leader>H` | **H**url (REST) | `Ha` run all, `Hs` at cursor |
 | `<leader>i` | **I**ron (REPL) | `is` toggle, `ic` send motion, `iv` send visual |
-| `<leader>l` | **L**aravel | `ll` picker, `la` artisan, `lr` routes |
 | `<leader>m` | **M**ulticursor | `mn` next, `ma` all matches |
 | `<leader>n` | Tree**w**alker | `nk/nj/nh/nl` AST up/down/parent/child |
 | `<leader>o` | **O**verseer | `or` run, `oc` shell command, `ot` toggle list |
@@ -210,7 +207,7 @@ Full reference: [`docs/keybinds.md`](docs/keybinds.md).
 - Diagnostics: `virtual_text` off (handled by `tiny-inline-diagnostic`); custom signs `✘ ⚠ ℹ ⚡`
 
 ### Formatting & Linting — `formatting.lua`
-- `conform.nvim`: `stylua` (Lua), `prettierd`/`prettier` (JS/TS), `php-cs-fixer`/`pint` (PHP), `blade-formatter` (Blade), `ruff_organize_imports` + `ruff_format` (Python)
+- `conform.nvim`: `stylua` (Lua), `prettierd`/`prettier` (JS/TS), `php-cs-fixer` (PHP), `ruff_organize_imports` + `ruff_format` (Python)
 - `nvim-lint`: PHP `phpcs` + `phpstan` — **only enabled inside the GAF monorepo**, with project-specific configs (`phpcs_gaf.xml`, `phpstan.neon`)
 - Format-on-save: enabled (3s timeout, LSP fallback). Toggle with `<leader>uf`.
 
@@ -224,7 +221,7 @@ Full reference: [`docs/keybinds.md`](docs/keybinds.md).
 Single plugin enabling: `picker`, `terminal`, `lazygit`, `dashboard` (preset), `notifier`, `indent` (animated), `bigfile`, `quickfile`, `scope`, `words`, `rename`, `image`, `statuscolumn`, `input`. Provides `<leader><leader>` files, `<leader>fr` recent, `<leader>sg` grep, `<leader>gg` lazygit, plus all LSP go-to pickers (`gd`/`gr`/`gI`/`gy`).
 
 ### Treesitter — `treesitter.lua`
-Parsers: `bash`, `blade`, `css`, `eruby`, `html`, `javascript`, `json`, `lua`, `markdown`, `markdown_inline`, `php`, `php_only`, `python`, `regex`, `ruby`, `tsx`, `typescript`, `vim`, `vimdoc`, `yaml`. Plus `nvim-treesitter-context` (3-line sticky header), `nvim-treesitter-textobjects` (`af`/`if`/`ac`/`ic`/`aa`/`ia`), and `nvim-ts-autotag`. Indent uses treesitter except for `blade`, `ruby`, `eruby` (deferred to built-in indent).
+Parsers: `bash`, `css`, `eruby`, `html`, `javascript`, `json`, `lua`, `markdown`, `markdown_inline`, `php`, `php_only`, `python`, `regex`, `ruby`, `tsx`, `typescript`, `vim`, `vimdoc`, `yaml`. Plus `nvim-treesitter-context` (3-line sticky header), `nvim-treesitter-textobjects` (`af`/`if`/`ac`/`ic`/`aa`/`ia`), and `nvim-ts-autotag`. Indent uses treesitter except for `ruby`, `eruby` (deferred to built-in indent).
 
 ### Productivity — `productivity.lua`
 - `typescript-tools.nvim` — TS LSP with custom code actions (`<leader>co` organize, `<leader>cM` add missing imports, `<leader>cU` remove unused, `<leader>cF` fix all)
@@ -264,7 +261,6 @@ UI test runners (fl-gaf webapp) — eight Overseer templates in [`lua/overseer/t
 - Set `DEVTOOLS=true` for devtools variants (read by `webapp/projects/ui-tests-common/karma.conf.cjs`).
 
 ### Framework-specific
-- `laravel.lua` — `laravel.nvim` + `blade-nav.nvim` (`gf` on Blade includes/components/routes). Activates only when `artisan` exists at root.
 - `ror.lua` — `ror.nvim`, `vim-projectionist` (Rails heuristics), `vim-endwise`, **Herb LSP** (HTML+ERB language server, auto-enabled when `herb-language-server` on `$PATH`). Activates on `Gemfile` + `config/environment.rb`.
 - `other.lua` — pattern-based related-file navigation (`<leader>oo`/`os`/`ov`) with 50+ Rails patterns, PHP `src/`/`src2/` patterns, and Angular component/datastore patterns.
 - `diagram.lua` — Mermaid/PlantUML/D2/Gnuplot inline rendering via Kitty + ImageMagick.
@@ -324,14 +320,7 @@ If the parser needs custom indent handling, add the filetype to `skip_ts_indent`
 
 ### Add a treesitter injection
 
-Place a `.scm` file under `queries/<lang>/injections.scm`. See [`queries/php/injections.scm`](queries/php/injections.scm) for the Blade-into-Livewire example.
-
-```scm
-; inherits: php_only
-((text) @injection.content
-  (#set! injection.language "blade")
-  (#set! injection.combined))
-```
+Place a `.scm` file under `queries/<lang>/injections.scm`.
 
 ### Add a Snacks picker
 
@@ -466,9 +455,6 @@ Either `<leader>uh` (if bound), or set `enabled = false` in the `hardtime.nvim` 
 ### `lua/overseer/template/user/`
 Custom Overseer task templates, auto-discovered. Currently 9 templates: 8 fl-gaf UI test variants (`ui_test_*.lua`) plus `fli_provision.lua`. Each file returns a table with `name`, `builder()`, `params`, and `condition.callback`. The UI test templates share builder logic via [`lua/config/ui_test.lua`](lua/config/ui_test.lua) — `resolve_webapp_cwd()` walks up from cwd to find the `webapp/` directory so the templates work from any nvim cwd. Invoke via `<leader>or`.
 
-### `queries/php/injections.scm`
-Treesitter injection: highlights post-`?>` content of Livewire single-file PHP components as Blade. Add more injection rules by appending `((text) @injection.content (#set! injection.language "..."))` patterns or by adding `queries/<lang>/injections.scm` for other languages.
-
 ### `scripts/neotest-run-tests.sh`
 PHPUnit wrapper for fl-gaf. Delegates to `bin/run-tests` (so namespacing via `GAF_TEST_WORKER_ID` and session-file lookup are handled upstream). Two transformations:
 1. `--filter` value: spaces become `\s` (PCRE-equivalent) — survives `bin/run-tests`' `read -r -a flag_args <<< "$1"` word-split.
@@ -490,14 +476,11 @@ This config detects a few project layouts and adjusts behavior automatically:
 
 **GAF monorepo (`fl-gaf`)** — detected via path containing `freelancer-dev/fl-gaf`:
 - PHP linters (`phpcs`, `phpstan`) enable with project configs (`phpcs_gaf.xml`, `phpstan.neon`)
-- `php-cs-fixer` used instead of `pint`
 - `basedpyright` adds `extraPaths` for `libgafthrift` and `restutils`
 - `neotest-phpunit` routes through `bin/run-tests` Docker wrapper
 - Custom UI test adapter activates for `webapp/projects/*/ui-tests/src/*.spec.ts`
 
 **Phabricator** — `gx` on a `D####` or `T####` token opens `https://phabricator.tools.flnltd.com/<token>`.
-
-**Laravel** — `laravel.nvim` activates only when `artisan` is in the project root.
 
 **Rails** — `ror.nvim` + projectionist activate on `Gemfile` + `config/environment.rb`. REPL auto-prefers `bin/rails console` → `pry` → `irb`.
 

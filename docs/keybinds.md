@@ -267,20 +267,6 @@ Leader key: `<space>`. Modes: `n` normal, `i` insert, `v` visual, `x` visual-blo
 |-----|------|-------------|
 | `<esc><esc>` | t | Exit terminal mode |
 
-## Laravel (PHP projects with `artisan`)
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>ll` | n | Laravel picker |
-| `<leader>la` | n | Artisan |
-| `<leader>lr` | n | Routes |
-| `<leader>lR` | n | Related files |
-| `<leader>lm` | n | Make (scaffold) |
-| `<leader>lc` | n | Commands |
-| `<leader>lo` | n | Resources |
-| `<leader>lv` | n | View finder |
-| `<leader>lp` | n | Command center |
-
 ## REST / HTTP (kulala)
 
 | Key | Mode | Description |
@@ -307,7 +293,7 @@ Leader key: `<space>`. Modes: `n` normal, `i` insert, `v` visual, `x` visual-blo
 
 ## Which-key groups
 
-`<leader>f` find · `<leader>s` search · `<leader>g` git · `<leader>gh` hunks · `<leader>b` buffer · `<leader>q` quit/session · `<leader>t` todo · `<leader>u` ui · `<leader>x` diagnostics · `<leader>c` code · `<leader>cs` swap · `<leader>d` debug · `<leader>T` test · `<leader>h` harpoon · `<leader>m` multicursor · `<leader>o` overseer · `<leader>r` refactor · `<leader>S` snippets · `<leader>l` laravel · `<leader>R` rest · `g` goto · `gs` surround
+`<leader>f` find · `<leader>s` search · `<leader>g` git · `<leader>gh` hunks · `<leader>b` buffer · `<leader>q` quit/session · `<leader>t` todo · `<leader>u` ui · `<leader>x` diagnostics · `<leader>c` code · `<leader>cs` swap · `<leader>d` debug · `<leader>T` test · `<leader>h` harpoon · `<leader>m` multicursor · `<leader>o` overseer · `<leader>r` refactor · `<leader>S` snippets · `<leader>R` rest · `g` goto · `gs` surround
 
 ## Overlaps to be aware of
 

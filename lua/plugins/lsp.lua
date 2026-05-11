@@ -77,13 +77,13 @@ return {
       -- Intelephense (PHP) — replaces phpantom
       vim.lsp.config("intelephense", {
         capabilities = capabilities,
-        filetypes = { "php", "blade" },
+        filetypes = { "php" },
         root_markers = { "composer.json", ".git" },
         settings = {
           intelephense = {
             files = {
               maxSize = 5000000,
-              associations = { "*.php", "*.blade.php" },
+              associations = { "*.php" },
             },
           },
         },
@@ -118,15 +118,12 @@ return {
         },
       })
 
-      -- Tailwind CSS (used with Livewire/Blade views)
+      -- Tailwind CSS
       vim.lsp.config("tailwindcss", {
         capabilities = capabilities,
-        filetypes = { "html", "css", "blade", "php", "javascript", "typescript", "javascriptreact", "typescriptreact" },
+        filetypes = { "html", "css", "javascript", "typescript", "javascriptreact", "typescriptreact" },
         settings = {
           tailwindCSS = {
-            includeLanguages = {
-              blade = "html",
-            },
             experimental = {
               classRegex = {
                 { "@apply\\s+([^;]*)", "" },
@@ -136,7 +133,7 @@ return {
         },
       })
 
-      -- HTML LSP — extended to blade/php; let blade-formatter own formatting.
+      -- HTML LSP.
       -- autoClosingTags disabled: nvim-ts-autotag already handles close-tag insertion;
       -- leaving this on causes duplicate `</tag>` (one from autotag, one from LSP completion).
       vim.lsp.config("html", {
@@ -154,9 +151,7 @@ return {
         },
       })
 
-      -- CSS LSP — only on pure CSS files. Do NOT attach to blade: cssls treats
-      -- the whole buffer as CSS, polluting completions and breaking formatting.
-      -- Embedded <style> blocks in blade get syntax highlighting via treesitter injections.
+      -- CSS LSP — only on pure CSS files.
       vim.lsp.config("cssls", {
         capabilities = capabilities,
         filetypes = { "css", "scss", "less" },
@@ -310,14 +305,9 @@ return {
       },
       signature = { enabled = true },
       sources = {
-        default = { "lsp", "path", "snippets", "buffer", "blade-nav" },
-        per_filetype = {
-          blade = { "blade-nav", "lsp", "path", "snippets", "buffer" },
-          php = { "blade-nav", "lsp", "path", "snippets", "buffer" },
-        },
+        default = { "lsp", "path", "snippets", "buffer" },
         providers = {
           lsp = { max_items = 50 },
-          ["blade-nav"] = { module = "blade-nav.blink", name = "blade-nav" },
         },
       },
       fuzzy = { implementation = "prefer_rust" },
