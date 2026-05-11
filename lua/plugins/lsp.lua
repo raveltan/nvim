@@ -251,12 +251,32 @@ return {
     },
   },
 
+  -- Snippet engine
+  {
+    "L3MON4D3/LuaSnip",
+    version = "v2.*",
+    build = "make install_jsregexp",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    config = function()
+      local ls = require("luasnip")
+      ls.config.setup({
+        history = true,
+        updateevents = "TextChanged,TextChangedI",
+        enable_autosnippets = false,
+      })
+      require("luasnip.loaders.from_vscode").lazy_load()
+      require("luasnip.loaders.from_vscode").lazy_load({
+        paths = { vim.fn.stdpath("config") .. "/snippets" },
+      })
+    end,
+  },
+
   -- Autocomplete
   {
     "saghen/blink.cmp",
     event = "InsertEnter",
     version = "1.*",
-    dependencies = { "rafamadriz/friendly-snippets" },
+    dependencies = { "rafamadriz/friendly-snippets", "L3MON4D3/LuaSnip" },
     ---@type blink.cmp.Config
     opts = {
       enabled = function()
@@ -283,18 +303,7 @@ return {
         },
       },
       appearance = { nerd_font_variant = "mono" },
-      snippets = {
-        -- Wrap snippet expansion to gracefully handle broken snippets (e.g. blade loop first/last)
-        expand = function(snippet)
-          local ok, err = pcall(vim.snippet.expand, snippet)
-          if not ok then
-            -- Fall back to inserting the snippet as plain text
-            vim.notify("Snippet parse error: " .. tostring(err), vim.log.levels.WARN)
-            local cursor = vim.api.nvim_win_get_cursor(0)
-            vim.api.nvim_put({ snippet }, "c", true, true)
-          end
-        end,
-      },
+      snippets = { preset = "luasnip" },
       completion = {
         accept = { resolve_timeout_ms = 500 },
         documentation = { auto_show = true },
@@ -309,14 +318,6 @@ return {
         providers = {
           lsp = { max_items = 50 },
           ["blade-nav"] = { module = "blade-nav.blink", name = "blade-nav" },
-          snippets = {
-            opts = {
-              search_paths = {
-                vim.fn.stdpath("data") .. "/lazy/friendly-snippets",
-                vim.fn.stdpath("config") .. "/snippets",
-              },
-            },
-          },
         },
       },
       fuzzy = { implementation = "prefer_rust" },

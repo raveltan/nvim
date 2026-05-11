@@ -197,5 +197,89 @@
     "prefix": "aainput",
     "description": "AA f.input (in form do)",
     "body": ["f.input :${1:attr}${2:, as: :${3:select}, collection: ${4:[]}}$0"]
+  },
+  "ERB cache block": {
+    "prefix": "cacheblock",
+    "description": "fragment cache block",
+    "body": ["<% cache ${1:@item} do %>", "\t$0", "<% end %>"]
+  },
+  "ERB cache collection": {
+    "prefix": "cachecollection",
+    "description": "render partial cached: true",
+    "body": ["<%= render partial: '${1:item}', collection: ${2:@items}, cached: true %>$0"]
+  },
+  "ERB Pundit policy if": {
+    "prefix": "policyif",
+    "description": "policy().action? guard",
+    "body": ["<% if policy(${1:@item}).${2:edit?} %>", "\t$0", "<% end %>"]
+  },
+  "ERB t lazy": {
+    "prefix": "tlazyerb",
+    "description": "<%= t('.key') %>",
+    "body": ["<%= t('.${1:key}') %>$0"]
+  },
+  "ERB errors_for": {
+    "prefix": "errorsfor",
+    "description": "errors full_messages list",
+    "body": [
+      "<% if ${1:@record}.errors.any? %>",
+      "\t<ul>",
+      "\t\t<% ${1}.errors.full_messages.each do |m| %>",
+      "\t\t\t<li><%= m %></li>",
+      "\t\t<% end %>",
+      "\t</ul>",
+      "<% end %>$0"
+    ]
+  },
+  "ERB time_ago_in_words": {
+    "prefix": "timeago",
+    "description": "time_ago_in_words",
+    "body": ["<%= time_ago_in_words(${1:@item}.created_at) %> ago$0"]
+  },
+  "ERB link_to_if": {
+    "prefix": "linktoif",
+    "description": "link_to_if",
+    "body": ["<%= link_to_if ${1:condition}, '${2:Label}', ${3:path} %>$0"]
+  },
+  "ERB safe_join": {
+    "prefix": "safejoin",
+    "description": "safe_join",
+    "body": ["<%= safe_join(${1:items}, '${2:, }') %>$0"]
+  },
+  "ERB simple_format": {
+    "prefix": "simpleformat",
+    "description": "simple_format",
+    "body": ["<%= simple_format(${1:text}) %>$0"]
+  },
+  "ERB number_to_currency": {
+    "prefix": "numbercurrency",
+    "description": "number_to_currency",
+    "body": ["<%= number_to_currency(${1:value}) %>$0"]
+  },
+  "ERB Ransack search form": {
+    "prefix": "ransackform",
+    "description": "search_form_for @q",
+    "body": [
+      "<%= search_form_for @q do |f| %>",
+      "\t<%= f.label :${1:attr}_cont %>",
+      "\t<%= f.search_field :${1}_cont %>",
+      "\t<%= f.submit %>",
+      "<% end %>$0"
+    ]
+  },
+  "ERB pagy nav": {
+    "prefix": "pagynav",
+    "description": "pagy_nav helper",
+    "body": ["<%== pagy_nav(@pagy) %>$0"]
+  },
+  "ERB kaminari paginate": {
+    "prefix": "kaminarinav",
+    "description": "<%= paginate %>",
+    "body": ["<%= paginate ${1:@records} %>$0"]
+  },
+  "ERB ViewComponent render": {
+    "prefix": "vcrendererb",
+    "description": "<%= render XComponent.new %>",
+    "body": ["<%= render(${1:Name}Component.new(${2:args})) %>$0"]
   }
 }
