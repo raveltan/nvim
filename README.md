@@ -49,6 +49,9 @@ A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.co
 - `stylua`, `prettierd` / `prettier`, `php-cs-fixer` (formatters)
 - `phpcs`, `phpstan` (linters — GAF monorepo only)
 - `rubocop` (gem), `erb-formatter` gem (provides `erb_format`), `@herb-tools/language-server` (npm) for Rails ERB
+- `stimulus-language-server` (npm, optional) — Hotwire Stimulus LSP; auto-enabled when on `$PATH`
+- `debug` gem (Ruby ≥3.1 bundles it) — for nvim-dap-ruby. Run app with `RUBY_DEBUG_OPEN=true`
+- `simplecov` gem (optional) — produces `coverage/.resultset.json` for `nvim-coverage`
 - `mmdc`, `d2`, `plantuml`, `gnuplot`, `imagemagick` (diagram rendering, optional)
 
 ---
@@ -62,7 +65,7 @@ nvim
 
 On first launch, lazy.nvim bootstraps itself, installs all plugins from `lua/plugins/*.lua`, and triggers Mason to fetch language servers. Restart once installs complete.
 
-Lockfile: [`lazy-lock.json`](lazy-lock.json) pins **106 plugins**. Use `:Lazy sync` to update; commit the lockfile after.
+Lockfile: [`lazy-lock.json`](lazy-lock.json) pins **~112 plugins**. Use `:Lazy sync` to update; commit the lockfile after.
 
 ---
 
@@ -165,7 +168,7 @@ Leader-prefixed groups (registered with `which-key`):
 | `<leader>n` | Tree**w**alker | `nk/nj/nh/nl` AST up/down/parent/child |
 | `<leader>o` | **O**verseer | `or` run, `oc` shell command, `ot` toggle list |
 | `<leader>q` | **Q**uit / Session | `qq` quit all, `qs` restore session |
-| `<leader>r` | **R**ails | `rc` commands, `rg` generate, `rs` schema, `rC` console |
+| `<leader>r` | **R**ails | `rc` commands palette, `rg` generate, `rr` routes, `rs` schema, `rm` migrate, `rk` rollback, `rb` bundle install, `rC` console, `re` credentials:edit |
 | `<leader>R` | **R**efactor | `Re` extract function, `Rv` extract var |
 | `<leader>s` | **S**earch | `sg` grep, `sw` grep word, `ss` symbols, `sr` find/replace |
 | `<leader>S` | **S**nippets | `Se` edit, `Sa` add |
@@ -261,7 +264,7 @@ UI test runners (fl-gaf webapp) — eight Overseer templates in [`lua/overseer/t
 - Set `DEVTOOLS=true` for devtools variants (read by `webapp/projects/ui-tests-common/karma.conf.cjs`).
 
 ### Framework-specific
-- `ror.lua` — `ror.nvim`, `vim-projectionist` (Rails heuristics), `vim-endwise`, **Herb LSP** (HTML+ERB language server, auto-enabled when `herb-language-server` on `$PATH`). Activates on `Gemfile` + `config/environment.rb`.
+- `ror.lua` — `ror.nvim` (Rails task palette `<leader>r*`), `vim-projectionist` (Rails heuristics — `:A`, `:Emodel`/`Econtroller`/`Eview`/`Espec`), `vim-endwise`, **`tpope/vim-rails`** (`:Rextract`, `:Rinvert`, context-aware `gf` on partials/fixtures/factories, Rails syntax), **Herb LSP** (HTML+ERB, auto-enabled when `herb-language-server` on `$PATH`), **Stimulus LSP** (auto-enabled when `stimulus-language-server` on `$PATH`), **ruby-lsp CodeLens handler** (`rubyLsp.openFile` — route↔action↔view jumps), **`suketa/nvim-dap-ruby`** (rdbg adapter — use existing `<leader>d*` DAP keys), **`andythigpen/nvim-coverage`** (SimpleCov gutter signs via `:Coverage*` commands). Activates on `Gemfile` + `config/environment.rb`.
 - `other.lua` — pattern-based related-file navigation (`<leader>oo`/`os`/`ov`) with 50+ Rails patterns, PHP `src/`/`src2/` patterns, and Angular component/datastore patterns.
 - `diagram.lua` — Mermaid/PlantUML/D2/Gnuplot inline rendering via Kitty + ImageMagick.
 
@@ -466,7 +469,7 @@ Test path is canonicalized via `realpath` and stripped to project-relative (`bin
 Hand-maintained 150+ keybinding cheatsheet, grouped by category, with a `Source` column linking each binding back to the file that defines it. Update this when you add or move keymaps.
 
 ### `lazy-lock.json`
-Plugin lockfile pinning all 106 plugins. Always commit after `:Lazy sync`.
+Plugin lockfile pinning all ~112 plugins. Always commit after `:Lazy sync`.
 
 ---
 
@@ -482,7 +485,7 @@ This config detects a few project layouts and adjusts behavior automatically:
 
 **Phabricator** — `gx` on a `D####` or `T####` token opens `https://phabricator.tools.flnltd.com/<token>`.
 
-**Rails** — `ror.nvim` + projectionist activate on `Gemfile` + `config/environment.rb`. REPL auto-prefers `bin/rails console` → `pry` → `irb`.
+**Rails** — `ror.nvim` + projectionist + vim-rails activate on `Gemfile` + `config/environment.rb`. REPL auto-prefers `bin/rails console` → `pry` → `irb`. ruby_lsp emits CodeLens above controller actions (route → action, action → view); clicking them invokes the `rubyLsp.openFile` handler wired in `ror.lua`. Debug via nvim-dap-ruby — start Rails with `RUBY_DEBUG_OPEN=true bin/rails s`, then attach via `<leader>dc`. Coverage gutter signs via `:CoverageLoad` then `:CoverageShow` (needs SimpleCov + JSON formatter).
 
 To remove project-specific behavior, search the codebase for `freelancer-dev` / `flnltd` and either remove or replace the gates.
 

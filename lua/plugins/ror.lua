@@ -101,8 +101,56 @@ return {
         end,
       })
       vim.lsp.enable("sorbet")
+
+      -- Stimulus LSP (Hotwired). Completion + go-to-definition for
+      -- data-controller / data-action / data-*-target. Requires:
+      --   npm i -g stimulus-language-server
+      if vim.fn.executable("stimulus-language-server") == 1 then
+        vim.lsp.config("stimulus_ls", {
+          capabilities = capabilities,
+          cmd = { "stimulus-language-server", "--stdio" },
+          filetypes = { "eruby", "html", "ruby" },
+          root_markers = { "Gemfile", ".git" },
+        })
+        vim.lsp.enable("stimulus_ls")
+      end
+
+      -- ruby_lsp CodeLens: handle rubyLsp.openFile execute_command requests
+      -- so route → controller action and action → view links work.
+      vim.lsp.commands["rubyLsp.openFile"] = function(cmd)
+        local uri = cmd.arguments and cmd.arguments[1]
+        if not uri then return end
+        if type(uri) == "table" then uri = uri[1] end
+        vim.cmd("edit " .. vim.uri_to_fname(uri))
+      end
     end,
   },
+
+  -- tpope/vim-rails: :Rextract, :Rinvert, context-aware `gf` on partials/
+  -- fixtures/factories, Rails syntax tweaks. Coexists with projectionist.
+  {
+    "tpope/vim-rails",
+    ft = { "ruby", "eruby" },
+  },
+
+  -- DAP adapter for rdbg / Ruby debug gem (Ruby 3.1+ ships it).
+  -- Launch Rails with: RUBY_DEBUG_OPEN=true bin/rails s, then <leader>dc attach.
+  {
+    "suketa/nvim-dap-ruby",
+    ft = "ruby",
+    dependencies = { "mfussenegger/nvim-dap" },
+    config = function() require("dap-ruby").setup() end,
+  },
+
+  -- SimpleCov gutter signs + summary buffer. Reads coverage/.resultset.json.
+  {
+    "andythigpen/nvim-coverage",
+    ft = { "ruby", "eruby" },
+    dependencies = { "nvim-lua/plenary.nvim" },
+    cmd = { "Coverage", "CoverageLoad", "CoverageShow", "CoverageHide", "CoverageToggle", "CoverageSummary" },
+    opts = { auto_reload = true },
+  },
+
 
   -- Ruby/ERB formatters
   {
