@@ -78,7 +78,7 @@ return {
   -- Fugitive: line history, interactive blame, GBrowse permalinks
   {
     "tpope/vim-fugitive",
-    cmd = { "Git", "G", "Gclog", "Gdiffsplit", "Gedit", "Gread", "Gwrite" },
+    cmd = { "Git", "G", "Gclog", "Gdiffsplit", "Gedit", "Gread", "Gwrite", "Ggrep" },
     keys = {
       {
         "<leader>gl",
@@ -98,6 +98,9 @@ return {
         desc = "Range history",
       },
       { "<leader>gB", "<cmd>Git blame<cr>", desc = "Blame interactive" },
+      { "<leader>g/", function() require("util.ggrep").prompt() end, desc = "Git grep (prompt)" },
+      { "<leader>g*", function() require("util.ggrep").cword() end, desc = "Git grep word under cursor" },
+      { "<leader>g/", function() require("util.ggrep").visual() end, mode = "v", desc = "Git grep selection" },
     },
   },
 }
