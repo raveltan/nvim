@@ -25,6 +25,29 @@ map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
 map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
 map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
+-- Window resize submode: press <leader>wr, then h/j/k/l (shift = bigger step), = to equalize, Esc/q to exit
+local function resize_submode()
+  local hint = "-- RESIZE -- h/l: width  j/k: height  H/J/K/L: x5  =: equal  q/<Esc>: quit"
+  while true do
+    vim.cmd("redraw")
+    vim.api.nvim_echo({ { hint, "ModeMsg" } }, false, {})
+    local ok, c = pcall(vim.fn.getcharstr)
+    if not ok then break end
+    if c == "h" then vim.cmd("vertical resize -2")
+    elseif c == "l" then vim.cmd("vertical resize +2")
+    elseif c == "j" then vim.cmd("resize -2")
+    elseif c == "k" then vim.cmd("resize +2")
+    elseif c == "H" then vim.cmd("vertical resize -10")
+    elseif c == "L" then vim.cmd("vertical resize +10")
+    elseif c == "J" then vim.cmd("resize -10")
+    elseif c == "K" then vim.cmd("resize +10")
+    elseif c == "=" then vim.cmd("wincmd =")
+    else break end
+  end
+  vim.api.nvim_echo({ { "" } }, false, {})
+end
+map("n", "<leader>wr", resize_submode, { desc = "Resize submode (hjkl)" })
+
 -- Clear search highlights
 map("n", "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear highlights" })
 
