@@ -132,6 +132,28 @@
       "end"
     ]
   },
+  "Params nested attributes": {
+    "prefix": "paramsnested",
+    "description": "permit nested attributes",
+    "body": [
+      "params.require(:${1:resource}).permit(${2:name}, ${3:items}_attributes: %i[id ${4:name} _destroy])$0"
+    ]
+  },
+  "Params array": {
+    "prefix": "paramsarray",
+    "description": "permit array attr",
+    "body": ["params.require(:${1:resource}).permit(${2:tags}: [])$0"]
+  },
+  "Params hash": {
+    "prefix": "paramshash",
+    "description": "permit hash attr",
+    "body": ["params.require(:${1:resource}).permit(${2:meta}: {})$0"]
+  },
+  "Params dig": {
+    "prefix": "paramsdig",
+    "description": "params.dig",
+    "body": ["params.dig(:${1:key}, :${2:sub})$0"]
+  },
   "before_action only": {
     "prefix": "baction",
     "description": "before_action only %i[]",
@@ -149,6 +171,168 @@
       "rescue_from ${1:ActiveRecord::RecordNotFound} do |${2:e}|",
       "\t$0",
       "end"
+    ]
+  },
+  "Error handler bundle": {
+    "prefix": "errorhandler",
+    "description": "ApplicationController rescue_from bundle",
+    "body": [
+      "rescue_from ActiveRecord::RecordNotFound, with: :not_found",
+      "rescue_from ActionController::ParameterMissing, with: :bad_request",
+      "rescue_from ActiveRecord::RecordInvalid, with: :unprocessable",
+      "",
+      "private",
+      "",
+      "def not_found(e)",
+      "\trender json: { error: e.message }, status: :not_found",
+      "end",
+      "",
+      "def bad_request(e)",
+      "\trender json: { error: e.message }, status: :bad_request",
+      "end",
+      "",
+      "def unprocessable(e)",
+      "\trender json: { errors: e.record.errors }, status: :unprocessable_entity",
+      "end$0"
+    ]
+  },
+  "Rate limit (Rails 8)": {
+    "prefix": "ratelimit",
+    "description": "Rails 8 rate_limit",
+    "body": [
+      "rate_limit to: ${1:10}, within: ${2:3.minutes}, only: %i[${3:create}], with: -> { ${4:head :too_many_requests} }$0"
+    ]
+  },
+  "Rack::Attack throttle": {
+    "prefix": "rackattackthrottle",
+    "description": "Rack::Attack throttle req/ip",
+    "body": [
+      "Rack::Attack.throttle('${1:req/ip}', limit: ${2:60}, period: ${3:1.minute}) do |req|",
+      "\treq.ip${4: if req.path.start_with?('/api')}",
+      "end$0"
+    ]
+  },
+  "Respond to formats": {
+    "prefix": "respondto",
+    "description": "respond_to do |format|",
+    "body": [
+      "respond_to do |format|",
+      "\tformat.html { ${1:redirect_to @record} }",
+      "\tformat.json { ${2:render json: @record} }",
+      "\tformat.turbo_stream$0",
+      "end"
+    ]
+  },
+  "Set locale": {
+    "prefix": "setlocale",
+    "description": "around_action set_locale",
+    "body": [
+      "around_action :set_locale",
+      "",
+      "def set_locale(&)",
+      "\tI18n.with_locale(params[:locale] || I18n.default_locale, &)",
+      "end$0"
+    ]
+  },
+  "HTTP token auth": {
+    "prefix": "httptoken",
+    "description": "authenticate_or_request_with_http_token",
+    "body": [
+      "before_action :authenticate",
+      "",
+      "private",
+      "",
+      "def authenticate",
+      "\tauthenticate_or_request_with_http_token do |token, _opts|",
+      "\t\tActiveSupport::SecurityUtils.secure_compare(token, ENV.fetch('API_TOKEN'))",
+      "\tend",
+      "end$0"
+    ]
+  },
+  "API key header": {
+    "prefix": "apikey",
+    "description": "X-API-Key header check",
+    "body": [
+      "before_action :verify_api_key",
+      "",
+      "private",
+      "",
+      "def verify_api_key",
+      "\tprovided = request.headers['X-API-Key'].to_s",
+      "\texpected = ENV.fetch('API_KEY')",
+      "\thead :unauthorized unless ActiveSupport::SecurityUtils.secure_compare(provided, expected)",
+      "end$0"
+    ]
+  },
+  "JWT encode": {
+    "prefix": "jwtencode",
+    "description": "JWT.encode helper",
+    "body": [
+      "def encode_token(payload, exp: ${1:24.hours.from_now})",
+      "\tJWT.encode(payload.merge(exp: exp.to_i), Rails.application.secret_key_base, '${2:HS256}')",
+      "end$0"
+    ]
+  },
+  "JWT decode": {
+    "prefix": "jwtdecode",
+    "description": "JWT.decode helper",
+    "body": [
+      "def decode_token(token)",
+      "\tJWT.decode(token, Rails.application.secret_key_base, true, algorithm: '${1:HS256}').first",
+      "rescue JWT::DecodeError",
+      "\tnil",
+      "end$0"
+    ]
+  },
+  "HMAC webhook verify": {
+    "prefix": "hmacverify",
+    "description": "Verify webhook HMAC signature",
+    "body": [
+      "def verify_webhook!",
+      "\tsignature = request.headers['${1:X-Signature}'].to_s",
+      "\tpayload = request.raw_post",
+      "\texpected = OpenSSL::HMAC.hexdigest('SHA256', ENV.fetch('${2:WEBHOOK_SECRET}'), payload)",
+      "\thead :unauthorized unless ActiveSupport::SecurityUtils.secure_compare(signature, expected)",
+      "end$0"
+    ]
+  },
+  "Idempotency key": {
+    "prefix": "idempotency",
+    "description": "Idempotency-Key handler",
+    "body": [
+      "def with_idempotency(&block)",
+      "\tkey = request.headers['Idempotency-Key']",
+      "\treturn block.call if key.blank?",
+      "\tcached = Rails.cache.read([:idem, key])",
+      "\treturn render(json: cached[:body], status: cached[:status]) if cached",
+      "\tresult = block.call",
+      "\tRails.cache.write([:idem, key], { body: response.body, status: response.status }, expires_in: 24.hours)",
+      "\tresult",
+      "end$0"
+    ]
+  },
+  "CORS config": {
+    "prefix": "corsconfig",
+    "description": "Rack::Cors initializer block",
+    "body": [
+      "Rails.application.config.middleware.insert_before 0, Rack::Cors do",
+      "\tallow do",
+      "\t\torigins '${1:*}'",
+      "\t\tresource '*',",
+      "\t\t\theaders: :any,",
+      "\t\t\tmethods: %i[get post put patch delete options head],",
+      "\t\t\texpose: %w[Authorization]",
+      "\tend",
+      "end$0"
+    ]
+  },
+  "Health check": {
+    "prefix": "health",
+    "description": "Health controller action",
+    "body": [
+      "def show",
+      "\trender json: { status: 'ok', time: Time.current.iso8601 }",
+      "end$0"
     ]
   },
   "Rails Model": {
@@ -193,7 +377,7 @@
     ]
   },
   "delegate": {
-    "prefix": "delegate",
+    "prefix": "rdelegate",
     "description": "delegate to: w/ allow_nil",
     "body": ["delegate :${1:attr}, to: :${2:assoc}, allow_nil: ${3:true}$0"]
   },
@@ -206,6 +390,11 @@
     "prefix": "aftercommit",
     "description": "after_commit on:",
     "body": ["after_commit :${1:method}, on: :${2:create}$0"]
+  },
+  "validates presence": {
+    "prefix": "vapresence",
+    "description": "validates presence",
+    "body": ["validates :${1:attr}, presence: true$0"]
   },
   "validates length": {
     "prefix": "valength",
@@ -233,6 +422,36 @@
     "prefix": "vanum",
     "description": "validates numericality",
     "body": ["validates :${1:attr}, numericality: { ${2:greater_than: 0} }$0"]
+  },
+  "validates confirmation": {
+    "prefix": "vaconfirm",
+    "description": "validates confirmation",
+    "body": ["validates :${1:password}, confirmation: true$0"]
+  },
+  "validates conditional": {
+    "prefix": "vacond",
+    "description": "validates with if/unless lambda",
+    "body": [
+      "validates :${1:attr}, presence: true, if: -> { ${2:condition} }$0"
+    ]
+  },
+  "validates multi attrs": {
+    "prefix": "vamulti",
+    "description": "multi-attr validation",
+    "body": ["validates :${1:a}, :${2:b}, presence: true$0"]
+  },
+  "validate custom method": {
+    "prefix": "vamethod",
+    "description": "validate :method + private impl",
+    "body": [
+      "validate :${1:custom_check}",
+      "",
+      "private",
+      "",
+      "def ${1}",
+      "\terrors.add(:${2:attr}, '${3:is invalid}') if ${4:condition}$0",
+      "end"
+    ]
   },
   "Rails Migration": {
     "prefix": "migration",
@@ -407,6 +626,93 @@
       "end"
     ]
   },
+  "Query object": {
+    "prefix": "queryobject",
+    "description": "Query object PORO",
+    "body": [
+      "class ${1:Name}Query",
+      "\tdef self.call(scope = ${2:Model}.all, **opts)",
+      "\t\tnew(scope, **opts).call",
+      "\tend",
+      "",
+      "\tdef initialize(scope, ${3:filter}: nil)",
+      "\t\t@scope = scope",
+      "\t\t@${3} = ${3}",
+      "\tend",
+      "",
+      "\tdef call",
+      "\t\t@scope$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "Result struct": {
+    "prefix": "result",
+    "description": "Result success/failure struct",
+    "body": [
+      "Result = Struct.new(:success, :value, :error, keyword_init: true) do",
+      "\tdef self.success(value) = new(success: true, value: value)",
+      "\tdef self.failure(error) = new(success: false, error: error)",
+      "\tdef success? = success",
+      "\tdef failure? = !success",
+      "end$0"
+    ]
+  },
+  "Presenter": {
+    "prefix": "presenter",
+    "description": "SimpleDelegator presenter",
+    "body": [
+      "class ${1:Name}Presenter < SimpleDelegator",
+      "\tdef initialize(record, view)",
+      "\t\t@view = view",
+      "\t\tsuper(record)",
+      "\tend",
+      "",
+      "\tattr_reader :view",
+      "",
+      "\tdef ${2:display_name}",
+      "\t\t$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "Memoize": {
+    "prefix": "memoize",
+    "description": "@x ||= compute",
+    "body": ["@${1:value} ||= ${2:compute}$0"]
+  },
+  "Instrument": {
+    "prefix": "instrument",
+    "description": "ActiveSupport::Notifications.instrument",
+    "body": [
+      "ActiveSupport::Notifications.instrument('${1:event}.${2:namespace}', ${3:payload}) do",
+      "\t$0",
+      "end"
+    ]
+  },
+  "Subscribe": {
+    "prefix": "subscribe",
+    "description": "ActiveSupport::Notifications.subscribe",
+    "body": [
+      "ActiveSupport::Notifications.subscribe('${1:event}.${2:namespace}') do |name, start, finish, id, payload|",
+      "\t$0",
+      "end"
+    ]
+  },
+  "Tagged logger": {
+    "prefix": "taggedlog",
+    "description": "Rails.logger.tagged",
+    "body": [
+      "Rails.logger.tagged('${1:tag}') do",
+      "\t$0",
+      "end"
+    ]
+  },
+  "Frozen string literal": {
+    "prefix": "magic",
+    "description": "frozen_string_literal magic comment",
+    "body": ["# frozen_string_literal: true", "$0"]
+  },
   "ActionCable Channel": {
     "prefix": "channel",
     "description": "ActionCable channel",
@@ -467,55 +773,6 @@
       "devise_for :${1:users}${2:, controllers: { sessions: 'users/sessions' }}$0"
     ]
   },
-  "CanCanCan Ability": {
-    "prefix": "ability",
-    "description": "CanCanCan Ability class",
-    "body": [
-      "class Ability",
-      "\tinclude CanCan::Ability",
-      "",
-      "\tdef initialize(user)",
-      "\t\tuser ||= User.new",
-      "",
-      "\t\tif user.${1:admin?}",
-      "\t\t\tcan :manage, :all",
-      "\t\telse",
-      "\t\t\tcan :read, :all",
-      "\t\t\tcan :manage, ${2:Model}, user_id: user.id",
-      "\t\tend$0",
-      "\tend",
-      "end"
-    ]
-  },
-  "CanCanCan load_and_authorize": {
-    "prefix": "loadauth",
-    "description": "load_and_authorize_resource",
-    "body": ["load_and_authorize_resource${1: class: ${2:Model}}$0"]
-  },
-  "CanCanCan authorize_resource": {
-    "prefix": "authres",
-    "description": "authorize_resource",
-    "body": ["authorize_resource$0"]
-  },
-  "CanCanCan authorize!": {
-    "prefix": "authbang",
-    "description": "authorize! action, resource",
-    "body": ["authorize! :${1:action}, ${2:@resource}$0"]
-  },
-  "CanCanCan can?": {
-    "prefix": "canq",
-    "description": "can? helper",
-    "body": ["can? :${1:action}, ${2:resource}$0"]
-  },
-  "CanCanCan rescue access denied": {
-    "prefix": "rescueaccess",
-    "description": "rescue_from CanCan::AccessDenied",
-    "body": [
-      "rescue_from CanCan::AccessDenied do |exception|",
-      "\tredirect_to ${1:root_path}, alert: exception.message",
-      "end$0"
-    ]
-  },
   "ActiveAdmin register": {
     "prefix": "aaregister",
     "description": "ActiveAdmin.register",
@@ -555,42 +812,25 @@
     "description": "AA scope",
     "body": ["scope :${1:active}${2:, default: true}$0"]
   },
-  "ActiveAdmin action_item": {
-    "prefix": "aaaction",
-    "description": "AA action_item",
-    "body": [
-      "action_item :${1:name}, only: :${2:show} do",
-      "\tlink_to '${3:Label}', ${4:path}",
-      "end$0"
-    ]
+  "ActiveAdmin form": {
+    "prefix": "aaform",
+    "description": "AA form do |f|",
+    "body": ["form do |f|", "\tf.inputs do", "\t\tf.input :${1:attr}", "\t\t$0", "\tend", "\tf.actions", "end"]
   },
-  "ActiveAdmin batch_action": {
-    "prefix": "aabatch",
-    "description": "AA batch_action",
-    "body": [
-      "batch_action :${1:name} do |ids|",
-      "\t${2:Model}.where(id: ids).${3:update_all(active: true)}",
-      "\tredirect_to collection_path, notice: '${4:Done}'",
-      "end$0"
-    ]
+  "ActiveAdmin show": {
+    "prefix": "aashow",
+    "description": "AA show attributes_table",
+    "body": ["show do", "\tattributes_table do", "\t\trow :${1:attr}", "\t\t$0", "\tend", "end"]
   },
-  "ActiveAdmin member_action": {
-    "prefix": "aamember",
-    "description": "AA member_action",
-    "body": [
-      "member_action :${1:name}, method: :${2:put} do",
-      "\t$0",
-      "end"
-    ]
+  "ActiveAdmin index": {
+    "prefix": "aaindex",
+    "description": "AA index columns",
+    "body": ["index do", "\tselectable_column", "\tid_column", "\tcolumn :${1:attr}", "\t$0", "\tactions", "end"]
   },
-  "ActiveAdmin sidebar": {
-    "prefix": "aasidebar",
-    "description": "AA sidebar",
-    "body": [
-      "sidebar '${1:Title}', only: :${2:show} do",
-      "\t$0",
-      "end"
-    ]
+  "ActiveAdmin permit_params": {
+    "prefix": "aapermit",
+    "description": "AA permit_params",
+    "body": ["permit_params :${1:a}, :${2:b}$0"]
   },
   "RSpec Rails request spec": {
     "prefix": "reqspec",
@@ -719,7 +959,7 @@
     "body": ["JSON.parse(response.body)$0"]
   },
   "Capybara visit": {
-    "prefix": "visit",
+    "prefix": "cvisit",
     "description": "visit page",
     "body": ["visit ${1:root_path}$0"]
   },
@@ -764,7 +1004,7 @@
     "body": ["expect(page).to have_current_path(${1:root_path})$0"]
   },
   "Capybara within": {
-    "prefix": "within",
+    "prefix": "cwithin",
     "description": "within block",
     "body": [
       "within '${1:.selector}' do",
@@ -816,27 +1056,6 @@
       "res = conn.${2:get}('${3:/path}'${4:, params})$0"
     ]
   },
-  "HTTParty class": {
-    "prefix": "httparty",
-    "description": "HTTParty client class",
-    "body": [
-      "class ${1:Name}Client",
-      "\tinclude HTTParty",
-      "\tbase_uri '${2:https://api.example.com}'",
-      "",
-      "\tdef ${3:get_thing}(id)",
-      "\t\tself.class.get(\"/${4:things}/#{id}\")",
-      "\tend$0",
-      "end"
-    ]
-  },
-  "RestClient request": {
-    "prefix": "restclient",
-    "description": "RestClient call",
-    "body": [
-      "RestClient.${1:get}('${2:url}'${3:, headers})$0"
-    ]
-  },
   "Stimulus controller": {
     "prefix": "stimcontroller",
     "description": "Stimulus controller class (JS)",
@@ -882,11 +1101,6 @@
       "broadcasts_to ->(${1:record}) { [${1}.${2:user}, '${3:items}'] }${4:, inserts_by: :prepend}$0"
     ]
   },
-  "Turbo broadcast refreshes": {
-    "prefix": "broadcastsrefresh",
-    "description": "broadcasts_refreshes",
-    "body": ["broadcasts_refreshes$0"]
-  },
   "Turbo Stream respond_to": {
     "prefix": "respondturbo",
     "description": "respond_to with turbo_stream",
@@ -903,56 +1117,6 @@
     "body": [
       "render turbo_stream: turbo_stream.${1:replace}('${2:dom_id}', partial: '${3:partial}', locals: { ${4:item}: @${4} })$0"
     ]
-  },
-  "Stimulus value-changed": {
-    "prefix": "stimvaluechanged",
-    "description": "Stimulus xValueChanged callback",
-    "body": ["${1:name}ValueChanged(current, previous) {", "\t$0", "}"]
-  },
-  "ActiveAdmin form": {
-    "prefix": "aaform",
-    "description": "AA form do |f|",
-    "body": ["form do |f|", "\tf.inputs do", "\t\tf.input :${1:attr}", "\t\t$0", "\tend", "\tf.actions", "end"]
-  },
-  "ActiveAdmin show": {
-    "prefix": "aashow",
-    "description": "AA show attributes_table",
-    "body": ["show do", "\tattributes_table do", "\t\trow :${1:attr}", "\t\t$0", "\tend", "end"]
-  },
-  "ActiveAdmin index": {
-    "prefix": "aaindex",
-    "description": "AA index columns",
-    "body": ["index do", "\tselectable_column", "\tid_column", "\tcolumn :${1:attr}", "\t$0", "\tactions", "end"]
-  },
-  "ActiveAdmin permit_params": {
-    "prefix": "aapermit",
-    "description": "AA permit_params",
-    "body": ["permit_params :${1:a}, :${2:b}$0"]
-  },
-  "ActiveAdmin controller": {
-    "prefix": "aacontroller",
-    "description": "AA controller do",
-    "body": ["controller do", "\tdef scoped_collection", "\t\tsuper.${1:includes(:user)}", "\tend$0", "end"]
-  },
-  "ActiveAdmin csv": {
-    "prefix": "aacsv",
-    "description": "AA csv export",
-    "body": ["csv do", "\tcolumn :${1:attr}", "\t$0", "end"]
-  },
-  "ActiveAdmin menu": {
-    "prefix": "aamenu",
-    "description": "AA menu directive",
-    "body": ["menu parent: '${1:Group}', priority: ${2:5}$0"]
-  },
-  "ActiveAdmin collection_action": {
-    "prefix": "aacollection",
-    "description": "AA collection_action",
-    "body": ["collection_action :${1:name}, method: :${2:post} do", "\t$0", "end"]
-  },
-  "ActiveAdmin Arbre panel": {
-    "prefix": "aaarbre",
-    "description": "AA Arbre panel + table_for",
-    "body": ["panel '${1:Title}' do", "\ttable_for ${2:collection} do", "\t\tcolumn :${3:attr}", "\t\t$0", "\tend", "end"]
   },
   "Pundit Policy": {
     "prefix": "punditpolicy",
@@ -1034,21 +1198,6 @@
     "description": "after_sign_in_path_for override",
     "body": ["def after_sign_in_path_for(resource)", "\t${1:root_path}", "end$0"]
   },
-  "Devise Invitable": {
-    "prefix": "deviseinvitable",
-    "description": "devise :invitable",
-    "body": ["devise :invitable, :database_authenticatable, :registerable, invite_for: ${1:2.weeks}$0"]
-  },
-  "Devise JWT": {
-    "prefix": "devisejwt",
-    "description": "devise jwt_authenticatable",
-    "body": ["devise :database_authenticatable, :registerable, :jwt_authenticatable, jwt_revocation_strategy: ${1:JwtDenylist}$0"]
-  },
-  "Devise Two Factor": {
-    "prefix": "devisetwofactor",
-    "description": "two_factor_authenticatable",
-    "body": ["devise :two_factor_authenticatable, otp_secret_encryption_key: ENV['OTP_SECRET']$0"]
-  },
   "Sidekiq Worker": {
     "prefix": "sidekiq",
     "description": "Sidekiq worker class",
@@ -1073,29 +1222,6 @@
     "description": "Worker.perform_at",
     "body": ["${1:Worker}.perform_at(${2:1.hour.from_now}, ${3:args})$0"]
   },
-  "Sidekiq Batch": {
-    "prefix": "sidekiqbatch",
-    "description": "Sidekiq::Batch.new",
-    "body": [
-      "batch = Sidekiq::Batch.new",
-      "batch.description = '${1:desc}'",
-      "batch.on(:complete, ${2:Callback}, ${3:opts})",
-      "batch.jobs do",
-      "\t${4:Worker}.perform_async(${5:args})$0",
-      "end"
-    ]
-  },
-  "Sidekiq Cron": {
-    "prefix": "sidekiqcron",
-    "description": "Sidekiq::Cron::Job.create",
-    "body": [
-      "Sidekiq::Cron::Job.create(",
-      "\tname: '${1:name}',",
-      "\tcron: '${2:0 * * * *}',",
-      "\tclass: '${3:Worker}',",
-      ")$0"
-    ]
-  },
   "Rails cache fetch": {
     "prefix": "cachefetch",
     "description": "Rails.cache.fetch with expiry",
@@ -1107,35 +1233,6 @@
     "body": [
       "Rails.cache.write('${1:key}', ${2:value}, expires_in: ${3:1.hour})",
       "Rails.cache.read('${1}')$0"
-    ]
-  },
-  "Rails cache fetch_multi": {
-    "prefix": "cachemulti",
-    "description": "Rails.cache.fetch_multi",
-    "body": ["Rails.cache.fetch_multi(*${1:keys}) do |key|", "\t$0", "end"]
-  },
-  "Rails fresh_when": {
-    "prefix": "freshwhen",
-    "description": "fresh_when in controller",
-    "body": ["fresh_when ${1:@record}, etag: ${1}, last_modified: ${1}.updated_at$0"]
-  },
-  "Rails stale?": {
-    "prefix": "staleq",
-    "description": "stale? guard",
-    "body": ["if stale?(${1:@record})", "\t$0", "end"]
-  },
-  "Rails http expires_in": {
-    "prefix": "httpcache",
-    "description": "expires_in",
-    "body": ["expires_in ${1:5.minutes}, public: ${2:true}$0"]
-  },
-  "Rails cache_key_with_version": {
-    "prefix": "cachekey",
-    "description": "override cache_key_with_version",
-    "body": [
-      "def cache_key_with_version",
-      "\t\"#{model_name.cache_key}/#{id}-#{updated_at.to_i}\"",
-      "end$0"
     ]
   },
   "AR enum": {
@@ -1203,16 +1300,6 @@
     "description": "has_many through",
     "body": ["has_many :${1:tags}, through: :${2:taggings}$0"]
   },
-  "AR STI subclass": {
-    "prefix": "arsti",
-    "description": "STI subclass",
-    "body": ["class ${1:Sub} < ${2:Base}", "\t$0", "end"]
-  },
-  "AR abstract class": {
-    "prefix": "arabstract",
-    "description": "abstract_class",
-    "body": ["self.abstract_class = true$0"]
-  },
   "AR counter_cache": {
     "prefix": "arcounter",
     "description": "belongs_to counter_cache",
@@ -1222,11 +1309,6 @@
     "prefix": "arloadasync",
     "description": "load_async (Rails 7)",
     "body": ["${1:Model}.where(${2:cond}).load_async$0"]
-  },
-  "AR signed_id": {
-    "prefix": "arsignedid",
-    "description": "find_signed!",
-    "body": ["${1:User}.find_signed!(${2:token}, purpose: :${3:purpose})$0"]
   },
   "Mailer preview": {
     "prefix": "mailerprev",
@@ -1243,16 +1325,6 @@
     "prefix": "mailerdeliver",
     "description": "Mailer.with.x.deliver_later",
     "body": ["${1:Name}Mailer.with(${2:user: @user}).${3:welcome}.deliver_later$0"]
-  },
-  "Action Mailbox route": {
-    "prefix": "mailbox",
-    "description": "ApplicationMailbox routing",
-    "body": ["routing /${1:to_pattern}/i => :${2:name}$0"]
-  },
-  "Action Mailbox class": {
-    "prefix": "mailboxclass",
-    "description": "Mailbox subclass",
-    "body": ["class ${1:Name}Mailbox < ApplicationMailbox", "\tdef process", "\t\t$0", "\tend", "end"]
   },
   "Action Text has_rich_text": {
     "prefix": "actiontext",
@@ -1289,11 +1361,6 @@
     "description": "l Time.current",
     "body": ["l ${1:Time.current}, format: :${2:short}$0"]
   },
-  "Kaminari page": {
-    "prefix": "kaminaripage",
-    "description": "page(params[:page]).per",
-    "body": ["${1:Model}.page(params[:page]).per(${2:20})$0"]
-  },
   "Pagy": {
     "prefix": "pagy",
     "description": "pagy(scope)",
@@ -1303,16 +1370,6 @@
     "prefix": "ransack",
     "description": "ransack(params[:q]).result",
     "body": ["@q = ${1:Model}.ransack(params[:q])", "@${2:records} = @q.result${3:.distinct}$0"]
-  },
-  "Searchkick search": {
-    "prefix": "searchkick",
-    "description": "Searchkick search",
-    "body": ["${1:Model}.search(params[:q], where: ${2:{ active: true }})$0"]
-  },
-  "pg_search_scope": {
-    "prefix": "pgsearchscope",
-    "description": "PgSearch::Model pg_search_scope",
-    "body": ["include PgSearch::Model", "pg_search_scope :search, against: %i[${1:title body}]$0"]
   },
   "ViewComponent class": {
     "prefix": "vccomponent",
@@ -1341,41 +1398,6 @@
     "description": "render(XComponent.new)",
     "body": ["render(${1:Name}Component.new(${2:args}))$0"]
   },
-  "Phlex component": {
-    "prefix": "phlexcomp",
-    "description": "Phlex::HTML class",
-    "body": ["class ${1:Name} < Phlex::HTML", "\tdef view_template", "\t\t$0", "\tend", "end"]
-  },
-  "Turbo morph frame": {
-    "prefix": "turbomorph",
-    "description": "turbo_frame_tag advance",
-    "body": ["<%= turbo_frame_tag '${1:id}', data: { turbo_action: 'advance' } %>$0"]
-  },
-  "Turbo StreamsChannel broadcast": {
-    "prefix": "turbocablebroadcast",
-    "description": "broadcast_replace_to",
-    "body": [
-      "Turbo::StreamsChannel.broadcast_replace_to(",
-      "\t${1:stream},",
-      "\ttarget: '${2:dom_id}',",
-      "\tpartial: '${3:partial}',",
-      "\tlocals: { ${4:item}: ${5:@item} },",
-      ")$0"
-    ]
-  },
-  "Draper decorator": {
-    "prefix": "draperdecorator",
-    "description": "Draper::Decorator class",
-    "body": [
-      "class ${1:Name}Decorator < Draper::Decorator",
-      "\tdelegate_all",
-      "",
-      "\tdef ${2:formatted}",
-      "\t\t$0",
-      "\tend",
-      "end"
-    ]
-  },
   "Form object": {
     "prefix": "formobject",
     "description": "ActiveModel form object",
@@ -1393,70 +1415,6 @@
       "\tend",
       "end"
     ]
-  },
-  "Dry Initializer": {
-    "prefix": "dryinit",
-    "description": "Dry::Initializer",
-    "body": [
-      "class ${1:Name}",
-      "\textend Dry::Initializer",
-      "\toption :${2:arg}",
-      "",
-      "\tdef call",
-      "\t\t$0",
-      "\tend",
-      "end"
-    ]
-  },
-  "Dry Monads": {
-    "prefix": "drymonad",
-    "description": "Dry::Monads result",
-    "body": [
-      "include Dry::Monads[:result]",
-      "",
-      "def call",
-      "\t${1:Success}(${2:value})$0",
-      "end"
-    ]
-  },
-  "Dry Validation Contract": {
-    "prefix": "dryvalidation",
-    "description": "Dry::Validation::Contract",
-    "body": [
-      "class ${1:Name}Contract < Dry::Validation::Contract",
-      "\tparams do",
-      "\t\trequired(:${2:name}).filled(:string)$0",
-      "\tend",
-      "end"
-    ]
-  },
-  "Interactor": {
-    "prefix": "interactor",
-    "description": "Interactor#call",
-    "body": [
-      "class ${1:Name}",
-      "\tinclude Interactor",
-      "",
-      "\tdef call",
-      "\t\tcontext.${2:result} = ${3:value}$0",
-      "\tend",
-      "end"
-    ]
-  },
-  "acts_as_paranoid": {
-    "prefix": "paranoid",
-    "description": "acts_as_paranoid",
-    "body": ["acts_as_paranoid$0"]
-  },
-  "PaperTrail": {
-    "prefix": "papertrail",
-    "description": "has_paper_trail",
-    "body": ["has_paper_trail${1: only: %i[${2:name}]}$0"]
-  },
-  "FriendlyId slug": {
-    "prefix": "friendlyid",
-    "description": "FriendlyId slugged",
-    "body": ["extend FriendlyId", "friendly_id :${1:name}, use: :slugged$0"]
   },
   "Shoulda validate_presence": {
     "prefix": "shouldavalid",
@@ -1496,16 +1454,6 @@
     "description": "travel_to block",
     "body": ["travel_to ${1:Time.current} do", "\t$0", "end"]
   },
-  "DatabaseCleaner": {
-    "prefix": "dbcleaner",
-    "description": "DatabaseCleaner.cleaning",
-    "body": [
-      "DatabaseCleaner.strategy = :${1:transaction}",
-      "DatabaseCleaner.cleaning do",
-      "\t$0",
-      "end"
-    ]
-  },
   "binding.pry": {
     "prefix": "pry",
     "description": "binding.pry",
@@ -1530,33 +1478,6 @@
     "prefix": "sentryrescue",
     "description": "Sentry.capture_exception",
     "body": ["Sentry.capture_exception(${1:e})$0"]
-  },
-  "Rollbar error": {
-    "prefix": "rollbarrescue",
-    "description": "Rollbar.error",
-    "body": ["Rollbar.error(${1:e}${2:, ${3:context: value}})$0"]
-  },
-  "Lograge config": {
-    "prefix": "lograge",
-    "description": "lograge enable JSON",
-    "body": [
-      "config.lograge.enabled = true",
-      "config.lograge.formatter = Lograge::Formatters::Json.new$0"
-    ]
-  },
-  "Bullet config": {
-    "prefix": "bullet",
-    "description": "Bullet config flags",
-    "body": [
-      "Bullet.enable = true",
-      "Bullet.alert = true",
-      "Bullet.bullet_logger = true$0"
-    ]
-  },
-  "money-rails monetize": {
-    "prefix": "money",
-    "description": "monetize :price_cents",
-    "body": ["monetize :${1:price_cents}${2:, as: '${3:price}'}$0"]
   },
   "rake task": {
     "prefix": "raketask",
@@ -1607,43 +1528,6 @@
       ")$0"
     ]
   },
-  "GraphQL Type": {
-    "prefix": "gqltype",
-    "description": "GraphQL object type",
-    "body": [
-      "class Types::${1:Name}Type < Types::BaseObject",
-      "\tfield :id, ID, null: false",
-      "\tfield :${2:name}, String, null: ${3:false}$0",
-      "end"
-    ]
-  },
-  "GraphQL Mutation": {
-    "prefix": "gqlmutation",
-    "description": "GraphQL mutation",
-    "body": [
-      "class Mutations::${1:Name} < Mutations::BaseMutation",
-      "\targument :${2:input}, String, required: true",
-      "\tfield :${3:result}, Types::${4:Name}Type, null: true",
-      "",
-      "\tdef resolve(${2}:)",
-      "\t\t$0",
-      "\tend",
-      "end"
-    ]
-  },
-  "GraphQL Query field": {
-    "prefix": "gqlquery",
-    "description": "GraphQL query field + resolver",
-    "body": [
-      "field :${1:name}, ${2:Types::Name}Type, null: ${3:true} do",
-      "\targument :${4:id}, ID, required: true",
-      "end",
-      "",
-      "def ${1}(${4}:)",
-      "\t$0",
-      "end"
-    ]
-  },
   "JBuilder block": {
     "prefix": "jbuilder",
     "description": "jbuilder json block",
@@ -1656,16 +1540,6 @@
       "class ${1:Name}Serializer",
       "\tinclude JSONAPI::Serializer",
       "\tattributes :${2:a}, :${3:b}$0",
-      "end"
-    ]
-  },
-  "AMS Serializer": {
-    "prefix": "amsserializer",
-    "description": "ActiveModel::Serializer",
-    "body": [
-      "class ${1:Name}Serializer < ActiveModel::Serializer",
-      "\tattributes :${2:id}, :${3:name}",
-      "\thas_many :${4:assocs}$0",
       "end"
     ]
   },
