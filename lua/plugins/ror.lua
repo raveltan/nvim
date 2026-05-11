@@ -44,11 +44,28 @@ return {
       require("telescope").load_extension("ui-select")
       require("ror").setup({})
       local capabilities = require("blink.cmp").get_lsp_capabilities()
+      -- Override nvim-lspconfig's ruby_lsp reuse_client. The shipped version
+      -- (lsp/ruby_lsp.lua) compares `client.config.cmd_cwd == config.cmd_cwd`
+      -- but only side-effect-sets cmd_cwd on the NEW config — the existing
+      -- client's stored cmd_cwd stays nil, so the second buffer attach
+      -- always fails the reuse check and spawns a second client. We replace
+      -- it with the standard name + root_dir comparison.
       vim.lsp.config("ruby_lsp", {
         capabilities = capabilities,
+        reuse_client = function(client, config)
+          return client.name == config.name and client.root_dir == config.root_dir
+        end,
         init_options = {
           formatter = "none", -- deferred to conform.nvim
           linters = { "rubocop" },
+          -- ruby-lsp-rails PR #660 (Dec 2025) added documentSymbol for
+          -- db/schema.rb. The generic indexer ALSO walks schema.rb, so
+          -- ActiveRecord::Schema ends up indexed twice -> duplicate
+          -- "Schema" completion items with identical hover. Excluding
+          -- schema.rb from the generic index drops the dup.
+          indexing = {
+            excludedPatterns = { "**/db/schema.rb", "**/db/*_schema.rb" },
+          },
           addonSettings = {
             ["Ruby LSP Rails"] = {
               enablePendingMigrationsPrompt = true,
@@ -57,6 +74,27 @@ return {
         },
       })
       vim.lsp.enable("ruby_lsp")
+
+      -- Sorbet. Prefer direct `srb` binary; fall back to bundle exec.
+      vim.lsp.config("sorbet", {
+        capabilities = capabilities,
+        cmd = vim.fn.executable("srb") == 1
+          and { "srb", "tc", "--lsp", "--disable-watchman" }
+          or { "bundle", "exec", "srb", "tc", "--lsp", "--disable-watchman" },
+        filetypes = { "ruby" },
+        -- root_markers with "sorbet/config" doesn't work — vim.fs.find
+        -- matches basenames only, returning the sorbet/ dir as root.
+        root_dir = function(bufnr, on_dir)
+          local fname = vim.api.nvim_buf_get_name(bufnr)
+          local sorbet_dir = vim.fs.find("sorbet", {
+            upward = true,
+            type = "directory",
+            path = vim.fs.dirname(fname),
+          })[1]
+          if sorbet_dir then on_dir(vim.fs.dirname(sorbet_dir)) end
+        end,
+      })
+      vim.lsp.enable("sorbet")
     end,
   },
 
@@ -67,6 +105,15 @@ return {
       opts.formatters_by_ft = opts.formatters_by_ft or {}
       opts.formatters_by_ft.ruby = { "rubocop" }
       opts.formatters_by_ft.eruby = { "erb_format" }
+      -- Use rubocop daemon (--server) and route diagnostics to stderr so
+      -- bundler's "Resolving dependencies..." can't leak into stdout (which
+      -- conform reads as formatted source and would prepend to the buffer).
+      opts.formatters = vim.tbl_deep_extend("force", opts.formatters or {}, {
+        rubocop = {
+          command = "rubocop",
+          args = { "--server", "--stderr", "--stdin", "$FILENAME", "-a", "--fail-level", "fatal" },
+        },
+      })
     end,
   },
 

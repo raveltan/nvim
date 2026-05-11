@@ -302,6 +302,15 @@ return {
       completion = {
         accept = { resolve_timeout_ms = 500 },
         documentation = { auto_show = true },
+        -- Explicitly pin trigger behavior. Defaults should match this but
+        -- pinning rules out a default drift across blink versions.
+        trigger = {
+          show_on_keyword = true,
+          show_on_trigger_character = true,
+          show_on_insert_on_trigger_character = true,
+        },
+        menu = { auto_show = true },
+        list = { selection = { preselect = true, auto_insert = false } },
       },
       signature = { enabled = true },
       sources = {
