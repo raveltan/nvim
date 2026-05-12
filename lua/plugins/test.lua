@@ -129,17 +129,52 @@ return {
             local dir = cwd
             while dir ~= "/" do
               if vim.fn.executable(dir .. "/bin/run-tests") == 1 then
-                vim.notify("Tearing down test infrastructure...", vim.log.levels.INFO)
-                vim.fn.jobstart({ dir .. "/bin/run-tests", "shutdown" }, {
-                  cwd = dir,
-                  on_exit = function(_, code)
+                local session_files = vim.fn.glob(dir .. "/.cache/gaf_session_*", false, true)
+                local worker_ids = {}
+                for _, f in ipairs(session_files) do
+                  local id = vim.fn.trim(vim.fn.readfile(f)[1] or "")
+                  if id ~= "" then table.insert(worker_ids, id) end
+                end
+
+                local function shutdown_one(worker_id, done)
+                  local env = nil
+                  if worker_id then env = { GAF_TEST_WORKER_ID = worker_id } end
+                  vim.fn.jobstart({ dir .. "/bin/run-tests", "shutdown" }, {
+                    cwd = dir,
+                    env = env,
+                    on_exit = function(_, code)
+                      done(worker_id, code)
+                    end,
+                  })
+                end
+
+                if #worker_ids == 0 then
+                  vim.notify("Tearing down test infrastructure...", vim.log.levels.INFO)
+                  shutdown_one(nil, function(_, code)
                     if code == 0 then
                       vim.notify("Test infrastructure torn down", vim.log.levels.INFO)
                     else
                       vim.notify("Test shutdown failed (exit " .. code .. ")", vim.log.levels.ERROR)
                     end
-                  end,
-                })
+                  end)
+                else
+                  vim.notify("Tearing down " .. #worker_ids .. " test session(s)...", vim.log.levels.INFO)
+                  local remaining = #worker_ids
+                  local failed = {}
+                  for _, wid in ipairs(worker_ids) do
+                    shutdown_one(wid, function(id, code)
+                      if code ~= 0 then table.insert(failed, id) end
+                      remaining = remaining - 1
+                      if remaining == 0 then
+                        if #failed == 0 then
+                          vim.notify("All test sessions torn down", vim.log.levels.INFO)
+                        else
+                          vim.notify("Shutdown failed for: " .. table.concat(failed, ", "), vim.log.levels.ERROR)
+                        end
+                      end
+                    end)
+                  end
+                end
                 return
               end
               dir = vim.fn.fnamemodify(dir, ":h")
