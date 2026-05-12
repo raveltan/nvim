@@ -1,21 +1,16 @@
 return {
   -- Colorscheme
   {
-    "EdenEast/nightfox.nvim",
-    name = "nightfox",
+    "scottmckendry/cyberdream.nvim",
+    name = "cyberdream",
     priority = 1000,
     lazy = false,
     config = function()
-      require("nightfox").setup({
-        options = {
-          transparent = true,
-          styles = {
-            comments = "italic",
-            keywords = "bold",
-          },
-        },
+      require("cyberdream").setup({
+        transparent = true,
+        italic_comments = true,
       })
-      vim.cmd.colorscheme("carbonfox")
+      vim.cmd.colorscheme("cyberdream")
 
       -- Clear backgrounds for full terminal transparency
       local transparent_groups = {
