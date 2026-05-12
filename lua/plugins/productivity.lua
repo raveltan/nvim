@@ -29,14 +29,21 @@ return {
         disable_member_code_lens = true,
       },
     },
-    keys = {
-      { "<leader>co", "<cmd>TSToolsOrganizeImports<cr>",       desc = "TS: organize imports" },
-      { "<leader>cM", "<cmd>TSToolsAddMissingImports<cr>",     desc = "TS: add missing imports" },
-      { "<leader>cU", "<cmd>TSToolsRemoveUnusedImports<cr>",   desc = "TS: remove unused imports" },
-      { "<leader>cR", "<cmd>TSToolsRemoveUnused<cr>",          desc = "TS: remove unused" },
-      { "<leader>cF", "<cmd>TSToolsFixAll<cr>",                desc = "TS: fix all" },
-      { "<leader>cD", "<cmd>TSToolsGoToSourceDefinition<cr>",  desc = "TS: go to source definition" },
-    },
+    init = function()
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+        callback = function(ev)
+          local opts = { buffer = ev.buf, silent = true }
+          local map = vim.keymap.set
+          map("n", "<leader>co", "<cmd>TSToolsOrganizeImports<cr>",      vim.tbl_extend("force", opts, { desc = "TS: organize imports" }))
+          map("n", "<leader>cM", "<cmd>TSToolsAddMissingImports<cr>",    vim.tbl_extend("force", opts, { desc = "TS: add missing imports" }))
+          map("n", "<leader>cU", "<cmd>TSToolsRemoveUnusedImports<cr>",  vim.tbl_extend("force", opts, { desc = "TS: remove unused imports" }))
+          map("n", "<leader>cR", "<cmd>TSToolsRemoveUnused<cr>",         vim.tbl_extend("force", opts, { desc = "TS: remove unused" }))
+          map("n", "<leader>cF", "<cmd>TSToolsFixAll<cr>",               vim.tbl_extend("force", opts, { desc = "TS: fix all" }))
+          map("n", "<leader>cD", "<cmd>TSToolsGoToSourceDefinition<cr>", vim.tbl_extend("force", opts, { desc = "TS: go to source definition" }))
+        end,
+      })
+    end,
   },
 
   -- Readable TS errors: translates cryptic messages AND expands collapsed types

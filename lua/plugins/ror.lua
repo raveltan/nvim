@@ -177,7 +177,7 @@ return {
   -- <leader>oo; projectionist owns the fast vim-rails-style :A and :E* commands.
   {
     "tpope/vim-projectionist",
-    event = { "BufReadPre", "BufNewFile" },
+    ft = { "ruby", "eruby" },
     init = function()
       vim.g.projectionist_heuristics = {
         ["config/environment.rb&Gemfile"] = {

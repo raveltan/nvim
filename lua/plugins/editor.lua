@@ -44,12 +44,20 @@ return {
   {
     "ThePrimeagen/refactoring.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
-    keys = {
-      { "<leader>Re", function() require("refactoring").select_refactor() end, mode = "v",          desc = "Refactor (select)" },
-      { "<leader>Rf", function() require("refactoring").extract_func() end,    mode = "v",          desc = "Extract function" },
-      { "<leader>Rv", function() require("refactoring").extract_var() end,     mode = "v",          desc = "Extract variable" },
-      { "<leader>Ri", function() require("refactoring").inline_var() end,      mode = { "n", "v" }, desc = "Inline variable" },
-    },
+    ft = { "typescript", "typescriptreact", "javascript", "javascriptreact", "lua", "python", "c", "cpp", "go", "java", "ruby", "php" },
+    init = function()
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact", "lua", "python", "c", "cpp", "go", "java", "ruby", "php" },
+        callback = function(ev)
+          local map = vim.keymap.set
+          local function bopts(desc) return { buffer = ev.buf, silent = true, desc = desc } end
+          map("v", "<leader>Re",        function() require("refactoring").select_refactor() end, bopts("Refactor (select)"))
+          map("v", "<leader>Rf",        function() require("refactoring").extract_func() end,    bopts("Extract function"))
+          map("v", "<leader>Rv",        function() require("refactoring").extract_var() end,     bopts("Extract variable"))
+          map({ "n", "v" }, "<leader>Ri", function() require("refactoring").inline_var() end,    bopts("Inline variable"))
+        end,
+      })
+    end,
     opts = {},
   },
 
