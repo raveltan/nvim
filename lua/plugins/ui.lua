@@ -48,22 +48,132 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
+    dependencies = { "echasnovski/mini.icons" },
+    opts = function()
+      local macro = {
+        function()
+          local r = vim.fn.reg_recording()
+          return r ~= "" and ("REC @" .. r) or ""
+        end,
+        cond = function() return vim.fn.reg_recording() ~= "" end,
+        color = { fg = "#ff5555", gui = "bold" },
+      }
+
+      local search = {
+        function()
+          local ok, s = pcall(vim.fn.searchcount, { maxcount = 999, timeout = 100 })
+          if not ok or not s or s.total == 0 then return "" end
+          return string.format(" [%d/%d]", s.current, s.total)
+        end,
+        cond = function() return vim.v.hlsearch == 1 end,
+      }
+
+      local selection = {
+        function()
+          local m = vim.fn.mode()
+          if not m:find("[vV\22]") then return "" end
+          local s_line, e_line = vim.fn.line("v"), vim.fn.line(".")
+          local lines = math.abs(e_line - s_line) + 1
+          local chars = vim.fn.wordcount().visual_chars or 0
+          return " " .. lines .. "L " .. chars .. "C"
+        end,
+      }
+
+      local lsp = {
+        function()
+          local cs = vim.lsp.get_clients({ bufnr = 0 })
+          if #cs == 0 then return "" end
+          local names = {}
+          for _, c in ipairs(cs) do table.insert(names, c.name) end
+          return " " .. table.concat(names, ",")
+        end,
+      }
+
+      -- Show encoding/fileformat only when non-default
+      local encoding = {
+        "encoding",
+        cond = function() return (vim.bo.fileencoding or "") ~= "" and vim.bo.fileencoding ~= "utf-8" end,
+      }
+      local fileformat = {
+        "fileformat",
+        cond = function() return vim.bo.fileformat ~= "unix" end,
+      }
+
+      -- Refresh on macro start/stop + mode change for snappy updates
+      vim.api.nvim_create_autocmd({ "RecordingEnter", "RecordingLeave", "ModeChanged" }, {
+        callback = function() require("lualine").refresh() end,
+      })
+
+      return {
+        options = {
+          theme = "github_dark_high_contrast",
+          globalstatus = true,
+          section_separators = { left = "", right = "" },
+          component_separators = { left = "", right = "" },
+          disabled_filetypes = {
+            statusline = { "dashboard", "alpha", "snacks_dashboard", "starter" },
+          },
+        },
+        sections = {
+          lualine_a = { { "mode", icon = "" } },
+          lualine_b = {
+            { "branch", icon = "" },
+            { "diff", symbols = { added = " ", modified = " ", removed = " " } },
+            { "diagnostics", symbols = { error = " ", warn = " ", info = " ", hint = " " } },
+          },
+          lualine_c = {
+            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+            { "filename", path = 0, symbols = { modified = "  ", readonly = " ", unnamed = " " } },
+            macro,
+            search,
+          },
+          lualine_x = { selection, lsp, encoding, fileformat, "filetype" },
+          lualine_y = { "progress" },
+          lualine_z = { { "location", icon = "" } },
+        },
+        extensions = { "lazy", "mason", "neo-tree", "trouble", "quickfix" },
+      }
+    end,
+  },
+
+  -- Cursor trail (smear)
+  {
+    "sphamba/smear-cursor.nvim",
+    event = "VeryLazy",
     opts = {
-      options = {
-        theme = "github_dark_high_contrast",
-        globalstatus = true,
-        section_separators = { left = "", right = "" },
-        component_separators = { left = "", right = "" },
-      },
-      sections = {
-        lualine_a = { "mode" },
-        lualine_b = { "branch", "diff", "diagnostics" },
-        lualine_c = { { "filename", path = 1 } },
-        lualine_x = { "encoding", "fileformat", "filetype" },
-        lualine_y = { "progress" },
-        lualine_z = { "location" },
-      },
+      stiffness = 0.8,
+      trailing_stiffness = 0.5,
+      distance_stop_animating = 0.5,
+      hide_target_hack = false,
     },
+  },
+
+  -- Indent scope animation
+  {
+    "echasnovski/mini.indentscope",
+    event = { "BufReadPre", "BufNewFile" },
+    opts = function()
+      return {
+        symbol = "│",
+        options = { try_as_border = true },
+        draw = {
+          animation = require("mini.indentscope").gen_animation.quadratic({
+            easing = "out",
+            duration = 80,
+            unit = "total",
+          }),
+        },
+      }
+    end,
+    init = function()
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {
+          "help", "alpha", "dashboard", "neo-tree", "Trouble", "trouble",
+          "lazy", "mason", "notify", "toggleterm", "lazyterm", "snacks_dashboard",
+        },
+        callback = function() vim.b.miniindentscope_disable = true end,
+      })
+    end,
   },
 
   -- Rainbow brackets via Treesitter
