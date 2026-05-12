@@ -462,10 +462,10 @@ return {
     "cshuaimin/ssr.nvim",
     keys = {
       {
-        "<leader>sr",
+        "<leader>cS",
         function() require("ssr").open() end,
         mode = { "n", "x" },
-        desc = "Structural replace",
+        desc = "Structural replace (SSR)",
       },
     },
     opts = {
@@ -533,6 +533,36 @@ return {
       { "[;", function() require("dropbar.api").goto_context_start() end, desc = "Goto context start" },
       { "];", function() require("dropbar.api").select_next_context() end, desc = "Select next context" },
     },
+  },
+
+  -- Treesitter node actions (toggle bool, cycle quotes, expand ternary, split params, JSX wrap)
+  {
+    "CKolkey/ts-node-action",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    keys = {
+      { "<leader>cn", function() require("ts-node-action").node_action() end, desc = "TS node action" },
+    },
+    opts = {},
+  },
+
+  -- Cycle LSP references inline with ]r / [r (no picker)
+  {
+    "mawkler/refjump.nvim",
+    keys = { "]r", "[r" },
+    opts = {
+      keymaps = { enable = true },
+      highlights = { enable = true },
+    },
+  },
+
+  -- Rust-backed fast file picker (frecency, typo-tolerant, sub-10ms on monorepos)
+  {
+    "dmtrKovalenko/fff.nvim",
+    build = "cargo build --release",
+    keys = {
+      { "<leader>ff", function() require("fff").find_files() end, desc = "Find files (fff)" },
+    },
+    opts = {},
   },
 
   -- Fuzzy undo history with diff preview

@@ -250,10 +250,11 @@ return {
     end,
   },
 
-  -- Auto-insert `end` for `def`/`do`/`if`/`class`/`module`. Treesitter doesn't.
+  -- Auto-insert `end` for `def`/`do`/`if`/`class`/`module`.
+  -- Restored after nvim-treesitter-endwise broke (upstream regression w/ TS main branch).
   {
     "tpope/vim-endwise",
-    ft = { "ruby", "eruby", "lua", "vim" },
+    ft = { "ruby", "eruby", "lua", "vim", "sh", "bash", "zsh" },
   },
 
   -- Herb: HTML+ERB language server (parser, linter, formatter via LSP)

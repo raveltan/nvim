@@ -155,12 +155,12 @@ Leader-prefixed groups (registered with `which-key`):
 | Prefix | Group | Examples |
 |---|---|---|
 | `<leader>b` | **B**uffers | `bo` close others |
-| `<leader>c` | **C**ode / LSP | `ca` action, `cr` rename, `cf` format, `co` organize imports (TS) |
-| `<leader>d` | **D**ebug (DAP) | `db` breakpoint, `dc` continue, `du` UI, `de` eval |
+| `<leader>c` | **C**ode / LSP | `ca` action, `cr` rename, `cf` format, `cn` TS node action, `cS` SSR, `cj` split/join, `co` organize imports (TS) |
+| `<leader>d` | **D**ebug (DAP) | `db` breakpoint, `dc` continue, `du` UI (dap-view), `de` watch |
 | `<leader>D` | **D**adbod (DB) | `Du` UI, `Df` find buffer, `Dq` last query |
 | `<leader>e` | **E**xplorer | `e` open oil |
-| `<leader>f` | **F**ind | `fr` recent, `fc` config, `fn` new file, `fR` rename |
-| `<leader>g` | **G**it | `gg` lazygit, `gd` diffview, `gb` blame, `gh*` hunk ops, `gw*` worktree |
+| `<leader>f` | **F**ind | `ff` files (fff), `fr` recent, `fc` config, `fn` new file, `fR` rename |
+| `<leader>g` | **G**it | `gg` lazygit, `gd` diffview, `gb` blame, `gh*` hunk ops, `go` mini.diff overlay |
 | `<leader>h` | **H**arpoon | `ha` add, `hh` toggle |
 | `<leader>H` | **H**url (REST) | `Ha` run all, `Hs` at cursor |
 | `<leader>i` | **I**ron (REPL) | `is` toggle, `ic` send motion, `iv` send visual |
@@ -170,10 +170,9 @@ Leader-prefixed groups (registered with `which-key`):
 | `<leader>q` | **Q**uit / Session | `qq` quit all, `qs` restore session |
 | `<leader>r` | **R**ails | `rc` commands palette, `rg` generate, `rr` routes, `rs` schema, `rm` migrate, `rk` rollback, `rb` bundle install, `rC` console, `re` credentials:edit |
 | `<leader>R` | **R**efactor | `Re` extract function, `Rv` extract var |
-| `<leader>s` | **S**earch | `sg` grep, `sw` grep word, `ss` symbols, `sr` find/replace |
+| `<leader>s` | **S**earch | `sg` grep, `sw` grep word, `ss` symbols, `sr` find/replace, `su` undo history |
 | `<leader>S` | **S**nippets | `Se` edit, `Sa` add |
-| `<leader>t` | Checkma**t**e | Markdown todo metadata |
-| `<leader>T` | **T**ests (Neotest) | `Tr` run nearest, `Tf` file, `Td` debug, `Ts` summary |
+| `<leader>t` | **T**ests / Checkmate | `tr` nearest, `tf` file, `td` debug, `ts` summary (Checkmate owns `<leader>t*` in markdown) |
 | `<leader>u` | **U**I toggles | `uz` zen, `ud` diagnostics, `uf` format-on-save, `uM` markdown render |
 | `<leader>x` | Diagnostics / lists | `xx` trouble, `xq` quickfix, `xl` loclist |
 | `<leader>a` | Cl**a**ude Code | `ac` toggle, `aC` continue, `ar` resume |
@@ -181,6 +180,8 @@ Leader-prefixed groups (registered with `which-key`):
 Other notable global keymaps (from `config/keymaps.lua`):
 
 - `<C-h/j/k/l>` — split + tmux pane navigation
+- `<C-o>` / `<C-i>` — jumplist back/forward (Jumppack floating preview)
+- `<leader>;` — dropbar breadcrumb picker (h=parent, l=child)
 - `<S-h>` / `<S-l>` — previous / next buffer
 - `<A-j>` / `<A-k>` — move line(s) down / up (works in visual)
 - `<C-s>` — save (n/i/v/s)
@@ -197,7 +198,7 @@ Full reference: [`docs/keybinds.md`](docs/keybinds.md).
 ## Plugins by Category
 
 ### Editing UX — `editor.lua`
-`vim-sleuth`, `nvim-ufo`, `undotree`, `treesj`, `refactoring.nvim`, `ultimate-autopair`, `mini.surround` (`gs` prefix), `grug-far` (search/replace), `flash.nvim` (`s`/`S` jumps), `markview.nvim`, `todo-comments`, `mini.bufremove`, `mini.ai`, `yanky` (100-entry yank ring), `multicursor.nvim`, `hurl.nvim`, `nvim-bqf`, `nvim-hlslens`, `dial.nvim`, `ts-comments`, `vim-matchup`, `nvim-scissors`, `marks.nvim`, `which-key`, `checkmate.nvim`, `vim-repeat`, `vim-abolish`, `vim-illuminate`.
+`vim-sleuth`, `nvim-ufo`, `undotree`, `treesj`, `ts-node-action`, `ssr.nvim` (structural replace `<leader>cS`), `refactoring.nvim`, `ultimate-autopair`, `mini.surround` (`gs` prefix), `grug-far` (search/replace), `flash.nvim` (`s`/`S` jumps), `markview.nvim`, `todo-comments`, `mini.bufremove`, `mini.ai`, `yanky` (100-entry yank ring), `multicursor.nvim`, `hurl.nvim`, `nvim-bqf`, `quicker.nvim` (editable qf), `nvim-hlslens`, `highlight-undo`, `dial.nvim`, `ts-comments`, `vim-matchup`, `nvim-scissors`, `marks.nvim`, `which-key`, `checkmate.nvim`, `vim-repeat`, `vim-abolish`, `vim-illuminate`, `refjump.nvim` (`]r`/`[r` LSP refs), `dropbar.nvim` (winbar breadcrumbs, `<leader>;`), `fff.nvim` (rust file picker), `telescope-undo.nvim` (`<leader>su`).
 
 ### LSP & Completion — `lsp.lua`
 - **Mason** + **mason-lspconfig** auto-install: `eslint`, `basedpyright`, `ruff`, `intelephense`, `jsonls`, `yamlls`, `tailwindcss`, `html`, `cssls`
@@ -245,10 +246,10 @@ Parsers: `bash`, `css`, `eruby`, `html`, `javascript`, `json`, `lua`, `markdown`
 - `claude-code.nvim` — Claude Code terminal toggle (`<leader>ac`)
 
 ### Debugging — `dap.lua`
-`nvim-dap` + `nvim-dap-ui` + `nvim-dap-virtual-text` + `mason-nvim-dap` (auto-installs `debugpy`, `vscode-php-debug`).
+`nvim-dap` + `nvim-dap-view` (modern tabbed panel — `<leader>du` toggle, `<leader>de` watch) + `nvim-dap-virtual-text` + `mason-nvim-dap` (auto-installs `debugpy`, `vscode-php-debug`).
 
 ### Git — `git.lua`
-`gitsigns.nvim` (gutter, blame, hunk ops, `]c`/`[c`), `git-conflict.nvim`, `diffview.nvim` (`<leader>gd`, `<leader>gf` history, `<leader>gF` branch history).
+`gitsigns.nvim` (gutter, blame, hunk ops, `]c`/`[c`), `git-conflict.nvim`, `diffview.nvim` (`<leader>gd`, `<leader>gf` history), `mini.diff` (inline overlay `<leader>go`, `ih` hunk textobj).
 
 ### Testing — `test.lua`
 `neotest` with adapters: `phpunit` (auto-routes to `bin/run-tests` in fl-gaf), `jest`, `vitest`, `python` (pytest, `justMyCode=false`), `rspec`, `minitest`, plus the **custom UI test adapter** in [`config/neotest-ui-tests.lua`](lua/config/neotest-ui-tests.lua) for fl-gaf webapp (`webapp/projects/*/ui-tests/src/*.spec.ts`).
@@ -264,7 +265,7 @@ UI test runners (fl-gaf webapp) — eight Overseer templates in [`lua/overseer/t
 - Set `DEVTOOLS=true` for devtools variants (read by `webapp/projects/ui-tests-common/karma.conf.cjs`).
 
 ### Framework-specific
-- `ror.lua` — `ror.nvim` (Rails task palette `<leader>r*`), `vim-projectionist` (Rails heuristics — `:A`, `:Emodel`/`Econtroller`/`Eview`/`Espec`), `vim-endwise`, **`tpope/vim-rails`** (`:Rextract`, `:Rinvert`, context-aware `gf` on partials/fixtures/factories, Rails syntax), **Herb LSP** (HTML+ERB, auto-enabled when `herb-language-server` on `$PATH`), **Stimulus LSP** (auto-enabled when `stimulus-language-server` on `$PATH`), **ruby-lsp CodeLens handler** (`rubyLsp.openFile` — route↔action↔view jumps), **`suketa/nvim-dap-ruby`** (rdbg adapter — use existing `<leader>d*` DAP keys), **`andythigpen/nvim-coverage`** (SimpleCov gutter signs via `:Coverage*` commands). Activates on `Gemfile` + `config/environment.rb`.
+- `ror.lua` — `ror.nvim` (Rails task palette `<leader>r*`), `vim-projectionist` (Rails heuristics — `:A`, `:Emodel`/`Econtroller`/`Eview`/`Espec`), `vim-endwise` (auto-`end` for Ruby/Lua/Vim/Bash), **`tpope/vim-rails`** (`:Rextract`, `:Rinvert`, context-aware `gf` on partials/fixtures/factories, Rails syntax), **Herb LSP** (HTML+ERB, auto-enabled when `herb-language-server` on `$PATH`), **Stimulus LSP** (auto-enabled when `stimulus-language-server` on `$PATH`), **ruby-lsp CodeLens handler** (`rubyLsp.openFile` — route↔action↔view jumps), **`suketa/nvim-dap-ruby`** (rdbg adapter — use existing `<leader>d*` DAP keys), **`andythigpen/nvim-coverage`** (SimpleCov gutter signs via `:Coverage*` commands). Activates on `Gemfile` + `config/environment.rb`.
 - `other.lua` — pattern-based related-file navigation (`<leader>oo`/`os`/`ov`) with 50+ Rails patterns, PHP `src/`/`src2/` patterns, and Angular component/datastore patterns.
 - `diagram.lua` — Mermaid/PlantUML/D2/Gnuplot inline rendering via Kitty + ImageMagick.
 

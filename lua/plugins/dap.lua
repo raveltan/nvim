@@ -3,20 +3,26 @@ return {
   {
     "mfussenegger/nvim-dap",
     dependencies = {
-      -- DAP UI
+      -- DAP UI (modern tabbed panel)
       {
-        "rcarriga/nvim-dap-ui",
-        dependencies = { "nvim-neotest/nvim-nio" },
-        opts = {},
+        "igorlfs/nvim-dap-view",
+        opts = {
+          winbar = {
+            sections = { "watches", "scopes", "exceptions", "breakpoints", "threads", "repl", "console" },
+            default_section = "scopes",
+          },
+          windows = {
+            height = 12,
+          },
+        },
         config = function(_, opts)
-          local dap, dapui = require("dap"), require("dapui")
-          dapui.setup(opts)
+          local dap, dv = require("dap"), require("dap-view")
+          dv.setup(opts)
 
-          -- Auto open/close UI with debug sessions
-          dap.listeners.before.attach.dapui_config = function() dapui.open() end
-          dap.listeners.before.launch.dapui_config = function() dapui.open() end
-          dap.listeners.before.event_terminated.dapui_config = function() dapui.close() end
-          dap.listeners.before.event_exited.dapui_config = function() dapui.close() end
+          dap.listeners.before.attach["dap-view-config"] = function() dv.open() end
+          dap.listeners.before.launch["dap-view-config"] = function() dv.open() end
+          dap.listeners.before.event_terminated["dap-view-config"] = function() dv.close() end
+          dap.listeners.before.event_exited["dap-view-config"] = function() dv.close() end
         end,
       },
 
@@ -49,8 +55,8 @@ return {
       { "<leader>do", function() require("dap").step_over() end, desc = "Step over" },
       { "<leader>dO", function() require("dap").step_out() end, desc = "Step out" },
       { "<leader>dt", function() require("dap").terminate() end, desc = "Terminate" },
-      { "<leader>du", function() require("dapui").toggle() end, desc = "Toggle DAP UI" },
-      { "<leader>de", function() require("dapui").eval() end, desc = "Eval expression", mode = { "n", "v" } },
+      { "<leader>du", function() require("dap-view").toggle() end, desc = "Toggle DAP UI" },
+      { "<leader>de", "<cmd>DapViewWatch<cr>", desc = "Watch expression", mode = { "n", "v" } },
       { "<leader>dl", function() require("dap").run_last() end, desc = "Run last" },
     },
     config = function()
