@@ -1,16 +1,18 @@
 return {
   -- Colorscheme
   {
-    "scottmckendry/cyberdream.nvim",
-    name = "cyberdream",
+    "projekt0n/github-nvim-theme",
+    name = "github-theme",
     priority = 1000,
     lazy = false,
     config = function()
-      require("cyberdream").setup({
-        transparent = true,
-        italic_comments = true,
+      require("github-theme").setup({
+        options = {
+          transparent = true,
+          styles = { comments = "italic" },
+        },
       })
-      vim.cmd.colorscheme("cyberdream")
+      vim.cmd.colorscheme("github_dark_high_contrast")
 
       -- Clear backgrounds for full terminal transparency
       local transparent_groups = {
@@ -48,7 +50,7 @@ return {
     event = "VeryLazy",
     opts = {
       options = {
-        theme = "cyberdream",
+        theme = "github_dark_high_contrast",
         globalstatus = true,
         section_separators = { left = "", right = "" },
         component_separators = { left = "", right = "" },
