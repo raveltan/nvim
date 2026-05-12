@@ -175,6 +175,7 @@ return {
         },
         update_in_insert = false,
         float = { border = "rounded" },
+        jump = { float = true },
         severity_sort = true,
       })
 

@@ -364,6 +364,7 @@ return {
         { "<leader>w",  group = "window" },
         { "g",          group = "goto" },
         { "gs",         group = "surround" },
+        { "<leader>;",  desc = "Dropbar pick (h=parent l=child i=fuzzy q=close)" },
       },
     },
   },
@@ -456,4 +457,96 @@ return {
     end,
   },
 
+  -- Structural search-replace (treesitter-aware)
+  {
+    "cshuaimin/ssr.nvim",
+    keys = {
+      {
+        "<leader>sr",
+        function() require("ssr").open() end,
+        mode = { "n", "x" },
+        desc = "Structural replace",
+      },
+    },
+    opts = {
+      border = "rounded",
+      min_width = 50,
+      min_height = 5,
+      max_width = 120,
+      max_height = 25,
+      adjust_window = true,
+      keymaps = {
+        close = "q",
+        next_match = "n",
+        prev_match = "N",
+        replace_confirm = "<cr>",
+        replace_all = "<leader><cr>",
+      },
+    },
+  },
+
+  -- Better quickfix: editable, prettier
+  {
+    "stevearc/quicker.nvim",
+    event = "FileType qf",
+    opts = {
+      keys = {
+        { ">", function() require("quicker").expand({ before = 2, after = 2, add_to_existing = true }) end, desc = "Expand qf context" },
+        { "<", function() require("quicker").collapse() end, desc = "Collapse qf context" },
+      },
+    },
+    keys = {
+      { "<leader>xQ", function() require("quicker").toggle() end, desc = "Toggle quickfix (quicker)" },
+    },
+  },
+
+  -- Flash region on undo/redo
+  {
+    "tzachar/highlight-undo.nvim",
+    keys = { "u", "<C-r>" },
+    opts = {},
+  },
+
+  -- Winbar breadcrumbs (LSP/TS symbol path, keyboard-navigable)
+  {
+    "Bekaboo/dropbar.nvim",
+    dependencies = { "nvim-telescope/telescope-fzf-native.nvim" },
+    event = "BufReadPost",
+    opts = {
+      bar = {
+        enable = function(buf, win)
+          if not vim.api.nvim_buf_is_valid(buf) or not vim.api.nvim_win_is_valid(win) then return false end
+          if vim.fn.win_gettype(win) ~= "" then return false end
+          if vim.wo[win].diff then return false end
+          local ft = vim.bo[buf].filetype
+          local skip = { oil = true, qf = true, help = true, lazy = true, mason = true, trouble = true, ["snacks_picker_list"] = true, ["dap-repl"] = true, ["dapui_scopes"] = true, ["dapui_breakpoints"] = true, ["dapui_stacks"] = true, ["dapui_watches"] = true, ["dapui_console"] = true, ["neotest-summary"] = true, ["neotest-output"] = true, ["neotest-output-panel"] = true, gitcommit = true, NeogitCommitMessage = true }
+          if skip[ft] then return false end
+          return vim.bo[buf].buftype == ""
+        end,
+      },
+      icons = {
+        kinds = { use_devicons = true },
+      },
+    },
+    keys = {
+      { "<leader>;", function() require("dropbar.api").pick() end, desc = "Dropbar pick (breadcrumb nav)" },
+      { "[;", function() require("dropbar.api").goto_context_start() end, desc = "Goto context start" },
+      { "];", function() require("dropbar.api").select_next_context() end, desc = "Select next context" },
+    },
+  },
+
+  -- Fuzzy undo history with diff preview
+  {
+    "debugloop/telescope-undo.nvim",
+    dependencies = {
+      "nvim-telescope/telescope.nvim",
+      "nvim-lua/plenary.nvim",
+    },
+    keys = {
+      { "<leader>su", "<cmd>Telescope undo<cr>", desc = "Undo history" },
+    },
+    config = function()
+      require("telescope").load_extension("undo")
+    end,
+  },
 }

@@ -38,6 +38,6 @@ opt.virtualedit = "block"
 opt.pumheight = 10
 opt.confirm = true
 opt.inccommand = "split"
-opt.jumpoptions = "view"
+opt.jumpoptions = "stack,view"
 opt.shortmess:append("I")
 opt.wrap = true

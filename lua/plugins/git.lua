@@ -103,4 +103,28 @@ return {
       { "<leader>g/", function() require("util.ggrep").visual() end, mode = "v", desc = "Git grep selection" },
     },
   },
+
+  -- Inline diff overlay + hunk textobj (complements gitsigns)
+  {
+    "echasnovski/mini.diff",
+    event = "BufReadPost",
+    opts = {
+      view = {
+        style = "sign",
+        signs = { add = "▎", change = "▎", delete = "" },
+      },
+      mappings = {
+        apply = "",
+        reset = "",
+        textobject = "ih",
+        goto_first = "",
+        goto_prev = "",
+        goto_next = "",
+        goto_last = "",
+      },
+    },
+    keys = {
+      { "<leader>go", function() require("mini.diff").toggle_overlay(0) end, desc = "Toggle mini.diff overlay" },
+    },
+  },
 }
