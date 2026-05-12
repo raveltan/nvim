@@ -71,6 +71,7 @@ return {
     keys = {
       -- Find
       { "<leader><leader>", function() Snacks.picker.files() end, desc = "Find files" },
+      { "<leader>ff", function() Snacks.picker.files() end, desc = "Find files" },
       { "<leader>fr", function() Snacks.picker.recent() end, desc = "Recent files" },
       { "<leader>,", function() Snacks.picker.buffers() end, desc = "Buffers" },
       -- Search

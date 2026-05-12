@@ -524,9 +524,6 @@ return {
           return vim.bo[buf].buftype == ""
         end,
       },
-      icons = {
-        kinds = { use_devicons = true },
-      },
     },
     keys = {
       { "<leader>;", function() require("dropbar.api").pick() end, desc = "Dropbar pick (breadcrumb nav)" },
@@ -553,16 +550,6 @@ return {
       keymaps = { enable = true },
       highlights = { enable = true },
     },
-  },
-
-  -- Rust-backed fast file picker (frecency, typo-tolerant, sub-10ms on monorepos)
-  {
-    "dmtrKovalenko/fff.nvim",
-    build = "cargo build --release",
-    keys = {
-      { "<leader>ff", function() require("fff").find_files() end, desc = "Find files (fff)" },
-    },
-    opts = {},
   },
 
   -- Fuzzy undo history with diff preview

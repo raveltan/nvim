@@ -159,7 +159,7 @@ Leader-prefixed groups (registered with `which-key`):
 | `<leader>d` | **D**ebug (DAP) | `db` breakpoint, `dc` continue, `du` UI (dap-view), `de` watch |
 | `<leader>D` | **D**adbod (DB) | `Du` UI, `Df` find buffer, `Dq` last query |
 | `<leader>e` | **E**xplorer | `e` open oil |
-| `<leader>f` | **F**ind | `ff` files (fff), `fr` recent, `fc` config, `fn` new file, `fR` rename |
+| `<leader>f` | **F**ind | `ff` files, `fr` recent, `fc` config, `fn` new file, `fR` rename |
 | `<leader>g` | **G**it | `gg` lazygit, `gd` diffview, `gb` blame, `gh*` hunk ops, `go` mini.diff overlay |
 | `<leader>h` | **H**arpoon | `ha` add, `hh` toggle |
 | `<leader>H` | **H**url (REST) | `Ha` run all, `Hs` at cursor |
@@ -198,7 +198,7 @@ Full reference: [`docs/keybinds.md`](docs/keybinds.md).
 ## Plugins by Category
 
 ### Editing UX — `editor.lua`
-`vim-sleuth`, `nvim-ufo`, `undotree`, `treesj`, `ts-node-action`, `ssr.nvim` (structural replace `<leader>cS`), `refactoring.nvim`, `ultimate-autopair`, `mini.surround` (`gs` prefix), `grug-far` (search/replace), `flash.nvim` (`s`/`S` jumps), `markview.nvim`, `todo-comments`, `mini.bufremove`, `mini.ai`, `yanky` (100-entry yank ring), `multicursor.nvim`, `hurl.nvim`, `nvim-bqf`, `quicker.nvim` (editable qf), `nvim-hlslens`, `highlight-undo`, `dial.nvim`, `ts-comments`, `vim-matchup`, `nvim-scissors`, `marks.nvim`, `which-key`, `checkmate.nvim`, `vim-repeat`, `vim-abolish`, `vim-illuminate`, `refjump.nvim` (`]r`/`[r` LSP refs), `dropbar.nvim` (winbar breadcrumbs, `<leader>;`), `fff.nvim` (rust file picker), `telescope-undo.nvim` (`<leader>su`).
+`vim-sleuth`, `nvim-ufo`, `undotree`, `treesj`, `ts-node-action`, `ssr.nvim` (structural replace `<leader>cS`), `refactoring.nvim`, `ultimate-autopair`, `mini.surround` (`gs` prefix), `grug-far` (search/replace), `flash.nvim` (`s`/`S` jumps), `markview.nvim`, `todo-comments`, `mini.bufremove`, `mini.ai`, `yanky` (100-entry yank ring), `multicursor.nvim`, `hurl.nvim`, `nvim-bqf`, `quicker.nvim` (editable qf), `nvim-hlslens`, `highlight-undo`, `dial.nvim`, `ts-comments`, `vim-matchup`, `nvim-scissors`, `marks.nvim`, `which-key`, `checkmate.nvim`, `vim-repeat`, `vim-abolish`, `vim-illuminate`, `refjump.nvim` (`]r`/`[r` LSP refs), `dropbar.nvim` (winbar breadcrumbs, `<leader>;`), `telescope-undo.nvim` (`<leader>su`).
 
 ### LSP & Completion — `lsp.lua`
 - **Mason** + **mason-lspconfig** auto-install: `eslint`, `basedpyright`, `ruff`, `intelephense`, `jsonls`, `yamlls`, `tailwindcss`, `html`, `cssls`

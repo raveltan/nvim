@@ -28,8 +28,8 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>e` | n | Explorer (Oil) | oil.nvim |
 | `-` | n | Open parent directory (Oil) | oil.nvim |
 | `<leader>fn` | n | New file | config/keymaps.lua |
-| `<leader>ff` | n | Find files (fff.nvim, rust-backed) | fff.nvim |
-| `<leader><leader>` | n | Find files (snacks) | snacks.picker |
+| `<leader>ff` | n | Find files | snacks.picker |
+| `<leader><leader>` | n | Find files (alias) | snacks.picker |
 | `<leader>,` | n | Buffers | snacks.picker |
 | `<leader>fr` | n | Recent files | snacks.picker |
 | `<leader>fc` | n | Find config file | snacks.picker |
@@ -391,7 +391,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 ## Removed / replaced (history)
 
 - `<leader>cn` was `neogen` annotation. Now `ts-node-action`.
-- `<leader>ff` was snacks files. Now `fff.nvim` (rust). Snacks files moved to `<leader><leader>`.
 - `<leader>du` opened `nvim-dap-ui`. Now `nvim-dap-view`.
 - `<leader>de` was DAP eval. Now `DapViewWatch`.
 - `nvim-treesitter-endwise` reverted to `tpope/vim-endwise` (TS plugin broken on TS main branch).
