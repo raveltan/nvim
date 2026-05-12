@@ -13,16 +13,6 @@ return {
       "olimorris/neotest-rspec",
       "zidhuss/neotest-minitest",
     },
-    keys = {
-      { "<leader>Tr", function() require("neotest").run.run() end, desc = "Run nearest test" },
-      { "<leader>Tf", function() require("neotest").run.run(vim.fn.expand("%")) end, desc = "Run file tests" },
-      { "<leader>Ts", function() require("neotest").summary.toggle() end, desc = "Toggle summary" },
-      { "<leader>To", function() require("neotest").output.open({ enter_on_run = true }) end, desc = "Show output" },
-      { "<leader>TO", function() require("neotest").output_panel.toggle() end, desc = "Toggle output panel" },
-      { "<leader>Td", function() require("neotest").run.run({ strategy = "dap" }) end, desc = "Debug nearest test" },
-      { "<leader>Tl", function() require("neotest").run.run_last() end, desc = "Run last test" },
-      { "<leader>TS", function() require("neotest").run.stop() end, desc = "Stop test" },
-    },
     ft = { "php", "typescript", "javascript", "python", "ruby" },
     opts = function()
       local ui_tests_adapter = require("config.neotest-ui-tests")
@@ -85,15 +75,39 @@ return {
       }
     end,
     config = function(_, opts)
+      local test_filetypes = { "php", "typescript", "javascript", "python", "ruby" }
+      local function attach_test_keys(buf)
+        local o = { buffer = buf, silent = true }
+        vim.keymap.set("n", "<leader>tr", function() require("neotest").run.run() end, vim.tbl_extend("force", o, { desc = "Run nearest test" }))
+        vim.keymap.set("n", "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, vim.tbl_extend("force", o, { desc = "Run file tests" }))
+        vim.keymap.set("n", "<leader>ts", function() require("neotest").summary.toggle() end, vim.tbl_extend("force", o, { desc = "Toggle summary" }))
+        vim.keymap.set("n", "<leader>to", function() require("neotest").output.open({ enter_on_run = true }) end, vim.tbl_extend("force", o, { desc = "Show output" }))
+        vim.keymap.set("n", "<leader>tO", function() require("neotest").output_panel.toggle() end, vim.tbl_extend("force", o, { desc = "Toggle output panel" }))
+        vim.keymap.set("n", "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, vim.tbl_extend("force", o, { desc = "Debug nearest test" }))
+        vim.keymap.set("n", "<leader>tl", function() require("neotest").run.run_last() end, vim.tbl_extend("force", o, { desc = "Run last test" }))
+        vim.keymap.set("n", "<leader>tS", function() require("neotest").run.stop() end, vim.tbl_extend("force", o, { desc = "Stop test" }))
+      end
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = test_filetypes,
+        callback = function(ev) attach_test_keys(ev.buf) end,
+      })
+      -- Apply to already-open buffers (ft lazy-load fires before this autocmd registers)
+      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(buf) then
+          local ft = vim.bo[buf].filetype
+          if vim.tbl_contains(test_filetypes, ft) then attach_test_keys(buf) end
+        end
+      end
+
       -- Context-aware buffer-local keybindings
       vim.api.nvim_create_autocmd("BufEnter", {
         pattern = "*/ui-tests/src/*.spec.ts",
         callback = function(ev)
           local o = { buffer = ev.buf }
-          vim.keymap.set("n", "<leader>Tm", function()
+          vim.keymap.set("n", "<leader>tm", function()
             require("neotest").run.run({ extra_args = { "--mobile" } })
           end, vim.tbl_extend("force", o, { desc = "Run test (mobile)" }))
-          vim.keymap.set("n", "<leader>Tw", function()
+          vim.keymap.set("n", "<leader>tw", function()
             require("neotest").run.run({ extra_args = { "--watch" } })
           end, vim.tbl_extend("force", o, { desc = "Run test (watch)" }))
         end,
@@ -103,7 +117,7 @@ return {
         callback = function(ev)
           local cwd = vim.fn.getcwd()
           if not cwd:match("fl%-gaf") then return end
-          vim.keymap.set("n", "<leader>Tx", function()
+          vim.keymap.set("n", "<leader>tx", function()
             local dir = cwd
             while dir ~= "/" do
               if vim.fn.executable(dir .. "/bin/run-tests") == 1 then
@@ -125,7 +139,7 @@ return {
             vim.notify("No bin/run-tests found", vim.log.levels.WARN)
           end, { buffer = ev.buf, desc = "Setup test infra" })
 
-          vim.keymap.set("n", "<leader>TX", function()
+          vim.keymap.set("n", "<leader>tX", function()
             local dir = cwd
             while dir ~= "/" do
               if vim.fn.executable(dir .. "/bin/run-tests") == 1 then
