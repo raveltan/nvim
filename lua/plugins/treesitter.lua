@@ -5,10 +5,14 @@ return {
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter").install({
-        "bash", "css", "eruby", "html", "javascript", "json", "lua",
+        "angular", "bash", "css", "eruby", "html", "javascript", "json", "lua",
         "markdown", "markdown_inline", "php", "php_only", "python", "regex",
         "ruby", "tsx", "typescript", "vim", "vimdoc", "yaml",
       })
+      -- `angular` parser auto-injects into @Component({ template: `...` })
+      -- backtick strings via nvim-treesitter's ecma/injections.scm — no extra
+      -- query needed. The archived nvim-treesitter-angular plugin is NOT added
+      -- (superseded by mainline injections).
 
       -- Filetypes whose runtime indent/<ft>.{vim,lua} beats treesitter's indents.scm.
       -- ruby/eruby: built-in GetRubyIndent handles continuations, hanging args,

@@ -168,6 +168,30 @@ return {
     config = function() require("dap-ruby").setup() end,
   },
 
+  -- Rails-aware rdbg helpers on top of nvim-dap-ruby:
+  --   :DebugRailsServer, :DebugSolidQueueWorker, :DebugMinitestFile, ...
+  -- Spawns rdbg with correct flags for each scenario.
+  {
+    "kaka-ruto/nvim-ruby-debugger",
+    ft = "ruby",
+    dependencies = { "mfussenegger/nvim-dap", "suketa/nvim-dap-ruby" },
+    cmd = {
+      "DebugRailsServer",
+      "DebugSolidQueueWorker",
+      "DebugMinitestFile",
+      "DebugRSpecFile",
+      "DebugCurrentFile",
+    },
+    keys = {
+      { "<leader>drs", "<cmd>DebugRailsServer<cr>",      desc = "Debug Rails server" },
+      { "<leader>drq", "<cmd>DebugSolidQueueWorker<cr>", desc = "Debug SolidQueue worker" },
+      { "<leader>drm", "<cmd>DebugMinitestFile<cr>",     desc = "Debug Minitest file" },
+      { "<leader>drr", "<cmd>DebugRSpecFile<cr>",        desc = "Debug RSpec file" },
+      { "<leader>drf", "<cmd>DebugCurrentFile<cr>",      desc = "Debug current file" },
+    },
+    config = function() require("ruby_debugger").setup() end,
+  },
+
   -- SimpleCov gutter signs + summary buffer. Reads coverage/.resultset.json.
   {
     "andythigpen/nvim-coverage",

@@ -19,6 +19,7 @@ return {
       notifier = { enabled = true },
       quickfile = { enabled = true },
       scope = { enabled = true },
+      scratch = { enabled = true },
       dashboard = {
         enabled = true,
         preset = {
@@ -83,9 +84,7 @@ return {
       { "<leader>sc", function() Snacks.picker.commands() end, desc = "Commands" },
       { "<leader>sd", function() Snacks.picker.diagnostics() end, desc = "Diagnostics" },
       { "<leader>sR", function() Snacks.picker.resume() end, desc = "Resume last picker" },
-      -- LSP
-      { "<leader>ss", function() Snacks.picker.lsp_symbols() end, desc = "Document symbols" },
-      { "<leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "Workspace symbols" },
+      -- LSP (document/workspace symbols handled by namu.nvim — see productivity.lua)
       { "gd", function() Snacks.picker.lsp_definitions() end, desc = "Go to definition" },
       { "gr", function() Snacks.picker.lsp_references() end, desc = "References" },
       { "gI", function() Snacks.picker.lsp_implementations() end, desc = "Implementations" },
@@ -123,6 +122,9 @@ return {
       -- Tools
       { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
       { "<leader>fR", function() Snacks.rename.rename_file() end, desc = "Rename file" },
+      -- Scratch (project-scoped scratchpad, persisted under stdpath('data'))
+      { "<leader>.",  function() Snacks.scratch() end,        desc = "Toggle scratch buffer" },
+      { "<leader>fs", function() Snacks.scratch.select() end, desc = "Select scratch buffer" },
     },
   },
 }
