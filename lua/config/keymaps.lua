@@ -102,9 +102,6 @@ map("n", "<leader>cr", function()
     else
       params.newName = new_name
     end
-    vim.notify(string.format("rename DEBUG: pos=%d:%d newName=%q cword=%q ft=%s var=%s",
-      params.position.line, params.position.character, params.newName, cword, vim.bo[bufnr].filetype, tostring(php_is_var)),
-      vim.log.levels.INFO)
     client:request("textDocument/rename", params, function(err, result)
       if err then
         vim.notify(string.format("Rename failed: %s (code=%s data=%s)",
@@ -116,6 +113,7 @@ map("n", "<leader>cr", function()
         return
       end
       vim.lsp.util.apply_workspace_edit(result, client.offset_encoding)
+      vim.cmd("silent! wall")
     end, bufnr)
   end)
 end, { desc = "Rename symbol" })
