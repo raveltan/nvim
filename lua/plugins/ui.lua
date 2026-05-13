@@ -1,18 +1,11 @@
 return {
   -- Colorscheme
   {
-    "projekt0n/github-nvim-theme",
-    name = "github-theme",
+    "luisiacc/gruvbox-baby",
     priority = 1000,
     lazy = false,
     config = function()
-      require("github-theme").setup({
-        options = {
-          transparent = true,
-          styles = { comments = "italic" },
-        },
-      })
-      vim.cmd.colorscheme("github_dark_high_contrast")
+      vim.cmd.colorscheme("gruvbox-baby")
 
       -- Clear backgrounds for full terminal transparency
       local transparent_groups = {
@@ -106,7 +99,7 @@ return {
 
       return {
         options = {
-          theme = "github_dark_high_contrast",
+          theme = "gruvbox-baby",
           globalstatus = true,
           section_separators = { left = "", right = "" },
           component_separators = { left = "", right = "" },

@@ -10,7 +10,7 @@ return {
       lazygit = { enabled = true },
       terminal = { enabled = true },
       indent = { enabled = true, animate = { enabled = true } },
-      scroll = { enabled = false },
+      scroll = { enabled = true, animate = { duration = { step = 8, total = 150 }, easing = "outQuad" } },
       statuscolumn = { enabled = true },
       input = { enabled = true },
       rename = { enabled = true },

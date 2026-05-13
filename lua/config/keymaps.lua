@@ -157,8 +157,8 @@ map("n", "gw", function()
 end, { desc = "Grep word under cursor" })
 
 -- Center after jumps
-map("n", "<C-d>", "<C-d>zz", { desc = "Half page down (centered)" })
-map("n", "<C-u>", "<C-u>zz", { desc = "Half page up (centered)" })
+map("n", "<C-d>", "10jzz", { desc = "Small jump down (centered)" })
+map("n", "<C-u>", "10kzz", { desc = "Small jump up (centered)" })
 map("n", "n", [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>zzzv]], { desc = "Next search result (centered)" })
 map("n", "N", [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>zzzv]], { desc = "Prev search result (centered)" })
 
