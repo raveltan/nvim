@@ -117,12 +117,38 @@ return {
 
       -- ruby_lsp CodeLens: handle rubyLsp.openFile execute_command requests
       -- so route → controller action and action → view links work.
+      -- URI may carry `#L<line>` fragment; strip it and jump to that line.
       vim.lsp.commands["rubyLsp.openFile"] = function(cmd)
-        local uri = cmd.arguments and cmd.arguments[1]
-        if not uri then return end
-        if type(uri) == "table" then uri = uri[1] end
-        vim.cmd("edit " .. vim.uri_to_fname(uri))
+        local arg = cmd.arguments and cmd.arguments[1]
+        if not arg then return end
+        if type(arg) == "table" then arg = arg[1] end
+        local uri, line = arg:match("^(.+)#L(%d+)$")
+        if not uri then uri = arg end
+        local bufnr = vim.uri_to_bufnr(uri)
+        vim.fn.bufload(bufnr)
+        vim.api.nvim_set_option_value("buflisted", true, { buf = bufnr })
+        vim.api.nvim_set_current_buf(bufnr)
+        vim.api.nvim_win_set_cursor(0, { tonumber(line) or 1, 0 })
       end
+
+      -- Auto-refresh codelens on Ruby buffers (LSP codelens not refreshed by default).
+      vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
+        pattern = { "*.rb", "*.erb" },
+        callback = function(args)
+          if next(vim.lsp.get_clients({ bufnr = args.buf })) then
+            vim.lsp.codelens.refresh({ bufnr = args.buf })
+          end
+        end,
+      })
+
+      -- Run codelens under cursor (Ruby buffers).
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "ruby", "eruby" },
+        callback = function(args)
+          vim.keymap.set("n", "<leader>cc", vim.lsp.codelens.run,
+            { buffer = args.buf, desc = "Run codelens" })
+        end,
+      })
     end,
   },
 

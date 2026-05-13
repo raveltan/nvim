@@ -235,4 +235,53 @@ return {
     },
     opts = { highlight = true, highlight_duration = 250 },
   },
+
+  -- lensline.nvim: inline lens info (refs, git blame, complexity, diagnostics)
+  -- above functions. Independent of LSP codelens — own virtual-text renderer.
+  -- Runs on all source filetypes; only noisy plugin buffers excluded.
+  {
+    "oribarilan/lensline.nvim",
+    event = { "LspAttach" },
+    opts = function()
+      local lp = require("util.lens_providers")
+      return {
+      profiles = {
+        {
+          name = "default",
+          providers = {
+            { name = "references", enabled = true },
+            { name = "last_author", enabled = true },
+            { name = "diagnostics", enabled = true, min_level = "WARN" },
+            { name = "complexity", enabled = true, min_level = "M" },
+            {
+              name = "line_count",
+              enabled = true,
+              event = { "BufWritePost", "BufEnter" },
+              handler = function(_, fi, _, cb)
+                if not (fi and fi.line and fi.end_line) then return end
+                local n = fi.end_line - fi.line + 1
+                if n > 1 then cb({ line = fi.line, text = ("%d ln"):format(n) }) end
+              end,
+            },
+            vim.tbl_extend("force", lp.auth_gate, { enabled = true }),
+            vim.tbl_extend("force", lp.logger_count, { enabled = true }),
+          },
+        },
+      },
+      style = {
+        placement = "above",
+        prefix = "󰍉 ",
+        separator = " • ",
+        use_nerdfont = true,
+      },
+      limits = {
+        exclude = {
+          "lazy", "mason", "TelescopePrompt", "neo-tree", "trouble",
+          "help", "qf", "snacks_picker_list", "snacks_picker_input",
+        },
+        max_lines = 5000,
+      },
+    }
+    end,
+  },
 }
