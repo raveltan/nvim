@@ -281,5 +281,251 @@
     "prefix": "vcrendererb",
     "description": "<%= render XComponent.new %>",
     "body": ["<%= render(${1:Name}Component.new(${2:args})) %>$0"]
+  },
+  "Form fields_for": {
+    "prefix": "fieldset",
+    "description": "f.fields_for nested",
+    "body": [
+      "<%= f.fields_for :${1:assoc} do |g| %>",
+      "\t$0",
+      "<% end %>"
+    ]
+  },
+  "Form label": {
+    "prefix": "flabel",
+    "description": "f.label",
+    "body": ["<%= f.label :${1:attr} %>$0"]
+  },
+  "Form text_field": {
+    "prefix": "ftext",
+    "description": "f.text_field",
+    "body": ["<%= f.text_field :${1:attr}${2:, class: 'form-control'} %>$0"]
+  },
+  "Form text_area": {
+    "prefix": "ftextarea",
+    "description": "f.text_area",
+    "body": ["<%= f.text_area :${1:attr}${2:, rows: 4} %>$0"]
+  },
+  "Form email_field": {
+    "prefix": "femail",
+    "description": "f.email_field",
+    "body": ["<%= f.email_field :${1:email} %>$0"]
+  },
+  "Form password_field": {
+    "prefix": "fpassword",
+    "description": "f.password_field",
+    "body": ["<%= f.password_field :${1:password} %>$0"]
+  },
+  "Form number_field": {
+    "prefix": "fnumber",
+    "description": "f.number_field",
+    "body": ["<%= f.number_field :${1:attr}${2:, step: 1} %>$0"]
+  },
+  "Form date_field": {
+    "prefix": "fdate",
+    "description": "f.date_field",
+    "body": ["<%= f.date_field :${1:attr} %>$0"]
+  },
+  "Form check_box": {
+    "prefix": "fcheck",
+    "description": "f.check_box",
+    "body": ["<%= f.check_box :${1:attr} %>$0"]
+  },
+  "Form radio_button": {
+    "prefix": "fradio",
+    "description": "f.radio_button",
+    "body": ["<%= f.radio_button :${1:attr}, ${2:value} %>$0"]
+  },
+  "Form hidden_field": {
+    "prefix": "fhidden",
+    "description": "f.hidden_field",
+    "body": ["<%= f.hidden_field :${1:attr}${2:, value: ${3:val}} %>$0"]
+  },
+  "Form file_field": {
+    "prefix": "ffile",
+    "description": "f.file_field",
+    "body": ["<%= f.file_field :${1:attr}${2:, multiple: true} %>$0"]
+  },
+  "Form select": {
+    "prefix": "fselect",
+    "description": "f.select w/ options_for_select",
+    "body": [
+      "<%= f.select :${1:attr}, options_for_select(${2:[['Label', 'value']]}, ${3:@record}.${1}) %>$0"
+    ]
+  },
+  "Form collection_select": {
+    "prefix": "fcollection",
+    "description": "f.collection_select",
+    "body": [
+      "<%= f.collection_select :${1:assoc_id}, ${2:Scope.all}, :${3:id}, :${4:name}${5:, include_blank: true} %>$0"
+    ]
+  },
+  "select_tag": {
+    "prefix": "selecttag",
+    "description": "select_tag",
+    "body": [
+      "<%= select_tag :${1:name}, options_for_select(${2:[['Label', 'value']]}) %>$0"
+    ]
+  },
+  "options_for_select": {
+    "prefix": "optsfor",
+    "description": "options_for_select",
+    "body": ["options_for_select(${1:[['Label', 'value']]}${2:, ${3:selected}})$0"]
+  },
+  "options_from_collection_for_select": {
+    "prefix": "optsfromcoll",
+    "description": "options_from_collection_for_select",
+    "body": [
+      "options_from_collection_for_select(${1:scope}, :${2:id}, :${3:name}${4:, ${5:selected}})$0"
+    ]
+  },
+  "mail_to": {
+    "prefix": "mailto",
+    "description": "mail_to helper",
+    "body": ["<%= mail_to ${1:@user}.email${2:, ${1}.name} %>$0"]
+  },
+  "number_with_delimiter": {
+    "prefix": "numberwith",
+    "description": "number_with_delimiter",
+    "body": ["<%= number_with_delimiter(${1:value}) %>$0"]
+  },
+  "number_to_percentage": {
+    "prefix": "numberpct",
+    "description": "number_to_percentage",
+    "body": ["<%= number_to_percentage(${1:value}, precision: ${2:2}) %>$0"]
+  },
+  "truncate": {
+    "prefix": "truncate",
+    "description": "truncate helper",
+    "body": ["<%= truncate(${1:text}, length: ${2:30}) %>$0"]
+  },
+  "pluralize": {
+    "prefix": "pluralize",
+    "description": "pluralize helper",
+    "body": ["<%= pluralize(${1:count}, '${2:word}') %>$0"]
+  },
+  "dom_id": {
+    "prefix": "domid",
+    "description": "dom_id helper",
+    "body": ["<%= dom_id(${1:@record}${2:, :${3:prefix}}) %>$0"]
+  },
+  "dom_class": {
+    "prefix": "domclass",
+    "description": "dom_class helper",
+    "body": ["<%= dom_class(${1:@record}${2:, :${3:prefix}}) %>$0"]
+  },
+  "time_tag": {
+    "prefix": "timetag",
+    "description": "time_tag",
+    "body": ["<%= time_tag ${1:@record}.created_at${2:, l(${1}.created_at)} %>$0"]
+  },
+  "javascript_include_tag": {
+    "prefix": "jstag",
+    "description": "javascript_include_tag",
+    "body": ["<%= javascript_include_tag '${1:application}'${2:, defer: true} %>$0"]
+  },
+  "stylesheet_link_tag": {
+    "prefix": "csstag",
+    "description": "stylesheet_link_tag",
+    "body": ["<%= stylesheet_link_tag '${1:application}'${2:, media: 'all'} %>$0"]
+  },
+  "javascript_importmap_tags": {
+    "prefix": "jsimportmap",
+    "description": "javascript_importmap_tags",
+    "body": ["<%= javascript_importmap_tags %>$0"]
+  },
+  "HTML5 layout": {
+    "prefix": "layouthtml",
+    "description": "full Rails HTML5 layout",
+    "body": [
+      "<!DOCTYPE html>",
+      "<html>",
+      "\t<head>",
+      "\t\t<title><%= content_for?(:title) ? yield(:title) : '${1:App}' %></title>",
+      "\t\t<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">",
+      "\t\t<%= csrf_meta_tags %>",
+      "\t\t<%= csp_meta_tag %>",
+      "\t\t<%= stylesheet_link_tag 'application', media: 'all' %>",
+      "\t\t<%= javascript_importmap_tags %>",
+      "\t</head>",
+      "\t<body>",
+      "\t\t<%= yield %>$0",
+      "\t</body>",
+      "</html>"
+    ]
+  },
+  "meta tag": {
+    "prefix": "metatag",
+    "description": "tag.meta",
+    "body": ["<%= tag.meta name: '${1:name}', content: '${2:content}' %>$0"]
+  },
+  "head title": {
+    "prefix": "headtitle",
+    "description": "title fallback",
+    "body": [
+      "<title><%= content_for?(:title) ? yield(:title) : '${1:App}' %></title>$0"
+    ]
+  },
+  "simple_form_for": {
+    "prefix": "simpleform",
+    "description": "simple_form_for",
+    "body": [
+      "<%= simple_form_for ${1:@resource} do |f| %>",
+      "\t$0",
+      "\t<%= f.button :submit %>",
+      "<% end %>"
+    ]
+  },
+  "simple_form input": {
+    "prefix": "sfinput",
+    "description": "simple_form f.input",
+    "body": ["<%= f.input :${1:attr}${2:, as: :${3:string}} %>$0"]
+  },
+  "simple_form button": {
+    "prefix": "sfbutton",
+    "description": "simple_form f.button",
+    "body": ["<%= f.button :submit${1:, '${2:Save}'} %>$0"]
+  },
+  "link_to block": {
+    "prefix": "linkblock",
+    "description": "link_to block form",
+    "body": [
+      "<%= link_to ${1:path}${2:, class: 'btn'} do %>",
+      "\t$0",
+      "<% end %>"
+    ]
+  },
+  "button_to block": {
+    "prefix": "buttontoblock",
+    "description": "button_to block form",
+    "body": [
+      "<%= button_to ${1:path}, method: :${2:post} do %>",
+      "\t$0",
+      "<% end %>"
+    ]
+  },
+  "current_page?": {
+    "prefix": "currentpage",
+    "description": "current_page? guard",
+    "body": [
+      "<% if current_page?(${1:path}) %>",
+      "\t$0",
+      "<% end %>"
+    ]
+  },
+  "concat helper": {
+    "prefix": "concat",
+    "description": "concat output",
+    "body": ["<% concat(${1:value}) %>$0"]
+  },
+  "raw html": {
+    "prefix": "rawhtml",
+    "description": "raw(html)",
+    "body": ["<%= raw(${1:html}) %>$0"]
+  },
+  "html_safe": {
+    "prefix": "htmlsafe",
+    "description": ".html_safe",
+    "body": ["<%= ${1:text}.html_safe %>$0"]
   }
 }

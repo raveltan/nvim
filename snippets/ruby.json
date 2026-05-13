@@ -1552,5 +1552,216 @@
       "\tfields :${2:name}, :${3:email}$0",
       "end"
     ]
+  },
+  "Sorbet typed true": {
+    "prefix": "tmagic",
+    "description": "# typed: true",
+    "body": ["# typed: true", "$0"]
+  },
+  "Sorbet typed strict": {
+    "prefix": "tstrict",
+    "description": "# typed: strict",
+    "body": ["# typed: strict", "$0"]
+  },
+  "Sorbet typed strong": {
+    "prefix": "tstrong",
+    "description": "# typed: strong",
+    "body": ["# typed: strong", "$0"]
+  },
+  "Sorbet typed false": {
+    "prefix": "tfalse",
+    "description": "# typed: false",
+    "body": ["# typed: false", "$0"]
+  },
+  "Sorbet typed ignore": {
+    "prefix": "tignore",
+    "description": "# typed: ignore",
+    "body": ["# typed: ignore", "$0"]
+  },
+  "Sorbet extend T::Sig": {
+    "prefix": "extendsig",
+    "description": "extend T::Sig",
+    "body": ["extend T::Sig$0"]
+  },
+  "Sorbet sig": {
+    "prefix": "sig",
+    "description": "sig { params(...).returns(...) }",
+    "body": ["sig { params(${1:name}: ${2:Type}).returns(${3:Type}) }$0"]
+  },
+  "Sorbet sig void": {
+    "prefix": "sigvoid",
+    "description": "sig { params(...).void }",
+    "body": ["sig { params(${1:name}: ${2:Type}).void }$0"]
+  },
+  "Sorbet sig no args": {
+    "prefix": "signoarg",
+    "description": "sig { returns(Type) }",
+    "body": ["sig { returns(${1:Type}) }$0"]
+  },
+  "Sorbet sig abstract": {
+    "prefix": "sigabs",
+    "description": "sig { abstract.params.returns }",
+    "body": ["sig { abstract.params(${1:name}: ${2:Type}).returns(${3:Type}) }$0"]
+  },
+  "Sorbet sig override": {
+    "prefix": "sigover",
+    "description": "sig { override.params.returns }",
+    "body": ["sig { override.params(${1:name}: ${2:Type}).returns(${3:Type}) }$0"]
+  },
+  "Sorbet sig overridable": {
+    "prefix": "sigoverridable",
+    "description": "sig { overridable.returns }",
+    "body": ["sig { overridable.returns(${1:Type}) }$0"]
+  },
+  "Sorbet T.let": {
+    "prefix": "tlet",
+    "description": "T.let(value, Type)",
+    "body": ["T.let(${1:value}, ${2:Type})$0"]
+  },
+  "Sorbet T.must": {
+    "prefix": "tmust",
+    "description": "T.must(value)",
+    "body": ["T.must(${1:value})$0"]
+  },
+  "Sorbet T.cast": {
+    "prefix": "tcast",
+    "description": "T.cast(value, Type)",
+    "body": ["T.cast(${1:value}, ${2:Type})$0"]
+  },
+  "Sorbet T.unsafe": {
+    "prefix": "tunsafe",
+    "description": "T.unsafe(value)",
+    "body": ["T.unsafe(${1:value})$0"]
+  },
+  "Sorbet T.nilable": {
+    "prefix": "tnilable",
+    "description": "T.nilable(Type)",
+    "body": ["T.nilable(${1:Type})$0"]
+  },
+  "Sorbet T::Array": {
+    "prefix": "tarr",
+    "description": "T::Array[Type]",
+    "body": ["T::Array[${1:Type}]$0"]
+  },
+  "Sorbet T::Hash": {
+    "prefix": "thash",
+    "description": "T::Hash[K, V]",
+    "body": ["T::Hash[${1:Symbol}, ${2:Type}]$0"]
+  },
+  "Sorbet T::Set": {
+    "prefix": "tset",
+    "description": "T::Set[Type]",
+    "body": ["T::Set[${1:Type}]$0"]
+  },
+  "Sorbet T::Enum": {
+    "prefix": "tenum",
+    "description": "T::Enum subclass",
+    "body": [
+      "class ${1:Name} < T::Enum",
+      "\tenums do",
+      "\t\t${2:VariantA} = new('${2}')",
+      "\t\t${3:VariantB} = new('${3}')$0",
+      "\tend",
+      "end"
+    ]
+  },
+  "Sorbet T::Struct": {
+    "prefix": "tstruct",
+    "description": "T::Struct subclass",
+    "body": [
+      "class ${1:Name} < T::Struct",
+      "\tconst :${2:id}, ${3:Integer}",
+      "\tprop :${4:name}, ${5:String}$0",
+      "end"
+    ]
+  },
+  "Sorbet prop": {
+    "prefix": "tprop",
+    "description": "prop :name, Type",
+    "body": ["prop :${1:name}, ${2:Type}$0"]
+  },
+  "Sorbet const": {
+    "prefix": "tconst",
+    "description": "const :name, Type",
+    "body": ["const :${1:name}, ${2:Type}$0"]
+  },
+  "Sorbet interface module": {
+    "prefix": "tinterface",
+    "description": "interface! module skeleton",
+    "body": [
+      "module ${1:Name}",
+      "\textend T::Sig",
+      "\textend T::Helpers",
+      "\tinterface!",
+      "",
+      "\tsig { abstract.params(${2:arg}: ${3:Type}).returns(${4:Type}) }",
+      "\tdef ${5:method}(${2}); end$0",
+      "end"
+    ]
+  },
+  "Sorbet abstract class": {
+    "prefix": "tabstract",
+    "description": "abstract! class skeleton",
+    "body": [
+      "class ${1:Name}",
+      "\textend T::Sig",
+      "\textend T::Helpers",
+      "\tabstract!",
+      "$0",
+      "end"
+    ]
+  },
+  "Sorbet final!": {
+    "prefix": "tfinal",
+    "description": "final!",
+    "body": ["final!$0"]
+  },
+  "Sorbet sealed!": {
+    "prefix": "tsealed",
+    "description": "sealed!",
+    "body": ["sealed!$0"]
+  },
+  "Sorbet mixes_in_class_methods": {
+    "prefix": "tmixesin",
+    "description": "mixes_in_class_methods",
+    "body": ["mixes_in_class_methods(${1:ClassMethods})$0"]
+  },
+  "Sorbet T.assert_type!": {
+    "prefix": "tassertype",
+    "description": "T.assert_type!",
+    "body": ["T.assert_type!(${1:value}, ${2:Type})$0"]
+  },
+  "Sorbet abstract method": {
+    "prefix": "tabsmethod",
+    "description": "abstract method w/ sig",
+    "body": [
+      "sig { abstract.params(${1:arg}: ${2:Type}).returns(${3:Type}) }",
+      "def ${4:method}(${1}); end$0"
+    ]
+  },
+  "Sorbet sig block proc": {
+    "prefix": "tsigblock",
+    "description": "sig w/ block proc",
+    "body": [
+      "sig { params(blk: T.proc.params(${1:arg}: ${2:Type}).void).void }",
+      "def ${3:method}(&blk)",
+      "\t$0",
+      "end"
+    ]
+  },
+  "Sorbet T.self_type": {
+    "prefix": "tselftype",
+    "description": "T.self_type",
+    "body": ["T.self_type$0"]
+  },
+  "Sorbet T.attached_class": {
+    "prefix": "tattachedclass",
+    "description": "T.attached_class",
+    "body": ["T.attached_class$0"]
+  },
+  "Sorbet T.class_of": {
+    "prefix": "tclassof",
+    "description": "T.class_of(Klass)",
+    "body": ["T.class_of(${1:Klass})$0"]
   }
 }
