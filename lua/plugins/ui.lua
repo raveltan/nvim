@@ -170,6 +170,7 @@ return {
         pattern = {
           "help", "alpha", "dashboard", "neo-tree", "Trouble", "trouble",
           "lazy", "mason", "notify", "toggleterm", "lazyterm", "snacks_dashboard",
+          "satellite", "undotree", "diff", "dap-view", "dap-view-term", "dap-repl",
         },
         callback = function() vim.b.miniindentscope_disable = true end,
       })
@@ -219,6 +220,50 @@ return {
     opts = {
       window = { width = 120 },
     },
+  },
+
+  -- Decorated scrollbar (diagnostics, git hunks, marks, search, cursor)
+  {
+    "lewis6991/satellite.nvim",
+    event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "lewis6991/gitsigns.nvim" },
+    opts = {
+      current_only = false,
+      winblend = 50,
+      zindex = 40,
+      excluded_filetypes = {
+        "dashboard", "snacks_dashboard", "alpha", "starter",
+        "help", "lazy", "mason", "TelescopeResults", "TelescopePrompt",
+        "trouble", "Trouble", "oil", "undotree", "diff",
+        "dap-view", "dap-view-term", "dap-repl",
+        "noice", "checkhealth", "qf", "grug-far",
+        "DiffviewFiles", "DiffviewFileHistory",
+        "fugitive", "fugitiveblame", "git",
+        "markview", "codecompanion", "Avante",
+      },
+      handlers = {
+        cursor      = { enable = true, overlap = true, priority = 1000 },
+        search      = { enable = true, overlap = true, priority = 10 },
+        diagnostic  = { enable = true, signs = { "-", "=", "≡" }, min_severity = vim.diagnostic.severity.HINT },
+        gitsigns    = { enable = true, signs = { add = "│", change = "│", delete = "-" } },
+        marks       = { enable = true, show_builtins = false, key = "m" },
+        quickfix    = { enable = true, signs = { "-", "=", "≡" } },
+      },
+    },
+    config = function(_, opts)
+      require("satellite").setup(opts)
+      -- Match transparent theme
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = function()
+          vim.api.nvim_set_hl(0, "SatelliteBar", { bg = "#30363d" })
+          vim.api.nvim_set_hl(0, "SatelliteBackground", { bg = "NONE" })
+        end,
+      })
+      pcall(function()
+        vim.api.nvim_set_hl(0, "SatelliteBar", { bg = "#30363d" })
+        vim.api.nvim_set_hl(0, "SatelliteBackground", { bg = "NONE" })
+      end)
+    end,
   },
 
   -- UI polish
