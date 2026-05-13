@@ -78,13 +78,37 @@ map("n", "<leader>cr", function()
 
   local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
   local cword = vim.fn.expand("<cword>")
+  local is_php = vim.bo[bufnr].filetype == "php"
+  local php_is_var = false
+  if is_php then
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local line = vim.api.nvim_buf_get_lines(bufnr, row - 1, row, false)[1] or ""
+    -- Look backward from cursor for `$` immediately preceding the identifier
+    local before = line:sub(1, col + 1)
+    if before:match("%$[%w_]*$") then
+      php_is_var = true
+    end
+    cword = cword:gsub("^%$", "")
+  end
 
   vim.ui.input({ prompt = "Rename: ", default = cword }, function(new_name)
-    if not new_name or new_name == "" or new_name == cword then return end
-    params.newName = new_name
+    if not new_name or new_name == "" then return end
+    if is_php then
+      new_name = new_name:gsub("^%$", "")
+    end
+    if new_name == cword then return end
+    if php_is_var then
+      params.newName = "$" .. new_name
+    else
+      params.newName = new_name
+    end
+    vim.notify(string.format("rename DEBUG: pos=%d:%d newName=%q cword=%q ft=%s var=%s",
+      params.position.line, params.position.character, params.newName, cword, vim.bo[bufnr].filetype, tostring(php_is_var)),
+      vim.log.levels.INFO)
     client:request("textDocument/rename", params, function(err, result)
       if err then
-        vim.notify("Rename failed: " .. err.message, vim.log.levels.ERROR)
+        vim.notify(string.format("Rename failed: %s (code=%s data=%s)",
+          err.message, tostring(err.code), vim.inspect(err.data)), vim.log.levels.ERROR)
         return
       end
       if not result then
