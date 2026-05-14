@@ -5,13 +5,16 @@
 # (GAF_TEST_WORKER_ID), setup, and teardown are handled by the upstream
 # tool — we don't reimplement any of it here.
 #
-# Two transformations:
-# 1. --filter values are re-encoded so spaces become \s. bin/run-tests
-#    word-splits flags via `read -r -a flag_args <<< "$1"`, which would
-#    otherwise shred the value (neotest-phpunit emits filters like
-#    "::testName( with data set .*)?$"). PHPUnit's --filter is PCRE so
-#    \s matches the same characters.
-# 2. --log-junit is redirected to a project-local temp file (Docker only
+# Three transformations:
+# 1. --filter is normalised to the one-arg "--filter=VALUE" form. neotest-phpunit
+#    emits the two-arg form ("--filter" "VALUE"), but bin/run-tests' top-level
+#    flag loop only collects args matching --*, so a bare value gets dropped and
+#    phpunit ends up with `--filter <test_path>` — no test matches, no junit XML.
+# 2. --filter values have spaces re-encoded to \s. bin/run-tests word-splits
+#    flags via `read -r -a flag_args <<< "$1"`, which would otherwise shred the
+#    value (neotest-phpunit emits filters like "::testName( with data set .*)?$").
+#    PHPUnit's --filter is PCRE so \s matches the same characters.
+# 3. --log-junit is redirected to a project-local temp file (Docker only
 #    mounts the project dir), then copied to the path neotest expects.
 #
 # Always runs with SETUP=false. Infrastructure must be brought up explicitly
@@ -40,14 +43,17 @@ NEXT_IS_FILTER=0
 
 for arg in "$@"; do
     if [[ $NEXT_IS_FILTER -eq 1 ]]; then
-        # Re-encode spaces in filter regex so bin/run-tests' word-split keeps it intact.
-        PASSTHROUGH+=("${arg// /\\s}")
+        # Merge two-arg "--filter VALUE" into one-arg "--filter=VALUE" form.
+        # bin/run-tests' top-level loop only collects args matching --*, so a bare
+        # value would be dropped, leaving phpunit with --filter <next-arg> and no
+        # test match. Spaces also re-encoded to \s so the later read -r -a split
+        # keeps the value intact.
+        PASSTHROUGH+=("--filter=${arg// /\\s}")
         NEXT_IS_FILTER=0
     elif [[ "$arg" == --filter=* ]]; then
         value="${arg#--filter=}"
         PASSTHROUGH+=("--filter=${value// /\\s}")
     elif [[ "$arg" == "--filter" ]]; then
-        PASSTHROUGH+=("$arg")
         NEXT_IS_FILTER=1
     elif [[ "$arg" == --log-junit=* ]]; then
         ORIGINAL_JUNIT="${arg#--log-junit=}"
