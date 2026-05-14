@@ -72,6 +72,20 @@ return {
         discovery = { enabled = false },
         status = { virtual_text = true, signs = true },
         output = { open_on_run = "short" },
+        watch = {
+          symbol_queries = {
+            php = [[
+              ;query
+              ;use Foo\Bar; / use Foo\Bar as Baz;
+              (namespace_use_clause (qualified_name (name) @symbol))
+              (namespace_use_clause (name) @symbol)
+              ;new Foo(), Foo::method(), Foo::CONST
+              (object_creation_expression (name) @symbol)
+              (class_constant_access_expression (name) @symbol)
+              (scoped_call_expression scope: (name) @symbol)
+            ]],
+          },
+        },
       }
     end,
     config = function(_, opts)
