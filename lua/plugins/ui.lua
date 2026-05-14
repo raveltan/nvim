@@ -259,6 +259,67 @@ return {
     end,
   },
 
+  -- Colored function arguments via Treesitter
+  {
+    "m-demare/hlargs.nvim",
+    event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {},
+  },
+
+  -- Flash beacon on cursor jump / buffer switch
+  {
+    "DanilaMihailov/beacon.nvim",
+    event = "VeryLazy",
+    opts = {
+      minimal_jump = 10,
+      ignore_buffers = { "terminal", "nofile" },
+      ignore_filetypes = {
+        "snacks_dashboard", "alpha", "dashboard", "neo-tree", "lazy",
+        "mason", "trouble", "Trouble", "oil", "noice",
+      },
+    },
+  },
+
+  -- Animated colored separator on active window
+  {
+    "nvim-zh/colorful-winsep.nvim",
+    event = { "WinNew" },
+    opts = {
+      hi = { fg = "#8ec07c" },
+      no_exec_files = { "packer", "TelescopePrompt", "mason", "snacks_dashboard", "alpha" },
+    },
+  },
+
+  -- Buffer dissolve effects (:CellularAutomaton make_it_rain / game_of_life)
+  {
+    "eandrju/cellular-automaton.nvim",
+    cmd = "CellularAutomaton",
+    keys = {
+      { "<leader>ufr", "<cmd>CellularAutomaton make_it_rain<cr>", desc = "Make it rain" },
+      { "<leader>ufg", "<cmd>CellularAutomaton game_of_life<cr>", desc = "Game of life" },
+    },
+  },
+
+  -- Wandering duck (:DuckHatch / :DuckCook)
+  {
+    "tamton-aquib/duck.nvim",
+    cmd = { "DuckHatch", "DuckCook", "DuckKill", "DuckCookAll", "DuckKillAll" },
+    keys = {
+      -- winborder=rounded is global; temp-disable so duck floats spawn borderless
+      { "<leader>udd", function()
+          local p = vim.o.winborder; vim.o.winborder = "none"
+          require("duck").hatch(); vim.o.winborder = p
+        end, desc = "Hatch duck" },
+      { "<leader>udk", function() require("duck").cook() end, desc = "Cook one duck" },
+      { "<leader>uda", function()
+          local p = vim.o.winborder; vim.o.winborder = "none"
+          require("duck").hatch("🦆", 10); vim.o.winborder = p
+        end, desc = "Hatch fast duck" },
+      { "<leader>udK", function() require("duck").cook_all() end, desc = "Cook all ducks" },
+    },
+  },
+
   -- UI polish
   {
     "folke/noice.nvim",

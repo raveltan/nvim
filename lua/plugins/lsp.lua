@@ -272,9 +272,10 @@ return {
     "saghen/blink.cmp",
     event = "InsertEnter",
     version = "1.*",
-    dependencies = { "rafamadriz/friendly-snippets", "L3MON4D3/LuaSnip" },
+    dependencies = { "rafamadriz/friendly-snippets", "L3MON4D3/LuaSnip", "onsails/lspkind.nvim" },
     ---@type blink.cmp.Config
-    opts = {
+    opts = function()
+      return {
       enabled = function()
         return vim.bo.filetype ~= "grug-far"
       end,
@@ -298,11 +299,19 @@ return {
           "fallback",
         },
       },
-      appearance = { nerd_font_variant = "mono" },
+      appearance = {
+        nerd_font_variant = "mono",
+        kind_icons = require("lspkind").symbol_map,
+      },
       snippets = { preset = "luasnip" },
       completion = {
         accept = { resolve_timeout_ms = 500 },
-        documentation = { auto_show = true },
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 200,
+          window = { border = "rounded", winblend = 0 },
+        },
+        ghost_text = { enabled = true },
         -- Explicitly pin trigger behavior. Defaults should match this but
         -- pinning rules out a default drift across blink versions.
         trigger = {
@@ -310,10 +319,31 @@ return {
           show_on_trigger_character = true,
           show_on_insert_on_trigger_character = true,
         },
-        menu = { auto_show = true },
+        menu = {
+          auto_show = true,
+          border = "rounded",
+          winblend = 0,
+          scrollbar = false,
+          draw = {
+            treesitter = { "lsp" },
+            columns = {
+              { "kind_icon", "label", "label_description", gap = 1 },
+              { "kind", gap = 1 },
+            },
+            components = {
+              kind_icon = {
+                text = function(ctx) return " " .. ctx.kind_icon .. ctx.icon_gap .. " " end,
+                highlight = function(ctx) return "BlinkCmpKind" .. ctx.kind end,
+              },
+              kind = {
+                highlight = function(ctx) return "BlinkCmpKind" .. ctx.kind end,
+              },
+            },
+          },
+        },
         list = { selection = { preselect = true, auto_insert = false } },
       },
-      signature = { enabled = true },
+      signature = { enabled = true, window = { border = "rounded" } },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
         providers = {
@@ -321,6 +351,7 @@ return {
         },
       },
       fuzzy = { implementation = "prefer_rust" },
-    },
+      }
+    end,
   },
 }
