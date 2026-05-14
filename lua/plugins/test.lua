@@ -84,6 +84,30 @@ return {
               (class_constant_access_expression (name) @symbol)
               (scoped_call_expression scope: (name) @symbol)
             ]],
+            ruby = [[
+              ;query
+              ;require "foo" / require_relative "foo"
+              (call
+                method: (identifier) @_method (#match? @_method "^require(_relative)?$")
+                arguments: (argument_list (string (string_content) @symbol)))
+              ;rspec — describe/context ClassName
+              (call
+                method: (identifier) @_ (#match? @_ "^(describe|context)")
+                arguments: (argument_list (constant) @symbol))
+              ;rspec — describe/context Namespaced::Class
+              (call
+                method: (identifier)
+                arguments: (argument_list
+                  (scope_resolution
+                    name: (constant) @symbol)))
+              ;Rails minitest — class FooTest < Parent (parent links to base test class)
+              (class
+                superclass: (superclass (constant) @symbol))
+              ;Class method calls — User.find, User.new
+              (call receiver: (constant) @symbol)
+              ;Namespaced class method calls — Admin::User.find
+              (call receiver: (scope_resolution name: (constant) @symbol))
+            ]],
           },
         },
       }
