@@ -2,12 +2,14 @@ return {
   {
     "maskudo/devdocs.nvim",
     dependencies = { "folke/snacks.nvim" },
-    cmd = { "DevDocs", "DevDocsOpen", "DevDocsJump", "DevDocsGrep", "DevDocsGrepAll" },
+    cmd = { "DevDocs", "DevDocsOpen", "DevDocsJump", "DevDocsGrep", "DevDocsGrepAll", "DevDocsGrepVisual", "DevDocsGrepVisualAll" },
     keys = {
       { "<leader>ko", "<cmd>DevDocsOpen<cr>",     desc = "DevDocs open (pick doc → file)" },
       { "<leader>kj", "<cmd>DevDocsJump<cr>",     desc = "DevDocs jump file in last doc" },
       { "<leader>ks", "<cmd>DevDocsGrep<cr>",     desc = "DevDocs grep in last doc" },
       { "<leader>kS", "<cmd>DevDocsGrepAll<cr>",  desc = "DevDocs grep all installed" },
+      { "<leader>ks", "<cmd>DevDocsGrepVisual<cr>",    mode = "x", desc = "DevDocs grep selection in last doc" },
+      { "<leader>kS", "<cmd>DevDocsGrepVisualAll<cr>", mode = "x", desc = "DevDocs grep selection all docs" },
       { "<leader>ki", "<cmd>DevDocs install<cr>", desc = "DevDocs install" },
       { "<leader>kf", "<cmd>DevDocs fetch<cr>",   desc = "DevDocs fetch index" },
       { "<leader>kd", "<cmd>DevDocs delete<cr>",  desc = "DevDocs delete" },
@@ -151,15 +153,59 @@ return {
         })
       end
 
-      local function grep_in_doc(slug)
+      local function grep_in_doc(slug, seed)
         local dir = DD.GetDocDir(slug)
         last_doc = slug
         Snacks.picker.grep({
           cwd = dir,
           prompt = slug .. " grep ❯ ",
+          search = seed,
           confirm = "edit_vsplit",
         })
       end
+
+      local function visual_selection()
+        local mode = vim.fn.mode()
+        local s_start, s_end, region_type
+        if mode == "v" or mode == "V" or mode == "\22" then
+          s_start = vim.fn.getpos("v")
+          s_end = vim.fn.getpos(".")
+          region_type = mode
+        else
+          s_start = vim.fn.getpos("'<")
+          s_end = vim.fn.getpos("'>")
+          region_type = "v"
+        end
+        local ok, lines = pcall(vim.fn.getregion, s_start, s_end, { type = region_type })
+        if not ok or not lines or #lines == 0 then return "" end
+        return table.concat(lines, " "):gsub("^%s+", ""):gsub("%s+$", "")
+      end
+
+      local function grep_visual()
+        local sel = visual_selection()
+        if sel == "" then return end
+        vim.api.nvim_input("<Esc>")
+        if last_doc then
+          grep_in_doc(last_doc, sel)
+        else
+          pick_doc(function(s) grep_in_doc(s, sel) end)
+        end
+      end
+
+      local function grep_visual_all()
+        local sel = visual_selection()
+        if sel == "" then return end
+        vim.api.nvim_input("<Esc>")
+        Snacks.picker.grep({
+          cwd = docs_root,
+          prompt = "All docs grep ❯ ",
+          search = sel,
+          confirm = "edit_vsplit",
+        })
+      end
+
+      vim.api.nvim_create_user_command("DevDocsGrepVisual", grep_visual, { range = true })
+      vim.api.nvim_create_user_command("DevDocsGrepVisualAll", grep_visual_all, { range = true })
 
       local function with_last_or_pick(fn)
         if last_doc then fn(last_doc) else pick_doc(fn) end
