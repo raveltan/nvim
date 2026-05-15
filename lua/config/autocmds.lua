@@ -88,17 +88,6 @@ autocmd("BufReadPost", {
   end,
 })
 
--- Disable relativenumber on large files (>2000 lines) — redraws on every cursor move
-autocmd("BufReadPost", {
-  group = augroup("no_relnum_large_file", { clear = true }),
-  callback = function()
-    if vim.api.nvim_buf_line_count(0) > 2000 then
-      vim.wo.relativenumber = false
-    end
-  end,
-})
-
-
 -- Close specific filetypes with q
 autocmd("FileType", {
   group = augroup("close_with_q", { clear = true }),
