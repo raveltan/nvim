@@ -343,7 +343,7 @@ return {
         { "<leader>g",  group = "git" },
         { "<leader>gh", group = "hunks" },
         { "<leader>b",  group = "buffer" },
-        { "<leader>q",  group = "quit/session" },
+        { "<leader>q",  group = "quit" },
         { "<leader>t",  group = "todo/test" },
         { "<leader>u",  group = "ui" },
         { "<leader>uf", group = "fun fx" },

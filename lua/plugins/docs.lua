@@ -11,13 +11,13 @@ return {
     },
     opts = {
       ensure_installed = {
-        "ruby~4", "rails~8.1",
+        "ruby~4.0", "rails~8.1",
         "javascript", "typescript", "node",
         "php", "html", "css", "http", "lua~5.1",
-        "tailwindcss", "react", "angular",
+        "tailwindcss", "react", "angular~20",
         "markdown", "nginx", "sqlite",
-        "bash", "git", "docker", "redis",
-        "sass", "rspec", "minitest", "playwright",
+        "bash", "git", "docker", "redis","rxjs", "rust", "typescript~5.1",
+        "sass", "minitest", "playwright","python~3.12",
       },
     },
   },
