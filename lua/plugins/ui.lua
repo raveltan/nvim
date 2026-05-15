@@ -72,8 +72,10 @@ return {
         cond = function() return vim.bo.fileformat ~= "unix" end,
       }
 
-      -- Refresh on macro start/stop + mode change for snappy updates
-      vim.api.nvim_create_autocmd({ "RecordingEnter", "RecordingLeave", "ModeChanged" }, {
+      -- Refresh on macro start/stop. ModeChanged dropped: lualine already
+      -- redraws on mode change internally, the extra refresh just doubled work
+      -- on every n↔i↔v↔c transition.
+      vim.api.nvim_create_autocmd({ "RecordingEnter", "RecordingLeave" }, {
         callback = function() require("lualine").refresh() end,
       })
 

@@ -132,7 +132,10 @@ return {
       end
 
       -- Auto-refresh codelens on Ruby buffers (LSP codelens not refreshed by default).
-      vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
+      -- BufEnter dropped: fires every window/buffer switch and triggered an LSP
+      -- codeLens/refresh round-trip per switch. BufWritePost+InsertLeave cover
+      -- the cases where lens contents actually change.
+      vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
         pattern = { "*.rb", "*.erb" },
         callback = function(args)
           if next(vim.lsp.get_clients({ bufnr = args.buf })) then

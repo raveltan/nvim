@@ -210,13 +210,6 @@ return {
     },
   },
 
-  -- Incremental LSP rename with live preview
-  {
-    "smjonas/inc-rename.nvim",
-    cmd = "IncRename",
-    config = true,
-  },
-
   -- LSP code action preview (diff before applying). Replaces <leader>ca.
   {
     "aznhe21/actions-preview.nvim",

@@ -563,18 +563,4 @@ return {
     },
   },
 
-  -- Fuzzy undo history with diff preview
-  {
-    "debugloop/telescope-undo.nvim",
-    dependencies = {
-      "nvim-telescope/telescope.nvim",
-      "nvim-lua/plenary.nvim",
-    },
-    keys = {
-      { "<leader>su", "<cmd>Telescope undo<cr>", desc = "Undo history" },
-    },
-    config = function()
-      require("telescope").load_extension("undo")
-    end,
-  },
 }

@@ -92,7 +92,7 @@ Lockfile: [`lazy-lock.json`](lazy-lock.json) pins **~112 plugins**. Use `:Lazy s
 │   │   ├── snacks.lua            # snacks.nvim (picker, dashboard, terminal, ...)
 │   │   ├── treesitter.lua        # parsers, textobjects, context, autotag
 │   │   ├── productivity.lua      # typescript-tools, dadbod, iron, satellite
-│   │   ├── workflow.lua          # overseer, persistence, git-worktree, claude-code
+│   │   ├── workflow.lua          # overseer, persistence, claude-code
 │   │   ├── dap.lua               # Debugger
 │   │   ├── git.lua               # gitsigns, diffview, git-conflict
 │   │   ├── test.lua              # neotest + adapters
@@ -198,7 +198,7 @@ Full reference: [`docs/keybinds.md`](docs/keybinds.md).
 ## Plugins by Category
 
 ### Editing UX — `editor.lua`
-`vim-sleuth`, `nvim-ufo`, `undotree`, `treesj`, `ts-node-action`, `ssr.nvim` (structural replace `<leader>cS`), `refactoring.nvim`, `ultimate-autopair`, `mini.surround` (`gs` prefix), `grug-far` (search/replace), `flash.nvim` (`s`/`S` jumps), `markview.nvim`, `todo-comments`, `mini.bufremove`, `mini.ai`, `yanky` (100-entry yank ring), `multicursor.nvim`, `hurl.nvim`, `nvim-bqf`, `quicker.nvim` (editable qf), `nvim-hlslens`, `highlight-undo`, `dial.nvim`, `ts-comments`, `vim-matchup`, `nvim-scissors`, `marks.nvim`, `which-key`, `checkmate.nvim`, `vim-repeat`, `vim-abolish`, `vim-illuminate`, `refjump.nvim` (`]r`/`[r` LSP refs), `dropbar.nvim` (winbar breadcrumbs, `<leader>;`), `telescope-undo.nvim` (`<leader>su`).
+`vim-sleuth`, `nvim-ufo`, `undotree`, `treesj`, `ts-node-action`, `ssr.nvim` (structural replace `<leader>cS`), `refactoring.nvim`, `ultimate-autopair`, `mini.surround` (`gs` prefix), `grug-far` (search/replace), `flash.nvim` (`s`/`S` jumps), `markview.nvim`, `todo-comments`, `mini.bufremove`, `mini.ai`, `yanky` (100-entry yank ring), `multicursor.nvim`, `hurl.nvim`, `nvim-bqf`, `quicker.nvim` (editable qf), `nvim-hlslens`, `highlight-undo`, `dial.nvim`, `ts-comments`, `vim-matchup`, `nvim-scissors`, `marks.nvim`, `which-key`, `checkmate.nvim`, `vim-repeat`, `vim-abolish`, `vim-illuminate`, `refjump.nvim` (`]r`/`[r` LSP refs), `dropbar.nvim` (winbar breadcrumbs, `<leader>;`).
 
 ### LSP & Completion — `lsp.lua`
 - **Mason** + **mason-lspconfig** auto-install: `eslint`, `basedpyright`, `ruff`, `intelephense`, `jsonls`, `yamlls`, `tailwindcss`, `html`, `cssls`
@@ -206,7 +206,7 @@ Full reference: [`docs/keybinds.md`](docs/keybinds.md).
 - **blink.cmp** — completion (sources: `lsp` → `path` → `snippets` → `buffer`, max 50 LSP items, prefer-rust fuzzy)
 - **fidget.nvim** — LSP progress
 - **trouble.nvim** — diagnostics panel (`<leader>xx`)
-- **inc-rename**, **actions-preview.nvim** — improved rename + code action UI
+- **actions-preview.nvim** — code action diff preview (`<leader>ca`); rename uses raw `textDocument/rename` (`<leader>cr`, handles PHP `$` sigil)
 - **lazydev.nvim** — Lua LSP awareness for `vim.*` API
 - Diagnostics: `virtual_text` off (handled by `tiny-inline-diagnostic`); custom signs `✘ ⚠ ℹ ⚡`
 
@@ -242,7 +242,6 @@ Parsers: `bash`, `css`, `eruby`, `html`, `javascript`, `json`, `lua`, `markdown`
 ### Workflow — `workflow.lua`
 - `overseer.nvim` — task runner (templates auto-discovered from `lua/overseer/template/user/`)
 - `persistence.nvim` — per-directory session save/restore
-- `git-worktree.nvim` — worktree switcher with chdir hook
 - `claude-code.nvim` — Claude Code terminal toggle (`<leader>ac`)
 
 ### Debugging — `dap.lua`
