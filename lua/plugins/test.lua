@@ -63,10 +63,21 @@ return {
             dap = { justMyCode = false },
           }),
           require("neotest-rspec")({
-            rspec_cmd = { "bundle", "exec", "rspec" },
+            rspec_cmd = function()
+              if vim.fn.executable("bin/rspec") == 1 then
+                return { "bin/rspec" }
+              end
+              return { "bundle", "exec", "rspec" }
+            end,
+            filter_dirs = { ".git", "node_modules", "vendor", "tmp", "coverage", "log" },
           }),
           require("neotest-minitest")({
-            test_cmd = { "bundle", "exec", "rails", "test" },
+            test_cmd = function()
+              if vim.fn.filereadable("bin/rails") == 1 then
+                return { "bin/rails", "test" }
+              end
+              return { "bundle", "exec", "ruby", "-Itest" }
+            end,
           }),
         },
         discovery = { enabled = false },
