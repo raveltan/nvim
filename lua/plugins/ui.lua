@@ -52,26 +52,6 @@ return {
         color = { fg = "#ff5555", gui = "bold" },
       }
 
-      local search = {
-        function()
-          local ok, s = pcall(vim.fn.searchcount, { maxcount = 999, timeout = 100 })
-          if not ok or not s or s.total == 0 then return "" end
-          return string.format(" [%d/%d]", s.current, s.total)
-        end,
-        cond = function() return vim.v.hlsearch == 1 end,
-      }
-
-      local selection = {
-        function()
-          local m = vim.fn.mode()
-          if not m:find("[vV\22]") then return "" end
-          local s_line, e_line = vim.fn.line("v"), vim.fn.line(".")
-          local lines = math.abs(e_line - s_line) + 1
-          local chars = vim.fn.wordcount().visual_chars or 0
-          return " " .. lines .. "L " .. chars .. "C"
-        end,
-      }
-
       local lsp = {
         function()
           local cs = vim.lsp.get_clients({ bufnr = 0 })
@@ -118,27 +98,14 @@ return {
             { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
             { "filename", path = 0, symbols = { modified = "  ", readonly = " ", unnamed = " " } },
             macro,
-            search,
           },
-          lualine_x = { selection, lsp, encoding, fileformat, "filetype" },
+          lualine_x = { lsp, encoding, fileformat, "filetype" },
           lualine_y = { "progress" },
           lualine_z = { { "location", icon = "" } },
         },
         extensions = { "lazy", "mason", "neo-tree", "trouble", "quickfix" },
       }
     end,
-  },
-
-  -- Cursor trail (smear)
-  {
-    "sphamba/smear-cursor.nvim",
-    event = "VeryLazy",
-    opts = {
-      stiffness = 0.8,
-      trailing_stiffness = 0.5,
-      distance_stop_animating = 0.5,
-      hide_target_hack = false,
-    },
   },
 
   -- Indent scope animation
@@ -167,6 +134,13 @@ return {
         },
         callback = function() vim.b.miniindentscope_disable = true end,
       })
+      vim.api.nvim_create_autocmd("BufReadPost", {
+        callback = function()
+          if vim.api.nvim_buf_line_count(0) > 1500 then
+            vim.b.miniindentscope_disable = true
+          end
+        end,
+      })
     end,
   },
 
@@ -176,6 +150,13 @@ return {
     event = "BufReadPost",
     config = function()
       require("rainbow-delimiters.setup").setup({})
+      vim.api.nvim_create_autocmd("BufReadPost", {
+        callback = function(args)
+          if vim.api.nvim_buf_line_count(args.buf) > 1500 then
+            vim.b[args.buf].rainbow_delimiters_disable = true
+          end
+        end,
+      })
     end,
   },
 
@@ -221,7 +202,7 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     dependencies = { "lewis6991/gitsigns.nvim" },
     opts = {
-      current_only = false,
+      current_only = true,
       winblend = 50,
       zindex = 40,
       excluded_filetypes = {
@@ -237,7 +218,7 @@ return {
       handlers = {
         cursor      = { enable = true, overlap = true, priority = 1000 },
         search      = { enable = true, overlap = true, priority = 10 },
-        diagnostic  = { enable = true, signs = { "-", "=", "≡" }, min_severity = vim.diagnostic.severity.HINT },
+        diagnostic  = { enable = true, signs = { "-", "=", "≡" }, min_severity = vim.diagnostic.severity.WARN },
         gitsigns    = { enable = true, signs = { add = "│", change = "│", delete = "-" } },
         marks       = { enable = true, show_builtins = false, key = "m" },
         quickfix    = { enable = true, signs = { "-", "=", "≡" } },
@@ -264,7 +245,16 @@ return {
     "m-demare/hlargs.nvim",
     event = { "BufReadPost", "BufNewFile" },
     dependencies = { "nvim-treesitter/nvim-treesitter" },
-    opts = {},
+    config = function()
+      require("hlargs").setup()
+      vim.api.nvim_create_autocmd("BufReadPost", {
+        callback = function(args)
+          if vim.api.nvim_buf_line_count(args.buf) > 1500 then
+            require("hlargs").disable_buf(args.buf)
+          end
+        end,
+      })
+    end,
   },
 
   -- Flash beacon on cursor jump / buffer switch

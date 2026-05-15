@@ -87,7 +87,7 @@ return {
         -- Skip typescript-tools: textDocument/references on every symbol is expensive on large TS projects.
         lsp = { "eslint", "typescript-tools" },
         filetypes = {},
-        cond = {},
+        cond = { function(buf) return vim.api.nvim_buf_line_count(buf) > 1000 end },
       },
     },
   },
@@ -107,18 +107,6 @@ return {
         "dbee", "dbui", "dap-repl", "dapui_scopes", "dapui_breakpoints",
         "dapui_stacks", "dapui_watches", "dapui_console", "aerial",
       },
-    },
-  },
-
-  -- Code action indicator in sign column
-  {
-    "kosayoda/nvim-lightbulb",
-    event = "LspAttach",
-    opts = {
-      autocmd = { enabled = true },
-      sign = { enabled = true, text = "💡" },
-      virtual_text = { enabled = false },
-      ignore = { ft = { "neo-tree", "oil", "snacks_picker_list" } },
     },
   },
 
@@ -269,52 +257,35 @@ return {
     },
   },
 
-  -- lensline.nvim: inline lens info (refs, git blame, complexity, diagnostics)
-  -- above functions. Independent of LSP codelens — own virtual-text renderer.
-  -- Runs on all source filetypes; only noisy plugin buffers excluded.
+  -- Inline lens above functions (between phpDoc and function declaration).
+  -- Only complexity + last_author — no LSP reference/blame storms.
   {
     "oribarilan/lensline.nvim",
-    event = { "LspAttach" },
-    opts = function()
-      local lp = require("util.lens_providers")
-      return {
+    event = "LspAttach",
+    opts = {
       profiles = {
         {
           name = "default",
           providers = {
-            { name = "references", enabled = true },
-            { name = "last_author", enabled = true },
-            { name = "diagnostics", enabled = true, min_level = "WARN" },
-            { name = "complexity", enabled = true, min_level = "M" },
-            {
-              name = "line_count",
-              enabled = true,
-              event = { "BufWritePost", "BufEnter" },
-              handler = function(_, fi, _, cb)
-                if not (fi and fi.line and fi.end_line) then return end
-                local n = fi.end_line - fi.line + 1
-                if n > 1 then cb({ line = fi.line, text = ("%d ln"):format(n) }) end
-              end,
-            },
-            vim.tbl_extend("force", lp.auth_gate, { enabled = true }),
-            vim.tbl_extend("force", lp.logger_count, { enabled = true }),
+            { name = "last_author",  enabled = true },
+            { name = "complexity",   enabled = true, min_level = "S" },
+          },
+          style = {
+            placement = "above",
+            prefix = "┃ ",
+            separator = " • ",
+            use_nerdfont = true,
           },
         },
-      },
-      style = {
-        placement = "above",
-        prefix = "󰍉 ",
-        separator = " • ",
-        use_nerdfont = true,
       },
       limits = {
         exclude = {
           "lazy", "mason", "TelescopePrompt", "neo-tree", "trouble",
           "help", "qf", "snacks_picker_list", "snacks_picker_input",
         },
-        max_lines = 5000,
+        max_lines = 1000,
       },
-    }
-    end,
+    },
   },
+
 }

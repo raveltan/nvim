@@ -456,8 +456,10 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       require("illuminate").configure({
-        providers = { "lsp", "treesitter", "regex" },
-        delay = 120,
+        providers = { "lsp", "treesitter" },
+        delay = 400,
+        large_file_cutoff = 1500,
+        large_file_overrides = { providers = {} },
         filetypes_denylist = { "oil", "trouble", "lazy", "mason", "help", "noice", "checkhealth", "snacks_picker_list" },
         min_count_to_highlight = 2,
       })

@@ -42,6 +42,12 @@ do
   end
 end
 
+-- Auto-dismiss swap file dialog (E325) — snacks picker opens files non-interactively
+autocmd("SwapExists", {
+  group = augroup("swap_exists", { clear = true }),
+  callback = function() vim.v.swapchoice = "e" end,
+})
+
 -- Highlight on yank
 autocmd("TextYankPost", {
   group = augroup("highlight_yank", { clear = true }),
@@ -78,6 +84,16 @@ autocmd("BufReadPost", {
     local lcount = vim.api.nvim_buf_line_count(0)
     if mark[1] > 0 and mark[1] <= lcount then
       pcall(vim.api.nvim_win_set_cursor, 0, mark)
+    end
+  end,
+})
+
+-- Disable relativenumber on large files (>2000 lines) — redraws on every cursor move
+autocmd("BufReadPost", {
+  group = augroup("no_relnum_large_file", { clear = true }),
+  callback = function()
+    if vim.api.nvim_buf_line_count(0) > 2000 then
+      vim.wo.relativenumber = false
     end
   end,
 })

@@ -14,7 +14,7 @@ return {
         },
         current_line_blame = true,
         current_line_blame_opts = {
-          delay = 300,
+          delay = 2000,
           virt_text_pos = "eol",
         },
         current_line_blame_formatter = "<author>, <author_time:%R> - <summary>",
@@ -104,27 +104,4 @@ return {
     },
   },
 
-  -- Inline diff overlay + hunk textobj (complements gitsigns)
-  {
-    "echasnovski/mini.diff",
-    event = "BufReadPost",
-    opts = {
-      view = {
-        style = "sign",
-        signs = { add = "▎", change = "▎", delete = "" },
-      },
-      mappings = {
-        apply = "",
-        reset = "",
-        textobject = "ih",
-        goto_first = "",
-        goto_prev = "",
-        goto_next = "",
-        goto_last = "",
-      },
-    },
-    keys = {
-      { "<leader>go", function() require("mini.diff").toggle_overlay(0) end, desc = "Toggle mini.diff overlay" },
-    },
-  },
 }
