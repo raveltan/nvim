@@ -20,8 +20,7 @@ require("lazy").setup({
   },
   install = { colorscheme = { "gruvbox-baby", "habamax" } },
   checker = {
-    enabled = true,
-    notify = false,
+    enabled = false,
   },
   performance = {
     rtp = {

@@ -135,6 +135,14 @@ return {
         vim.keymap.set("n", "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, vim.tbl_extend("force", o, { desc = "Debug nearest test" }))
         vim.keymap.set("n", "<leader>tl", function() require("neotest").run.run_last() end, vim.tbl_extend("force", o, { desc = "Run last test" }))
         vim.keymap.set("n", "<leader>tS", function() require("neotest").run.stop() end, vim.tbl_extend("force", o, { desc = "Stop test" }))
+        vim.keymap.set("n", "<leader>tw", function()
+          local file = vim.fn.expand("%:p")
+          require("neotest").watch.watch(file)
+          require("neotest").summary.open()
+        end, vim.tbl_extend("force", o, { desc = "Watch file + open summary" }))
+        vim.keymap.set("n", "<leader>tW", function()
+          require("neotest").watch.stop(vim.fn.expand("%:p"))
+        end, vim.tbl_extend("force", o, { desc = "Stop watching file" }))
       end
       vim.api.nvim_create_autocmd("FileType", {
         pattern = test_filetypes,
@@ -250,9 +258,12 @@ return {
       require("neotest").setup(opts)
 
       vim.api.nvim_create_autocmd("BufWritePost", {
-        pattern = { "*.rb", "*.erb" },
+        pattern = { "*.php", "*.rb", "*.erb" },
         callback = function()
-          require("neotest").run.run_last()
+          local file = vim.fn.expand("%:p")
+          if file:match("%.php$") and not vim.fn.getcwd():match("fl%-gaf") then return end
+          if not require("neotest").watch.is_watching(file) then return end
+          require("neotest").run.run(file)
         end,
       })
     end,

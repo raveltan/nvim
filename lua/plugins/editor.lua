@@ -360,7 +360,6 @@ return {
         { "<leader>cs", group = "swap" },
         { "<leader>d",  group = "debug" },
         { "<leader>h",  group = "harpoon" },
-        { "<leader>i",  group = "iron repl" },
         { "<leader>m",  group = "multicursor" },
         { "<leader>n",  group = "ast nav" },
         { "<leader>o",  group = "overseer" },
