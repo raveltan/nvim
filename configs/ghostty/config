@@ -1,0 +1,41 @@
+# Font
+font-family = JetBrains Mono
+font-size = 15
+font-thicken = true
+adjust-cell-height = 4
+
+# Shell
+command = /opt/homebrew/bin/tmux new-session -A -s main
+
+# Window transparency
+# background-opacity = 0.8
+# background-blur-radius = 20
+
+# Kaku Dark theme
+background = 15141b
+foreground = edecee
+cursor-color = a277ff
+cursor-text = 15141b
+selection-background = 3d375e
+selection-foreground = edecee
+
+# Normal colors (ANSI 0-7)
+palette = 0=110f18
+palette = 1=ff6767
+palette = 2=61ffca
+palette = 3=ffca85
+palette = 4=5fa8ff
+palette = 5=a277ff
+palette = 6=61ffca
+palette = 7=edecee
+
+# Bright colors (ANSI 8-15)
+palette = 8=6d6d6d
+palette = 9=ff6767
+palette = 10=61ffca
+palette = 11=ffca85
+palette = 12=8cc2ff
+palette = 13=a277ff
+palette = 14=61ffca
+palette = 15=edecee
+
