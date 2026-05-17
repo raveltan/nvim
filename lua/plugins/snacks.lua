@@ -104,6 +104,7 @@ return {
       -- Find extras
       -- Tools
       { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
+      { "<leader>/", function() Snacks.terminal.toggle() end, mode = { "n", "t" }, desc = "Toggle terminal" },
       { "<leader>fR", function() Snacks.rename.rename_file() end, desc = "Rename file" },
       -- Scratch (project-scoped scratchpad, persisted under stdpath('data'))
       { "<leader>.",  function() Snacks.scratch() end,        desc = "Toggle scratch buffer" },
