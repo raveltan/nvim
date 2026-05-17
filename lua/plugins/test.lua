@@ -248,6 +248,13 @@ return {
       })
 
       require("neotest").setup(opts)
+
+      vim.api.nvim_create_autocmd("BufWritePost", {
+        pattern = { "*.rb", "*.erb" },
+        callback = function()
+          require("neotest").run.run_last()
+        end,
+      })
     end,
   },
 }
