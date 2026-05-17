@@ -70,13 +70,9 @@ return {
     },
     keys = {
       -- Find
-      { "<leader><leader>", function() Snacks.picker.files() end, desc = "Find files" },
-      { "<leader>ff", function() Snacks.picker.files() end, desc = "Find files" },
       { "<leader>fr", function() Snacks.picker.recent() end, desc = "Recent files" },
       { "<leader>,", function() Snacks.picker.buffers() end, desc = "Buffers" },
       -- Search
-      { "<leader>sg", function() Snacks.picker.grep() end, desc = "Grep" },
-      { "<leader>sw", function() Snacks.picker.grep_word() end, desc = "Grep word", mode = { "n", "x" } },
       { "<leader>sb", function() Snacks.picker.lines() end, desc = "Buffer lines" },
       { "<leader>sh", function() Snacks.picker.help() end, desc = "Help pages" },
       { "<leader>sk", function() Snacks.picker.keymaps() end, desc = "Keymaps" },
@@ -90,7 +86,6 @@ return {
       { "gy", function() Snacks.picker.lsp_type_definitions() end, desc = "Type definitions" },
       -- Git
       { "<leader>gc", function() Snacks.picker.git_log() end, desc = "Git log" },
-      { "<leader>gs", function() Snacks.picker.git_status() end, desc = "Git status" },
       -- History / Registers
       { '<leader>s"', function() Snacks.picker.registers() end, desc = "Registers" },
       { "<leader>sm", function() Snacks.picker.marks() end, desc = "Marks" },
@@ -98,26 +93,6 @@ return {
       { "<leader>s/", function() Snacks.picker.search_history() end, desc = "Search history" },
       { "<leader>s:", function() Snacks.picker.command_history() end, desc = "Command history" },
       -- Find extras
-      { "<leader>fc", function() Snacks.picker.files({ cwd = vim.fn.stdpath("config") }) end, desc = "Find config file" },
-      { "<leader>sG", function()
-        Snacks.picker.files({
-          prompt = "Pick dir to grep in",
-          confirm = function(picker, item)
-            picker:close()
-            if item then
-              local dir = item._path or item.file
-              if dir then
-                -- If a file was picked, use its parent directory
-                if vim.fn.isdirectory(dir) == 0 then
-                  dir = vim.fn.fnamemodify(dir, ":h")
-                end
-                Snacks.picker.grep({ cwd = dir })
-              end
-            end
-          end,
-        })
-      end, desc = "Grep in directory (pick)" },
-      { "<leader>s.", function() Snacks.picker.grep({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Grep in current file dir" },
       -- Tools
       { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
       { "<leader>fR", function() Snacks.rename.rename_file() end, desc = "Rename file" },

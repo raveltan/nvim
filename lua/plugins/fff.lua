@@ -1,0 +1,50 @@
+return {
+  {
+    "dmtrKovalenko/fff.nvim",
+    version = "*",
+    build = function() require("fff.download").download_or_build_binary() end,
+    cmd = { "FFFScan", "FFFRefreshGit", "FFFClearCache", "FFFHealth", "FFFDebug", "FFFOpenLog" },
+    keys = {
+      { "<leader><leader>", function() require("fff").find_files() end, desc = "Find files" },
+      { "<leader>ff", function() require("fff").find_files() end, desc = "Find files" },
+      { "<leader>fd", function() require("fff").find_files_in_dir(vim.fn.expand("%:p:h")) end, desc = "Files in buffer dir" },
+      { "<leader>fc", function()
+          local cwd = vim.fn.getcwd()
+          require("fff").find_files_in_dir(vim.fn.stdpath("config"))
+          vim.api.nvim_create_autocmd("WinClosed", {
+            once = true,
+            callback = function() pcall(require("fff").change_indexing_directory, cwd) end,
+          })
+        end, desc = "Config files" },
+      { "<leader>sg", function() require("fff").live_grep() end, desc = "Live grep" },
+      { "<leader>sw", function() require("fff").live_grep({ query = vim.fn.expand("<cword>") }) end, mode = { "n", "x" }, desc = "Grep word" },
+      { "<leader>sz", function() require("fff").live_grep({ grep = { modes = { "fuzzy", "plain" } } }) end, desc = "Fuzzy grep" },
+      { "<leader>s.", function() require("fff").live_grep({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Grep in current file dir" },
+      { "<leader>gs", function()
+          require("fff").find_files()
+          vim.schedule(function() vim.api.nvim_feedkeys("git:modified ", "i", false) end)
+        end, desc = "Git modified files" },
+    },
+    opts = {
+      prompt = "  ",
+      title = " Files",
+      max_results = 100,
+      layout = {
+        height = 0.85,
+        width = 0.85,
+        prompt_position = "top",
+        preview_position = "right",
+        preview_size = 0.55,
+        flex = { size = 130, wrap = "top" },
+      },
+      preview = { line_numbers = true },
+      keymaps = {
+        focus_list = "<C-l>",
+        focus_preview = "<C-p>",
+      },
+      frecency = { enabled = true },
+      history = { enabled = true },
+      grep = { smart_case = true, time_budget_ms = 200 },
+    },
+  },
+}
