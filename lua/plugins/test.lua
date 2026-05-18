@@ -83,44 +83,6 @@ return {
         discovery = { enabled = false },
         status = { virtual_text = true, signs = true },
         output = { open_on_run = "short" },
-        watch = {
-          symbol_queries = {
-            php = [[
-              ;query
-              ;use Foo\Bar; / use Foo\Bar as Baz;
-              (namespace_use_clause (qualified_name (name) @symbol))
-              (namespace_use_clause (name) @symbol)
-              ;new Foo(), Foo::method(), Foo::CONST
-              (object_creation_expression (name) @symbol)
-              (class_constant_access_expression (name) @symbol)
-              (scoped_call_expression scope: (name) @symbol)
-            ]],
-            ruby = [[
-              ;query
-              ;require "foo" / require_relative "foo"
-              (call
-                method: (identifier) @_method (#match? @_method "^require(_relative)?$")
-                arguments: (argument_list (string (string_content) @symbol)))
-              ;rspec — describe/context ClassName
-              (call
-                method: (identifier) @_ (#match? @_ "^(describe|context)")
-                arguments: (argument_list (constant) @symbol))
-              ;rspec — describe/context Namespaced::Class
-              (call
-                method: (identifier)
-                arguments: (argument_list
-                  (scope_resolution
-                    name: (constant) @symbol)))
-              ;Rails minitest — class FooTest < Parent (parent links to base test class)
-              (class
-                superclass: (superclass (constant) @symbol))
-              ;Class method calls — User.find, User.new
-              (call receiver: (constant) @symbol)
-              ;Namespaced class method calls — Admin::User.find
-              (call receiver: (scope_resolution name: (constant) @symbol))
-            ]],
-          },
-        },
       }
     end,
     config = function(_, opts)
@@ -135,14 +97,6 @@ return {
         vim.keymap.set("n", "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, vim.tbl_extend("force", o, { desc = "Debug nearest test" }))
         vim.keymap.set("n", "<leader>tl", function() require("neotest").run.run_last() end, vim.tbl_extend("force", o, { desc = "Run last test" }))
         vim.keymap.set("n", "<leader>tS", function() require("neotest").run.stop() end, vim.tbl_extend("force", o, { desc = "Stop test" }))
-        vim.keymap.set("n", "<leader>tw", function()
-          local file = vim.fn.expand("%:p")
-          require("neotest").watch.watch(file)
-          require("neotest").summary.open()
-        end, vim.tbl_extend("force", o, { desc = "Watch file + open summary" }))
-        vim.keymap.set("n", "<leader>tW", function()
-          require("neotest").watch.stop(vim.fn.expand("%:p"))
-        end, vim.tbl_extend("force", o, { desc = "Stop watching file" }))
       end
       vim.api.nvim_create_autocmd("FileType", {
         pattern = test_filetypes,
@@ -256,16 +210,6 @@ return {
       })
 
       require("neotest").setup(opts)
-
-      vim.api.nvim_create_autocmd("BufWritePost", {
-        pattern = { "*.php", "*.rb", "*.erb" },
-        callback = function()
-          local file = vim.fn.expand("%:p")
-          if file:match("%.php$") and not vim.fn.getcwd():match("fl%-gaf") then return end
-          if not require("neotest").watch.is_watching(file) then return end
-          require("neotest").run.run(file)
-        end,
-      })
     end,
   },
 }
