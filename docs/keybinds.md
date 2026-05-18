@@ -36,7 +36,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>fR` | n | Rename file | snacks.rename |
 | `<leader>ha` | n | Harpoon add | harpoon |
 | `<leader>hh` | n | Harpoon menu | harpoon |
-| `<leader>1`–`<leader>4` | n | Harpoon slot 1–4 | harpoon |
+| `<leader>1`–`<leader>8` | n | Harpoon slot 1–8 | harpoon |
 | `<C-o>` / `<C-i>` | n | Jumplist back/forward (Jumppack preview) | Jumppack.nvim |
 | `<leader>;` | n | Dropbar pick — h=parent, l=child, i=fuzzy, q=close | dropbar.nvim |
 | `[;` / `];` | n | Goto context start / select next context | dropbar.nvim |
@@ -97,6 +97,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>cR` | n | TS: remove unused | typescript-tools |
 | `<leader>cF` | n | TS: fix all | typescript-tools |
 | `<leader>cD` | n | TS: go to source definition | typescript-tools |
+| `:w` (TS/JS) | n | Auto: add missing + remove unused imports on save (`:let g:disable_ts_organize_on_save = 1` to disable) | productivity.lua |
 | `<leader>csa` / `<leader>csA` | n | Swap with next/prev arg | treesitter |
 | `<leader>dd` | n | Better-ts-errors toggle (TS) / Diagram show (md) | better-ts-errors / diagram |
 | `<leader>dx` | n | Better-ts-errors: go to def (TS) | better-ts-errors |
@@ -273,6 +274,29 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>Sa` | n, x | Add snippet | scissors |
 | `<CR>` | i | Accept completion / newline with pair expand | blink.cmp |
 | `<C-Space>` | i | Show completion & docs | blink.cmp |
+
+### vim-abolish — case coercion (`cr` prefix)
+
+Operates on word under cursor. Case-preserving rename across forms.
+
+| Key | Result on `myVar` | Style |
+|-----|-------------------|-------|
+| `crs` | `my_var` | snake_case |
+| `crc` | `myVar` | camelCase |
+| `crm` | `MyVar` | MixedCase / PascalCase |
+| `cru` | `MY_VAR` | UPPER_SNAKE |
+| `cr-` | `my-var` | kebab-case |
+| `cr.` | `my.var` | dot.case |
+| `crt` | `My Var` | Title Case |
+
+Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural in one pass.
+
+### Filetype tricks — `after/ftplugin/`
+
+| Trigger | FT | Result |
+|---------|------|--------|
+| `$$` (insert) | php | Expands to `$this->`. Skips if previous char is word/`$` (so `$$foo` stays literal). |
+| `fn<Tab>` | php | Arrow function snippet `fn($x) => ` (alias to existing `afn`) |
 
 ### Multicursor — `<leader>m`
 

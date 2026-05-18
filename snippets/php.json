@@ -31,6 +31,11 @@
     "description": "arrow fn",
     "body": ["fn(${1:\\$x}) => ${0}"]
   },
+  "PHP arrow fn short": {
+    "prefix": "fn",
+    "description": "arrow fn (short alias)",
+    "body": ["fn(${1:\\$x}) => ${0}"]
+  },
   "PHP match": {
     "prefix": "match",
     "description": "match expression",

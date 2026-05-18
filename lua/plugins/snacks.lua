@@ -41,12 +41,9 @@ return {
           {
             pane = 1,
             icon = " ",
-            title = "TODO",
-            section = "terminal",
-            cmd = "cat ~/todo.md 2>/dev/null | head -6",
-            height = 6,
-            ttl = 5,
-            indent = 3,
+            desc = "Edit todo.md",
+            key = "t",
+            action = ":e ~/todo.md",
             padding = 1,
           },
           {

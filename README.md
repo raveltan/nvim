@@ -100,6 +100,8 @@ Lockfile: [`lazy-lock.json`](lazy-lock.json) pins **~112 plugins**. Use `:Lazy s
 │   │   ├── other.lua             # other.nvim — related-file navigation
 │   │   └── diagram.lua           # mermaid/d2/plantuml inline render
 │   └── overseer/template/user/   # Custom overseer task templates (auto-discovered)
+├── after/ftplugin/               # Per-filetype tricks (e.g. PHP `$$` → `$this->`)
+├── snippets/                     # LuaSnip vscode-format JSON (ts/php/ruby/eruby)
 ├── scripts/neotest-run-tests.sh  # PHPUnit wrapper for fl-gaf Docker test infra
 └── docs/keybinds.md              # 150+ keybind cheatsheet
 ```
@@ -161,7 +163,7 @@ Leader-prefixed groups (registered with `which-key`):
 | `<leader>e` | **E**xplorer | `e` open oil |
 | `<leader>f` | **F**ind | `ff` files, `fr` recent, `fc` config, `fn` new file, `fR` rename |
 | `<leader>g` | **G**it | `gg` lazygit, `gd` diffview, `gb` blame, `gh*` hunk ops, `go` mini.diff overlay |
-| `<leader>h` | **H**arpoon | `ha` add, `hh` toggle |
+| `<leader>h` | **H**arpoon | `ha` add, `hh` toggle, `<leader>1`–`<leader>8` slot jump |
 | `<leader>H` | **H**url (REST) | `Ha` run all, `Hs` at cursor |
 | `<leader>i` | **I**ron (REPL) | `is` toggle, `ic` send motion, `iv` send visual |
 | `<leader>m` | **M**ulticursor | `mn` next, `ma` all matches |
@@ -193,6 +195,25 @@ Other notable global keymaps (from `config/keymaps.lua`):
 
 Full reference: [`docs/keybinds.md`](docs/keybinds.md).
 
+### Filetype tricks (`after/ftplugin/`)
+
+- **PHP `$$` → `$this->`** — insert-mode expansion. Skips when previous char is word/`$` so `$$foo` stays literal. See `after/ftplugin/php.lua`.
+
+### vim-abolish case coercion (`cr` prefix)
+
+Operate on word under cursor. Memorize once, use across PHP (snake), TS (camel), Ruby (snake), Angular (kebab).
+
+| Key | `myVar` → | |
+|---|---|---|
+| `crs` | `my_var` | snake |
+| `crc` | `myVar` | camel |
+| `crm` | `MyVar` | mixed/pascal |
+| `cru` | `MY_VAR` | upper |
+| `cr-` | `my-var` | kebab |
+| `cr.` | `my.var` | dot |
+
+Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` rewrites singular + plural together.
+
 ---
 
 ## Plugins by Category
@@ -214,9 +235,10 @@ Full reference: [`docs/keybinds.md`](docs/keybinds.md).
 - `conform.nvim`: `stylua` (Lua), `prettierd`/`prettier` (JS/TS), `php-cs-fixer` (PHP), `ruff_organize_imports` + `ruff_format` (Python)
 - `nvim-lint`: PHP `phpcs` + `phpstan` — **only enabled inside the GAF monorepo**, with project-specific configs (`phpcs_gaf.xml`, `phpstan.neon`)
 - Format-on-save: enabled (3s timeout, LSP fallback). Toggle with `<leader>uf`.
+- **TS auto-organize on save** (`productivity.lua`): adds missing + removes unused imports synchronously on `BufWritePre` for `*.ts/tsx/js/jsx`. Notifies "TS: organizing imports…". Disable per-session via `:let g:disable_ts_organize_on_save = 1`.
 
 ### Navigation — `nav.lua`
-`vim-tmux-navigator`, `oil.nvim` (file explorer with hidden files), `harpoon2` (`<leader>1-4` jump), `Jumppack.nvim`, `glance.nvim` (`gD`/`gR`/`gY`/`gM` peek).
+`vim-tmux-navigator`, `oil.nvim` (file explorer with hidden files), `harpoon2` (`<leader>1`–`<leader>8` slot jump, 8 marks), `Jumppack.nvim`, `glance.nvim` (`gD`/`gR`/`gY`/`gM` peek).
 
 ### UI — `ui.lua`
 `rose-pine` (main variant, transparent backgrounds), `mini.icons`, `lualine.nvim`, `rainbow-delimiters`, `nvim-colorizer.lua`, `tiny-inline-diagnostic` (powerline preset), `zen-mode.nvim` (120 cols), `noice.nvim` (cmdline + LSP hover/messages; signature disabled — blink.cmp owns it).
