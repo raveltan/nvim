@@ -61,12 +61,20 @@ return {
     opts = {},
   },
 
-  -- Autopairs (ultimate-autopair — smarter multiline / JSX handling)
+  -- Autopairs (ultimate-autopair — smarter multiline / JSX handling).
+  -- cr.enable=false: its <CR> handler remaps imap <CR> with noremap=true and
+  -- displaces vim-endwise's <Plug>DiscretionaryEnd map. Disabling restores the
+  -- endwise chain so blink.cmp's "fallback" finds endwise and inserts `end`
+  -- for def/do/if/class/module on Enter in Ruby/Lua/Vim buffers.
+  -- Trade-off: typing <CR> inside `{|}` no longer expands to `{\n|\n}` —
+  -- use `o` or a snippet for that case.
   {
     "altermo/ultimate-autopair.nvim",
     event = { "InsertEnter", "CmdlineEnter" },
     branch = "v0.6",
-    opts = {},
+    opts = {
+      cr = { enable = false },
+    },
   },
 
   -- Surround (gs prefix)
