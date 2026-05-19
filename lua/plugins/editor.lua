@@ -27,40 +27,6 @@ return {
     },
   },
 
-  -- Split/join code blocks (single-line <-> multi-line)
-  {
-    "Wansmer/treesj",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    keys = {
-      { "<leader>cj", function() require("treesj").toggle() end, desc = "Split/join block" },
-    },
-    opts = {
-      use_default_keymaps = false,
-      max_join_length = 150,
-    },
-  },
-
-  -- Refactoring (extract function/variable, inline)
-  {
-    "ThePrimeagen/refactoring.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
-    ft = { "typescript", "typescriptreact", "javascript", "javascriptreact", "lua", "python", "c", "cpp", "go", "java", "ruby", "php" },
-    init = function()
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact", "lua", "python", "c", "cpp", "go", "java", "ruby", "php" },
-        callback = function(ev)
-          local map = vim.keymap.set
-          local function bopts(desc) return { buffer = ev.buf, silent = true, desc = desc } end
-          map("v", "<leader>Re",        function() require("refactoring").select_refactor() end, bopts("Refactor (select)"))
-          map("v", "<leader>Rf",        function() require("refactoring").extract_func() end,    bopts("Extract function"))
-          map("v", "<leader>Rv",        function() require("refactoring").extract_var() end,     bopts("Extract variable"))
-          map({ "n", "v" }, "<leader>Ri", function() require("refactoring").inline_var() end,    bopts("Inline variable"))
-        end,
-      })
-    end,
-    opts = {},
-  },
-
   -- Autopairs (ultimate-autopair — smarter multiline / JSX handling).
   -- cr.enable=false: its <CR> handler remaps imap <CR> with noremap=true and
   -- displaces vim-endwise's <Plug>DiscretionaryEnd map. Disabling restores the
@@ -226,36 +192,6 @@ return {
     end,
   },
 
-  -- HTTP client (REST API testing via Hurl)
-  {
-    "jellydn/hurl.nvim",
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-    },
-    ft = "hurl",
-    cmd = { "HurlRunner", "HurlRunnerAt", "HurlRunnerToEntry", "HurlToggleMode", "HurlVerbose" },
-    keys = {
-      { "<leader>Ha", "<cmd>HurlRunner<CR>", desc = "Run all requests" },
-      { "<leader>Hs", "<cmd>HurlRunnerAt<CR>", desc = "Run request at cursor" },
-      { "<leader>He", "<cmd>HurlRunnerToEntry<CR>", desc = "Run up to entry" },
-      { "<leader>Hm", "<cmd>HurlToggleMode<CR>", desc = "Toggle result mode" },
-      { "<leader>Hv", "<cmd>HurlVerbose<CR>", desc = "Run in verbose mode" },
-      { "<leader>H", "<cmd>HurlRunner<CR>", desc = "Run selection", mode = "v" },
-    },
-    opts = {
-      debug = false,
-      show_notification = true,
-      mode = "split",
-      formatters = {
-        json = { "jq" },
-        html = { "prettier", "--parser", "html" },
-        xml = { "tidy", "-xml", "-i", "-q" },
-      },
-    },
-  },
-
   -- Better quickfix window with preview + fzf filter
   {
     "kevinhwang91/nvim-bqf",
@@ -354,27 +290,22 @@ return {
         { "<leader>q",  group = "quit" },
         { "<leader>t",  group = "todo/test" },
         { "<leader>u",  group = "ui" },
-        { "<leader>uf", group = "fun fx" },
-        { "<leader>ufr", desc = "Make it rain" },
-        { "<leader>ufg", desc = "Game of life" },
         { "<leader>ud", group = "duck" },
         { "<leader>udd", desc = "Hatch duck" },
         { "<leader>udk", desc = "Cook one duck" },
         { "<leader>uda", desc = "Hatch fast duck" },
         { "<leader>udK", desc = "Cook all ducks" },
-        { "<leader>uz", desc = "Zen mode" },
         { "<leader>x",  group = "diagnostics" },
         { "<leader>c",  group = "code" },
         { "<leader>cs", group = "swap" },
+        { "<leader>cv", group = "case convert" },
         { "<leader>d",  group = "debug" },
         { "<leader>h",  group = "harpoon" },
         { "<leader>m",  group = "multicursor" },
         { "<leader>n",  group = "ast nav" },
         { "<leader>o",  group = "overseer" },
         { "<leader>r",  group = "rails" },
-        { "<leader>R",  group = "refactor" },
         { "<leader>S",  group = "snippets" },
-        { "<leader>H",  group = "hurl" },
         { "<leader>a",  group = "ai/claude" },
         { "<leader>D",  group = "database" },
         { "<leader>w",  group = "window" },
@@ -548,16 +479,6 @@ return {
       { "[;", function() require("dropbar.api").goto_context_start() end, desc = "Goto context start" },
       { "];", function() require("dropbar.api").select_next_context() end, desc = "Select next context" },
     },
-  },
-
-  -- Treesitter node actions (toggle bool, cycle quotes, expand ternary, split params, JSX wrap)
-  {
-    "CKolkey/ts-node-action",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    keys = {
-      { "<leader>cn", function() require("ts-node-action").node_action() end, desc = "TS node action" },
-    },
-    opts = {},
   },
 
   -- Cycle LSP references inline with ]r / [r (no picker)

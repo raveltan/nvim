@@ -58,19 +58,6 @@ return {
     end,
   },
 
-  -- Readable TS errors: translates cryptic messages AND expands collapsed types
-  {
-    "OlegGulevskyy/better-ts-errors.nvim",
-    ft = { "typescript", "typescriptreact" },
-    dependencies = { "MunifTanjim/nui.nvim" },
-    opts = {
-      keymaps = {
-        toggle = "<leader>dd",
-        go_to_definition = "<leader>dx",
-      },
-    },
-  },
-
   -- Auto-convert "..." to `...` when typing ${
   {
     "axelvc/template-string.nvim",
@@ -165,39 +152,6 @@ return {
       { "<leader>nJ", "<cmd>Treewalker SwapDown<cr>",   desc = "AST swap down" },
     },
     opts = { highlight = true, highlight_duration = 250 },
-  },
-
-  -- Zed-style symbol picker. LSP + ctags + treesitter fallback, multi-buffer
-  -- (watchtower), diagnostics picker, and call hierarchy (in/out/both).
-  -- Owns <leader>ss / <leader>sS (replacing snacks.lsp_symbols).
-  {
-    "bassamsdata/namu.nvim",
-    cmd = "Namu",
-    keys = {
-      { "<leader>ss", "<cmd>Namu symbols<cr>",              desc = "Symbols (Namu)" },
-      { "<leader>sS", "<cmd>Namu workspace<cr>",            desc = "Workspace symbols (Namu)" },
-      { "<leader>sW", "<cmd>Namu watchtower<cr>",           desc = "Symbols across open buffers" },
-      { "<leader>sC", "<cmd>Namu ctags<cr>",                desc = "ctags symbols (buffer)" },
-      { "<leader>sD", "<cmd>Namu diagnostics workspace<cr>", desc = "Workspace diagnostics (Namu)" },
-      { "<leader>cI", "<cmd>Namu call in<cr>",              desc = "Call hierarchy: incoming" },
-      { "<leader>cO", "<cmd>Namu call out<cr>",             desc = "Call hierarchy: outgoing" },
-      { "<leader>cB", "<cmd>Namu call both<cr>",            desc = "Call hierarchy: both" },
-    },
-    opts = {
-      namu_symbols = {
-        enable  = true,
-        options = {
-          display     = { mode = "icon", padding = 2 },
-          row_position = "top10",
-        },
-      },
-      workspace      = { enable = true },
-      watchtower     = { enable = true },
-      diagnostics    = { enable = true },
-      call_hierarchy = { enable = true },
-      ctags          = { enable = true },
-      ui_select      = { enable = false }, -- keep snacks.input as vim.ui.select handler
-    },
   },
 
   -- Inline lens above functions (between phpDoc and function declaration).

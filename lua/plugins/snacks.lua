@@ -102,7 +102,9 @@ return {
       { "<leader>sc", function() Snacks.picker.commands() end, desc = "Commands" },
       { "<leader>sd", function() Snacks.picker.diagnostics() end, desc = "Diagnostics" },
       { "<leader>sR", function() Snacks.picker.resume() end, desc = "Resume last picker" },
-      -- LSP (document/workspace symbols handled by namu.nvim — see productivity.lua)
+      -- LSP
+      { "<leader>ss", function() Snacks.picker.lsp_symbols() end, desc = "Document symbols" },
+      { "<leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "Workspace symbols" },
       { "gd", function() Snacks.picker.lsp_definitions() end, desc = "Go to definition" },
       { "gr", function() Snacks.picker.lsp_references() end, desc = "References" },
       { "gI", function() Snacks.picker.lsp_implementations() end, desc = "Implementations" },

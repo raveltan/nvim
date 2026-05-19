@@ -183,17 +183,6 @@ return {
     end,
   },
 
-  -- Distraction-free coding
-  {
-    "folke/zen-mode.nvim",
-    keys = {
-      { "<leader>uz", "<cmd>ZenMode<cr>", desc = "Zen mode" },
-    },
-    opts = {
-      window = { width = 120 },
-    },
-  },
-
   -- Decorated scrollbar (diagnostics, git hunks, marks, search, cursor)
   {
     "lewis6991/satellite.nvim",
@@ -253,40 +242,6 @@ return {
         end,
       })
     end,
-  },
-
-  -- Flash beacon on cursor jump / buffer switch
-  {
-    "DanilaMihailov/beacon.nvim",
-    event = "VeryLazy",
-    opts = {
-      minimal_jump = 10,
-      ignore_buffers = { "terminal", "nofile" },
-      ignore_filetypes = {
-        "snacks_dashboard", "alpha", "dashboard", "neo-tree", "lazy",
-        "mason", "trouble", "Trouble", "oil", "noice",
-      },
-    },
-  },
-
-  -- Animated colored separator on active window
-  {
-    "nvim-zh/colorful-winsep.nvim",
-    event = { "WinNew" },
-    opts = {
-      hi = { fg = "#8ec07c" },
-      no_exec_files = { "packer", "TelescopePrompt", "mason", "snacks_dashboard", "alpha" },
-    },
-  },
-
-  -- Buffer dissolve effects (:CellularAutomaton make_it_rain / game_of_life)
-  {
-    "eandrju/cellular-automaton.nvim",
-    cmd = "CellularAutomaton",
-    keys = {
-      { "<leader>ufr", "<cmd>CellularAutomaton make_it_rain<cr>", desc = "Make it rain" },
-      { "<leader>ufg", "<cmd>CellularAutomaton game_of_life<cr>", desc = "Game of life" },
-    },
   },
 
   -- Wandering duck (:DuckHatch / :DuckCook)
