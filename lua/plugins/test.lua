@@ -14,6 +14,16 @@ return {
       "zidhuss/neotest-minitest",
     },
     ft = { "php", "typescript", "javascript", "python", "ruby" },
+    keys = {
+      { "<leader>tl", function() require("neotest").run.run_last() end, desc = "Run last test" },
+      { "<leader>tL", function() require("neotest").run.run_last({ strategy = "dap" }) end, desc = "Debug last test" },
+      { "<leader>tS", function() require("neotest").run.stop() end, desc = "Stop test" },
+      { "<leader>to", function() require("neotest").output.open({ last_run = true, enter = true }) end, desc = "Show last output" },
+      { "<leader>tO", function() require("neotest").output_panel.toggle() end, desc = "Toggle output panel" },
+      { "<leader>ts", function() require("neotest").summary.toggle() end, desc = "Toggle summary" },
+      { "<leader>tM", function() require("neotest").summary.run_marked() end, desc = "Run marked tests" },
+      { "<leader>tC", function() require("config.neotest-coverage").run_last() end, desc = "Run last test with coverage" },
+    },
     opts = function()
       local ui_tests_adapter = require("config.neotest-ui-tests")
       return {
@@ -88,84 +98,12 @@ return {
     config = function(_, opts)
       local test_filetypes = { "php", "typescript", "javascript", "python", "ruby" }
 
-      -- Resolve project root by walking up from `path` looking for any of `markers`.
-      -- Falls back to nvim cwd. Used so the coverage-file watcher targets the right
-      -- directory even when nvim's cwd isn't the project root.
-      local function find_project_root(path, markers)
-        local found = vim.fs.find(markers, { upward = true, path = vim.fs.dirname(path) })[1]
-        if found then return vim.fs.dirname(found) end
-        return vim.fn.getcwd()
-      end
-
-      -- Run current file's tests with coverage enabled, then auto-load + show signs
-      -- once the coverage report mtime bumps.
-      --   PHP   → NEOTEST_COVERAGE=1 env var picked up by scripts/neotest-run-tests.sh,
-      --           which injects --coverage-cobertura=coverage/cobertura.xml. We can't
-      --           use extra_args because neotest-phpunit's build_spec drops them
-      --           (init.lua:146-187 ignores args.extra_args).
-      --   Ruby  → no extra args (SimpleCov must be wired in spec_helper.rb; writes
-      --           coverage/.resultset.json on every rspec run)
-      local function run_with_coverage(buf)
-        local ft = vim.bo[buf].filetype
-        local file = vim.fn.expand("%:p")
-        local run_env, coverage_rel, markers
-        if ft == "php" then
-          coverage_rel = "coverage/cobertura.xml"
-          run_env = { NEOTEST_COVERAGE = "1" }
-          markers = { "bin/run-tests", "composer.json", ".git" }
-        elseif ft == "ruby" then
-          coverage_rel = "coverage/.resultset.json"
-          run_env = nil
-          markers = { "Gemfile", "Rakefile", ".git" }
-        else
-          vim.notify("Coverage not configured for filetype: " .. ft, vim.log.levels.WARN)
-          return
-        end
-
-        local root = find_project_root(file, markers)
-        local coverage_file = root .. "/" .. coverage_rel
-
-        -- Snapshot mtime so the poll only fires on a fresh report (avoids loading
-        -- a stale file left over from a previous run).
-        local prev_mtime = 0
-        local stat = vim.uv.fs_stat(coverage_file)
-        if stat then prev_mtime = stat.mtime.sec end
-
-        vim.notify("Running test with coverage...", vim.log.levels.INFO)
-        require("neotest").run.run({ file, env = run_env })
-
-        local elapsed_ms = 0
-        local interval_ms = 1000
-        local timeout_ms = 600000 -- 10 min hard cap; xdebug coverage on fl-gaf is slow
-        local timer = vim.uv.new_timer()
-        timer:start(interval_ms, interval_ms, vim.schedule_wrap(function()
-          elapsed_ms = elapsed_ms + interval_ms
-          local s = vim.uv.fs_stat(coverage_file)
-          if s and s.mtime.sec ~= prev_mtime then
-            timer:stop(); timer:close()
-            pcall(vim.cmd, "CoverageLoad")
-            pcall(vim.cmd, "CoverageShow")
-            vim.notify("Coverage loaded: " .. coverage_rel, vim.log.levels.INFO)
-            return
-          end
-          if elapsed_ms >= timeout_ms then
-            timer:stop(); timer:close()
-            vim.notify("Coverage poll timed out (" .. coverage_rel .. " not updated)", vim.log.levels.WARN)
-          end
-        end))
-      end
-
       local function attach_test_keys(buf)
         local o = { buffer = buf, silent = true }
         vim.keymap.set("n", "<leader>tr", function() require("neotest").run.run() end, vim.tbl_extend("force", o, { desc = "Run nearest test" }))
         vim.keymap.set("n", "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, vim.tbl_extend("force", o, { desc = "Run file tests" }))
-        vim.keymap.set("n", "<leader>tc", function() run_with_coverage(buf) end, vim.tbl_extend("force", o, { desc = "Run file tests with coverage" }))
-        vim.keymap.set("n", "<leader>ts", function() require("neotest").summary.toggle() end, vim.tbl_extend("force", o, { desc = "Toggle summary" }))
-        vim.keymap.set("n", "<leader>to", function() require("neotest").output.open({ enter_on_run = true }) end, vim.tbl_extend("force", o, { desc = "Show output" }))
-        vim.keymap.set("n", "<leader>tO", function() require("neotest").output_panel.toggle() end, vim.tbl_extend("force", o, { desc = "Toggle output panel" }))
+        vim.keymap.set("n", "<leader>tc", function() require("config.neotest-coverage").run_current() end, vim.tbl_extend("force", o, { desc = "Run file tests with coverage" }))
         vim.keymap.set("n", "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, vim.tbl_extend("force", o, { desc = "Debug nearest test" }))
-        vim.keymap.set("n", "<leader>tl", function() require("neotest").run.run_last() end, vim.tbl_extend("force", o, { desc = "Run last test" }))
-        vim.keymap.set("n", "<leader>tS", function() require("neotest").run.stop() end, vim.tbl_extend("force", o, { desc = "Stop test" }))
       end
       vim.api.nvim_create_autocmd("FileType", {
         pattern = test_filetypes,

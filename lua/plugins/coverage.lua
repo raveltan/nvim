@@ -15,6 +15,10 @@ return {
       "CoverageClear",
       "CoverageSummary",
     },
+    keys = {
+      { "<leader>tv", "<cmd>Coverage<cr>", desc = "Coverage signs" },
+      { "<leader>tV", "<cmd>CoverageSummary<cr>", desc = "Coverage summary" },
+    },
     -- Cobertura parser (used for PHP) requires lua-xmlreader. Homebrew Lua 5.5
     -- can't build that rock (luaL_checkint/luaL_register removed in 5.3/5.2),
     -- so install against Lua 5.1 — LuaJIT is 5.1-ABI compatible:
