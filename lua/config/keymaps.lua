@@ -196,30 +196,8 @@ map("n", "N", [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('h
 -- Join without moving cursor
 map("n", "J", "mzJ`z", { desc = "Join lines" })
 
--- Phabricator object opener: gx on D12345 / T12345 opens the Phab URL
-local function open_phab_under_cursor()
-  local line = vim.api.nvim_get_current_line()
-  local col = vim.api.nvim_win_get_cursor(0)[2] + 1
-  local init = 1
-  while init <= #line do
-    local s, e, token = line:find("([DT]%d+)", init)
-    if not s then break end
-    if col >= s and col <= e then
-      vim.ui.open("https://phabricator.tools.flnltd.com/" .. token)
-      return true
-    end
-    init = e + 1
-  end
-  return false
-end
-
 map("n", "gx", function()
-  if open_phab_under_cursor() then return end
-  local cword = vim.fn.expand("<cword>")
-  if cword:match("^[DT]%d+$") then
-    vim.ui.open("https://phabricator.tools.flnltd.com/" .. cword)
-    return
-  end
+  if vim.g.gaf and require("gaf.keymaps").open_phab_under_cursor() then return end
   local cfile = vim.fn.expand("<cfile>")
   if cfile ~= "" then vim.ui.open(cfile) end
-end, { desc = "Open URL/file/Phab object under cursor" })
+end, { desc = "Open URL/file under cursor" })

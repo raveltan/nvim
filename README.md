@@ -1,6 +1,6 @@
 # Neovim Configuration
 
-A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.com/folke/lazy.nvim). Optimized for polyglot development across TypeScript/Angular, PHP, Ruby on Rails, and Python, with first-class support for the GAF monorepo (`fl-gaf`) and Phabricator workflows.
+A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.com/folke/lazy.nvim). Optimized for polyglot development across TypeScript/Angular, PHP, Ruby on Rails, and Python. Ships an opt-in GAF profile (`GAF=1 nvim`) that layers Freelancer-specific tooling (`fl-gaf` monorepo, Phabricator, xdebug remote debugging) on top of the base config — see [GAF Profile](#gaf-profile).
 
 > Looking for the keybind cheatsheet? See [`docs/keybinds.md`](docs/keybinds.md).
 
@@ -12,13 +12,13 @@ A modular, LSP-first Neovim configuration built on [lazy.nvim](https://github.co
 - [Installation](#installation)
 - [Layout](#layout)
 - [Bootstrap Flow](#bootstrap-flow)
+- [GAF Profile](#gaf-profile)
 - [Core Options](#core-options)
 - [Keymap Conventions](#keymap-conventions)
 - [Plugins by Category](#plugins-by-category)
 - [How to Add Things](#how-to-add-things)
 - [How to Configure Things](#how-to-configure-things)
 - [Support Files](#support-files)
-- [Project-Specific Behavior](#project-specific-behavior)
 - [Snippets](#snippets)
 - [Multicursor](#multicursor)
 - [Debugging (PHP / xdebug + DAP)](#debugging-php--xdebug--dap)
@@ -82,8 +82,20 @@ Lockfile: [`lazy-lock.json`](lazy-lock.json) pins **~112 plugins**. Use `:Lazy s
 │   │   ├── lazy.lua              # lazy.nvim bootstrap + plugin spec import
 │   │   ├── keymaps.lua           # Global keymaps (no plugin keymaps here)
 │   │   ├── autocmds.lua          # Autocmd groups + LSP hover workaround
-│   │   ├── neotest-ui-tests.lua  # Custom Neotest adapter for fl-gaf UI tests
-│   │   └── ui_test.lua           # Helper for fl-gaf UI test overseer templates
+│   │   └── neotest-coverage.lua  # PHP/Ruby neotest run-with-coverage helper
+│   ├── gaf/                      # GAF profile (loaded only when GAF=1)
+│   │   ├── init.lua              # Bootstrap — wires commands + keymaps
+│   │   ├── paths.lua             # ~/freelancer-dev/fl-gaf, devbox name, /mnt/gaf
+│   │   ├── xdebug.lua            # bin/gaf-xdebug wrapper + profile picker
+│   │   ├── dap.lua               # PHP xdebug DAP config + GAF keymaps
+│   │   ├── lsp.lua               # Mason filter + basedpyright extraPaths
+│   │   ├── formatting.lua        # php-cs-fixer + phpcs config
+│   │   ├── test.lua              # neotest extension (ui-tests adapter, GAF keys)
+│   │   ├── test_infra.lua        # bin/run-tests setup/shutdown
+│   │   ├── neotest-profile.lua   # Run a test with XDEBUG_MODE=profile
+│   │   ├── neotest-ui-tests.lua  # Custom adapter for webapp UI specs
+│   │   ├── ui_test.lua           # Helper for UI test overseer templates
+│   │   └── keymaps.lua           # Phabricator D####/T#### gx opener
 │   ├── plugins/                  # One file per category — lazy auto-imports all
 │   │   ├── editor.lua            # Editing UX (flash, surround, multicursor, ...)
 │   │   ├── formatting.lua        # conform.nvim + nvim-lint
@@ -126,6 +138,52 @@ require("config.autocmds")   -- 4. Autocmds + LSP hover patch
 - Default colorscheme: `rose-pine` (falls back to `habamax`)
 - Auto-update checker: enabled, silent
 - Disables built-in plugins: `gzip`, `tarPlugin`, `zipPlugin`, `tohtml`, `tutor`
+
+---
+
+## GAF Profile
+
+Freelancer-specific tooling is opt-in via an environment flag. Run vanilla Neovim with `nvim`, or layer the GAF profile on top with:
+
+```sh
+GAF=1 nvim
+# or alias it permanently:
+alias gnvim='GAF=1 nvim'
+```
+
+`init.lua` reads `vim.env.GAF` once and sets `vim.g.gaf`. Every GAF feature is gated on that flag, so non-GAF use of this config never pulls in `~/freelancer-dev`, `fl-gaf` Docker test scripts, Phabricator URLs, or the xdebug helpers.
+
+### What the flag turns on
+
+| Feature | Module | Surface |
+|---|---|---|
+| `:GafXdebug*` commands + `<leader>dx/dX/dv` keys | `lua/gaf/xdebug.lua` | Port-forward, validate, profile snapshot management |
+| PHP DAP `Listen for Xdebug (:9003)` + `/mnt/gaf` path map | `lua/gaf/dap.lua` | Remote debugging via `vscode-php-debug` |
+| Custom `neotest-ui-tests` adapter | `lua/gaf/neotest-ui-tests.lua` | `yarn ui:<project>` for `webapp/projects/*/ui-tests/src/*.spec.ts` |
+| neotest phpunit → `scripts/neotest-run-tests.sh` wrapper | `lua/gaf/test.lua` | Routes through `bin/run-tests` Docker infra |
+| `<leader>tx/tX` setup / shutdown test infra | `lua/gaf/test_infra.lua` | Wraps `bin/run-tests setup`/`shutdown` |
+| `<leader>tp/tP` + `<leader>dD` profile / debug toggles | `lua/gaf/test.lua` | Per-buffer PHP keys; `GAF_DEBUG=1` env |
+| `<leader>tm/tw` mobile / watch flags | `lua/gaf/test.lua` | Active on `*/ui-tests/src/*.spec.ts` buffers |
+| `phpcs` linter on save + `php-cs-fixer` formatter | `lua/gaf/formatting.lua` | Uses `fl-gaf/phpcs_gaf.xml`, `fl-gaf/.php-cs-fixer.dist.php` |
+| `basedpyright` extraPaths (`libgafthrift`, `restutils`) | `lua/gaf/lsp.lua` | Python type-resolution for GAF Thrift libs |
+| `tailwindcss` LSP **disabled** | `lua/gaf/lsp.lua` | Removed from `mason-lspconfig` ensure_installed |
+| `gx` on `D####` / `T####` opens Phabricator | `lua/gaf/keymaps.lua` | Falls through to `vim.ui.open(<cfile>)` otherwise |
+| Overseer `ui_test_*` + `fli provision` templates | `lua/overseer/template/user/*.lua` | `condition.callback` returns `vim.g.gaf and has_webapp()` |
+| `~/freelancer-dev` in Snacks project picker | `lua/plugins/snacks.lua` | Added to `dev` paths |
+
+### How to add a GAF-only feature
+
+1. Drop a module under `lua/gaf/` (e.g. `lua/gaf/myfeature.lua`).
+2. Wire it from the relevant base file with a one-line hook:
+   ```lua
+   if vim.g.gaf then require("gaf.myfeature").setup() end
+   ```
+   Or, for global side effects, register it in `lua/gaf/init.lua`'s `setup()`.
+3. Constants belong in `lua/gaf/paths.lua` — never inline `~/freelancer-dev` elsewhere.
+
+### Disabling the profile temporarily
+
+`unset GAF` before launching, or simply use `nvim` instead of the alias. No state survives between launches — `vim.g.gaf` is recomputed every start.
 
 ---
 
@@ -189,7 +247,7 @@ Other notable global keymaps (from `config/keymaps.lua`):
 - `<A-j>` / `<A-k>` — move line(s) down / up (works in visual)
 - `<C-s>` — save (n/i/v/s)
 - `gw` — grep word under cursor (Snacks)
-- `gx` — open URL under cursor; **detects Phabricator `D####` / `T####` tokens** and rewrites to `https://phabricator.tools.flnltd.com/...`
+- `gx` — open URL/file under cursor. Under GAF profile, also detects Phabricator `D####`/`T####` tokens.
 - `n` / `N` — search next/prev with hlslens count + recenter
 - `<C-d>` / `<C-u>` — half-page scroll, cursor recentered
 - `<Esc><Esc>` — exit terminal mode
@@ -233,8 +291,8 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` rewrites singular + plur
 - Diagnostics: `virtual_text` off (handled by `tiny-inline-diagnostic`); custom signs `✘ ⚠ ℹ ⚡`
 
 ### Formatting & Linting — `formatting.lua`
-- `conform.nvim`: `stylua` (Lua), `prettierd`/`prettier` (JS/TS), `php-cs-fixer` (PHP), `ruff_organize_imports` + `ruff_format` (Python)
-- `nvim-lint`: PHP `phpcs` + `phpstan` — **only enabled inside the GAF monorepo**, with project-specific configs (`phpcs_gaf.xml`, `phpstan.neon`)
+- `conform.nvim`: `stylua` (Lua), `prettierd`/`prettier` (JS/TS), `ruff_organize_imports` + `ruff_format` (Python). PHP `php-cs-fixer` added by [GAF profile](#gaf-profile).
+- `nvim-lint`: empty by default. GAF profile registers `phpcs` against `phpcs_gaf.xml`.
 - Format-on-save: enabled (3s timeout, LSP fallback). Toggle with `<leader>uf`.
 - **TS auto-organize on save** (`productivity.lua`): adds missing + removes unused imports synchronously on `BufWritePre` for `*.ts/tsx/js/jsx`. Notifies "TS: organizing imports…". Disable per-session via `:let g:disable_ts_organize_on_save = 1`.
 
@@ -268,23 +326,20 @@ Parsers: `bash`, `css`, `eruby`, `html`, `javascript`, `json`, `lua`, `markdown`
 - `claude-code.nvim` — Claude Code terminal toggle (`<leader>ac`)
 
 ### Debugging — `dap.lua`
-`nvim-dap` + `nvim-dap-view` (modern tabbed panel — `<leader>du` toggle, `<leader>de` watch) + `nvim-dap-virtual-text` + `mason-nvim-dap` (auto-installs `debugpy`, `vscode-php-debug`). GAF-specific xdebug helpers (`<leader>dx/dX/dv/dD`, `:GafXdebug*` user commands) wire `bin/gaf-xdebug` and the neotest wrapper — see [Debugging (PHP / xdebug + DAP)](#debugging-php--xdebug--dap).
+`nvim-dap` + `nvim-dap-view` (modern tabbed panel — `<leader>du` toggle, `<leader>de` watch) + `nvim-dap-virtual-text` + `mason-nvim-dap` (auto-installs `debugpy`, `vscode-php-debug`). The base spec stays language-agnostic; [GAF profile](#gaf-profile) layers PHP xdebug helpers (`<leader>dx/dX/dv/dD`, `:GafXdebug*` user commands) — see [Debugging (PHP / xdebug + DAP)](#debugging-php--xdebug--dap).
 
 ### Git — `git.lua`
 `gitsigns.nvim` (gutter, blame, hunk ops, `]c`/`[c`), `git-conflict.nvim`, `diffview.nvim` (`<leader>gd`, `<leader>gf` history), `mini.diff` (inline overlay `<leader>go`, `ih` hunk textobj).
 
 ### Testing — `test.lua`
-`neotest` with adapters: `phpunit` (auto-routes to `bin/run-tests` in fl-gaf), `jest`, `vitest`, `python` (pytest, `justMyCode=false`), `rspec`, `minitest`, plus the **custom UI test adapter** in [`config/neotest-ui-tests.lua`](lua/config/neotest-ui-tests.lua) for fl-gaf webapp (`webapp/projects/*/ui-tests/src/*.spec.ts`).
+`neotest` with adapters: `phpunit` (`vendor/bin/phpunit` by default), `jest`, `vitest`, `python` (pytest, `justMyCode=false`), `rspec`, `minitest`. The [GAF profile](#gaf-profile) swaps phpunit to [`scripts/neotest-run-tests.sh`](scripts/neotest-run-tests.sh) and adds the custom UI test adapter at [`lua/gaf/neotest-ui-tests.lua`](lua/gaf/neotest-ui-tests.lua).
 
-PHP test infra (fl-gaf):
-- `<leader>Tx` — `bin/run-tests setup` (spins up namespaced Docker silo, writes `.cache/gaf_session_<PID>`).
-- `<leader>TX` — `bin/run-tests shutdown` (tears it down).
+Under GAF profile:
+- `<leader>tx` — `bin/run-tests setup` (spins up namespaced Docker silo, writes `.cache/gaf_session_<PID>`).
+- `<leader>tX` — `bin/run-tests shutdown` (tears it down).
+- `<leader>tp` / `<leader>tP` — run current/last test with `XDEBUG_MODE=profile` for callgrind capture.
 - Neotest invocations go through [`scripts/neotest-run-tests.sh`](scripts/neotest-run-tests.sh) which calls `bin/run-tests <relative-path> --filter ... SETUP=false`. Setup must be run explicitly first (or you get "Services are not running").
-
-UI test runners (fl-gaf webapp) — eight Overseer templates in [`lua/overseer/template/user/ui_test_*.lua`](lua/overseer/template/user/) cover `ui:main` × `{watch}` × `{mobile}` × `{devtools}`. Invoke via `<leader>or`. They:
-- Default `SPECS` env to `vim.fn.expand("%:t")` (current buffer's filename); pass blank to run the full suite.
-- Auto-resolve the `webapp/` directory — works whether nvim's cwd is the repo root, a worktree, the webapp folder itself, or any subdir under those.
-- Set `DEVTOOLS=true` for devtools variants (read by `webapp/projects/ui-tests-common/karma.conf.cjs`).
+- Eight Overseer templates in [`lua/overseer/template/user/ui_test_*.lua`](lua/overseer/template/user/) cover `ui:main` × `{watch}` × `{mobile}` × `{devtools}`. Invoke via `<leader>or`. They default `SPECS` to the current buffer's filename, auto-resolve `webapp/` from any cwd, and set `DEVTOOLS=true` for devtools variants.
 
 ### Framework-specific
 - `ror.lua` — `ror.nvim` (Rails task palette `<leader>r*`), `vim-projectionist` (Rails heuristics — `:A`, `:Emodel`/`Econtroller`/`Eview`/`Espec`), `vim-endwise` (auto-`end` for Ruby/Lua/Vim/Bash), **`tpope/vim-rails`** (`:Rextract`, `:Rinvert`, context-aware `gf` on partials/fixtures/factories, Rails syntax), **Herb LSP** (HTML+ERB, auto-enabled when `herb-language-server` on `$PATH`), **Stimulus LSP** (auto-enabled when `stimulus-language-server` on `$PATH`), **ruby-lsp CodeLens handler** (`rubyLsp.openFile` — route↔action↔view jumps), **`suketa/nvim-dap-ruby`** (rdbg adapter — use existing `<leader>d*` DAP keys), **`andythigpen/nvim-coverage`** (SimpleCov gutter signs via `:Coverage*` commands). Activates on `Gemfile` + `config/environment.rb`.
@@ -319,7 +374,7 @@ Run `:Lazy sync` to install. Commit `lazy-lock.json` after.
 
 1. In [`lua/plugins/lsp.lua`](lua/plugins/lsp.lua), add the server name to `mason-lspconfig`'s `ensure_installed` list.
 2. Configure it inside the `nvim-lspconfig` `config` function using `vim.lsp.config(<name>, { settings = {...} })`, then `vim.lsp.enable(<name>)`.
-3. If the server needs project-specific settings, gate them on a path check (see how `basedpyright` handles `~/freelancer-dev/fl-gaf` `extraPaths`).
+3. If the server needs project-specific settings, gate them on `vim.g.gaf` (see how `basedpyright` extraPaths is gated in `plugins/lsp.lua`, with the actual paths defined in [`lua/gaf/lsp.lua`](lua/gaf/lsp.lua)).
 
 ### Add a formatter
 
@@ -336,7 +391,7 @@ Ensure the binary is on `$PATH` (Mason can install many: `:Mason`).
 
 ### Add a linter
 
-Edit the `linters_by_ft` block in `formatting.lua`. The current setup gates linters on GAF monorepo detection — if your linter should run everywhere, add it outside the `if in_freelancer` block.
+Edit the `linters_by_ft` block in `formatting.lua`. The default block is empty; add unconditional linters outside the `if vim.g.gaf then ... end` gate. GAF-profile linters live in [`lua/gaf/formatting.lua`](lua/gaf/formatting.lua).
 
 ### Add a treesitter parser
 
@@ -479,14 +534,14 @@ Either `<leader>uh` (if bound), or set `enabled = false` in the `hardtime.nvim` 
 ## Support Files
 
 ### `lua/overseer/template/user/`
-Custom Overseer task templates, auto-discovered. Currently 9 templates: 8 fl-gaf UI test variants (`ui_test_*.lua`) plus `fli_provision.lua`. Each file returns a table with `name`, `builder()`, `params`, and `condition.callback`. The UI test templates share builder logic via [`lua/config/ui_test.lua`](lua/config/ui_test.lua) — `resolve_webapp_cwd()` walks up from cwd to find the `webapp/` directory so the templates work from any nvim cwd. Invoke via `<leader>or`.
+Custom Overseer task templates, auto-discovered. Currently 9 templates: 8 UI test variants (`ui_test_*.lua`) plus `fli_provision.lua`. Every template's `condition.callback` gates on `vim.g.gaf`, so they only appear in `<leader>or` under the GAF profile. UI test templates share builder logic via [`lua/gaf/ui_test.lua`](lua/gaf/ui_test.lua) — `resolve_webapp_cwd()` walks up from cwd to find the `webapp/` directory.
 
 ### `scripts/neotest-run-tests.sh`
 PHPUnit wrapper for fl-gaf. Delegates to `bin/run-tests` (so namespacing via `GAF_TEST_WORKER_ID` and session-file lookup are handled upstream). Two transformations:
 1. `--filter` value: spaces become `\s` (PCRE-equivalent) — survives `bin/run-tests`' `read -r -a flag_args <<< "$1"` word-split.
 2. `--log-junit` path: redirected to `.cache/neotest-junit-$$.xml` (inside Docker bind-mount), then copied to neotest's tempfile after.
 
-Test path is canonicalized via `realpath` and stripped to project-relative (`bin/run-tests` requires `^test/{functional,unit}` etc.). Always runs with `SETUP=false`, so containers must be brought up first via `<leader>Tx`. Works in both `fl-gaf/` and `fl-gaf-worktree/<branch>/` since each has its own `bin/run-tests`.
+Test path is canonicalized via `realpath` and stripped to project-relative (`bin/run-tests` requires `^test/{functional,unit}` etc.). Always runs with `SETUP=false`, so containers must be brought up first via `<leader>tx`. Works in both `fl-gaf/` and `fl-gaf-worktree/<branch>/` since each has its own `bin/run-tests`.
 
 ### `docs/keybinds.md`
 Hand-maintained 150+ keybinding cheatsheet, grouped by category, with a `Source` column linking each binding back to the file that defines it. Update this when you add or move keymaps.
@@ -498,19 +553,12 @@ Plugin lockfile pinning all ~112 plugins. Always commit after `:Lazy sync`.
 
 ## Project-Specific Behavior
 
-This config detects a few project layouts and adjusts behavior automatically:
+Two persona-level adjustments — one opt-in via env flag, one auto-detected:
 
-**GAF monorepo (`fl-gaf`)** — detected via path containing `freelancer-dev/fl-gaf`:
-- PHP linters (`phpcs`, `phpstan`) enable with project configs (`phpcs_gaf.xml`, `phpstan.neon`)
-- `basedpyright` adds `extraPaths` for `libgafthrift` and `restutils`
-- `neotest-phpunit` routes through `bin/run-tests` Docker wrapper
-- Custom UI test adapter activates for `webapp/projects/*/ui-tests/src/*.spec.ts`
+- **GAF profile** (env-gated) — see the [GAF Profile](#gaf-profile) section above. All Freelancer-specific behaviors are explicitly opted in via `GAF=1 nvim`. Code lives entirely under `lua/gaf/`, with one-line `if vim.g.gaf then require("gaf.X").Y() end` hooks from base plugin files.
+- **Rails** (filetype-gated) — `ror.nvim` + projectionist + vim-rails activate on `Gemfile` + `config/environment.rb`. REPL auto-prefers `bin/rails console` → `pry` → `irb`. ruby_lsp emits CodeLens above controller actions (route → action, action → view); clicking them invokes the `rubyLsp.openFile` handler wired in `ror.lua`. Debug via nvim-dap-ruby — start Rails with `RUBY_DEBUG_OPEN=true bin/rails s`, then attach via `<leader>dc`. Coverage gutter signs via `:CoverageLoad` then `:CoverageShow` (needs SimpleCov + JSON formatter).
 
-**Phabricator** — `gx` on a `D####` or `T####` token opens `https://phabricator.tools.flnltd.com/<token>`.
-
-**Rails** — `ror.nvim` + projectionist + vim-rails activate on `Gemfile` + `config/environment.rb`. REPL auto-prefers `bin/rails console` → `pry` → `irb`. ruby_lsp emits CodeLens above controller actions (route → action, action → view); clicking them invokes the `rubyLsp.openFile` handler wired in `ror.lua`. Debug via nvim-dap-ruby — start Rails with `RUBY_DEBUG_OPEN=true bin/rails s`, then attach via `<leader>dc`. Coverage gutter signs via `:CoverageLoad` then `:CoverageShow` (needs SimpleCov + JSON formatter).
-
-To remove project-specific behavior, search the codebase for `freelancer-dev` / `flnltd` and either remove or replace the gates.
+To remove GAF tooling entirely, delete `lua/gaf/` and grep for `vim.g.gaf` across `lua/plugins/` to remove the gated blocks.
 
 ---
 
@@ -969,13 +1017,14 @@ zzz = 3
 
 ## Debugging (PHP / xdebug + DAP)
 
-End-to-end debug workflow for the GAF PHP monorepo. The `vscode-php-debug` adapter is installed automatically by `mason-nvim-dap` and listens on port `9003` (xdebug 3 default).
+End-to-end debug workflow for the GAF PHP monorepo. Requires the [GAF profile](#gaf-profile) (`GAF=1 nvim`). The `vscode-php-debug` adapter is installed automatically by `mason-nvim-dap` and listens on port `9003` (xdebug 3 default).
 
 ### Setup (one-time)
 
-1. **Install xdebug** locally (`pecl install xdebug`) — only required if you run PHP directly on the host. Container/devbox flows already ship it.
-2. **Configure your devbox name** — defaults to `rtanjaya`, hardcoded in [`lua/config/gaf-xdebug.lua`](lua/config/gaf-xdebug.lua). Change the function if your devbox slot is different.
-3. **Validate** — open a PHP file in `fl-gaf`, then `<leader>dv` (runs `bin/gaf-xdebug validate`). Fix anything it reports.
+1. **Launch with GAF profile** — `GAF=1 nvim` (or `gnvim` alias). Without it, `:GafXdebug*` commands are not registered.
+2. **Install xdebug** locally (`pecl install xdebug`) — only required if you run PHP directly on the host. Container/devbox flows already ship it.
+3. **Configure your devbox name** — set in [`lua/gaf/paths.lua`](lua/gaf/paths.lua) (`M.dev_dns`). Defaults to `rtanjaya`.
+4. **Validate** — open a PHP file in `fl-gaf`, then `<leader>dv` (runs `bin/gaf-xdebug validate`). Fix anything it reports.
 
 ### Keymaps
 
@@ -994,12 +1043,12 @@ End-to-end debug workflow for the GAF PHP monorepo. The `vscode-php-debug` adapt
 | `<leader>dv` | `:GafXdebugValidate` — IDE validation |
 | `<leader>dD` | Toggle `GAF_DEBUG=1` env (neotest then passes `--debug`) |
 
-User commands (defined in [`lua/config/gaf-xdebug.lua`](lua/config/gaf-xdebug.lua)):
+User commands (defined in [`lua/gaf/xdebug.lua`](lua/gaf/xdebug.lua)):
 `:GafXdebugStart`, `:GafXdebugStop`, `:GafXdebugValidate`, `:GafXdebugLogs`, `:GafXdebugInsert` (inserts `xdebug_connect_to_client();` at cursor).
 
 ### DAP configuration
 
-Registered once on first `FileType=php` event in [`lua/plugins/dap.lua`](lua/plugins/dap.lua):
+Registered once on first `FileType=php` event from [`lua/gaf/dap.lua`](lua/gaf/dap.lua) (hooked by `lua/plugins/dap.lua` when GAF profile is active):
 
 ```lua
 dap.configurations.php = {
@@ -1048,7 +1097,7 @@ For scripts run on the remote host, also `export PHP_IDE_CONFIG="serverName=rtan
 **3. Functional test (local Docker)**
 
 ```
-<leader>Tx          → bin/run-tests setup  (once per session)
+<leader>tx          → bin/run-tests setup  (once per session)
 <leader>db          → breakpoint in test OR code under test
 <leader>dD          → toggle GAF_DEBUG=1
 <leader>dc          → start listener on :9003
@@ -1079,7 +1128,7 @@ XDEBUG_MODE=debug bin/gaf-php scripts/playground.php
 
 ### Path mapping
 
-The hardcoded mapping is `/mnt/gaf` → `~/freelancer-dev/fl-gaf`. Update [`lua/plugins/dap.lua`](lua/plugins/dap.lua) if your checkout lives elsewhere. Multiple entries allowed — adapter resolves longest-prefix match.
+The hardcoded mapping is `/mnt/gaf` → `~/freelancer-dev/fl-gaf`. Constants live in [`lua/gaf/paths.lua`](lua/gaf/paths.lua) (`remote_root` / `fl_gaf`). Edit there to relocate the checkout.
 
 ### Snippets
 

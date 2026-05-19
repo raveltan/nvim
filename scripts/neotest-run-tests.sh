@@ -122,6 +122,14 @@ if [[ "${GAF_DEBUG:-}" == "1" ]]; then
     PASSTHROUGH+=("--debug")
 fi
 
+# Profile opt-in: nvim's <leader>tp / <leader>tP set NEOTEST_PROFILE=1.
+# bin/run-tests --profile enables xdebug profile mode for the test container;
+# cachegrind.out.* snapshots end up on the remote /tmp, pull them via
+# :GafXdebugProfileList / Download / Open.
+if [[ "${NEOTEST_PROFILE:-}" == "1" ]]; then
+    PASSTHROUGH+=("--profile")
+fi
+
 EXIT_CODE=0
 SETUP=false ./bin/run-tests "$TEST_PATH" "${PASSTHROUGH[@]}" || EXIT_CODE=$?
 

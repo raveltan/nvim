@@ -1,4 +1,4 @@
-local h = require("config.ui_test")
+local h = require("gaf.ui_test")
 return {
   name = "ui test devtools (current)",
   params = h.params,

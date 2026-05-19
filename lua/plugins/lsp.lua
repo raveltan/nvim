@@ -1,7 +1,4 @@
-local in_freelancer = vim.fn.getcwd():find(vim.fn.expand("~/freelancer-dev"), 1, true) ~= nil
-
 return {
-  -- Mason
   {
     "mason-org/mason.nvim",
     cmd = "Mason",
@@ -13,11 +10,9 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     opts = function()
-      -- Gate tailwindcss out of ensure_installed when in freelancer (defeats the
-      -- prior `vim.lsp.enable` gate that didn't actually prevent install/enable).
-      local servers = { "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense" }
-      if not in_freelancer then
-        table.insert(servers, "tailwindcss")
+      local servers = { "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense", "tailwindcss" }
+      if vim.g.gaf then
+        servers = require("gaf.lsp").filter_mason_servers(servers)
       end
       return { ensure_installed = servers }
     end,
@@ -48,14 +43,13 @@ return {
         },
       })
 
-      -- basedpyright (community fork of pyright with stronger inference)
       local basedpyright_analysis = {
         autoSearchPaths = true,
         useLibraryCodeForTypes = true,
         autoImportCompletions = true,
       }
-      if in_freelancer then
-        basedpyright_analysis.extraPaths = { "libgafthrift", "restutils" }
+      if vim.g.gaf then
+        basedpyright_analysis.extraPaths = require("gaf.lsp").basedpyright_extra_paths()
       end
       vim.lsp.config("basedpyright", {
         capabilities = capabilities,

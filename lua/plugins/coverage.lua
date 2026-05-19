@@ -1,6 +1,6 @@
 -- Coverage gutter signs + summary. Reads:
---   PHP   (fl-gaf): coverage/cobertura.xml  -- PHPUnit --coverage-cobertura
---   Ruby  (Rails):  coverage/.resultset.json -- SimpleCov default (configure in spec_helper.rb)
+--   PHP:  coverage/cobertura.xml         (PHPUnit --coverage-cobertura)
+--   Ruby: coverage/.resultset.json       (SimpleCov default)
 return {
   {
     "andythigpen/nvim-coverage",

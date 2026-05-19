@@ -1,8 +1,6 @@
 local M = {}
 
--- Resolve the webapp directory to run yarn from.
--- If cwd already ends in /webapp, use it. Otherwise walk up looking for a
--- webapp/ subdirectory with package.json. Returns nil when none found.
+-- Find a webapp/ directory (with package.json) at or above cwd.
 function M.resolve_webapp_cwd()
   local cwd = vim.fn.getcwd()
   if cwd:match("/webapp$") and vim.fn.filereadable(cwd .. "/package.json") == 1 then
@@ -24,9 +22,8 @@ function M.has_webapp()
   return M.resolve_webapp_cwd() ~= nil
 end
 
--- Build an overseer task spec for a yarn ui-test script.
--- yarn_script: the package.json script name (e.g. "ui:main:watch").
--- extra_env: optional extra env vars (e.g. { DEVTOOLS = "true" }).
+-- yarn_script: package.json script name (e.g. "ui:main:watch")
+-- extra_env: optional extra env vars (e.g. { DEVTOOLS = "true" })
 function M.build_task(yarn_script, extra_env)
   return function(params)
     if params.spec == nil or params.spec == "" then
@@ -34,9 +31,7 @@ function M.build_task(yarn_script, extra_env)
     end
     local env = { SPECS = params.spec }
     if extra_env then
-      for k, v in pairs(extra_env) do
-        env[k] = v
-      end
+      for k, v in pairs(extra_env) do env[k] = v end
     end
     return {
       cmd = { "yarn", yarn_script },
@@ -47,7 +42,6 @@ function M.build_task(yarn_script, extra_env)
   end
 end
 
--- Standard params block shared by all UI test templates.
 M.params = {
   spec = {
     type = "string",
@@ -59,7 +53,7 @@ M.params = {
 }
 
 M.condition = {
-  callback = M.has_webapp,
+  callback = function() return vim.g.gaf and M.has_webapp() end,
 }
 
 return M

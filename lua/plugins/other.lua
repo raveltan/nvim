@@ -1,5 +1,5 @@
 return {
-  -- Jump between related files. Tuned for fl-gaf (PHP src/src2 + Angular webapp).
+  -- Jump between related files. Patterns cover Rails, PHP (src/src2), and Angular conventions.
   --
   -- Test/source:
   --   src/<M>/Foo.php           ↔ test/unit/src/<M>/FooTest.php

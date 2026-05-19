@@ -10,7 +10,10 @@ return {
         enabled = true,
         sources = {
           projects = {
-            dev = { "~/freelancer-dev", "~/repo", "~/rails" },
+            dev = vim.list_extend(
+              vim.g.gaf and { "~/freelancer-dev" } or {},
+              { "~/repo", "~/rails" }
+            ),
             patterns = { ".git", "Gemfile", "composer.json", "pyproject.toml", "requirements.txt", "Pipfile", "setup.py", "package.json" },
           },
         },

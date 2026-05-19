@@ -6,4 +6,7 @@ return {
       components = { "default" },
     }
   end,
+  condition = {
+    callback = function() return vim.g.gaf end,
+  },
 }

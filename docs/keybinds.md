@@ -175,10 +175,18 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>td` | n | Debug nearest test |
 | `<leader>tl` | n | Run last test |
 | `<leader>tS` | n | Stop test |
-| `<leader>tm` | n | Run UI test (mobile) — buffer-local on `ui-tests/*.spec.ts` |
-| `<leader>tw` | n | Run UI test (watch) — buffer-local on `ui-tests/*.spec.ts` |
-| `<leader>tx` | n | Setup test infra — buffer-local on PHP in `fl-gaf` |
-| `<leader>tX` | n | Shutdown test infra — buffer-local on PHP in `fl-gaf` |
+| `<leader>tC` | n | Run last test with coverage |
+
+### GAF profile (`GAF=1 nvim`)
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>tp` | n | Run file with xdebug profile — PHP buffers |
+| `<leader>tP` | n | Replay last profile run |
+| `<leader>tx` | n | Setup test infra (`bin/run-tests setup`) — PHP buffers |
+| `<leader>tX` | n | Shutdown test infra — PHP buffers |
+| `<leader>tm` | n | Run UI test (mobile) — `ui-tests/*.spec.ts` |
+| `<leader>tw` | n | Run UI test (watch) — `ui-tests/*.spec.ts` |
 
 > In markdown buffers, `<leader>t*` is owned by Checkmate (see Markdown todos). Neotest keys still work outside markdown.
 
@@ -196,6 +204,15 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>du` | n | Toggle DAP UI (nvim-dap-view) |
 | `<leader>de` | n, v | Watch expression |
 | `<leader>dl` | n | Run last |
+
+### GAF profile (`GAF=1 nvim`)
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>dx` | n | GAF xdebug: start port-forward (`:GafXdebugStart`) |
+| `<leader>dX` | n | GAF xdebug: stop port-forward (`:GafXdebugStop`) |
+| `<leader>dv` | n | GAF xdebug: validate IDE setup |
+| `<leader>dD` | n | Toggle `GAF_DEBUG=1` (neotest passes `--debug`) |
 
 ## Database (`<leader>D` — vim-dadbod-ui)
 
