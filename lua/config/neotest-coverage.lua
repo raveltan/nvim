@@ -23,6 +23,22 @@ function M.run(file, ft)
     run_env = nil
     markers = { "package.json", ".git" }
     extra_args = { "--coverage" }
+  elseif ft == "python" then
+    coverage_rel = "coverage.xml"
+    run_env = nil
+    markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" }
+    extra_args = { "--cov", "--cov-report=xml" }
+  elseif ft == "rust" then
+    -- Requires cargo-llvm-cov installed. The neotest-rust adapter shells out to
+    -- `cargo test`; setting CARGO env vars makes llvm-cov instrument the build
+    -- and dump lcov to coverage/lcov.info on test exit.
+    coverage_rel = "coverage/lcov.info"
+    run_env = {
+      CARGO_LLVM_COV = "1",
+      CARGO_LLVM_COV_TARGET_DIR = "target/llvm-cov-target",
+      LLVM_COV_FLAGS = "--lcov --output-path=coverage/lcov.info",
+    }
+    markers = { "Cargo.toml", ".git" }
   else
     vim.notify("Coverage not configured for filetype: " .. ft, vim.log.levels.WARN)
     return

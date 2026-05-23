@@ -54,7 +54,7 @@ return {
         "jay-babu/mason-nvim-dap.nvim",
         dependencies = { "mason-org/mason.nvim" },
         opts = {
-          ensure_installed = { "python", "php", "js-debug-adapter" },
+          ensure_installed = { "python", "php", "js-debug-adapter", "codelldb" },
           automatic_installation = true,
           handlers = {
             function(config)
@@ -74,6 +74,18 @@ return {
                   },
                 }
               end
+            end,
+            ["codelldb"] = function()
+              local dap = require("dap")
+              local cmd = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb"
+              dap.adapters.codelldb = {
+                type = "server",
+                port = "${port}",
+                executable = {
+                  command = cmd,
+                  args = { "--port", "${port}" },
+                },
+              }
             end,
           },
         },
@@ -154,6 +166,94 @@ return {
           },
         }
       end
+
+      dap.configurations.rust = {
+        {
+          name = "codelldb: launch executable (prompt)",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/target/debug/", "file")
+          end,
+          cwd = "${workspaceFolder}",
+          stopOnEntry = false,
+          args = {},
+          runInTerminal = false,
+        },
+        {
+          name = "codelldb: launch cargo build (debug profile)",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            local bin = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+            return vim.fn.getcwd() .. "/target/debug/" .. bin
+          end,
+          cwd = "${workspaceFolder}",
+          stopOnEntry = false,
+          args = {},
+        },
+        {
+          name = "codelldb: attach to PID",
+          type = "codelldb",
+          request = "attach",
+          pid = function()
+            return tonumber(vim.fn.input("PID: "))
+          end,
+          cwd = "${workspaceFolder}",
+        },
+      }
+
+      dap.configurations.python = {
+        {
+          type = "python",
+          request = "launch",
+          name = "Python: current file",
+          program = "${file}",
+          cwd = "${workspaceFolder}",
+          justMyCode = false,
+          console = "integratedTerminal",
+        },
+        {
+          type = "python",
+          request = "launch",
+          name = "Python: module",
+          module = function() return vim.fn.input("Module: ") end,
+          cwd = "${workspaceFolder}",
+          justMyCode = false,
+          console = "integratedTerminal",
+        },
+        {
+          type = "python",
+          request = "launch",
+          name = "Flask: flask run",
+          module = "flask",
+          args = { "run", "--no-debugger", "--no-reload" },
+          env = function()
+            local app = vim.fn.input("FLASK_APP [app.py]: ")
+            return {
+              FLASK_APP = app ~= "" and app or "app.py",
+              FLASK_DEBUG = "1",
+            }
+          end,
+          cwd = "${workspaceFolder}",
+          justMyCode = false,
+          console = "integratedTerminal",
+        },
+        {
+          type = "python",
+          request = "launch",
+          name = "FastAPI: uvicorn",
+          module = "uvicorn",
+          args = function()
+            local app = vim.fn.input("Uvicorn app [main:app]: ")
+            if app == "" then app = "main:app" end
+            return { app, "--reload", "--port", "8000" }
+          end,
+          cwd = "${workspaceFolder}",
+          justMyCode = false,
+          console = "integratedTerminal",
+        },
+      }
     end,
   },
 }

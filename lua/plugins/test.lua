@@ -11,8 +11,10 @@ return {
       "nvim-neotest/neotest-python",
       "olimorris/neotest-rspec",
       "zidhuss/neotest-minitest",
+      "sidlatau/neotest-dart",
+      "rouge8/neotest-rust",
     },
-    ft = { "php", "typescript", "javascript", "python", "ruby" },
+    ft = { "php", "typescript", "javascript", "python", "ruby", "dart", "rust" },
     keys = function()
       local keys = {
         { "<leader>tl", function() require("neotest").run.run_last() end, desc = "Run last test" },
@@ -87,6 +89,13 @@ return {
               return { "bundle", "exec", "ruby", "-Itest" }
             end,
           }),
+          require("neotest-dart")({
+            command = "flutter",
+            use_lsp = true,
+          }),
+          require("neotest-rust")({
+            args = { "--no-capture" },
+          }),
         },
         discovery = { enabled = false },
         status = { virtual_text = true, signs = true },
@@ -99,7 +108,7 @@ return {
     config = function(_, opts)
       if vim.g.gaf then require("gaf.test").extend(opts) end
 
-      local test_filetypes = { "php", "typescript", "javascript", "python", "ruby" }
+      local test_filetypes = { "php", "typescript", "javascript", "python", "ruby", "dart", "rust" }
 
       local function attach_test_keys(buf, ft)
         local o = { buffer = buf, silent = true }

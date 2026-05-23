@@ -1,6 +1,8 @@
 -- Coverage gutter signs + summary. Reads:
---   PHP:  coverage/cobertura.xml         (PHPUnit --coverage-cobertura)
---   Ruby: coverage/.resultset.json       (SimpleCov default)
+--   PHP:    coverage/cobertura.xml       (PHPUnit --coverage-cobertura)
+--   Ruby:   coverage/.resultset.json     (SimpleCov default)
+--   Python: coverage.xml                 (pytest-cov --cov-report=xml)
+--   Rust:   coverage/lcov.info           (cargo llvm-cov --lcov --output-path coverage/lcov.info)
 return {
   {
     "andythigpen/nvim-coverage",
@@ -42,6 +44,12 @@ return {
       lang = {
         php = {
           coverage_file = "coverage/cobertura.xml",
+        },
+        python = {
+          coverage_file = "coverage.xml",
+        },
+        rust = {
+          coverage_file = "coverage/lcov.info",
         },
         -- ruby: leave default (coverage/.resultset.json from SimpleCov)
       },

@@ -5,9 +5,9 @@ return {
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter").install({
-        "angular", "bash", "css", "embedded_template", "html", "javascript", "json", "lua",
+        "angular", "bash", "css", "dart", "embedded_template", "html", "javascript", "json", "lua",
         "markdown", "markdown_inline", "php", "php_only", "python", "regex",
-        "ruby", "tsx", "typescript", "vim", "vimdoc", "yaml",
+        "ruby", "rust", "tsx", "typescript", "vim", "vimdoc", "yaml",
       })
       -- `angular` parser auto-injects into @Component({ template: `...` })
       -- backtick strings via nvim-treesitter's ecma/injections.scm — no extra

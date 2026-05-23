@@ -14,6 +14,8 @@ return {
         javascriptreact = { "prettierd", "prettier", stop_after_first = true },
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
         python = { "ruff_organize_imports", "ruff_format" },
+        dart = { "dart_format" },
+        rust = { "rustfmt" },
       }
       local formatters = {}
       if vim.g.gaf then
