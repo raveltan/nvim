@@ -5,7 +5,7 @@ Modular, LSP-first Neovim built on [lazy.nvim](https://github.com/folke/lazy.nvi
 ## Install
 
 ```sh
-git clone <this-repo> ~/.config/nvim
+git clone git@github.com:raveltan/nvim.git ~/.config/nvim
 nvim
 ```
 
