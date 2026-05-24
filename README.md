@@ -13,6 +13,7 @@ nvim
 
 - [`docs/nvimdocs/INDEX.md`](docs/nvimdocs/INDEX.md) — every plugin / module, grouped
 - [`docs/keybinds.md`](docs/keybinds.md) — keybind cheatsheet
+- [`docs/obsidian.md`](docs/obsidian.md) — Obsidian note-taking workflow guide
 - [`docs/nvimdocs/config-init.md`](docs/nvimdocs/config-init.md) — bootstrap order
 - [`docs/nvimdocs/gaf-overview.md`](docs/nvimdocs/gaf-overview.md) — GAF profile
 
