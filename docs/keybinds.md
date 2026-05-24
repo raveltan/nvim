@@ -88,8 +88,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>ci` | n | Toggle inlay hints | config/keymaps.lua |
 | `<leader>cd` | n | Line diagnostics float | config/keymaps.lua |
 | `<leader>cu` | n | Undo tree (undotree) | undotree |
-| `<leader>cj` | n | Split/join block (treesj) | treesj |
-| `<leader>cn` | n | Treesitter node action | ts-node-action |
 | `<leader>cS` | n, x | Structural search-replace | ssr.nvim |
 | `<leader>co` | n | TS: organize imports | typescript-tools |
 | `<leader>cM` | n | TS: add missing imports | typescript-tools |
@@ -118,16 +116,8 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>g/` | n | Git grep (prompt) | util.ggrep |
 | `<leader>g/` | v | Git grep selection | util.ggrep |
 | `<leader>g*` | n | Git grep word under cursor | util.ggrep |
-| `<leader>go` | n | Toggle mini.diff overlay | mini.diff |
 | `]c` / `[c` | n | Next/Prev hunk | gitsigns |
-| `<leader>ghs` | n, v | Stage hunk | gitsigns |
-| `<leader>ghr` | n, v | Reset hunk | gitsigns |
-| `<leader>ghS` | n | Stage buffer | gitsigns |
-| `<leader>ghR` | n | Reset buffer | gitsigns |
-| `<leader>ghu` | n | Undo stage hunk | gitsigns |
-| `<leader>ghp` | n | Preview hunk | gitsigns |
-| `<leader>ghd` / `<leader>ghD` | n | Diff this / vs last commit | gitsigns |
-| `ih` | o, x | Select hunk (gitsigns or mini.diff textobj) | gitsigns / mini.diff |
+| `ih` | o, x | Select hunk (gitsigns textobj) | gitsigns |
 
 ## Diagnostics / Quickfix
 
@@ -153,15 +143,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>oc` | n | Run shell command |
 | `<leader>ot` | n | Toggle task list |
 | `<leader>ol` | n | Task action |
-
-## Refactoring (`<leader>R` — buffer-local on supported FT)
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>Re` | v | Refactor (select) |
-| `<leader>Rf` | v | Extract function |
-| `<leader>Rv` | v | Extract variable |
-| `<leader>Ri` | n, v | Inline variable |
 
 ## Testing (Neotest) — `<leader>t*`
 
@@ -228,24 +209,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>Dr` | n | DB: rename buffer |
 | `<leader>Dq` | n | DB: last query info |
 
-## REPL (`<leader>i` — iron.nvim)
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>is` | n | Toggle REPL |
-| `<leader>ir` | n | Restart REPL |
-| `<leader>ic` | n, o | Send motion |
-| `<leader>iv` | x | Send visual selection |
-| `<leader>il` | n | Send line |
-| `<leader>if` | n | Send file |
-| `<leader>iu` | n | Send until cursor |
-| `<leader>im` | n | Send mark |
-| `<leader>iM` | n, x | Mark motion / mark visual |
-| `<leader>id` | n | Remove mark |
-| `<leader>ix` | n | Interrupt |
-| `<leader>iq` | n | Exit |
-| `<leader>iC` | n | Clear |
-
 ## Navigation / Motion
 
 | Key | Mode | Description | Source |
@@ -263,13 +226,31 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `zp` | n | Peek fold | UFO |
 | `gx` | n | Open URL/file/Phab `D####`/`T####` under cursor | config/keymaps.lua |
 
-### AST nav (treewalker) — `<leader>n`
+## Obsidian — `<leader>n*`
 
 | Key | Mode | Description |
 |-----|------|-------------|
-| `<leader>nk` / `<leader>nj` | n, v | AST up / down |
-| `<leader>nh` / `<leader>nl` | n, v | AST parent / child |
-| `<leader>nK` / `<leader>nJ` | n | AST swap up / down |
+| `<leader>nf` | n | Find note (quick switch) |
+| `<leader>ns` | n | Search vault content |
+| `<leader>ng` | n | Tags picker |
+| `<leader>nb` | n | Backlinks |
+| `<leader>nl` | n | Links in note |
+| `<leader>nF` | n | Follow link |
+| `<leader>no` | n | Open in Obsidian app |
+| `<leader>nW` | n | Switch workspace |
+| `<leader>nd` / `<leader>ny` / `<leader>nT` | n | Today / yesterday / tomorrow daily |
+| `<leader>nR` | n | Weekly review |
+| `<leader>nc` | n | Capture to inbox |
+| `<leader>nn` | n | New note (raw, inbox) |
+| `<leader>np` / `<leader>nm` / `<leader>nu` / `<leader>nD` | n | New project / meeting / bug / decision |
+| `<leader>nk` / `<leader>nP` / `<leader>nS` / `<leader>nB` | n | New concept / person / snippet / book |
+| `<leader>ni` | n | Insert template at cursor |
+| `<leader>nr` | n | Rename note (refactor links) |
+| `<leader>nI` | n | Paste image |
+| `<leader>nL` | v | Link selection |
+| `<leader>nX` | v | Extract selection → note |
+| `<leader>nt` | n | Toggle checkbox |
+| `<leader>nC` | n | Table of contents |
 
 ## Editing
 
@@ -343,19 +324,16 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 | Key | Mode | Description |
 |-----|------|-------------|
 | `<leader>uf` | n | Toggle format-on-save |
-| `<leader>ud` | n | Toggle diagnostics |
+| `<leader>ud` | n | Toggle diagnostics (conflicts with duck `<leader>ud*` prefix — 2-char fires after timeout) |
 | `<leader>uM` | n | Toggle markdown render (markview) |
-| `<leader>uz` | n | Zen mode |
+| `<leader>udd` / `<leader>uda` | n | Hatch duck (slow / fast) |
+| `<leader>udk` / `<leader>udK` | n | Cook one duck / cook all |
 
-## Sessions / Quit — `<leader>q`
+## Quit — `<leader>q`
 
 | Key | Mode | Description |
 |-----|------|-------------|
 | `<leader>qq` | n | Quit all |
-| `<leader>qs` | n | Restore session |
-| `<leader>qS` | n | Select session |
-| `<leader>ql` | n | Restore last session |
-| `<leader>qd` | n | Don't save current session |
 
 ## Terminal
 
@@ -363,16 +341,20 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 |-----|------|-------------|
 | `<esc><esc>` | t | Exit terminal mode |
 
-## HTTP (hurl.nvim) — `<leader>H`
+## Flutter — `<leader>F*`
 
 | Key | Mode | Description |
 |-----|------|-------------|
-| `<leader>H` | v | Run selection |
-| `<leader>Ha` | n | Run all requests |
-| `<leader>Hs` | n | Run request at cursor |
-| `<leader>He` | n | Run up to entry |
-| `<leader>Hm` | n | Toggle result mode |
-| `<leader>Hv` | n | Run in verbose mode |
+| `<leader>Fr` | n | Flutter run |
+| `<leader>FR` | n | Flutter hot reload |
+| `<leader>FM` | n | Flutter hot restart |
+| `<leader>Fq` | n | Flutter quit |
+| `<leader>Fd` | n | Flutter devices |
+| `<leader>Fe` | n | Flutter emulators |
+| `<leader>Fl` | n | Flutter log toggle |
+| `<leader>Fo` | n | Flutter outline |
+| `<leader>Fp` / `<leader>FP` | n | Pub get / Pub upgrade |
+| `<leader>Fc` | n | Flutter LSP restart |
 
 ## Claude Code — `<leader>a`
 
@@ -447,7 +429,7 @@ ERB examples:
 
 ## Which-key groups
 
-`<leader>a` claude · `<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>g` git · `<leader>gh` hunks · `<leader>H` hurl · `<leader>h` harpoon · `<leader>i` iron repl · `<leader>m` multicursor · `<leader>n` ast nav · `<leader>o` overseer · `<leader>q` quit/session · `<leader>r` rails · `<leader>R` refactor · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>w` window · `<leader>x` diagnostics · `g` goto · `gs` surround
+`<leader>a` ai/claude · `<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>m` multicursor · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>q` quit · `<leader>r` rails · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics · `<leader>X` xdebug profile · `g` goto · `gs` surround
 
 ## Known overlaps
 

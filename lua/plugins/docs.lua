@@ -2,7 +2,11 @@ return {
   {
     "maskudo/devdocs.nvim",
     dependencies = { "folke/snacks.nvim" },
-    cmd = { "DevDocs", "DevDocsOpen", "DevDocsJump", "DevDocsGrep", "DevDocsGrepAll", "DevDocsGrepVisual", "DevDocsGrepVisualAll" },
+    cmd = {
+      "DevDocs", "DevDocsOpen", "DevDocsJump", "DevDocsGrep", "DevDocsGrepAll",
+      "DevDocsGrepVisual", "DevDocsGrepVisualAll",
+      "NvimDocs", "NvimDocsGrep", "NvimDocsGrepVisual",
+    },
     keys = {
       { "<leader>ko", "<cmd>DevDocsOpen<cr>",     desc = "DevDocs open (pick doc → file)" },
       { "<leader>kj", "<cmd>DevDocsJump<cr>",     desc = "DevDocs jump file in last doc" },
@@ -13,6 +17,10 @@ return {
       { "<leader>ki", "<cmd>DevDocs install<cr>", desc = "DevDocs install" },
       { "<leader>kf", "<cmd>DevDocs fetch<cr>",   desc = "DevDocs fetch index" },
       { "<leader>kd", "<cmd>DevDocs delete<cr>",  desc = "DevDocs delete" },
+      -- Local nvim-config docs (this repo's docs/nvimdocs/)
+      { "<leader>kn", "<cmd>NvimDocs<cr>",                  desc = "NvimDocs: pick file (title search)" },
+      { "<leader>kN", "<cmd>NvimDocsGrep<cr>",              desc = "NvimDocs: grep all" },
+      { "<leader>kN", "<cmd>NvimDocsGrepVisual<cr>", mode = "x", desc = "NvimDocs: grep selection" },
     },
     opts = {
       ensure_installed = {
@@ -93,8 +101,22 @@ return {
       local function follow_link()
         local line = vim.api.nvim_get_current_line()
         local col = vim.api.nvim_win_get_cursor(0)[2] + 1
-        -- Markdown links [text](target)
+        -- Wiki-style [[slug]] (nvimdocs cross-refs)
         local s = 1
+        while true do
+          local ls, le, target = line:find("%[%[([^%]]+)%]%]", s)
+          if not ls then break end
+          if col >= ls and col <= le then
+            local anchor = ""
+            local path, hash = target:match("^([^#]*)#(.*)$")
+            if path then target, anchor = path, hash end
+            local resolved = target:match("%.md$") and target or (target .. ".md")
+            return open_target(anchor ~= "" and (resolved .. "#" .. anchor) or resolved)
+          end
+          s = le + 1
+        end
+        -- Markdown links [text](target)
+        s = 1
         while true do
           local ls, le, _, target = line:find("%[([^%]]*)%]%(([^)]+)%)", s)
           if not ls then break end
@@ -131,6 +153,48 @@ return {
         end,
       })
 
+      -- NvimDocs: local config documentation under docs/nvimdocs/.
+      -- Same picker UX as devdocs (file picker = title search; grep = full-text),
+      -- and the same gf/<CR> link-following keymaps inside doc buffers.
+      local nvimdocs_root = vim.fn.stdpath("config") .. "/docs/nvimdocs"
+
+      vim.api.nvim_create_autocmd("BufEnter", {
+        group = vim.api.nvim_create_augroup("nvimdocs_buf", { clear = true }),
+        pattern = nvimdocs_root .. "/*",
+        callback = function(args)
+          vim.keymap.set("n", "gf", follow_link, { buffer = args.buf, desc = "NvimDocs follow link" })
+          vim.keymap.set("n", "<CR>", follow_link, { buffer = args.buf, desc = "NvimDocs follow link" })
+        end,
+      })
+
+      vim.api.nvim_create_user_command("NvimDocs", function()
+        Snacks.picker.files({
+          cwd = nvimdocs_root,
+          prompt = "nvimdocs ❯ ",
+          confirm = "edit",
+        })
+      end, { desc = "NvimDocs: pick file (title search)" })
+
+      vim.api.nvim_create_user_command("NvimDocsGrep", function()
+        Snacks.picker.grep({
+          cwd = nvimdocs_root,
+          prompt = "nvimdocs grep ❯ ",
+          confirm = "edit",
+        })
+      end, { desc = "NvimDocs: grep all docs" })
+
+      vim.api.nvim_create_user_command("NvimDocsGrepVisual", function()
+        local sel = visual_selection()
+        if sel == "" then return end
+        vim.api.nvim_input("<Esc>")
+        Snacks.picker.grep({
+          cwd = nvimdocs_root,
+          prompt = "nvimdocs grep ❯ ",
+          search = sel,
+          confirm = "edit",
+        })
+      end, { range = true, desc = "NvimDocs: grep selection" })
+
       local function pick_doc(cb)
         local docs = DD.GetInstalledDocs()
         if #docs == 0 then
@@ -149,7 +213,7 @@ return {
         Snacks.picker.files({
           cwd = dir,
           prompt = slug .. " ❯ ",
-          confirm = "edit_vsplit",
+          confirm = "edit",
         })
       end
 
@@ -160,7 +224,7 @@ return {
           cwd = dir,
           prompt = slug .. " grep ❯ ",
           search = seed,
-          confirm = "edit_vsplit",
+          confirm = "edit",
         })
       end
 
@@ -200,7 +264,7 @@ return {
           cwd = docs_root,
           prompt = "All docs grep ❯ ",
           search = sel,
-          confirm = "edit_vsplit",
+          confirm = "edit",
         })
       end
 
@@ -224,7 +288,7 @@ return {
         Snacks.picker.grep({
           cwd = docs_root,
           prompt = "All docs grep ❯ ",
-          confirm = "edit_vsplit",
+          confirm = "edit",
         })
       end, {})
     end,

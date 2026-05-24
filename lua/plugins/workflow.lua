@@ -9,15 +9,21 @@ return {
       { "<leader>ot", "<cmd>OverseerToggle<cr>", desc = "Toggle task list" },
       { "<leader>ol", "<cmd>OverseerTaskAction<cr>", desc = "Task action" },
     },
-    opts = {
-      dap = true,
-      template_dirs = { "overseer.template.user" },
-      task_list = {
-        direction = "bottom",
-        min_height = 8,
-        max_height = { 20, 0.2 },
-      },
-    },
+    opts = function()
+      local disable_template_modules = {}
+      if not vim.g.gaf then
+        table.insert(disable_template_modules, "^overseer%.template%.user%.")
+      end
+      return {
+        dap = true,
+        disable_template_modules = disable_template_modules,
+        task_list = {
+          direction = "bottom",
+          min_height = 8,
+          max_height = { 20, 0.2 },
+        },
+      }
+    end,
   },
 
   -- Claude Code terminal toggle

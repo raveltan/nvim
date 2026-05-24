@@ -51,6 +51,9 @@ return {
         rust = {
           coverage_file = "coverage/lcov.info",
         },
+        dart = {
+          coverage_file = "coverage/lcov.info",
+        },
         -- ruby: leave default (coverage/.resultset.json from SimpleCov)
       },
     },

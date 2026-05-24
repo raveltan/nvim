@@ -28,6 +28,11 @@ function M.run(file, ft)
     run_env = nil
     markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" }
     extra_args = { "--cov", "--cov-report=xml" }
+  elseif ft == "dart" then
+    coverage_rel = "coverage/lcov.info"
+    run_env = nil
+    markers = { "pubspec.yaml", ".git" }
+    extra_args = { "--coverage" }
   elseif ft == "rust" then
     -- Requires cargo-llvm-cov installed. The neotest-rust adapter shells out to
     -- `cargo test`; setting CARGO env vars makes llvm-cov instrument the build

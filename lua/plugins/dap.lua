@@ -54,13 +54,13 @@ return {
         "jay-babu/mason-nvim-dap.nvim",
         dependencies = { "mason-org/mason.nvim" },
         opts = {
-          ensure_installed = { "python", "php", "js-debug-adapter", "codelldb" },
+          ensure_installed = { "python", "php", "js", "codelldb" },
           automatic_installation = true,
           handlers = {
             function(config)
               require("mason-nvim-dap").default_setup(config)
             end,
-            ["js-debug-adapter"] = function()
+            ["js"] = function()
               local dap = require("dap")
               local server = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js"
               for _, name in ipairs({ "pwa-node", "pwa-chrome" }) do
