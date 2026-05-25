@@ -1,0 +1,8 @@
+# lazy.nvim local state (already tracked: lazy-lock.json)
+# semantic search artifacts
+scripts/semantic/.venv/
+scripts/semantic/__pycache__/
+scripts/semantic/**/__pycache__/
+# semantic DB lives at ~/.ravelnvim.db; ignore here too if anyone moves it
+.ravelnvim.db
+*.ravelnvim.db

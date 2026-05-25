@@ -23,15 +23,7 @@ return {
       { "<leader>kN", "<cmd>NvimDocsGrepVisual<cr>", mode = "x", desc = "NvimDocs: grep selection" },
     },
     opts = {
-      ensure_installed = {
-        "ruby~4.0", "rails~8.1",
-        "javascript", "typescript", "node",
-        "php", "html", "css", "http", "lua~5.1",
-        "tailwindcss", "react", "angular~20",
-        "markdown", "nginx", "sqlite",
-        "bash", "git", "docker", "redis","rxjs", "rust", "typescript~5.1",
-        "sass", "minitest", "playwright","python~3.12",
-      },
+      ensure_installed = {},
     },
     config = function(_, opts)
       -- Strip inline SVG data URIs from HTML before pandoc.
