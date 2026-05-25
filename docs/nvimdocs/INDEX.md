@@ -97,6 +97,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 ## Editor
 
 - [editor-which-key](editor-which-key.md) — leader prefix labels
+- [editor-textobjects-cheatsheet](editor-textobjects-cheatsheet.md) — master textobject + motion + surround guide
 - [editor-mini-ai](editor-mini-ai.md) — extended textobjects
 - [editor-mini-surround](editor-mini-surround.md) — `gs*` surround ops
 - [editor-mini-bufremove](editor-mini-bufremove.md) — `<leader>bd` close-keep-window
