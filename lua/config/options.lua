@@ -41,3 +41,6 @@ opt.inccommand = "split"
 opt.jumpoptions = "stack,view"
 opt.shortmess:append("I")
 opt.wrap = true
+opt.textwidth = 150
+opt.colorcolumn = "80,150"
+opt.formatoptions:append("t")

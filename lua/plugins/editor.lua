@@ -2,6 +2,32 @@ return {
   -- Auto-detect indentation
   { "tpope/vim-sleuth", event = "BufReadPre" },
 
+  -- Hard/soft wrap mode manager
+  {
+    "andrewferrier/wrapping.nvim",
+    event = "BufReadPre",
+    opts = {
+      auto_set_mode_filetype_allowlist = {},
+      auto_set_mode_filetype_denylist = {},
+      auto_set_mode_heuristically = false,
+      create_commands = true,
+      create_keymappings = false,
+      notify_on_switch = false,
+      set_nvim_opt_defaults = true,
+      softener = { default = true },
+    },
+    config = function(_, opts)
+      require("wrapping").setup(opts)
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("force_hardwrap", { clear = true }),
+        callback = function()
+          require("wrapping").hard_wrap_mode()
+          vim.opt_local.textwidth = 150
+        end,
+      })
+    end,
+  },
+
   -- Folding with treesitter + peek preview
   {
     "kevinhwang91/nvim-ufo",
