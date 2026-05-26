@@ -19,10 +19,12 @@ return {
     config = function(_, opts)
       require("wrapping").setup(opts)
       vim.api.nvim_create_autocmd("FileType", {
-        group = vim.api.nvim_create_augroup("force_hardwrap", { clear = true }),
+        group = vim.api.nvim_create_augroup("force_hybridwrap", { clear = true }),
         callback = function()
-          require("wrapping").hard_wrap_mode()
+          vim.opt_local.wrap = true
           vim.opt_local.textwidth = 150
+          vim.opt_local.formatoptions:append("t")
+          vim.opt_local.formatoptions:append("l")
         end,
       })
     end,
