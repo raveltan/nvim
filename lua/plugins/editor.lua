@@ -322,7 +322,6 @@ return {
         { "<leader>g",  group = "git" },
         { "<leader>h",  group = "harpoon" },
         { "<leader>k",  group = "docs (devdocs/nvimdocs)" },
-        { "<leader>kx", group = "semantic search" },
         { "<leader>m",  group = "multicursor" },
         { "<leader>n",  group = "obsidian" },
         { "<leader>o",  group = "overseer/other" },
