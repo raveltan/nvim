@@ -6,7 +6,6 @@ return {
     keys = {
       { "<leader>or", "<cmd>OverseerRun<cr>", desc = "Run task" },
       { "<leader>oc", "<cmd>OverseerShell<cr>", desc = "Run shell command" },
-      { "<leader>ot", "<cmd>OverseerToggle<cr>", desc = "Toggle task list" },
       {
         "<leader>ol",
         function()
@@ -34,6 +33,34 @@ return {
           end)
         end,
         desc = "Open task in float",
+      },
+      {
+        "<leader>od",
+        function()
+          local task_list = require("overseer.task_list")
+          local action_util = require("overseer.action_util")
+          local tasks = task_list.list_tasks({
+            unique = true,
+            sort = task_list.sort_finished_recently,
+            include_ephemeral = true,
+          })
+          if #tasks == 0 then
+            vim.notify("No tasks available", vim.log.levels.WARN)
+            return
+          end
+          vim.ui.select(tasks, {
+            prompt = "Dispose task",
+            kind = "overseer_task",
+            format_item = function(t)
+              return t.name
+            end,
+          }, function(task)
+            if task then
+              action_util.run_task_action(task, "dispose")
+            end
+          end)
+        end,
+        desc = "Dispose task",
       },
     },
     config = function()
