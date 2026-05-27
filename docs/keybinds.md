@@ -29,7 +29,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `-` | n | Open parent directory (Oil) | oil.nvim |
 | `<leader>fn` | n | New file | config/keymaps.lua |
 | `<leader>ff` | n | Find files | snacks.picker |
-| `<leader><leader>` | n | Find files (alias) | snacks.picker |
+| `<leader><leader>` | n | Find files (resumes last query) | fff.nvim |
 | `<leader>,` | n | Buffers | snacks.picker |
 | `<leader>fr` | n | Recent files | snacks.picker |
 | `<leader>fc` | n | Find config file | snacks.picker |
@@ -48,7 +48,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 
 | Key | Mode | Description | Source |
 |-----|------|-------------|--------|
-| `<leader>sg` | n | Live grep | snacks.picker |
+| `<leader>sg` | n | Live grep (resumes last query) | fff.nvim |
 | `<leader>sw` | n, x | Grep word/selection | snacks.picker |
 | `<leader>sb` | n | Buffer lines | snacks.picker |
 | `<leader>sh` | n | Help pages | snacks.picker |

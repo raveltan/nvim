@@ -1,3 +1,17 @@
+local last_query = { files = "", grep = "" }
+
+local function patch_close_once()
+  local picker_ui = require("fff.picker_ui")
+  if picker_ui._last_query_patched then return end
+  picker_ui._last_query_patched = true
+  local original_close = picker_ui.close
+  picker_ui.close = function(...)
+    local mode = picker_ui.state.mode == "grep" and "grep" or "files"
+    last_query[mode] = picker_ui.state.query or ""
+    return original_close(...)
+  end
+end
+
 return {
   {
     "dmtrKovalenko/fff.nvim",
@@ -5,7 +19,7 @@ return {
     build = function() require("fff.download").download_or_build_binary() end,
     cmd = { "FFFScan", "FFFRefreshGit", "FFFClearCache", "FFFHealth", "FFFDebug", "FFFOpenLog" },
     keys = {
-      { "<leader><leader>", function() require("fff").find_files() end, desc = "Find files" },
+      { "<leader><leader>", function() patch_close_once(); require("fff").find_files({ query = last_query.files }) end, desc = "Find files (resume last query)" },
       { "<leader>ff", function() require("fff").find_files() end, desc = "Find files" },
       { "<leader>fd", function() require("fff").find_files_in_dir(vim.fn.expand("%:p:h")) end, desc = "Files in buffer dir" },
       { "<leader>fc", function()
@@ -16,7 +30,7 @@ return {
             callback = function() pcall(require("fff").change_indexing_directory, cwd) end,
           })
         end, desc = "Config files" },
-      { "<leader>sg", function() require("fff").live_grep() end, desc = "Live grep" },
+      { "<leader>sg", function() patch_close_once(); require("fff").live_grep({ query = last_query.grep }) end, desc = "Live grep (resume last query)" },
       { "<leader>sw", function() require("fff").live_grep({ query = vim.fn.expand("<cword>") }) end, mode = { "n", "x" }, desc = "Grep word" },
       { "<leader>sz", function() require("fff").live_grep({ grep = { modes = { "fuzzy", "plain" } } }) end, desc = "Fuzzy grep" },
       { "<leader>s.", function() require("fff").live_grep({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Grep in current file dir" },
@@ -41,6 +55,7 @@ return {
       keymaps = {
         focus_list = "<C-l>",
         focus_preview = "<C-p>",
+        preview_scroll_up = "<M-u>",
       },
       frecency = { enabled = true },
       history = { enabled = true },
