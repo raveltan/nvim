@@ -28,10 +28,6 @@ opt.mouse = "a"
 opt.winborder = "rounded"
 opt.laststatus = 3
 opt.smoothscroll = true
-opt.foldcolumn = "1"
-opt.foldlevel = 99
-opt.foldlevelstart = 99
-opt.foldenable = true
 opt.fillchars = { eob = " " }
 opt.diffopt:append("vertical")
 opt.virtualedit = "block"

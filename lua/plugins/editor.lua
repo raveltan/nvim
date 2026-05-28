@@ -30,23 +30,6 @@ return {
     end,
   },
 
-  -- Folding with treesitter + peek preview
-  {
-    "kevinhwang91/nvim-ufo",
-    dependencies = { "kevinhwang91/promise-async" },
-    event = "BufReadPost",
-    opts = {
-      provider_selector = function()
-        return { "treesitter", "indent" }
-      end,
-    },
-    keys = {
-      { "zR", function() require("ufo").openAllFolds() end,               desc = "Open all folds" },
-      { "zM", function() require("ufo").closeAllFolds() end,              desc = "Close all folds" },
-      { "zp", function() require("ufo").peekFoldedLinesUnderCursor() end, desc = "Peek fold" },
-    },
-  },
-
   -- Undo tree visualization
   {
     "mbbill/undotree",
@@ -310,7 +293,7 @@ return {
     event = "VeryLazy",
     opts = {
       spec = {
-        { "<leader>a",  group = "ai/claude" },
+        { "<leader>a",  group = "ai/codecompanion" },
         { "<leader>b",  group = "buffer" },
         { "<leader>c",  group = "code" },
         { "<leader>cs", group = "swap" },

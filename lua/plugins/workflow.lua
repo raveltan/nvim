@@ -92,34 +92,48 @@ return {
     end,
   },
 
-  -- Claude Code terminal toggle
+  -- CodeCompanion — buffer-integrated AI chat / inline / cmd.
+  -- Uses claude_code ACP adapter → reuses Claude Code CLI subscription auth
+  -- (no ANTHROPIC_API_KEY needed). Requires `claude` CLI on PATH + logged in.
   {
-    "greggh/claude-code.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    cmd = { "ClaudeCode", "ClaudeCodeContinue", "ClaudeCodeResume", "ClaudeCodeVerbose" },
+    "olimorris/codecompanion.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    cmd = {
+      "CodeCompanion",
+      "CodeCompanionChat",
+      "CodeCompanionActions",
+      "CodeCompanionCmd",
+    },
     keys = {
-      { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
-      { "<leader>aC", "<cmd>ClaudeCodeContinue<cr>", desc = "Claude Code continue" },
-      { "<leader>ar", "<cmd>ClaudeCodeResume<cr>", desc = "Claude Code resume" },
-      { "<leader>av", "<cmd>ClaudeCodeVerbose<cr>", desc = "Claude Code verbose" },
+      { "<leader>ac", "<cmd>CodeCompanionChat Toggle<cr>", mode = { "n", "v" }, desc = "CodeCompanion chat toggle" },
+      { "<leader>aa", "<cmd>CodeCompanionActions<cr>",     mode = { "n", "v" }, desc = "CodeCompanion actions" },
+      { "<leader>ai", ":CodeCompanion ",                   mode = { "n", "v" }, desc = "CodeCompanion inline" },
+      { "<leader>ax", "<cmd>CodeCompanionChat Add<cr>",    mode = "v",          desc = "Add selection to chat" },
+      { "<leader>aC", "<cmd>CodeCompanionCmd<cr>",         desc = "CodeCompanion cmd-line" },
     },
     opts = {
-      window = {
-        split_ratio = 0.4,
-        position = "vertical",
-        enter_insert = true,
-        start_in_normal_mode = false,
-        hide_numbers = true,
-        hide_signcolumn = true,
+      -- claude_code ACP adapter (ships with codecompanion). Spawns
+      -- @agentclientprotocol/claude-agent-acp bridge → reuses Claude Code CLI
+      -- subscription auth via keychain. No API key, no env overrides needed.
+      strategies = {
+        chat = { adapter = "claude_code" },
+        inline = { adapter = "claude_code" },
+        cmd = { adapter = "claude_code" },
       },
-      refresh = {
-        enable = true,
-        updatetime = 100,
-        timer_interval = 1000,
-        show_notifications = true,
+      display = {
+        chat = {
+          window = {
+            layout = "vertical",
+            width = 0.4,
+            border = "rounded",
+          },
+          show_settings = false,
+        },
+        diff = { provider = "default" },
       },
-      git = { use_git_root = true },
-      command = "claude",
     },
   },
 

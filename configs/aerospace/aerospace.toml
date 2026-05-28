@@ -1,0 +1,171 @@
+# ~/.aerospace.toml
+# Hyper = alt-shift-cmd-ctrl   |   Meh = alt-shift-ctrl
+
+start-at-login = true
+
+# Run JankyBorders and SketchyBar when AeroSpace starts.
+after-startup-command = [
+  'exec-and-forget /opt/homebrew/bin/borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0 style=round',
+  'exec-and-forget /opt/homebrew/bin/sketchybar',
+]
+
+# Notify SketchyBar on every workspace change.
+exec-on-workspace-change = ['/bin/bash', '-c',
+  '/opt/homebrew/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE 2>/dev/null || true'
+]
+
+# Move mouse to the center of newly focused monitor.
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+accordion-padding = 30
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+automatically-unhide-macos-hidden-apps = false
+
+[gaps]
+inner.horizontal = 8
+inner.vertical = 8
+outer.left = 8
+outer.right = 8
+outer.top = 40        # leaves room for SketchyBar
+outer.bottom = 8
+
+[key-mapping]
+preset = 'qwerty'
+
+# ============================================================
+# MAIN MODE — Hyper (alt-shift-cmd-ctrl) + key
+# ============================================================
+[mode.main.binding]
+
+# Focus (crosses monitors)
+alt-shift-cmd-ctrl-h = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-the-workspace left'
+alt-shift-cmd-ctrl-j = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-the-workspace down'
+alt-shift-cmd-ctrl-k = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-the-workspace up'
+alt-shift-cmd-ctrl-l = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-the-workspace right'
+
+# Move (Meh = alt-shift-ctrl, no cmd)
+alt-shift-ctrl-h = 'move left'
+alt-shift-ctrl-j = 'move down'
+alt-shift-ctrl-k = 'move up'
+alt-shift-ctrl-l = 'move right'
+
+# Workspace jumps — letter mnemonics
+alt-shift-cmd-ctrl-t = ['exec-and-forget open -a "Ghostty"',       'workspace T']
+alt-shift-cmd-ctrl-b = ['exec-and-forget open -a "Google Chrome"', 'workspace B']
+alt-shift-cmd-ctrl-d = 'workspace D'
+alt-shift-cmd-ctrl-c = ['exec-and-forget open -a "Slack"',         'workspace C']
+alt-shift-cmd-ctrl-n = 'workspace N'
+
+# Numbered workspaces (scratch)
+alt-shift-cmd-ctrl-1 = 'workspace 1'
+alt-shift-cmd-ctrl-2 = 'workspace 2'
+alt-shift-cmd-ctrl-3 = 'workspace 3'
+alt-shift-cmd-ctrl-4 = 'workspace 4'
+alt-shift-cmd-ctrl-5 = 'workspace 5'
+
+# Move current window to workspace (Meh + letter, then follow)
+alt-shift-ctrl-t = ['move-node-to-workspace T', 'workspace T']
+alt-shift-ctrl-b = ['move-node-to-workspace B', 'workspace B']
+alt-shift-ctrl-d = ['move-node-to-workspace D', 'workspace D']
+alt-shift-ctrl-c = ['move-node-to-workspace C', 'workspace C']
+alt-shift-ctrl-n = ['move-node-to-workspace N', 'workspace N']
+
+# Workspace back-and-forth
+alt-shift-cmd-ctrl-tab = 'workspace-back-and-forth'
+
+# Cycle workspaces (next/prev)
+alt-shift-cmd-ctrl-rightSquareBracket = 'workspace next'
+alt-shift-cmd-ctrl-leftSquareBracket  = 'workspace prev'
+
+# Move window to next/prev workspace + follow
+alt-shift-ctrl-rightSquareBracket = ['move-node-to-workspace next', 'workspace next']
+alt-shift-ctrl-leftSquareBracket  = ['move-node-to-workspace prev', 'workspace prev']
+
+# Layouts
+alt-shift-cmd-ctrl-slash = 'layout tiles horizontal vertical'
+alt-shift-cmd-ctrl-comma = 'layout accordion horizontal vertical'
+alt-shift-cmd-ctrl-f     = 'fullscreen'
+alt-shift-cmd-ctrl-space = 'layout floating tiling'
+
+# Modes
+alt-shift-cmd-ctrl-r         = 'mode resize'
+alt-shift-cmd-ctrl-semicolon = 'mode service'
+
+# Monitor management
+alt-shift-cmd-ctrl-period = 'move-workspace-to-monitor --wrap-around next'
+
+# ============================================================
+# RESIZE MODE
+# ============================================================
+[mode.resize.binding]
+h     = 'resize width -50'
+j     = 'resize height +50'
+k     = 'resize height -50'
+l     = 'resize width +50'
+enter = 'mode main'
+esc   = 'mode main'
+
+# ============================================================
+# SERVICE MODE — destructive, requires entering it first
+# ============================================================
+[mode.service.binding]
+esc       = ['reload-config', 'mode main']
+r         = ['flatten-workspace-tree', 'mode main']
+f         = ['layout floating tiling', 'mode main']
+backspace = ['close-all-windows-but-current', 'mode main']
+alt-shift-h = ['join-with left',  'mode main']
+alt-shift-j = ['join-with down',  'mode main']
+alt-shift-k = ['join-with up',    'mode main']
+alt-shift-l = ['join-with right', 'mode main']
+
+# ============================================================
+# Workspace ↔ monitor pinning (uncomment for dual-monitor)
+# ============================================================
+# [workspace-to-monitor-force-assignment]
+# T = ['built-in']
+# B = ['secondary', 'main']
+# D = ['secondary', 'main']
+# C = ['built-in']
+# N = ['built-in']
+
+# ============================================================
+# App rules — run `aerospace list-apps` for exact app-ids
+# ============================================================
+
+# Ghostty — tiled, lives in T. Tabs are tmux's job.
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = ['layout tiling', 'move-node-to-workspace T']
+
+# Chrome — goes to B
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
+run = 'move-node-to-workspace B'
+
+# Slack / Discord — C
+[[on-window-detected]]
+if.app-id = 'com.tinyspeck.slackmacgap'
+run = 'move-node-to-workspace C'
+
+[[on-window-detected]]
+if.app-id = 'com.hnc.Discord'
+run = 'move-node-to-workspace C'
+
+# Float dialog-style apps
+[[on-window-detected]]
+if.app-id = 'com.1password.1password'
+run = 'layout floating'
+
+# Critical: float Raycast so AeroSpace doesn't try to tile the launcher.
+[[on-window-detected]]
+if.app-id = 'com.raycast.macos'
+run = 'layout floating'
+
+# Homerow's small overlays — let them float.
+[[on-window-detected]]
+if.app-id = 'com.dexterleng.homerow'
+run = 'layout floating'

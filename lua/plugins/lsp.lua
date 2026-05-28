@@ -366,6 +366,9 @@ return {
       signature = { enabled = true, window = { border = "rounded" } },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
+        per_filetype = {
+          codecompanion = { "codecompanion" },
+        },
         providers = {
           lsp = { max_items = 50 },
         },
