@@ -30,7 +30,13 @@ inner.horizontal = 8
 inner.vertical = 8
 outer.left = 8
 outer.right = 8
-outer.top = 20        # leaves room for SketchyBar
+# SketchyBar is position=top height=40. Notch built-in already reserves a
+# tall menu bar in visibleFrame, so it needs a small gap; external/no-notch
+# monitors need the full bar height + pad or the bar gets covered.
+outer.top = [
+  { monitor.'built-in' = 8 },   # notch: menu bar already eats ~37px
+  44,                           # external/default: clear 40px bar + 4 pad
+]
 outer.bottom = 8
 
 [key-mapping]

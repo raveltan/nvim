@@ -14,6 +14,11 @@ System Settings tweaks (separate Spaces, hidden menu bar, removed extra desktops
   - Hyper (`⌃⌥⌘⇧`) + `hjkl` focus, Meh (`⌃⌥⇧`) + `hjkl` move.
   - Workspaces: `T` terminal, `B` browser, `D` docs, `C` comms (Rocket.Chat), `N` notes.
   - Workspaces pinned with fallback: letters/numbers split `main` vs `secondary`, both collapse to `built-in` when undocked. No manual reconfig between laptop/dock.
+  - **Top gap is per-monitor** (`[gaps] outer.top` array) so SketchyBar clears correctly on both notch and non-notch screens:
+    - `{ monitor.'built-in' = 8 }` — notch screen's tall menu bar is already excluded from `visibleFrame`, so only a small gap is needed; a fixed value here double-gaps.
+    - `44` (default) — external/no-notch monitors: SketchyBar (`position=top height=40`) sits at `y=0`, so the gap must cover the full bar height + pad or the bar gets hidden under the top window.
+    - Last array item **must be a bare Int** (the default); a `monitor.'.*'` object there fails to parse.
+    - Symptom if wrong: single fixed `outer.top` → extra space on notch displays, bar covered on non-notch.
   - Reload: `Hyper-;` then `Esc`, or `aerospace reload-config`.
 
 - **JankyBorders** — colored ring on focused window. Live: `~/.config/borders/bordersrc`. Mirror: `borders/bordersrc`.
