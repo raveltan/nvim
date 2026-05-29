@@ -196,6 +196,10 @@ map("n", "N", [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('h
 -- Join without moving cursor
 map("n", "J", "mzJ`z", { desc = "Join lines" })
 
+-- Folding (native treesitter foldexpr). za/zR/zM/zr/zm are built-ins; zx
+-- recomputes folds after foldexpr leaves stale boundaries (neovim#26224).
+map("n", "<leader>zx", "zx", { desc = "Recompute folds" })
+
 map("n", "gx", function()
   if vim.g.gaf and require("gaf.keymaps").open_phab_under_cursor() then return end
   local cfile = vim.fn.expand("<cfile>")

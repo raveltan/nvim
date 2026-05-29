@@ -222,8 +222,10 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `aa` / `ia` | x, o | Around/Inside argument | treesitter |
 | `<C-d>` / `<C-u>` | n | Half page down/up (centered) | config/keymaps.lua |
 | `n` / `N` | n | Next/Prev search (centered, hlslens) | config/keymaps.lua |
-| `zR` / `zM` | n | Open / close all folds | UFO |
-| `zp` | n | Peek fold | UFO |
+| `za` | n | Toggle fold under cursor | native (treesitter folds) |
+| `zR` / `zM` | n | Open / close all folds | native (treesitter folds) |
+| `zj` / `zk` | n | Jump to next / prev fold | native |
+| `<leader>zx` | n | Recompute folds | config/keymaps.lua |
 | `gx` | n | Open URL/file/Phab `D####`/`T####` under cursor | config/keymaps.lua |
 
 ## Obsidian — `<leader>n*`

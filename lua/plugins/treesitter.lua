@@ -31,9 +31,16 @@ return {
           if ok_stat and stat and stat.size and stat.size > TS_MAX_BYTES then return end
           if vim.api.nvim_buf_line_count(args.buf) > TS_MAX_LINES then return end
           pcall(vim.treesitter.start, args.buf)
-          if not skip_ts_indent[vim.bo[args.buf].filetype]
-            and vim.treesitter.get_parser(args.buf, nil, { error = false }) then
-            vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          if vim.treesitter.get_parser(args.buf, nil, { error = false }) then
+            if not skip_ts_indent[vim.bo[args.buf].filetype] then
+              vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            end
+            -- Native treesitter folding — window-local, buffer-scoped (vim.wo[0][0]),
+            -- only for buffers WITH a parser, so the size guard above also skips folds.
+            -- nvim-treesitter main does not auto-enable folds; we wire them here.
+            vim.wo[0][0].foldmethod = "expr"
+            vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+            vim.wo[0][0].foldlevel = 99 -- re-assert: folds enable after the window opened
           end
         end,
       })

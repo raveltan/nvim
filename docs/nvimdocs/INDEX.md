@@ -105,7 +105,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [editor-flash](editor-flash.md) — `s`/`S` label jumps
 - [editor-ssr](editor-ssr.md) — structural search-replace `<leader>cS`
 - [editor-grug-far](editor-grug-far.md) — project-wide find/replace UI
-- [editor-ufo](editor-ufo.md) — fold UI
+- [editor-folding](editor-folding.md) — native treesitter folding
 - [editor-undotree](editor-undotree.md) — undo history
 - [editor-marks](editor-marks.md) — mark gutter + picker
 - [editor-yanky](editor-yanky.md) — yank ring

@@ -18,7 +18,7 @@ return {
 
   -- File explorer (edit filesystem like a buffer)
   {
-    "stevearc/oil.nvim",
+    "barrettruth/canola.nvim",
     dependencies = { "echasnovski/mini.icons" },
     keys = {
       { "<leader>e", "<cmd>Oil<cr>", desc = "Explorer (Oil)" },
