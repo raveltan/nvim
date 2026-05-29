@@ -48,7 +48,9 @@ sketchybar --add item chevron left \
            --subscribe front_app front_app_switched
 
 ##### Right items #####
-sketchybar --add item clock right \
+sketchybar --add item devbox right \
+           --set devbox update_freq=30 script="$PLUGIN_DIR/devbox.sh" \
+           --add item clock right \
            --set clock update_freq=10 icon=  script="$PLUGIN_DIR/clock.sh" \
            --add item volume right \
            --set volume script="$PLUGIN_DIR/volume.sh" \

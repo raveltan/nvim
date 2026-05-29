@@ -26,6 +26,8 @@ System Settings tweaks (separate Spaces, hidden menu bar, removed extra desktops
 
 - **SketchyBar** — top bar. Live: `~/.config/sketchybar/`. Mirror: `sketchybar/`.
   - Workspace chips driven by `aerospace_workspace_change` event.
+  - **devbox item** — remote dev box health. Plugin `sketchybar/plugins/devbox.sh`
+    runs `script/checkdevbox.sh` every 30s; green=up, yellow=provisioning, red=down.
   - Reload: `sketchybar --reload`.
 
 - **Ice** — tidies the native menu bar (mostly hidden, revealed at top edge).
@@ -41,6 +43,15 @@ System Settings tweaks (separate Spaces, hidden menu bar, removed extra desktops
 - **Ghostty** — `configs/ghostty/`. Native tabs disabled; tmux owns tabs.
 - **tmux** — `configs/tmux/`. Prefix `Ctrl-Space`. `vim-tmux-navigator` glues panes to nvim splits.
 - **Neovim** — `~/.config/nvim/`.
+
+## Scripts
+
+Helper scripts live in `script/`. Real home is `~/.config/nvim/configs/script/`.
+
+- **`checkdevbox.sh`** — SSHes to the remote dev box, reports `UP` / `PROVISIONING`
+  (muppet running) / `DOWN` (unreachable). Consumed by the SketchyBar devbox item.
+  - Expects an SSH key at `~/.ssh/id_ed25519` (**not** committed here — key stays local).
+  - Edit `REMOTE_HOST` at the top to retarget.
 
 ## Other
 
