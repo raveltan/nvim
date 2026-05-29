@@ -3,16 +3,16 @@
 
 **Repo:** https://github.com/OXY2DEV/markview.nvim
 **Local spec:** lua/plugins/editor.lua:94-107
-**Tags:** editor markdown render preview latex codecompanion avante
+**Tags:** editor markdown render preview latex avante
 
 ## Scope
-Decorates Markdown buffers with concealed/virt-text rendering of headings (icons, underline), code blocks (language label + background), lists, tables, links, callouts, and LaTeX. We enable it for `markdown` plus the two AI chat buffers (`codecompanion`, `Avante`) so AI replies look like rendered Markdown instead of raw text.
+Decorates Markdown buffers with concealed/virt-text rendering of headings (icons, underline), code blocks (language label + background), lists, tables, links, callouts, and LaTeX. We enable it for `markdown` plus the `Avante` AI chat buffer so AI replies look like rendered Markdown instead of raw text.
 
 ## Install spec
 ```lua
 {
   "OXY2DEV/markview.nvim",
-  ft = { "markdown", "codecompanion", "Avante" },
+  ft = { "markdown", "Avante" },
   dependencies = {
     "nvim-treesitter/nvim-treesitter",
     "echasnovski/mini.icons",
@@ -20,11 +20,11 @@ Decorates Markdown buffers with concealed/virt-text rendering of headings (icons
   keys = {
     { "<leader>uM", "<cmd>Markview Toggle<cr>",
       desc = "Toggle markdown render",
-      ft = { "markdown", "codecompanion", "Avante" } },
+      ft = { "markdown", "Avante" } },
   },
   opts = {
     preview = {
-      filetypes = { "markdown", "codecompanion", "Avante" },
+      filetypes = { "markdown", "Avante" },
       ignore_buftypes = {},
     },
   },
@@ -42,16 +42,16 @@ Decorates Markdown buffers with concealed/virt-text rendering of headings (icons
 ## Our config
 Minimal: we only set `preview.filetypes` and clear `ignore_buftypes`. Everything else (heading icons, code-block styling, link rendering) uses the upstream defaults.
 
-The `Avante` and `codecompanion` filetypes are not in the upstream default list, so adding them is the load-bearing customisation — without it, AI responses render as raw `## headings` and triple-backticks.
+The `Avante` filetype is not in the upstream default list, so adding it is the load-bearing customisation — without it, AI responses render as raw `## headings` and triple-backticks.
 
-`ignore_buftypes = {}` is required because both AI plugins host their chat in a `nofile` buffer; the default ignore list would skip them.
+`ignore_buftypes = {}` is required because Avante hosts its chat in a `nofile` buffer; the default ignore list would skip it.
 
 ## Keymaps
 | Key | Mode | Action | Desc |
 |---|---|---|---|
 | `<leader>uM` | n | `:Markview Toggle` | Toggle render in current buffer |
 
-Buffer-local; only bound when the filetype is one of `markdown`, `codecompanion`, `Avante`.
+Buffer-local; only bound when the filetype is one of `markdown`, `Avante`.
 
 ## Links
 - README: https://github.com/OXY2DEV/markview.nvim
@@ -61,5 +61,5 @@ Buffer-local; only bound when the filetype is one of `markdown`, `codecompanion`
 ## Notes
 - Requires `nvim-treesitter` with the `markdown` and `markdown_inline` parsers installed; otherwise heading detection silently fails.
 - `mini.icons` (not `nvim-web-devicons`) is our icon source; markview auto-detects either.
-- If a `codecompanion` buffer does not render, check that the filetype actually matches — some versions of CodeCompanion use `codecompanion` (lowercase) while Avante uses `Avante` (capitalised). We list both.
+- If an `Avante` buffer does not render, check that the filetype actually matches — Avante uses `Avante` (capitalised).
 - Toggling off does *not* unload the plugin; it disables decoration for the current buffer only.

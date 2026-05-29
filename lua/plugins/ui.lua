@@ -200,7 +200,7 @@ return {
         "noice", "checkhealth", "qf", "grug-far",
         "DiffviewFiles", "DiffviewFileHistory",
         "fugitive", "fugitiveblame", "git",
-        "markview", "codecompanion", "Avante",
+        "markview", "Avante",
       },
       handlers = {
         cursor      = { enable = true, overlap = true, priority = 1000 },

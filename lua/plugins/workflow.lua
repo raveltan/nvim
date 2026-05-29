@@ -92,49 +92,4 @@ return {
     end,
   },
 
-  -- CodeCompanion — buffer-integrated AI chat / inline / cmd.
-  -- Uses claude_code ACP adapter → reuses Claude Code CLI subscription auth
-  -- (no ANTHROPIC_API_KEY needed). Requires `claude` CLI on PATH + logged in.
-  {
-    "olimorris/codecompanion.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-    },
-    cmd = {
-      "CodeCompanion",
-      "CodeCompanionChat",
-      "CodeCompanionActions",
-      "CodeCompanionCmd",
-    },
-    keys = {
-      { "<leader>ac", "<cmd>CodeCompanionChat Toggle<cr>", mode = { "n", "v" }, desc = "CodeCompanion chat toggle" },
-      { "<leader>aa", "<cmd>CodeCompanionActions<cr>",     mode = { "n", "v" }, desc = "CodeCompanion actions" },
-      { "<leader>ai", ":CodeCompanion ",                   mode = { "n", "v" }, desc = "CodeCompanion inline" },
-      { "<leader>ax", "<cmd>CodeCompanionChat Add<cr>",    mode = "v",          desc = "Add selection to chat" },
-      { "<leader>aC", "<cmd>CodeCompanionCmd<cr>",         desc = "CodeCompanion cmd-line" },
-    },
-    opts = {
-      -- claude_code ACP adapter (ships with codecompanion). Spawns
-      -- @agentclientprotocol/claude-agent-acp bridge → reuses Claude Code CLI
-      -- subscription auth via keychain. No API key, no env overrides needed.
-      strategies = {
-        chat = { adapter = "claude_code" },
-        inline = { adapter = "claude_code" },
-        cmd = { adapter = "claude_code" },
-      },
-      display = {
-        chat = {
-          window = {
-            layout = "vertical",
-            width = 0.4,
-            border = "rounded",
-          },
-          show_settings = false,
-        },
-        diff = { provider = "default" },
-      },
-    },
-  },
-
 }

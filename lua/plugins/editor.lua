@@ -104,14 +104,14 @@ return {
   -- Inline markdown rendering (headings, code blocks, tables, LaTeX, mermaid, links)
   {
     "OXY2DEV/markview.nvim",
-    ft = { "markdown", "codecompanion", "Avante" },
+    ft = { "markdown", "Avante" },
     dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.icons" },
     keys = {
-      { "<leader>uM", "<cmd>Markview Toggle<cr>", desc = "Toggle markdown render", ft = { "markdown", "codecompanion", "Avante" } },
+      { "<leader>uM", "<cmd>Markview Toggle<cr>", desc = "Toggle markdown render", ft = { "markdown", "Avante" } },
     },
     opts = {
       preview = {
-        filetypes = { "markdown", "codecompanion", "Avante" },
+        filetypes = { "markdown", "Avante" },
         ignore_buftypes = {},
       },
     },
@@ -293,7 +293,6 @@ return {
     event = "VeryLazy",
     opts = {
       spec = {
-        { "<leader>a",  group = "ai/codecompanion" },
         { "<leader>b",  group = "buffer" },
         { "<leader>c",  group = "code" },
         { "<leader>cs", group = "swap" },
