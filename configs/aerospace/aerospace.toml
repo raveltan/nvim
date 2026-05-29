@@ -19,7 +19,7 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
-accordion-padding = 30
+accordion-padding = 20
 default-root-container-layout = 'tiles'
 default-root-container-orientation = 'auto'
 
@@ -30,7 +30,7 @@ inner.horizontal = 8
 inner.vertical = 8
 outer.left = 8
 outer.right = 8
-outer.top = 40        # leaves room for SketchyBar
+outer.top = 20        # leaves room for SketchyBar
 outer.bottom = 8
 
 [key-mapping]
@@ -57,7 +57,7 @@ alt-shift-ctrl-l = 'move right'
 alt-shift-cmd-ctrl-t = ['exec-and-forget open -a "Ghostty"',       'workspace T']
 alt-shift-cmd-ctrl-b = ['exec-and-forget open -a "Google Chrome"', 'workspace B']
 alt-shift-cmd-ctrl-d = 'workspace D'
-alt-shift-cmd-ctrl-c = ['exec-and-forget open -a "Slack"',         'workspace C']
+alt-shift-cmd-ctrl-c = ['exec-and-forget open -a "Rocket.Chat"',   'workspace C']
 alt-shift-cmd-ctrl-n = 'workspace N'
 
 # Numbered workspaces (scratch)
@@ -98,6 +98,13 @@ alt-shift-cmd-ctrl-semicolon = 'mode service'
 # Monitor management
 alt-shift-cmd-ctrl-period = 'move-workspace-to-monitor --wrap-around next'
 
+# Splits — set parent container orientation, next window stacks that way
+alt-shift-cmd-ctrl-minus     = 'layout v_tiles'   # up/down
+alt-shift-cmd-ctrl-backslash = 'layout h_tiles'   # side-by-side
+
+# Join focused window with right neighbor into accordion sub-container
+alt-shift-cmd-ctrl-a = ['join-with right', 'layout accordion horizontal']
+
 # ============================================================
 # RESIZE MODE
 # ============================================================
@@ -123,14 +130,24 @@ alt-shift-k = ['join-with up',    'mode main']
 alt-shift-l = ['join-with right', 'mode main']
 
 # ============================================================
-# Workspace ↔ monitor pinning (uncomment for dual-monitor)
+# Workspace ↔ monitor pinning
+# Fallback list: prefer first available monitor, drop down on undock.
+# Docked = spread across 2 screens. Laptop-only = all on built-in.
 # ============================================================
-# [workspace-to-monitor-force-assignment]
-# T = ['built-in']
-# B = ['secondary', 'main']
-# D = ['secondary', 'main']
-# C = ['built-in']
-# N = ['built-in']
+[workspace-to-monitor-force-assignment]
+# left cluster — main screen when docked, else laptop
+T = ['main', 'built-in']
+D = ['main', 'built-in']
+N = ['main', 'built-in']
+1 = ['main', 'built-in']
+2 = ['main', 'built-in']
+
+# right cluster — secondary when docked, else laptop
+B = ['secondary', 'built-in']
+C = ['secondary', 'built-in']
+3 = ['secondary', 'built-in']
+4 = ['secondary', 'built-in']
+5 = ['secondary', 'built-in']
 
 # ============================================================
 # App rules — run `aerospace list-apps` for exact app-ids
@@ -146,9 +163,9 @@ run = ['layout tiling', 'move-node-to-workspace T']
 if.app-id = 'com.google.Chrome'
 run = 'move-node-to-workspace B'
 
-# Slack / Discord — C
+# Rocket.Chat / Discord — C
 [[on-window-detected]]
-if.app-id = 'com.tinyspeck.slackmacgap'
+if.app-id = 'chat.rocket'
 run = 'move-node-to-workspace C'
 
 [[on-window-detected]]

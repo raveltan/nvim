@@ -6,6 +6,24 @@ Mnemonic: **Hyper = look** (focus), **Meh = carry** (move).
 
 ---
 
+## Quickstart — daily drivers
+
+Five things to memorize first. Everything else is sugar.
+
+| Keys | Action |
+|---|---|
+| `Hyper-h/j/k/l` | Move focus (window to window, monitor to monitor) |
+| `Meh-h/j/k/l`   | Move window in direction |
+| `Hyper-T`       | Terminal workspace (auto-launch Ghostty) |
+| `Hyper-B`       | Browser workspace (auto-launch Chrome) |
+| `Hyper-C`       | Comms workspace (auto-launch Rocket.Chat) |
+| `Hyper-\`       | Tile (side-by-side layout) |
+| `Hyper-A`       | Tab a group (join right + accordion) |
+
+That's the loop: jump workspace → focus around with hjkl → tile or tab when crowded.
+
+---
+
 ## AeroSpace — outside terminal
 
 ### Focus / move
@@ -22,7 +40,7 @@ Mnemonic: **Hyper = look** (focus), **Meh = carry** (move).
 | `Hyper-T` | Terminal (Ghostty) — auto-launches if not running |
 | `Hyper-B` | Browser (Chrome) — auto-launches |
 | `Hyper-D` | Docs |
-| `Hyper-C` | Comms (Slack) — auto-launches |
+| `Hyper-C` | Comms (Rocket.Chat) — auto-launches |
 | `Hyper-N` | Notes |
 | `Hyper-1..5` | Scratch workspaces |
 | `Hyper-Tab` | Previous workspace (back-and-forth) |
@@ -32,8 +50,11 @@ Mnemonic: **Hyper = look** (focus), **Meh = carry** (move).
 
 | Keys | Action |
 |---|---|
+| `Hyper-\` | Tile side-by-side (h_tiles) |
+| `Hyper--` | Tile stacked up/down (v_tiles) |
 | `Hyper-/` | Toggle horizontal/vertical tiling |
 | `Hyper-,` | Accordion layout |
+| `Hyper-A` | Join right + flip to accordion (tab a group) |
 | `Hyper-F` | Fullscreen (zoom focused window) |
 | `Hyper-Space` | Toggle float/tile |
 | `Hyper-.` | Move workspace to next monitor |

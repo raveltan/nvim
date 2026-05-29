@@ -12,7 +12,8 @@ System Settings tweaks (separate Spaces, hidden menu bar, removed extra desktops
 
 - **AeroSpace** — tiling WM. Live config: `~/.aerospace.toml`. Mirror: `aerospace/aerospace.toml`.
   - Hyper (`⌃⌥⌘⇧`) + `hjkl` focus, Meh (`⌃⌥⇧`) + `hjkl` move.
-  - Workspaces: `T` terminal, `B` browser, `D` docs, `C` comms, `N` notes.
+  - Workspaces: `T` terminal, `B` browser, `D` docs, `C` comms (Rocket.Chat), `N` notes.
+  - Workspaces pinned with fallback: letters/numbers split `main` vs `secondary`, both collapse to `built-in` when undocked. No manual reconfig between laptop/dock.
   - Reload: `Hyper-;` then `Esc`, or `aerospace reload-config`.
 
 - **JankyBorders** — colored ring on focused window. Live: `~/.config/borders/bordersrc`. Mirror: `borders/bordersrc`.
