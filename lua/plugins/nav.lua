@@ -19,6 +19,7 @@ return {
   -- File explorer (edit filesystem like a buffer)
   {
     "barrettruth/canola.nvim",
+    main = "oil",
     dependencies = { "echasnovski/mini.icons" },
     keys = {
       { "<leader>e", "<cmd>Oil<cr>", desc = "Explorer (Oil)" },
