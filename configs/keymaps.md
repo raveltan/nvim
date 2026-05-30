@@ -15,7 +15,7 @@ Five things to memorize first. Everything else is sugar.
 | `Hyper-h/j/k/l` | Move focus (window to window, monitor to monitor) |
 | `Meh-h/j/k/l`   | Move window in direction |
 | `Hyper-T`       | Terminal workspace (auto-launch Ghostty) |
-| `Hyper-B`       | Browser workspace (auto-launch Chrome) |
+| `Hyper-B`       | Browser workspace (no auto-launch) |
 | `Hyper-C`       | Comms workspace (auto-launch Rocket.Chat) |
 | `Hyper-\`       | Tile (side-by-side layout) |
 | `Hyper-A`       | Tab a group (join right + accordion) |
@@ -38,7 +38,7 @@ That's the loop: jump workspace → focus around with hjkl → tile or tab when 
 | Keys | Action |
 |---|---|
 | `Hyper-T` | Terminal (Ghostty) — auto-launches if not running |
-| `Hyper-B` | Browser (Chrome) — auto-launches |
+| `Hyper-B` | Browser (Chrome) — switch only, no auto-launch |
 | `Hyper-D` | Docs |
 | `Hyper-C` | Comms (Rocket.Chat) — auto-launches |
 | `Hyper-N` | Notes |

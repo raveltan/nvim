@@ -61,7 +61,7 @@ alt-shift-ctrl-l = 'move right'
 
 # Workspace jumps — letter mnemonics
 alt-shift-cmd-ctrl-t = ['exec-and-forget open -a "Ghostty"',       'workspace T']
-alt-shift-cmd-ctrl-b = ['exec-and-forget open -a "Google Chrome"', 'workspace B']
+alt-shift-cmd-ctrl-b = 'workspace B'
 alt-shift-cmd-ctrl-d = 'workspace D'
 alt-shift-cmd-ctrl-c = ['exec-and-forget open -a "Rocket.Chat"',   'workspace C']
 alt-shift-cmd-ctrl-n = 'workspace N'
