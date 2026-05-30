@@ -303,6 +303,8 @@ return {
         { "<leader>F",  group = "flutter" },
         { "<leader>g",  group = "git" },
         { "<leader>h",  group = "harpoon" },
+        { "<leader>j",  group = "chrome devtools" },
+        { "<leader>jd", group = "emulate" },
         { "<leader>k",  group = "docs (devdocs/nvimdocs)" },
         { "<leader>m",  group = "multicursor" },
         { "<leader>n",  group = "obsidian" },
