@@ -6,7 +6,6 @@ return {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
       "olimorris/neotest-phpunit",
-      "nvim-neotest/neotest-jest",
       "marilari88/neotest-vitest",
       "nvim-neotest/neotest-python",
       "olimorris/neotest-rspec",
@@ -41,32 +40,22 @@ return {
           require("neotest-phpunit")({
             phpunit_cmd = "vendor/bin/phpunit",
           }),
-          require("neotest-jest")({
-            jestCommand = "npx jest",
-            isTestFile = function(file_path)
-              if file_path:match("ui%-tests/src/.+%.spec%.ts$") then
-                return false
-              end
-              return file_path:match("%.test%.[jt]sx?$") or file_path:match("%.spec%.[jt]sx?$")
-            end,
-          }),
           require("neotest-vitest")({
             filter_dir = function(name, _, _)
               return name ~= "node_modules" and name ~= "ui-tests"
             end,
+            -- Filename match ONLY. neotest-vitest already AND-wraps this with its
+            -- built-in hasVitestDependency() check, so re-reading package.json here
+            -- was redundant — and broken: it ran *after* that check's async file
+            -- read, where vim.fn.readfile errors in the nio callback context. The
+            -- pcall swallowed the error → returned false → every test file was
+            -- rejected ("no test found"). Drop it; keep only the name pattern.
             is_test_file = function(file_path)
               if file_path:match("ui%-tests/src/.+%.spec%.ts$") then
                 return false
               end
-              if not (file_path:match("%.test%.[jt]sx?$") or file_path:match("%.spec%.[jt]sx?$")) then
-                return false
-              end
-              local dir = vim.fs.dirname(file_path)
-              local pkg = vim.fs.find("package.json", { upward = true, path = dir })[1]
-              if not pkg then return false end
-              local ok, contents = pcall(vim.fn.readfile, pkg)
-              if not ok then return false end
-              return table.concat(contents, "\n"):match("vitest") ~= nil
+              return file_path:match("%.test%.[mc]?[jt]sx?$") ~= nil
+                or file_path:match("%.spec%.[mc]?[jt]sx?$") ~= nil
             end,
           }),
           require("neotest-python")({
@@ -122,12 +111,6 @@ return {
         if ft == "ruby" then
           vim.keymap.set("n", "<leader>tp", function() require("config.neotest-profile-ruby").run_current() end,
             vim.tbl_extend("force", o, { desc = "Profile file tests (stackprof)" }))
-        elseif ft == "typescript" or ft == "javascript" then
-          local fname = vim.api.nvim_buf_get_name(buf)
-          if not fname:match("ui%-tests/src/.+%.spec%.ts$") then
-            vim.keymap.set("n", "<leader>tp", function() require("config.neotest-profile-ts").run_current() end,
-              vim.tbl_extend("force", o, { desc = "Profile file tests (cpu-prof)" }))
-          end
         end
         if vim.g.gaf then require("gaf.test").attach_keys(buf, ft) end
       end

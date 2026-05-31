@@ -20,7 +20,11 @@ return {
       require("wrapping").setup(opts)
       vim.api.nvim_create_autocmd("FileType", {
         group = vim.api.nvim_create_augroup("force_hybridwrap", { clear = true }),
-        callback = function()
+        callback = function(ev)
+          -- Normal file buffers only. Skip prompt (dap-repl), terminal, quickfix,
+          -- help, nofile — fo+=t auto-reflows text and jumps the cursor on each
+          -- keystroke in special buffers (e.g. the dap REPL prompt).
+          if vim.bo[ev.buf].buftype ~= "" then return end
           vim.opt_local.wrap = true
           vim.opt_local.textwidth = 150
           vim.opt_local.formatoptions:append("t")

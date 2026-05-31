@@ -73,24 +73,6 @@ return {
   -- Consumed by jsonls/yamlls in lsp.lua
   { "b0o/SchemaStore.nvim", lazy = true, version = false },
 
-  -- Break bad habits: blocks hjkl spam and arrow keys, nudges toward real motions
-  {
-    "m4xshen/hardtime.nvim",
-    event = "VeryLazy",
-    dependencies = { "MunifTanjim/nui.nvim" },
-    opts = {
-      max_count = 4,
-      disable_mouse = false,
-      restriction_mode = "hint",
-      disabled_filetypes = {
-        "qf", "netrw", "NvimTree", "lazy", "mason", "oil", "help", "trouble",
-        "TelescopePrompt", "snacks_picker_input", "snacks_picker_list",
-        "dbee", "dbui", "dap-repl", "dapui_scopes", "dapui_breakpoints",
-        "dapui_stacks", "dapui_watches", "dapui_console", "aerial",
-      },
-    },
-  },
-
   -- Database client: connect/inspect/query Postgres/MySQL/SQLite from inside nvim.
   -- vim-dadbod is the engine, dadbod-ui is the file-tree UI, dadbod-completion
   -- gives column/table completion inside SQL buffers via blink.cmp/omnifunc.

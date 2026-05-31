@@ -136,7 +136,7 @@ return {
       vim.api.nvim_set_hl(0, "NvimDapVirtualTextInfo",    { fg = "#9ece6a", italic = true })
       vim.fn.sign_define("DapBreakpoint",          { text = "●", texthl = "DiagnosticError" })
       vim.fn.sign_define("DapBreakpointCondition", { text = "◆", texthl = "DiagnosticWarn" })
-      vim.fn.sign_define("DapBreakpointRejected",  { text = "", texthl = "DiagnosticError" })
+      vim.fn.sign_define("DapBreakpointRejected",  { text = "○", texthl = "DiagnosticError" })
       vim.fn.sign_define("DapLogPoint",            { text = "◆", texthl = "DiagnosticInfo" })
       vim.fn.sign_define("DapStopped",             { text = "▶", texthl = "DiagnosticOk", linehl = "DapStoppedLine" })
 
@@ -148,13 +148,16 @@ return {
           {
             type = "pwa-node",
             request = "launch",
-            name = "Jest: debug current file",
+            name = "Vitest: debug current file",
             runtimeExecutable = "node",
-            runtimeArgs = { "${workspaceFolder}/node_modules/jest/bin/jest.js", "--runInBand", "${file}" },
+            runtimeArgs = { "${workspaceFolder}/node_modules/vitest/vitest.mjs", "run", "--no-file-parallelism", "${file}" },
             cwd = "${workspaceFolder}",
             console = "integratedTerminal",
             internalConsoleOptions = "neverOpen",
+            autoAttachChildProcesses = true, -- vitest runs tests in forked workers; follow them or breakpoints never bind
             sourceMaps = true,
+            smartStep = true,
+            skipFiles = { "<node_internals>/**", "**/node_modules/**" },
           },
           {
             type = "pwa-chrome",
