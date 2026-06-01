@@ -112,6 +112,20 @@ That's the loop: jump workspace → focus around with hjkl → tile or tab when 
 | `<prefix> T` | sesh project picker | tmux |
 | `<prefix> I` | Install tmux plugins | TPM |
 
+### Floating terminal (floax)
+
+Float = popup attached to a separate `scratch` session. Status bar shows window numbers (re-enabled via `client-attached` hook — floax disables it by default).
+
+| Keys | Action |
+|---|---|
+| `<prefix> p` | Toggle float on/off |
+| `<prefix> c` | New window **inside float** |
+| `Alt-1..5` / `<prefix> n/p` | Switch float windows |
+| `<prefix> P` | Float menu (resize/fullscreen/embed) |
+| `C-M-e` | Embed float window into current session |
+
+Multiple windows live in one float — numbers in the status bar tell them apart.
+
 ---
 
 ## Inside Chrome
