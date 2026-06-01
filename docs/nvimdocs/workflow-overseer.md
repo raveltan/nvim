@@ -6,7 +6,7 @@
 **Tags:** workflow task-runner overseer dap ui-tests gaf
 
 ## Scope
-Lazy-loaded on user templates and four `<leader>o*` keys. Tasks discovered from custom user templates living in `lua/overseer/template/user/`. DAP integration enabled so debuggable tasks (e.g. jest specs) can launch via `nvim-dap`. Task list dock anchors to the bottom of the screen, 8-20 lines tall.
+Lazy-loaded on user templates and six `<leader>o*` keys. Tasks discovered from custom user templates living in `lua/overseer/template/user/`. DAP integration enabled so debuggable tasks (e.g. jest specs) can launch via `nvim-dap`. Task list dock anchors to the bottom of the screen, 8-20 lines tall.
 
 ## Install spec
 ```lua
@@ -51,8 +51,10 @@ All UI-test templates share `lua/gaf/ui_test.lua` helpers — they accept an opt
 |-----|------|--------|------|
 | `<leader>or` | n | `:OverseerRun` | Pick a template and run |
 | `<leader>oc` | n | `:OverseerShell` | Ad-hoc shell command |
-| `<leader>ot` | n | `:OverseerToggle` | Toggle task list dock |
-| `<leader>ol` | n | `:OverseerTaskAction` | Action menu for a task (restart, stop, dispose...) |
+| `<leader>ol` | n | task picker → `open float` | Open task output in floating window |
+| `<leader>oh` | n | task picker → `open hsplit` | Open task output in horizontal split |
+| `<leader>ov` | n | task picker → `open vsplit` | Open task output in vertical split |
+| `<leader>od` | n | task picker → `dispose` | Dispose a task |
 
 ## GAF integration
 Every user template guards with `condition.callback = function() return vim.g.gaf and ... end` — they are invisible when `GAF=1` is not set. UI-test templates additionally call `gaf.ui_test.has_webapp()` to walk up from cwd looking for a `webapp/package.json`, so they only surface in monorepos that have one. `fli provision` runs against devbox `rtanjaya` (hard-coded inside `fli`). See [[gaf-ui-test]] for the spec-pattern helper used by every `ui_test_*` template.

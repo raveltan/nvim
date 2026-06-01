@@ -33,7 +33,7 @@ return {
     keys = {
       { "<leader>oo", "<cmd>Other<cr>",       desc = "Other: pick related file" },
       { "<leader>os", "<cmd>OtherSplit<cr>",  desc = "Other: pick (split)" },
-      { "<leader>ov", "<cmd>OtherVSplit<cr>", desc = "Other: pick (vsplit)" },
+      { "<leader>oV", "<cmd>OtherVSplit<cr>", desc = "Other: pick (vsplit)" },
     },
     opts = {
       rememberBuffers = false,

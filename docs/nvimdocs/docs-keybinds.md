@@ -133,8 +133,9 @@ Reference doc — not loaded by nvim. View with `<leader>fc` → `docs/keybinds.
 ### `<leader>o` — Overseer
 | Key | Mode | Action |
 |---|---|---|
-| `<leader>or` / `oc` / `ot` / `ol` | n | Run / shell cmd / toggle list / action |
-| `<leader>oo` / `os` / `ov` | n | other.nvim related-file pick / split / vsplit |
+| `<leader>or` / `oc` | n | Run task / shell cmd |
+| `<leader>ol` / `oh` / `ov` / `od` | n | Open task output float / hsplit / vsplit, dispose |
+| `<leader>oo` / `os` / `oV` | n | other.nvim related-file pick / split / vsplit |
 
 ### `<leader>q` — Quit / Session
 | Key | Mode | Action |

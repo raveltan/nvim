@@ -6,7 +6,7 @@
 **Tags:** workflow navigation related-files rails php angular datastore
 
 ## Scope
-Lazy-loaded on `Other*` commands and `<leader>o{o,s,v}`. Pure pattern-matching: each rule has a Lua-pattern `pattern` capturing `%1` (and sometimes `%2`) and a list of candidate `target` paths with human-readable `context` labels. `showMissingFiles = false` means the picker only lists files that actually exist, so we can offer many candidates without noise.
+Lazy-loaded on `Other*` commands and `<leader>o{o,s,V}`. Pure pattern-matching: each rule has a Lua-pattern `pattern` capturing `%1` (and sometimes `%2`) and a list of candidate `target` paths with human-readable `context` labels. `showMissingFiles = false` means the picker only lists files that actually exist, so we can offer many candidates without noise.
 
 ## Install spec
 ```lua
@@ -66,7 +66,7 @@ Bidirectional Model ↔ Controller (plural/singular bridge: `users_controller` �
 |-----|------|--------|------|
 | `<leader>oo` | n | `:Other` | Picker; opens in current window |
 | `<leader>os` | n | `:OtherSplit` | Picker; opens in horizontal split |
-| `<leader>ov` | n | `:OtherVSplit` | Picker; opens in vertical split |
+| `<leader>oV` | n | `:OtherVSplit` | Picker; opens in vertical split |
 
 ## GAF integration
 Not gated by `vim.g.gaf` — pattern rules are inert when paths don't match, so leaving them globally enabled costs nothing. The src/src2/consumers patterns are tuned to the Freelancer GAF monorepo layout. AjaxApi aggregator controllers (e.g. `BusinessBuilderController`) won't find a 1:1 sibling — use LSP `gd` on the import instead.

@@ -35,6 +35,62 @@ return {
         desc = "Open task in float",
       },
       {
+        "<leader>oh",
+        function()
+          local task_list = require("overseer.task_list")
+          local action_util = require("overseer.action_util")
+          local tasks = task_list.list_tasks({
+            unique = true,
+            sort = task_list.sort_finished_recently,
+            include_ephemeral = true,
+          })
+          if #tasks == 0 then
+            vim.notify("No tasks available", vim.log.levels.WARN)
+            return
+          end
+          vim.ui.select(tasks, {
+            prompt = "Open task (hsplit)",
+            kind = "overseer_task",
+            format_item = function(t)
+              return t.name
+            end,
+          }, function(task)
+            if task then
+              action_util.run_task_action(task, "open hsplit")
+            end
+          end)
+        end,
+        desc = "Open task in hsplit",
+      },
+      {
+        "<leader>ov",
+        function()
+          local task_list = require("overseer.task_list")
+          local action_util = require("overseer.action_util")
+          local tasks = task_list.list_tasks({
+            unique = true,
+            sort = task_list.sort_finished_recently,
+            include_ephemeral = true,
+          })
+          if #tasks == 0 then
+            vim.notify("No tasks available", vim.log.levels.WARN)
+            return
+          end
+          vim.ui.select(tasks, {
+            prompt = "Open task (vsplit)",
+            kind = "overseer_task",
+            format_item = function(t)
+              return t.name
+            end,
+          }, function(task)
+            if task then
+              action_util.run_task_action(task, "open vsplit")
+            end
+          end)
+        end,
+        desc = "Open task in vsplit",
+      },
+      {
         "<leader>od",
         function()
           local task_list = require("overseer.task_list")

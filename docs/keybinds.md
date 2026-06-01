@@ -42,7 +42,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `[;` / `];` | n | Goto context start / select next context | dropbar.nvim |
 | `<leader>oo` | n | Other: pick related file | other.nvim |
 | `<leader>os` | n | Other: pick (split) | other.nvim |
-| `<leader>ov` | n | Other: pick (vsplit) | other.nvim |
+| `<leader>oV` | n | Other: pick (vsplit) | other.nvim |
 
 ## Search
 
@@ -141,8 +141,10 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 |-----|------|-------------|
 | `<leader>or` | n | Run task |
 | `<leader>oc` | n | Run shell command |
-| `<leader>ot` | n | Toggle task list |
-| `<leader>ol` | n | Task action |
+| `<leader>ol` | n | Open task output in float |
+| `<leader>oh` | n | Open task output in hsplit |
+| `<leader>ov` | n | Open task output in vsplit |
+| `<leader>od` | n | Dispose task |
 
 ## Testing (Neotest) — `<leader>t*`
 
