@@ -43,18 +43,6 @@ return {
           map("n", "<leader>cD", "<cmd>TSToolsGoToSourceDefinition<cr>", vim.tbl_extend("force", opts, { desc = "TS: go to source definition" }))
         end,
       })
-
-      -- Organize + remove unused imports on save (TS/JS only)
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
-        group = vim.api.nvim_create_augroup("ts_organize_on_save", { clear = true }),
-        callback = function()
-          if vim.g.disable_ts_organize_on_save then return end
-          vim.notify("TS: organizing imports…", vim.log.levels.INFO, { title = "Save" })
-          pcall(vim.cmd, "TSToolsAddMissingImports sync")
-          pcall(vim.cmd, "TSToolsRemoveUnusedImports sync")
-        end,
-      })
     end,
   },
 

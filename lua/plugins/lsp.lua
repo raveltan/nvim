@@ -331,7 +331,10 @@ return {
           auto_show_delay_ms = 200,
           window = { border = "rounded", winblend = 0 },
         },
-        ghost_text = { enabled = true },
+        -- Disabled: inline ghost text (virt_text_pos='inline' in ns blink_cmp)
+        -- could orphan its extmark across buffer/redraw races, leaving stuck
+        -- "typed" text that can't be deleted and isn't undoable.
+        ghost_text = { enabled = false },
         -- Explicitly pin trigger behavior. Defaults should match this but
         -- pinning rules out a default drift across blink versions.
         trigger = {

@@ -48,10 +48,10 @@ preset = 'qwerty'
 [mode.main.binding]
 
 # Focus (crosses monitors)
-alt-shift-cmd-ctrl-h = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-the-workspace left'
-alt-shift-cmd-ctrl-j = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-the-workspace down'
-alt-shift-cmd-ctrl-k = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-the-workspace up'
-alt-shift-cmd-ctrl-l = 'focus --boundaries all-monitors-outer-frame --boundaries-action wrap-around-the-workspace right'
+alt-shift-cmd-ctrl-h = 'focus left'
+alt-shift-cmd-ctrl-j = 'focus down'
+alt-shift-cmd-ctrl-k = 'focus up'
+alt-shift-cmd-ctrl-l = 'focus right'
 
 # Move (Meh = alt-shift-ctrl, no cmd)
 alt-shift-ctrl-h = 'move left'
