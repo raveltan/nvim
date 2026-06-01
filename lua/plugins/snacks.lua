@@ -135,7 +135,7 @@ return {
       { "<leader>sk", function() Snacks.picker.keymaps() end, desc = "Keymaps" },
       { "<leader>sc", function() Snacks.picker.commands() end, desc = "Commands" },
       { "<leader>sd", function() Snacks.picker.diagnostics() end, desc = "Diagnostics" },
-      { "<leader>sR", function() Snacks.picker.resume() end, desc = "Resume last picker" },
+      { "<leader>sl", function() Snacks.picker.resume() end, desc = "Resume last picker" },
       -- LSP
       { "<leader>ss", function() Snacks.picker.lsp_symbols() end, desc = "Document symbols" },
       { "<leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "Workspace symbols" },

@@ -21,10 +21,16 @@ return {
       vim.api.nvim_create_autocmd("FileType", {
         group = vim.api.nvim_create_augroup("force_hybridwrap", { clear = true }),
         callback = function(ev)
-          -- Normal file buffers only. Skip prompt (dap-repl), terminal, quickfix,
-          -- help, nofile — fo+=t auto-reflows text and jumps the cursor on each
-          -- keystroke in special buffers (e.g. the dap REPL prompt).
-          if vim.bo[ev.buf].buftype ~= "" then return end
+          -- Special buffers (prompt/dap-repl, terminal, quickfix, help, nofile)
+          -- inherit Neovim's default fo `tcqj`. The `t` auto-reflows at textwidth
+          -- and jumps the cursor on each keystroke (e.g. typing in the dap REPL).
+          -- buftype is set before FileType fires (nvim-dap repl.lua), so this
+          -- branch reliably catches the prompt buffer — strip `t` + textwidth.
+          if vim.bo[ev.buf].buftype ~= "" then
+            vim.opt_local.formatoptions:remove("t")
+            vim.opt_local.textwidth = 0
+            return
+          end
           vim.opt_local.wrap = true
           vim.opt_local.textwidth = 150
           vim.opt_local.formatoptions:append("t")

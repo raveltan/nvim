@@ -46,6 +46,7 @@ end
 
 function M.setup_autocmds()
   vim.api.nvim_create_autocmd("BufEnter", {
+    group = vim.api.nvim_create_augroup("gaf_uitest_keys", { clear = true }),
     pattern = "*/ui-tests/src/*.spec.ts",
     callback = function(ev)
       local o = { buffer = ev.buf }
