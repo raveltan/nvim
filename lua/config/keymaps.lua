@@ -1,5 +1,15 @@
 local map = vim.keymap.set
 
+-- Granular undo: break the insert-undo so one `u` doesn't wipe a whole insert
+-- session. C-w/C-u become separately undoable; sentence punctuation splits a
+-- paragraph into per-sentence undo steps. (Tradeoff: `.` dot-repeat only
+-- replays the last chunk after a break.)
+map("i", "<C-w>", "<C-g>u<C-w>", { desc = "Delete word (undo break)" })
+map("i", "<C-u>", "<C-g>u<C-u>", { desc = "Delete to BOL (undo break)" })
+for _, ch in ipairs({ ".", ",", ";", "!", "?" }) do
+  map("i", ch, ch .. "<C-g>u")
+end
+
 -- Window splits
 map("n", "<leader>|", "<cmd>vsplit<cr>", { desc = "Vertical split" })
 map("n", "<leader>-", "<cmd>split<cr>", { desc = "Horizontal split" })

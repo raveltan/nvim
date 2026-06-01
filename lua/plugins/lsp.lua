@@ -277,7 +277,9 @@ return {
       local ls = require("luasnip")
       ls.config.setup({
         history = true,
-        updateevents = "TextChanged",
+        updateevents = "TextChanged,TextChangedI",
+        region_check_events = "CursorMoved,CursorMovedI,InsertEnter",
+        delete_check_events = "TextChanged,InsertLeave",
         enable_autosnippets = false,
       })
       require("luasnip.loaders.from_vscode").lazy_load()

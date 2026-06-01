@@ -21,7 +21,16 @@ opt.splitright = true
 opt.updatetime = 500
 opt.cursorline = true
 opt.scrolloff = 8
+-- Persistent, deep undo. Pin undodir + ensure it exists so history survives
+-- restarts even on a fresh machine. NOTE: undofile is keyed to the file's
+-- content hash — git checkout / branch switch / external rewrites still drop
+-- history by design; use undotree + g-/g+ to reach orphaned branches.
 opt.undofile = true
+opt.undolevels = 10000
+opt.undoreload = 10000
+local undodir = vim.fn.stdpath("state") .. "/undo"
+vim.fn.mkdir(undodir, "p")
+opt.undodir = undodir
 opt.ignorecase = true
 opt.smartcase = true
 opt.mouse = "a"

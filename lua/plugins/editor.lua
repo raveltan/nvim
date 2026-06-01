@@ -40,12 +40,19 @@ return {
     end,
   },
 
-  -- Undo tree visualization
+  -- Undo tree visualization. Vim undo is a TREE — after undo+new edit the old
+  -- "redo" path becomes a branch <C-r> can't reach; undotree (and g-/g+)
+  -- navigate those branches. edgy owns placement (left panel + diff below).
   {
     "mbbill/undotree",
     keys = {
       { "<leader>cu", "<cmd>UndotreeToggle<cr>", desc = "Undo tree" },
+      { "<leader>U", "<cmd>UndotreeToggle<cr>", desc = "Undo tree" },
     },
+    init = function()
+      vim.g.undotree_SetFocusWhenToggle = 1 -- focus tree on open
+      vim.g.undotree_ShortIndicators = 1    -- compact timestamps
+    end,
   },
 
   -- Autopairs (ultimate-autopair — smarter multiline / JSX handling).
