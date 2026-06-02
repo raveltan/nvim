@@ -22,6 +22,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [gaf-keymaps](gaf-keymaps.md) — `gx` on `D####`/`T####` Phabricator opener
 - [gaf-lsp](gaf-lsp.md) — basedpyright extra paths + tailwindcss filter
 - [gaf-dap](gaf-dap.md) — PHP xdebug DAP config + path mappings
+- [gaf-functional-debug](gaf-functional-debug.md) — step-debug functional tests: LOCAL vs DEVBOX, which xdebug config to pick
 - [gaf-xdebug](gaf-xdebug.md) — `:GafXdebug*` port-forward / profile commands
 - [gaf-test](gaf-test.md) — neotest extension routing phpunit via fl-gaf
 - [gaf-test-infra](gaf-test-infra.md) — `bin/run-tests setup/shutdown` wrappers
