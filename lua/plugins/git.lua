@@ -12,7 +12,9 @@ return {
           topdelete = { text = "‾" },
           changedelete = { text = "~" },
         },
-        current_line_blame = true,
+        -- Off by default — `git blame` per buffer + EOL virt-text on idle is
+        -- background cost + visual noise. Toggle on with <leader>gt.
+        current_line_blame = false,
         current_line_blame_opts = {
           delay = 2000,
           virt_text_pos = "eol",

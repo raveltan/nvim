@@ -58,7 +58,6 @@ All customisation is in `opts.spec`. Registered group prefixes:
 | `<leader>cv` | case convert |
 | `<leader>d` | debug |
 | `<leader>h` | harpoon |
-| `<leader>m` | multicursor |
 | `<leader>n` | obsidian |
 | `<leader>o` | overseer |
 | `<leader>r` | rails |

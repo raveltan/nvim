@@ -33,6 +33,14 @@ require("lazy").setup({
         "tohtml",
         "tutor",
         "zipPlugin",
+        -- oil (canola) owns file exploration; netrw runtime is dead weight.
+        -- `gx` uses vim.ui.open (keymaps.lua), not netrw.
+        "netrwPlugin",
+        -- vim-matchup supersedes the built-in matchit/matchparen. Disabling
+        -- the builtins is matchup's recommended setup (avoids the runtime
+        -- having to deactivate matchparen after the fact).
+        "matchit",
+        "matchparen",
       },
     },
   },

@@ -31,7 +31,9 @@ return {
         "prettier",
       },
       auto_update = false,
-      run_on_start = true,
+      -- Don't probe the registry on first file open; run :MasonToolsUpdate
+      -- manually. Shaves startup work off the first BufReadPre.
+      run_on_start = false,
     },
   },
 

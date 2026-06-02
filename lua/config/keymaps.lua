@@ -203,6 +203,20 @@ map("n", "<C-u>", "15kzz", { desc = "Small jump up (centered)" })
 map("n", "n", [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>zzzv]], { desc = "Next search result (centered)" })
 map("n", "N", [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>zzzv]], { desc = "Prev search result (centered)" })
 
+-- ]] / [[ — jump to next/prev occurrence of the word under cursor via plain
+-- text search (no LSP). Sets the search register (whole-word, \V so symbols
+-- stay literal) + hlsearch, then feeds n/N so the centered+hlslens maps above
+-- fire and `n`/`N` keep cycling afterwards.
+local function search_cword(next_key)
+  local w = vim.fn.expand("<cword>")
+  if w == "" then return end
+  vim.fn.setreg("/", [[\V\<]] .. vim.fn.escape(w, [[\]]) .. [[\>]])
+  vim.opt.hlsearch = true
+  vim.api.nvim_feedkeys(next_key, "m", false)
+end
+map("n", "]]", function() search_cword("n") end, { desc = "Next occurrence of word (text search)" })
+map("n", "[[", function() search_cword("N") end, { desc = "Prev occurrence of word (text search)" })
+
 -- Join without moving cursor
 map("n", "J", "mzJ`z", { desc = "Join lines" })
 

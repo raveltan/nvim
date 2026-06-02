@@ -130,7 +130,7 @@ GAF=1 nvim webapp/projects/<proj>/ui-tests/src/foo.spec.ts
 - [gaf-ui-test](gaf-ui-test.md) — overseer UI templates
 - [gaf-neotest-profile](gaf-neotest-profile.md) — profile capture
 - [gaf-neotest-ui-tests](gaf-neotest-ui-tests.md) — yarn ui:* adapter
-- [docs-keybinds](docs-keybinds.md) — full keymap index
+- `docs/keybinds.md` — full keymap cheatsheet (canonical)
 
 ## Notes
 

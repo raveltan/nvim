@@ -64,5 +64,4 @@ Plugin also registers visual/operator-pending variants when `keymaps.enable` is 
 ## Notes
 
 - Requires an attached LSP server that implements `textDocument/references`. Falls back to a "no references" notification otherwise.
-- `]]` / `[[` are bound by `vim-illuminate` to cycle illuminated occurrences (regex/TS/LSP highlights) without an LSP roundtrip — pair them: `]]`/`[[` for visible occurrences, `]r`/`[r` for the authoritative cross-file LSP set. See [[editor-illuminate]].
 - The cache means a stale rename can leave you jumping to a freed location; press `]r` after touching the symbol to refresh.

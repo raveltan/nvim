@@ -101,7 +101,6 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [editor-mini-ai](editor-mini-ai.md) — extended textobjects
 - [editor-mini-surround](editor-mini-surround.md) — `gs*` surround ops
 - [editor-mini-bufremove](editor-mini-bufremove.md) — `<leader>bd` close-keep-window
-- [editor-multicursor](editor-multicursor.md) — `<leader>m*` cursor ops
 - [editor-flash](editor-flash.md) — `s`/`S` label jumps
 - [editor-ssr](editor-ssr.md) — structural search-replace `<leader>cS`
 - [editor-grug-far](editor-grug-far.md) — project-wide find/replace UI
@@ -121,7 +120,6 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [editor-todo-comments](editor-todo-comments.md) — TODO/FIXME highlight + picker
 - [editor-hlslens](editor-hlslens.md) — search match count + virt text
 - [editor-highlight-undo](editor-highlight-undo.md) — flash region on undo/redo
-- [editor-illuminate](editor-illuminate.md) — highlight word under cursor + `]]`/`[[`
 - [editor-refjump](editor-refjump.md) — `]r`/`[r` LSP reference cycle
 - [editor-dropbar](editor-dropbar.md) — winbar breadcrumb picker `<leader>;`
 - [editor-bqf](editor-bqf.md) — better quickfix preview
@@ -210,7 +208,6 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 - [docs-nvimdocs](docs-nvimdocs.md) — how this doc set is structured
 - [docs-devdocs](docs-devdocs.md) — devdocs.io integration
-- [docs-keybinds](docs-keybinds.md) — searchable per-prefix keybind index
 - [INDEX](INDEX.md) — this file
 
 ## Notes

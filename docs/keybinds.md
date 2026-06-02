@@ -78,9 +78,8 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `gr` | n | References | snacks.picker |
 | `gI` | n | Implementations | snacks.picker |
 | `gy` | n | Type definitions | snacks.picker |
-| `gD` / `gR` / `gY` / `gM` | n | Peek (Glance) def/refs/type/impl | glance.nvim |
 | `]r` / `[r` | n | Cycle LSP references inline | refjump.nvim |
-| `]]` / `[[` | n | Next/Prev reference | illuminate |
+| `]]` / `[[` | n | Next/prev occurrence of word under cursor (text search) | config/keymaps.lua |
 | `<leader>ca` | n, v | Code action (preview) | actions-preview |
 | `<leader>cA` | n | Source action | config/keymaps.lua |
 | `<leader>cr` | n | Rename symbol (PHP `$` sigil aware) | config/keymaps.lua |
@@ -304,25 +303,6 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 | `$$` (insert) | php | Expands to `$this->`. Skips if previous char is word/`$` (so `$$foo` stays literal). |
 | `fn<Tab>` | php | Arrow function snippet `fn($x) => ` (alias to existing `afn`) |
 
-### Multicursor — `<leader>m`
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>mn` / `<leader>mN` | n, x | Add cursor at next/prev match |
-| `<leader>ms` / `<leader>mS` | n, x | Skip match next/prev |
-| `<leader>ma` | n, x | Add cursor at all matches |
-| `<leader>mj` / `<leader>mk` | n, x | Add cursor on line below/above |
-| `<leader>mJ` / `<leader>mK` | n, x | Skip line down/up |
-| `<leader>mx` | n, x | Delete cursor under main |
-| `<leader>mr` | n | Restore cursors |
-| `<leader>ml` | n, x | Align cursors to same column |
-| `<leader>mp` | x | Split visual selection by regex |
-| `<leader>mt` | x | Transpose text between cursors |
-| `<C-q>` | n, x | Toggle cursor |
-| `<C-LeftMouse>` | n | Toggle cursor at click |
-| `<Tab>` / `<S-Tab>` | n, x | Cycle main cursor (in cursor layer) |
-| `<Esc>` | n | Clear all cursors (in cursor layer) |
-
 ## UI Toggles — `<leader>u`
 
 | Key | Mode | Description |
@@ -433,7 +413,7 @@ ERB examples:
 
 ## Which-key groups
 
-`<leader>a` ai/claude · `<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>m` multicursor · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>q` quit · `<leader>r` rails · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics · `<leader>X` xdebug profile · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>q` quit · `<leader>r` rails · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics · `<leader>X` xdebug profile · `g` goto · `gs` surround
 
 ## Known overlaps
 
@@ -443,7 +423,6 @@ ERB examples:
 - **`<C-p>` / `<C-n>`** — yanky yank-ring cycling (n). Blink.cmp uses its own keys in insert.
 - **`q`** — global (no map) vs buffer-local close-window in help/qf/man/grug-far/blame.
 - **`<CR>`** — blink.cmp in insert. Treesitter incremental-select start in normal / expand in visual (if enabled).
-- **`]]` / `[[`** — illuminate references. `[[` is also dropbar's binding alias? No — dropbar uses `[;`/`];` here.
 
 ## Removed / replaced (history)
 

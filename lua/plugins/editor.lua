@@ -186,50 +186,6 @@ return {
     },
   },
 
-  -- Multi-cursor editing (VSCode-style match selection)
-  {
-    "jake-stewart/multicursor.nvim",
-    branch = "1.0",
-    keys = {
-      { "<leader>mn", function() require("multicursor-nvim").matchAddCursor(1) end, mode = { "n", "x" }, desc = "Add cursor at next match" },
-      { "<leader>mN", function() require("multicursor-nvim").matchAddCursor(-1) end, mode = { "n", "x" }, desc = "Add cursor at prev match" },
-      { "<leader>ms", function() require("multicursor-nvim").matchSkipCursor(1) end, mode = { "n", "x" }, desc = "Skip match (next)" },
-      { "<leader>mS", function() require("multicursor-nvim").matchSkipCursor(-1) end, mode = { "n", "x" }, desc = "Skip match (prev)" },
-      { "<leader>ma", function() require("multicursor-nvim").matchAllAddCursors() end, mode = { "n", "x" }, desc = "Add cursor at all matches" },
-      { "<leader>mx", function() require("multicursor-nvim").deleteCursor() end, mode = { "n", "x" }, desc = "Delete cursor under main" },
-      { "<leader>mj", function() require("multicursor-nvim").lineAddCursor(1) end, mode = { "n", "x" }, desc = "Add cursor down" },
-      { "<leader>mk", function() require("multicursor-nvim").lineAddCursor(-1) end, mode = { "n", "x" }, desc = "Add cursor up" },
-      { "<leader>mJ", function() require("multicursor-nvim").lineSkipCursor(1) end, mode = { "n", "x" }, desc = "Skip line down" },
-      { "<leader>mK", function() require("multicursor-nvim").lineSkipCursor(-1) end, mode = { "n", "x" }, desc = "Skip line up" },
-      { "<leader>mr", function() require("multicursor-nvim").restoreCursors() end, mode = "n", desc = "Restore cursors" },
-      { "<leader>ml", function() require("multicursor-nvim").alignCursors() end, mode = { "n", "x" }, desc = "Align cursors" },
-      { "<leader>mp", function() require("multicursor-nvim").splitCursors() end, mode = "x", desc = "Split selection by regex" },
-      { "<leader>mt", function() require("multicursor-nvim").transposeCursors(1) end, mode = "x", desc = "Transpose cursors" },
-      { "<C-q>", function() require("multicursor-nvim").toggleCursor() end, mode = { "n", "x" }, desc = "Toggle cursor" },
-      { "<C-LeftMouse>", function() require("multicursor-nvim").handleMouse() end, mode = "n", desc = "Toggle cursor at click" },
-    },
-    config = function()
-      local mc = require("multicursor-nvim")
-      mc.setup()
-
-      -- Cursor layer: bindings active only while extra cursors exist
-      mc.addKeymapLayer(function(layerSet)
-        layerSet({ "n", "x" }, "<left>", mc.prevCursor)
-        layerSet({ "n", "x" }, "<right>", mc.nextCursor)
-        -- NOTE: do NOT map <tab>/<s-tab> here. In a terminal <Tab> == <C-i>, so a
-        -- normal-mode <tab> mapping silently hijacks the <C-i> jumplist-forward jump
-        -- whenever extra cursors linger. Arrows above already navigate cursors.
-        layerSet("n", "<esc>", function()
-          if not mc.cursorsEnabled() then
-            mc.enableCursors()
-          else
-            mc.clearCursors()
-          end
-        end)
-      end)
-    end,
-  },
-
   -- Better quickfix window with preview + fzf filter
   {
     "kevinhwang91/nvim-bqf",
@@ -333,7 +289,6 @@ return {
         { "<leader>j",  group = "chrome devtools" },
         { "<leader>jd", group = "emulate" },
         { "<leader>k",  group = "docs (devdocs/nvimdocs)" },
-        { "<leader>m",  group = "multicursor" },
         { "<leader>n",  group = "obsidian" },
         { "<leader>o",  group = "overseer/other" },
         { "<leader>q",  group = "quit" },
@@ -522,24 +477,6 @@ return {
 
   -- Case-preserving :Subvert/:S and `crs`/`crc`/`crm`/`cru`/`cr-`/`cr.` case coercions
   { "tpope/vim-abolish", event = "VeryLazy" },
-
-  -- Highlight other uses of the symbol under cursor (LSP/Treesitter/regex)
-  {
-    "RRethy/vim-illuminate",
-    event = { "BufReadPost", "BufNewFile" },
-    config = function()
-      require("illuminate").configure({
-        providers = { "lsp", "treesitter" },
-        delay = 400,
-        large_file_cutoff = 1500,
-        large_file_overrides = { providers = {} },
-        filetypes_denylist = { "oil", "trouble", "lazy", "mason", "help", "noice", "checkhealth", "snacks_picker_list" },
-        min_count_to_highlight = 2,
-      })
-      vim.keymap.set("n", "]]", function() require("illuminate").goto_next_reference(false) end, { desc = "Next reference" })
-      vim.keymap.set("n", "[[", function() require("illuminate").goto_prev_reference(false) end, { desc = "Prev reference" })
-    end,
-  },
 
   -- Structural search-replace (treesitter-aware)
   {

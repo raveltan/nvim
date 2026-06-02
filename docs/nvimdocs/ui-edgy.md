@@ -36,7 +36,7 @@ Solves the "where did that quickfix window open?" problem by intercepting window
 ```
 
 ## Common customizations
-- `animate.enabled` *(bool, true)* — slide-in animation. Disabled here (smear-cursor + indentscope already animate).
+- `animate.enabled` *(bool, true)* — slide-in animation. Disabled here (indentscope already animates; avoids panel-open lag).
 - `wo.winbar` *(bool, true)* — title bar per edgy window.
 - `wo.winfixwidth` / `wo.winfixheight` *(bool)* — lock dimensions against `<C-w>=`.
 - `wo.winhighlight` *(string)* — remap `Normal`/`WinBar` to edgy-specific groups for theming.
@@ -54,7 +54,7 @@ WebFetch https://raw.githubusercontent.com/folke/edgy.nvim/HEAD/README.md for th
 
 ## Our config
 - `init` sets `laststatus = 3` (single global statusline, already required by lualine) and `splitkeep = "screen"` so cursor position doesn't jump when edgy resizes splits.
-- `animate = false` — avoid double-animation with smear-cursor.
+- `animate = false` — panels appear instantly (no slide-in lag).
 - `wo`: `winbar=true`, `winfixwidth=true`, `winfixheight=false` (heights flex), custom highlights, `spell=false` (no red squiggles in panel buffers).
 - `exit_when_last = true`, `close_when_all_hidden = true` — clean exit semantics.
 

@@ -101,7 +101,7 @@ return {
             { "filename", path = 0, symbols = { modified = "  ", readonly = " ", unnamed = " " } },
             macro,
           },
-          lualine_x = { lsp, encoding, fileformat, "filetype" },
+          lualine_x = { lsp, encoding, fileformat },
           lualine_y = { "progress" },
           lualine_z = { { "location", icon = "" } },
         },
