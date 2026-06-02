@@ -136,24 +136,30 @@ alt-shift-k = ['join-with up',    'mode main']
 alt-shift-l = ['join-with right', 'mode main']
 
 # ============================================================
-# Workspace ↔ monitor pinning
-# Fallback list: prefer first available monitor, drop down on undock.
-# Docked = spread across 2 screens. Laptop-only = all on built-in.
+# Workspace ↔ monitor pinning  (3-display desk)
+# One screen = one role. Fallback list drops to built-in on undock.
+# Monitors matched by NAME regex (single-quoted = literal, so \( stays
+# escaped). main/secondary only give 2 buckets — useless with 3 screens.
+#   built-in        -> COMMS  : Claude + Rocket.Chat   (ws C, N)
+#   DELL U2715H (1) -> CODING : Ghostty / editors      (ws T, D)
+#   DELL U2715H (2) -> BROWSER: Chrome/Firefox testing (ws B)
 # ============================================================
 [workspace-to-monitor-force-assignment]
-# left cluster — main screen when docked, else laptop
-T = ['main', 'built-in']
-D = ['main', 'built-in']
-N = ['main', 'built-in']
-1 = ['main', 'built-in']
-2 = ['main', 'built-in']
+# --- Built-in laptop: comms ---
+C = 'built-in'
+N = 'built-in'
+1 = 'built-in'
 
-# right cluster — secondary when docked, else laptop
-B = ['secondary', 'built-in']
-C = ['secondary', 'built-in']
-3 = ['secondary', 'built-in']
-4 = ['secondary', 'built-in']
-5 = ['secondary', 'built-in']
+# --- DELL (1): coding ---
+T = ['DELL U2715H \(1\)', 'built-in']
+D = ['DELL U2715H \(1\)', 'built-in']
+2 = ['DELL U2715H \(1\)', 'built-in']
+3 = ['DELL U2715H \(1\)', 'built-in']
+
+# --- DELL (2): browser / testing ---
+B = ['DELL U2715H \(2\)', 'built-in']
+4 = ['DELL U2715H \(2\)', 'built-in']
+5 = ['DELL U2715H \(2\)', 'built-in']
 
 # ============================================================
 # App rules — run `aerospace list-apps` for exact app-ids
@@ -164,10 +170,19 @@ C = ['secondary', 'built-in']
 if.app-id = 'com.mitchellh.ghostty'
 run = ['layout tiling', 'move-node-to-workspace T']
 
-# Chrome — goes to B
+# Chrome / Firefox — browser testing, goes to B
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
 run = 'move-node-to-workspace B'
+
+[[on-window-detected]]
+if.app-id = 'org.mozilla.firefox'
+run = 'move-node-to-workspace B'
+
+# Claude desktop — comms, goes to C (laptop)
+[[on-window-detected]]
+if.app-id = 'com.anthropic.claudefordesktop'
+run = 'move-node-to-workspace C'
 
 # Rocket.Chat / Discord — C
 [[on-window-detected]]
