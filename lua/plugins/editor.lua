@@ -158,7 +158,16 @@ return {
   {
     "echasnovski/mini.ai",
     event = "VeryLazy",
-    opts = {},
+    opts = {
+      custom_textobjects = {
+        -- Override the default `t` tag text object so `dit`/`cit`/`dat`/`cat` match
+        -- hyphenated custom elements (`<fl-button>`, `<app-foo-bar>`). Upstream uses
+        -- `(%w-)` for the tag name, which stops at the first hyphen; widen the name
+        -- class and its frontier to include `-`. Second pattern (inner/around split)
+        -- is mini.ai's default, unchanged.
+        t = { "<([%w%-]-)%f[^<%w%-][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
+      },
+    },
   },
 
   -- Yank history ring
@@ -207,8 +216,9 @@ return {
       mc.addKeymapLayer(function(layerSet)
         layerSet({ "n", "x" }, "<left>", mc.prevCursor)
         layerSet({ "n", "x" }, "<right>", mc.nextCursor)
-        layerSet({ "n", "x" }, "<tab>", mc.nextCursor)
-        layerSet({ "n", "x" }, "<s-tab>", mc.prevCursor)
+        -- NOTE: do NOT map <tab>/<s-tab> here. In a terminal <Tab> == <C-i>, so a
+        -- normal-mode <tab> mapping silently hijacks the <C-i> jumplist-forward jump
+        -- whenever extra cursors linger. Arrows above already navigate cursors.
         layerSet("n", "<esc>", function()
           if not mc.cursorsEnabled() then
             mc.enableCursors()

@@ -1,7 +1,10 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    lazy = false,
+    -- Defer to first file open. BufReadPre fires before FileType, so the FileType
+    -- autocmd below is registered in time to highlight that same buffer. Saves
+    -- startup cost on the dashboard (no buffer = no parser needed).
+    event = { "BufReadPre", "BufNewFile" },
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter").install({

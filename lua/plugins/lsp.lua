@@ -273,12 +273,17 @@ return {
     version = "v2.*",
     build = "make install_jsregexp",
     dependencies = { "rafamadriz/friendly-snippets" },
+    event = "InsertEnter", -- defer load; snippets only matter once typing starts
     config = function()
       local ls = require("luasnip")
       ls.config.setup({
-        history = true,
+        -- history=false + region_check on InsertEnter only: exited snippets die and
+        -- are NOT re-armed when the cursor wanders back into an old region. Prevents
+        -- <Tab> (blink default preset = snippet_forward) from teleporting into a stale
+        -- snippet instead of indenting. CursorMoved region-checks were the cause.
+        history = false,
         updateevents = "TextChanged,TextChangedI",
-        region_check_events = "CursorMoved,CursorMovedI,InsertEnter",
+        region_check_events = "InsertEnter",
         delete_check_events = "TextChanged,InsertLeave",
         enable_autosnippets = false,
       })

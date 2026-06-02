@@ -146,7 +146,9 @@ return {
       -- codeLens/refresh requests that cascaded into cancel-loop on busy server).
       -- Debounced so back-to-back saves coalesce.
       local codelens_timer
+      local codelens_group = vim.api.nvim_create_augroup("ror_codelens", { clear = true })
       vim.api.nvim_create_autocmd("BufWritePost", {
+        group = codelens_group,
         pattern = { "*.rb", "*.erb" },
         callback = function(args)
           if codelens_timer then codelens_timer:stop() end
@@ -161,6 +163,7 @@ return {
 
       -- Run codelens under cursor (Ruby buffers).
       vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("ror_codelens_keys", { clear = true }),
         pattern = { "ruby", "eruby" },
         callback = function(args)
           vim.keymap.set("n", "<leader>cc", vim.lsp.codelens.run,
@@ -177,14 +180,10 @@ return {
     ft = { "ruby", "eruby" },
   },
 
-  -- DAP adapter for rdbg / Ruby debug gem (Ruby 3.1+ ships it).
-  -- Launch Rails with: RUBY_DEBUG_OPEN=true bin/rails s, then <leader>dc attach.
-  {
-    "suketa/nvim-dap-ruby",
-    ft = "ruby",
-    dependencies = { "mfussenegger/nvim-dap" },
-    config = function() require("dap-ruby").setup() end,
-  },
+  -- DAP adapter for rdbg lives in plugins/dap.lua as a dependency of nvim-dap, so
+  -- it loads on demand when you start debugging (not on every ruby buffer). The
+  -- former standalone ft="ruby" spec here was redundant — lazy.nvim would merge it
+  -- and only one config() survives anyway.
 
   -- Ruby/ERB formatters
   {
