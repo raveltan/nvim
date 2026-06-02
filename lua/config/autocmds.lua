@@ -88,6 +88,22 @@ autocmd("BufReadPost", {
   end,
 })
 
+-- Keep ]] / [[ as universal "next/prev occurrence of word under cursor" (text
+-- search). Many runtime ftplugins (ruby, python, rust, markdown, go, eruby, …)
+-- map [[/]] buffer-locally to class/section motions, shadowing the global maps
+-- in config/keymaps.lua. This FileType autocmd runs after those ftplugins, so
+-- re-asserting the buffer-local maps wins everywhere.
+autocmd("FileType", {
+  group = augroup("universal_word_search", { clear = true }),
+  callback = function(ev)
+    local search_cword = require("util.wordsearch").search_cword
+    vim.keymap.set("n", "]]", function() search_cword("n") end,
+      { buffer = ev.buf, desc = "Next occurrence of word (text search)" })
+    vim.keymap.set("n", "[[", function() search_cword("N") end,
+      { buffer = ev.buf, desc = "Prev occurrence of word (text search)" })
+  end,
+})
+
 -- Close specific filetypes with q
 autocmd("FileType", {
   group = augroup("close_with_q", { clear = true }),
