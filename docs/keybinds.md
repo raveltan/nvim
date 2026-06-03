@@ -117,6 +117,16 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>g*` | n | Git grep word under cursor | util.ggrep |
 | `]c` / `[c` | n | Next/Prev hunk | gitsigns |
 | `ih` | o, x | Select hunk (gitsigns textobj) | gitsigns |
+| `<leader>ghr` | n | Reset hunk | gitsigns |
+| `<leader>ghr` | v | Reset selected lines | gitsigns |
+| `<leader>ghR` | n | Reset whole file | gitsigns |
+| `<leader>ghp` | n | Preview hunk (popup) | gitsigns |
+| `<leader>ghi` | n | Preview hunk (inline) | gitsigns |
+| `<leader>ghb` | n | Blame line (full popup) | gitsigns |
+| `<leader>ghs` | n | Stage hunk | gitsigns |
+| `<leader>ghs` | v | Stage selected lines | gitsigns |
+| `<leader>ghu` | n | Undo stage hunk | gitsigns |
+| `<leader>gho` | n | Toggle diff overlay (word-level) | mini.diff |
 
 ## Diagnostics / Quickfix
 
@@ -413,7 +423,7 @@ ERB examples:
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>q` quit · `<leader>r` rails · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics · `<leader>X` xdebug profile · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter · `<leader>g` git · `<leader>gh` hunk · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>q` quit · `<leader>r` rails · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics · `<leader>X` xdebug profile · `g` goto · `gs` surround
 
 ## Known overlaps
 

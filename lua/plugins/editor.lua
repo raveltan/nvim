@@ -285,6 +285,7 @@ return {
         { "<leader>f",  group = "find" },
         { "<leader>F",  group = "flutter" },
         { "<leader>g",  group = "git" },
+        { "<leader>gh", group = "hunk" },
         { "<leader>h",  group = "harpoon" },
         { "<leader>j",  group = "chrome devtools" },
         { "<leader>jd", group = "emulate" },

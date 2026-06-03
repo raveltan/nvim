@@ -49,9 +49,51 @@ return {
           -- Blame
           map("n", "<leader>gb", function() gs.blame() end, { desc = "Blame file (author column)" })
           map("n", "<leader>gt", gs.toggle_current_line_blame, { desc = "Toggle line blame virt text" })
+
+          -- Hunk actions (reset / preview / stage)
+          map("n", "<leader>ghr", gs.reset_hunk, { desc = "Reset hunk" })
+          map("v", "<leader>ghr", function()
+            gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+          end, { desc = "Reset selected lines" })
+          map("n", "<leader>ghR", gs.reset_buffer, { desc = "Reset whole file" })
+
+          map("n", "<leader>ghp", gs.preview_hunk, { desc = "Preview hunk (popup)" })
+          map("n", "<leader>ghi", gs.preview_hunk_inline, { desc = "Preview hunk (inline)" })
+          map("n", "<leader>ghb", function() gs.blame_line({ full = true }) end, { desc = "Blame line (full popup)" })
+
+          map("n", "<leader>ghs", gs.stage_hunk, { desc = "Stage hunk" })
+          map("v", "<leader>ghs", function()
+            gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+          end, { desc = "Stage selected lines" })
+          map("n", "<leader>ghu", gs.undo_stage_hunk, { desc = "Undo stage hunk" })
         end,
       })
     end,
+  },
+
+  -- mini.diff: word-level overlay diff (gitsigns owns the gutter; this is
+  -- overlay-only). Toggle with <leader>gho — shows changed words inline and
+  -- deleted lines as virt-text across the whole buffer.
+  {
+    "echasnovski/mini.diff",
+    event = { "BufReadPost", "BufNewFile" },
+    keys = {
+      { "<leader>gho", function() require("mini.diff").toggle_overlay(0) end, desc = "Toggle diff overlay" },
+    },
+    opts = {
+      -- Blank signs so only gitsigns draws the gutter (no double signs).
+      view = { style = "sign", signs = { add = "", change = "", delete = "" } },
+      -- Disable mini's own hunk maps — gitsigns handles nav/stage/reset.
+      mappings = {
+        apply = "",
+        reset = "",
+        textobject = "",
+        goto_first = "",
+        goto_prev = "",
+        goto_next = "",
+        goto_last = "",
+      },
+    },
   },
 
   -- Visual merge-conflict resolution (co/ct/cb/c0, ]x/[x)

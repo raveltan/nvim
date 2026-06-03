@@ -1,23 +1,37 @@
 {
-  "name": "rtanjaya-snippets",
   "contributes": {
     "snippets": [
       {
-        "language": ["typescript"],
+        "language": [
+          "typescript"
+        ],
         "path": "./typescript.json"
       },
       {
-        "language": ["php"],
+        "language": [
+          "php"
+        ],
         "path": "./php.json"
       },
       {
-        "language": ["ruby"],
+        "language": [
+          "ruby"
+        ],
         "path": "./ruby.json"
       },
       {
-        "language": ["eruby"],
+        "language": [
+          "eruby"
+        ],
         "path": "./eruby.json"
+      },
+      {
+        "language": [
+          "snacks_dashboard"
+        ],
+        "path": "./snacks_dashboard.json"
       }
     ]
-  }
+  },
+  "name": "rtanjaya-snippets"
 }
