@@ -30,7 +30,8 @@ return {
             callback = function() pcall(require("fff").change_indexing_directory, cwd) end,
           })
         end, desc = "Config files" },
-      { "<leader>sg", function() patch_close_once(); require("fff").live_grep({ query = last_query.grep }) end, desc = "Live grep (resume last query)" },
+      { "<leader>sg", function() patch_close_once(); require("fff").live_grep() end, desc = "Live grep" },
+      { "<leader>sG", function() patch_close_once(); require("fff").live_grep({ query = last_query.grep }) end, desc = "Live grep (resume last query)" },
       { "<leader>sw", function() require("fff").live_grep({ query = vim.fn.expand("<cword>") }) end, mode = { "n", "x" }, desc = "Grep word" },
       { "<leader>sz", function() require("fff").live_grep({ grep = { modes = { "fuzzy", "plain" } } }) end, desc = "Fuzzy grep" },
       { "<leader>s.", function() require("fff").live_grep({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Grep in current file dir" },

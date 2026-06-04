@@ -8,7 +8,12 @@ return {
     opts = {
       settings = {
         tsserver_file_preferences = {
-          importModuleSpecifierPreference = "relative",
+          -- fl-gaf (GAF=1) bans relative @freelancer imports
+          -- (eslint local-rules/validate-freelancer-imports) but still requires
+          -- relative for self-imports within a @freelancer/ui package.
+          -- project-relative satisfies both: alias across packages, relative within.
+          -- vim.g.gaf is set in init.lua before lazy reads this spec.
+          importModuleSpecifierPreference = vim.g.gaf and "project-relative" or "relative",
           includePackageJsonAutoImports = "auto",
           includeInlayParameterNameHints = "none",
           includeInlayParameterNameHintsWhenArgumentMatchesName = false,
