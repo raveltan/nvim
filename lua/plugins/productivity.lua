@@ -112,35 +112,4 @@ return {
     end,
   },
 
-  -- Inline lens above functions (between phpDoc and function declaration).
-  -- Only complexity + last_author — no LSP reference/blame storms.
-  {
-    "oribarilan/lensline.nvim",
-    event = "LspAttach",
-    opts = {
-      profiles = {
-        {
-          name = "default",
-          providers = {
-            { name = "last_author",  enabled = true },
-            { name = "complexity",   enabled = true, min_level = "S" },
-          },
-          style = {
-            placement = "above",
-            prefix = "┃ ",
-            separator = " • ",
-            use_nerdfont = true,
-          },
-        },
-      },
-      limits = {
-        exclude = {
-          "lazy", "mason", "TelescopePrompt", "neo-tree", "trouble",
-          "help", "qf", "snacks_picker_list", "snacks_picker_input",
-        },
-        max_lines = 1000,
-      },
-    },
-  },
-
 }

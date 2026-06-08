@@ -60,3 +60,11 @@ opt.wrap = true
 opt.textwidth = 150
 opt.colorcolumn = "80,150"
 opt.formatoptions:append("t")
+
+-- LSP log level. Default ERROR floods lsp.log with the harmless-but-synchronous
+-- "Cannot find request with id N whilst attempting to cancel" stale-cancel error
+-- (87k+ lines, ~95% of a 32MB log, ruby_lsp worst). Each write is a blocking
+-- io.write+flush on the main loop; bursts of 30+/sec while typing stalled the UI
+-- and made blink.cmp + which-key fail to render. WARN drops the cancel spam while
+-- keeping genuine warnings. Set "OFF" to silence entirely.
+vim.lsp.set_log_level("WARN")
