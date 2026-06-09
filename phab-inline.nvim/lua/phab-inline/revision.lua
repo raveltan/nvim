@@ -4,6 +4,13 @@
 
 local M = {}
 
+-- Memoize results: the worktree ancestor of an absolute path never changes
+-- within a session. The autocmd in commands.lua calls find() on every BufEnter
+-- for every buffer (incl. files outside any D-worktree, where the walk runs all
+-- the way to "/"); caching turns that into a table lookup. nil results are
+-- cached too (stored as `false`), since those are the expensive full walks.
+local find_cache = {}
+
 -- Walk up from `path` looking for a directory named D<digits>, optionally
 -- followed by a "-slug" suffix (legacy worktree layout). `path` may be a file
 -- or a directory. Returns (revision_id, worktree_root) or nil. The revision id
@@ -13,6 +20,13 @@ local M = {}
 function M.find(path)
   if not path or path == "" then return nil end
   path = vim.fn.fnamemodify(path, ":p"):gsub("/$", "")
+
+  local hit = find_cache[path]
+  if hit ~= nil then
+    if hit == false then return nil end
+    return hit.id, hit.root
+  end
+
   local dir
   if vim.fn.isdirectory(path) == 1 then
     dir = path
@@ -23,12 +37,16 @@ function M.find(path)
     local name = vim.fs.basename(dir)
     if name then
       local id = name:match("^(D%d+)$") or name:match("^(D%d+)%-")
-      if id then return id, dir end
+      if id then
+        find_cache[path] = { id = id, root = dir }
+        return id, dir
+      end
     end
     local parent = vim.fs.dirname(dir)
     if parent == dir then break end
     dir = parent
   end
+  find_cache[path] = false
   return nil
 end
 

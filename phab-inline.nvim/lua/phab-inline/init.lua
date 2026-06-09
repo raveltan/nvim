@@ -150,7 +150,19 @@ function M.on_buf(buf)
   local status = state.get_active(rev) or "incomplete"
   state.set_active(rev, status)
   if state.get_slot(rev, status) then
-    render.render(buf, rev, status)
+    -- BufEnter fires on every focus change; render.render does a full extmark
+    -- teardown+rebuild. Skip it when the render inputs (status, visibility, and
+    -- the underlying comment data) are unchanged since this buffer last rendered.
+    -- The signature lives in a buffer-local var so it dies with the buffer (no
+    -- stale skips on reload/bufnr reuse).
+    local sig = string.format(
+      "%s\0%s\0%d\0%s",
+      rev, status, state.slot_gen(), tostring(state.is_hidden(rev))
+    )
+    if vim.b[buf].phab_render_sig ~= sig then
+      render.render(buf, rev, status)
+      vim.b[buf].phab_render_sig = sig
+    end
   else
     fetch.fetch(rev, root, status, function() render.render_all(rev, status) end)
   end

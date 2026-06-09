@@ -1,5 +1,14 @@
 local M = {}
 
+-- `git show <sha>` output is immutable, so cache it per sha. Combined with the
+-- async fetch below this means scrolling back over a row is instant and never
+-- re-spawns git.
+local show_cache = {}
+-- Monotonic token: each preview request bumps it. A slow earlier `git show`
+-- resolving after the selection moved on is dropped instead of clobbering the
+-- newer preview.
+local preview_gen = 0
+
 local function get_range(s, e)
   if s and e then return s, e end
   local l = vim.fn.line(".")
@@ -45,12 +54,38 @@ function M.pick(s, e)
     items = items,
     format = function(item) return { { item.text } } end,
     preview = function(ctx)
-      local out = vim.fn.systemlist({
-        "git", "show", "--stat", "-p", ctx.item.sha, "--", rel,
-      })
+      local sha = ctx.item.sha
+      local function show(out)
+        ctx.preview:reset()
+        ctx.preview:set_lines(out)
+        ctx.preview:highlight({ ft = "git" })
+      end
+
+      local cached = show_cache[sha]
+      if cached then
+        show(cached)
+        return
+      end
+
+      -- Async: never block the UI loop on `git show` while arrow-keying through
+      -- the list (the old synchronous systemlist froze nvim on every cursor
+      -- move, made worse on a large repo).
+      preview_gen = preview_gen + 1
+      local my_gen = preview_gen
       ctx.preview:reset()
-      ctx.preview:set_lines(out)
-      ctx.preview:highlight({ ft = "git" })
+      ctx.preview:set_lines({ "Loading " .. sha .. " …" })
+      vim.system(
+        { "git", "show", "--stat", "-p", sha, "--", rel },
+        { text = true },
+        vim.schedule_wrap(function(res)
+          local out = vim.split(res.stdout or "", "\n")
+          if out[#out] == "" then out[#out] = nil end
+          show_cache[sha] = out
+          -- Selection moved on while git ran; the current preview is newer.
+          if my_gen ~= preview_gen then return end
+          pcall(show, out)
+        end)
+      )
     end,
     confirm = function(picker, item)
       picker:close()

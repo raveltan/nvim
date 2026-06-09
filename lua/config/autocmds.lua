@@ -28,15 +28,36 @@ local augroup = vim.api.nvim_create_augroup
 --   TypeScript signature still renders fully.
 -- ─────────────────────────────────────────────────────────────────────────────
 do
+  -- The conceal_lines shrink bug ONLY fires for markdown floats containing a
+  -- fenced code block (```), so the fixup is gated to that case. This skips it
+  -- for plain hovers and — critically — signature-help, which re-opens a float
+  -- per keystroke while typing call args; running a forced redraw there cost a
+  -- blocking repaint on every key.
+  local function has_code_fence(contents)
+    if type(contents) == "string" then return contents:find("```", 1, true) ~= nil end
+    if type(contents) == "table" then
+      for _, l in ipairs(contents) do
+        if type(l) == "string" and l:find("```", 1, true) then return true end
+      end
+    end
+    return false
+  end
+
   local orig = vim.lsp.util.open_floating_preview
   vim.lsp.util.open_floating_preview = function(contents, syntax, opts)
     local buf, win = orig(contents, syntax, opts)
-    if win and vim.api.nvim_win_is_valid(win) then
-      vim.api.nvim__redraw({ win = win, valid = true, flush = true })
-      local rendered = vim.api.nvim_win_text_height(win, {}).all
-      if rendered > vim.api.nvim_win_get_height(win) then
-        vim.api.nvim_win_set_height(win, rendered)
-      end
+    local is_markdown = not syntax or syntax == "" or syntax == "markdown"
+    if win and is_markdown and has_code_fence(contents) then
+      -- Defer instead of nvim__redraw{flush=true}: the float renders naturally
+      -- on the next tick (conceal applied), so nvim_win_text_height reports the
+      -- true row count without a synchronous blocking redraw on the main loop.
+      vim.schedule(function()
+        if not vim.api.nvim_win_is_valid(win) then return end
+        local rendered = vim.api.nvim_win_text_height(win, {}).all
+        if rendered > vim.api.nvim_win_get_height(win) then
+          vim.api.nvim_win_set_height(win, rendered)
+        end
+      end)
     end
     return buf, win
   end

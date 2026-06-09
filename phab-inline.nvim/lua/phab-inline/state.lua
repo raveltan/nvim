@@ -14,6 +14,10 @@ local active_status = {}
 -- hidden[rev] = true when the user has toggled visibility off.
 -- Cache is kept intact; rendering is suppressed until toggled back.
 local hidden = {}
+-- Bumped whenever any slot is set or dropped. on_buf uses it to detect that
+-- cached comment data is unchanged since a buffer was last rendered, so it can
+-- skip a full extmark teardown+rebuild on every BufEnter.
+local slot_gen = 0
 
 local VALID_STATUS = { incomplete = true, done = true, all = true }
 
@@ -38,11 +42,16 @@ end
 function M.set_slot(rev, status, slot)
   cache[rev] = cache[rev] or {}
   cache[rev][status] = slot
+  slot_gen = slot_gen + 1
 end
 
 function M.drop_slot(rev, status)
   if cache[rev] then cache[rev][status] = nil end
+  slot_gen = slot_gen + 1
 end
+
+-- Monotonic token; changes whenever cached comment data could have changed.
+function M.slot_gen() return slot_gen end
 
 function M.set_active(rev, status) active_status[rev] = status end
 function M.get_active(rev) return active_status[rev] end
@@ -66,6 +75,7 @@ function M._reset()
   inflight = {}
   active_status = {}
   hidden = {}
+  slot_gen = 0
 end
 
 return M
