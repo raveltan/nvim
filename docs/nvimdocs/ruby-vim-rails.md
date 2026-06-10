@@ -2,7 +2,7 @@
 > tpope's classic Rails plugin: :R*/:E* navigation commands, partial/factory `gf`, Rails syntax tweaks.
 
 **Repo:** https://github.com/tpope/vim-rails
-**Local spec:** /Users/rtanjaya/.config/nvim/lua/plugins/ror.lua:175-178
+**Local spec:** /Users/rtanjaya/.config/nvim/lua/plugins/rails.lua:5-135
 **Tags:** ruby, rails, navigation, tpope
 
 ## Scope
@@ -13,16 +13,17 @@ Adds Rails-aware vim commands: `:Rcontroller`, `:Rmodel`, `:Rview`, `:Rmigration
 {
   "tpope/vim-rails",
   ft = { "ruby", "eruby" },
+  dependencies = { "neovim/nvim-lspconfig", "saghen/blink.cmp" },
 }
 ```
 
 ## Common customizations
 - No setup function — works out of the box once loaded inside a Rails project (detected by `config/environment.rb`).
-- `g:rails_projections` / `g:rails_buffer_processing` to add custom file types. We instead use vim-projectionist for projection overrides (see [[ruby-vim-projectionist]]) since vim-rails projections are deprecated in favour of projectionist's.
+- `g:rails_projections` / `g:rails_buffer_processing` to add custom file types. We set neither — for many-target alternate picks we use `other.nvim` instead.
 - WebFetch https://raw.githubusercontent.com/tpope/vim-rails/HEAD/README.markdown if uncertain about a specific command.
 
 ## Our config
-No config. Pure lazy-load on filetype.
+vim-rails itself needs no setup, but its spec doubles as the load carrier for the Ruby LSP stack — `ruby_lsp`, `sorbet`, `stimulus_ls`, the `rubyLsp.openFile` codelens handler, and the debounced codelens refresh autocmds all live in its `config` function (`lua/plugins/rails.lua:12-134`).
 
 ## Keymaps
 | Key | Mode | Action | Desc |
@@ -43,8 +44,8 @@ Useful commands (typed, not mapped):
 ## Links
 - Plugin README: https://github.com/tpope/vim-rails
 - Commands list: `:help rails-commands`
-- Companion: [[ruby-vim-projectionist]] (projections), [[ruby-ror]] (modern Rails tooling)
+- Companion: [[ruby-vim-endwise]], [[ruby-conform-rubocop]]
 
 ## Notes
-- vim-rails and vim-projectionist coexist. vim-rails owns `:R*`/`:E*` + Rails-aware `gf`; projectionist owns `:A` alternate routing via our heuristic in `lua/plugins/ror.lua`.
+- vim-projectionist was dropped together with the old `lua/plugins/ror.lua` spec — vim-rails alone owns `:R*`/`:E*`, `:A`, and Rails-aware `gf` now.
 - For richer many-target alternate picks (e.g. controller → multiple views), prefer `other.nvim`'s `<leader>oo`.

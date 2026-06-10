@@ -2,7 +2,7 @@
 > Auto-inserts `end` after `def`/`do`/`if`/`class`/`module` (Ruby) and equivalents in other langs.
 
 **Repo:** https://github.com/tpope/vim-endwise
-**Local spec:** /Users/rtanjaya/.config/nvim/lua/plugins/ror.lua:289-292
+**Local spec:** /Users/rtanjaya/.config/nvim/lua/plugins/rails.lua:161-164
 **Tags:** ruby, lua, vim, shell, autoclose, tpope
 
 ## Scope
@@ -33,9 +33,9 @@ Pure filetype lazy-load — no setup, no overrides.
 
 ## Links
 - Plugin README: https://github.com/tpope/vim-endwise
-- Companion: [[ruby-ror]], [[ts-nvim-treesitter]] (treesitter-endwise alternative)
+- Companion: [[ruby-vim-rails]], [[ts-nvim-treesitter]] (treesitter-endwise alternative)
 
 ## Notes
-- We previously used `nvim-treesitter-endwise` but it broke against the treesitter `main` branch (upstream regression as of late 2025) — comment in `lua/plugins/ror.lua` records the swap.
+- We previously used `nvim-treesitter-endwise` but it broke against the treesitter `main` branch (upstream regression as of late 2025) — comment in `lua/plugins/rails.lua:160` records the swap.
 - Plays nicely with blink.cmp: endwise's `<CR>` triggers only when no completion item is selected, so completion `<CR>` accept still works.
 - For Lua / Vimscript / shells we keep it active because the same heuristic gives `end` / `endfunction` / `fi` / `done` / `esac` cheaply with zero config drift.

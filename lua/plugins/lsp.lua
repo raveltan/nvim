@@ -377,12 +377,9 @@ return {
       },
       signature = { enabled = true, window = { border = "rounded" } },
       sources = {
-        default = { "lsp", "path", "snippets", "buffer", "webconsole" },
+        default = { "lsp", "path", "snippets", "buffer" },
         providers = {
           lsp = { max_items = 50 },
-          -- Chrome console JS autocomplete; inert outside the webconnect
-          -- console input buffer (its enabled() checks b:webconsole_input).
-          webconsole = { name = "JS", module = "util.cmp_webconsole", async = true },
         },
       },
       fuzzy = { implementation = "prefer_rust" },

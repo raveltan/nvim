@@ -78,6 +78,6 @@ Manual: just run tests once SimpleCov is wired, then `:Coverage`.
 - `bin/rspec` binstub: regenerate with `bundle binstubs rspec-core` if missing — much faster than `bundle exec`.
 
 ## Links
-- Related: [[dap-nvim-dap]], [[dap-nvim-dap-ruby]], [[test-neotest-adapters]], [[coverage]], [[config-neotest-coverage]], [[config-neotest-profile-ruby]], [[ruby-ror]]
+- Related: [[dap-nvim-dap]], [[dap-nvim-dap-ruby]], [[test-neotest-adapters]], [[coverage]], [[config-neotest-coverage]], [[config-neotest-profile-ruby]], [[ruby-vim-rails]]
 - debug.gem (rdbg): https://github.com/ruby/debug
 - SimpleCov: https://github.com/simplecov-ruby/simplecov

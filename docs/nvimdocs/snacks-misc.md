@@ -130,7 +130,6 @@ Terminal requirement: kitty / ghostty / wezterm (limited) / tmux passthrough. **
 | Key | Mode | Action | Desc |
 |---|---|---|---|
 | `<leader>gg` | n | `Snacks.lazygit()` | Lazygit |
-| `<leader>/` | n / t | `Snacks.terminal.toggle()` | Toggle terminal |
 | `<leader>fR` | n | `Snacks.rename.rename_file()` | Rename current file |
 | `<leader>.` | n | `Snacks.scratch()` | Toggle scratch buffer |
 | `<leader>fs` | n | `Snacks.scratch.select()` | Select scratch buffer |
@@ -145,5 +144,5 @@ Terminal requirement: kitty / ghostty / wezterm (limited) / tmux passthrough. **
 ## Notes
 - `Snacks.rename.rename_file()` fires LSP `workspace/willRenameFiles` so language servers update imports automatically. For symbol renames in PHP we still use native `vim.lsp.buf.rename` (see auto-memory `nvim_php_rename.md`) due to the intelephense `$` sigil bug.
 - The scratch directory is keyed by cwd/branch by default — switching git branches gives you a separate scratchpad per branch.
-- Terminal `<leader>/` works in both normal and terminal mode (`mode = { "n", "t" }`) so the same key dismisses it from inside.
+- The `terminal` module stays enabled because `Snacks.lazygit()` uses it internally, but it has no direct keybind — `<leader>/` now launches [seeker.nvim](nav-seeker.md) and tmux handles standalone terminals.
 - `image` requires ImageMagick on `$PATH` for format conversion (PDF, mermaid, raster→png).

@@ -46,7 +46,6 @@ return {
   {
     "mbbill/undotree",
     keys = {
-      { "<leader>cu", "<cmd>UndotreeToggle<cr>", desc = "Undo tree" },
       { "<leader>U", "<cmd>UndotreeToggle<cr>", desc = "Undo tree" },
     },
     init = function()
@@ -287,13 +286,10 @@ return {
         { "<leader>g",  group = "git" },
         { "<leader>gh", group = "hunk" },
         { "<leader>h",  group = "harpoon" },
-        { "<leader>j",  group = "chrome devtools" },
-        { "<leader>jd", group = "emulate" },
         { "<leader>k",  group = "docs (devdocs/nvimdocs)" },
         { "<leader>n",  group = "obsidian" },
         { "<leader>o",  group = "overseer/other" },
         { "<leader>q",  group = "quit" },
-        { "<leader>r",  group = "rails" },
         { "<leader>s",  group = "search" },
         { "<leader>S",  group = "snippets" },
         { "<leader>t",  group = "todo/test" },

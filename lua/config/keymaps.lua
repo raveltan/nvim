@@ -127,7 +127,6 @@ map("n", "<leader>cr", function()
     end, bufnr)
   end)
 end, { desc = "Rename symbol" })
-map("n", "<leader>cf", function() require("conform").format({ async = true }) end, { desc = "Format file" })
 map("n", "K", vim.lsp.buf.hover, { desc = "Hover docs" })
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })
 map("n", "[d", function() vim.diagnostic.jump({ count = -1 }) end, { desc = "Prev diagnostic" })
@@ -146,12 +145,6 @@ end, { desc = "Toggle inlay hints" })
 map("n", "<leader>ud", function()
   vim.diagnostic.enable(not vim.diagnostic.is_enabled())
 end, { desc = "Toggle diagnostics" })
-
--- Toggle format-on-save
-map("n", "<leader>uf", function()
-  vim.g.disable_autoformat = not vim.g.disable_autoformat
-  vim.notify(vim.g.disable_autoformat and "Format-on-save disabled" or "Format-on-save enabled")
-end, { desc = "Toggle format-on-save" })
 
 -- Case conversion via vim-abolish (operates on word under cursor)
 map("n", "<leader>cvs", "crsiw", { remap = true, desc = "snake_case" })
@@ -224,64 +217,3 @@ map("n", "gx", function()
   local cfile = vim.fn.expand("<cfile>")
   if cfile ~= "" then vim.ui.open(cfile) end
 end, { desc = "Open URL/file under cursor" })
-
--- Chrome DevTools (webconnect bridge) — <leader>j = chrome devtools group
-local wc = function() return require("util.webconsole") end
-local wn = function() return require("util.webnetwork") end
-local ws = function() return require("util.webstorage") end
-local wd = function() return require("util.webdom") end
-local wem = function() return require("util.webemulate") end
-local wcl = function() return require("util.webclient") end
-local wh = function() return require("util.webhelp") end
-
-map("n", "<leader>jl", function() wcl().launch_connect() end, { desc = "Launch debug Chrome + connect (no panel)" })
-map("n", "<leader>jc", function() wc().toggle() end, { desc = "Toggle console" })
-map("n", "<leader>je", function() wc().eval_line() end, { desc = "Eval current line" })
-map("v", "<leader>je", function() wc().eval_visual() end, { desc = "Eval selection" })
-map("n", "<leader>jp", function() wc().eval_prompt() end, { desc = "Eval prompt (JS>)" })
-map("n", "<leader>jg", function() wc().navigate() end, { desc = "Navigate to URL" })
-map("n", "<leader>jx", function() wc().clear() end, { desc = "Clear console" })
-map("n", "<leader>jr", function() wc().reload() end, { desc = "Reload page" })
-map("n", "<leader>jn", function() wn().toggle() end, { desc = "Toggle network panel" })
-map("n", "<leader>js", function() ws().toggle() end, { desc = "Toggle storage panel" })
-map("n", "<leader>ji", function() wd().toggle() end, { desc = "Elements panel (DOM tree)" })
-map("n", "<leader>jI", function() wd().inspect() end, { desc = "Inspect DOM (selector)" })
-map("n", "<leader>jt", function() wcl().pick_tab() end, { desc = "Pick Chrome tab to attach" })
-map("n", "<leader>jq", function() wc().stop() end, { desc = "Disconnect" })
-map("n", "<leader>jk", function() wcl().kill_port() end, { desc = "Kill stale debug port" })
-map("n", "<leader>jP", function() wcl().screenshot(false) end, { desc = "Screenshot (viewport)" })
-map("n", "<leader>j?", function() wh().show() end, { desc = "DevTools help" })
-
--- Emulation subgroup: <leader>jd…
-map("n", "<leader>jdd", function() wem().device() end, { desc = "Emulate device (responsive)" })
-map("n", "<leader>jdu", function() wem().user_agent() end, { desc = "Override user agent" })
-map("n", "<leader>jdw", function() wem().throttle() end, { desc = "Throttle network/CPU" })
-map("n", "<leader>jdr", function() wem().reset_all() end, { desc = "Reset all emulation" })
-map("n", "<leader>jdo", function() wem().rotate() end, { desc = "Rotate orientation" })
-
-vim.api.nvim_create_user_command("ChromeLaunch", function(o)
-  wcl().launch_connect({ fresh = o.bang, url = o.args ~= "" and o.args or nil })
-end, { bang = true, nargs = "?", desc = "Launch debug Chrome (! = fresh profile copy) and connect (no panel)" })
-vim.api.nvim_create_user_command("ChromeConsole", function() wc().toggle() end, { desc = "Toggle Chrome console" })
-vim.api.nvim_create_user_command("ChromeConsoleStop", function() wc().stop() end, { desc = "Disconnect Chrome console" })
-vim.api.nvim_create_user_command("ChromeConsoleBuild", function() wc().build() end, { desc = "Build the webconnect Go binary" })
-vim.api.nvim_create_user_command("ChromeEval", function(o) wc().eval(o.args) end, { nargs = "+", desc = "Eval JS in Chrome" })
-vim.api.nvim_create_user_command("ChromeNetwork", function() wn().toggle() end, { desc = "Toggle Chrome network panel" })
-vim.api.nvim_create_user_command("ChromeNetworkStop", function() wn().stop() end, { desc = "Close Chrome network panel" })
-vim.api.nvim_create_user_command("ChromeStorage", function() ws().toggle() end, { desc = "Toggle Chrome storage panel" })
-vim.api.nvim_create_user_command("ChromeStorageStop", function() ws().stop() end, { desc = "Close Chrome storage panel" })
-vim.api.nvim_create_user_command("ChromeTabs", function() wcl().pick_tab() end, { desc = "Pick a Chrome tab to attach to" })
-vim.api.nvim_create_user_command("ChromeDevice", function() wem().device() end, { desc = "Emulate a device (responsive)" })
-vim.api.nvim_create_user_command("ChromeUserAgent", function() wem().user_agent() end, { desc = "Override user agent" })
-vim.api.nvim_create_user_command("ChromeThrottle", function() wem().throttle() end, { desc = "Throttle network / CPU" })
-vim.api.nvim_create_user_command("ChromeKill", function() wcl().kill_port() end, { desc = "Kill process holding the debug port" })
-vim.api.nvim_create_user_command("ChromeRelaunch", function(o)
-  wcl().kill_port(function() wcl().launch_connect({ fresh = o.bang }) end)
-end, { bang = true, desc = "Kill stale port then launch fresh (! = fresh profile)" })
-vim.api.nvim_create_user_command("ChromeReload", function() wc().reload() end, { desc = "Reload the attached Chrome tab" })
-vim.api.nvim_create_user_command("ChromeNavigate", function(o) wc().navigate(o.args) end, { nargs = 1, desc = "Navigate the attached Chrome tab" })
-vim.api.nvim_create_user_command("ChromeShot", function(o) wcl().screenshot(o.bang) end, { bang = true, desc = "Screenshot the tab (! = full page)" })
-vim.api.nvim_create_user_command("ChromeInspect", function() wd().inspect() end, { desc = "Inspect a DOM element by selector" })
-vim.api.nvim_create_user_command("ChromeDom", function() wd().toggle() end, { desc = "Toggle Chrome DOM inspect panel" })
-vim.api.nvim_create_user_command("ChromeClear", function() wc().clear() end, { desc = "Clear the Chrome console" })
-vim.api.nvim_create_user_command("ChromeEmulateReset", function() wem().reset_all() end, { desc = "Reset all Chrome emulation overrides" })

@@ -49,6 +49,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | Key | Mode | Description | Source |
 |-----|------|-------------|--------|
 | `<leader>sg` | n | Live grep (resumes last query) | fff.nvim |
+| `<leader>/` | n | Seek: progressive file → grep (`<C-e>` toggle, `<Tab>` multi-select) | seeker.nvim |
 | `<leader>sw` | n, x | Grep word/selection | snacks.picker |
 | `<leader>sb` | n | Buffer lines | snacks.picker |
 | `<leader>sh` | n | Help pages | snacks.picker |
@@ -83,10 +84,10 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>ca` | n, v | Code action (preview) | actions-preview |
 | `<leader>cA` | n | Source action | config/keymaps.lua |
 | `<leader>cr` | n | Rename symbol (PHP `$` sigil aware) | config/keymaps.lua |
-| `<leader>cf` | n | Format file (conform) | config/keymaps.lua |
+| `<leader>cf` | n, v | Format file/selection (conform) | plugins/formatting.lua |
 | `<leader>ci` | n | Toggle inlay hints | config/keymaps.lua |
 | `<leader>cd` | n | Line diagnostics float | config/keymaps.lua |
-| `<leader>cu` | n | Undo tree (undotree) | undotree |
+| `<leader>U` | n | Undo tree (undotree) | undotree |
 | `<leader>cS` | n, x | Structural search-replace | ssr.nvim |
 | `<leader>co` | n | TS: organize imports | typescript-tools |
 | `<leader>cM` | n | TS: add missing imports | typescript-tools |
@@ -317,7 +318,6 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 
 | Key | Mode | Description |
 |-----|------|-------------|
-| `<leader>uf` | n | Toggle format-on-save |
 | `<leader>ud` | n | Toggle diagnostics (conflicts with duck `<leader>ud*` prefix — 2-char fires after timeout) |
 | `<leader>uM` | n | Toggle markdown render (markview) |
 | `<leader>udd` / `<leader>uda` | n | Hatch duck (slow / fast) |
@@ -358,20 +358,6 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 | `<leader>aC` | n | Claude Code continue |
 | `<leader>ar` | n | Claude Code resume |
 | `<leader>av` | n | Claude Code verbose |
-
-## Rails (ror.nvim) — `<leader>r`
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>rc` | n | Rails commands |
-| `<leader>rg` | n | Generate |
-| `<leader>rr` | n | List routes |
-| `<leader>rs` | n | Schema columns |
-| `<leader>rm` | n | DB migrate |
-| `<leader>rk` | n | DB rollback |
-| `<leader>rb` | n | Bundle install |
-| `<leader>rC` | n | Rails console (terminal split) |
-| `<leader>re` | n | Edit credentials |
 
 ## Emmet (emmet-vim) — `<C-y>` leader
 
@@ -423,7 +409,7 @@ ERB examples:
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter · `<leader>g` git · `<leader>gh` hunk · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>q` quit · `<leader>r` rails · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics · `<leader>X` xdebug profile · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter · `<leader>g` git · `<leader>gh` hunk · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>q` quit · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics · `<leader>X` xdebug profile · `g` goto · `gs` surround
 
 ## Known overlaps
 
@@ -440,3 +426,4 @@ ERB examples:
 - `<leader>du` opened `nvim-dap-ui`. Now `nvim-dap-view`.
 - `<leader>de` was DAP eval. Now `DapViewWatch`.
 - `nvim-treesitter-endwise` reverted to `tpope/vim-endwise` (TS plugin broken on TS main branch).
+- `<leader>j*` Chrome DevTools group removed — vendored `webconnect/` Go bridge, `phab-inline.nvim/` plugin, and `web*` util modules deleted.

@@ -50,7 +50,7 @@ Every module is wired the same way — `opts.<module> = { enabled = bool, ... }`
 | `image` | on | Inline image preview in markdown/LaTeX via Kitty graphics protocol (kitty terminal). |
 | `picker` | on | Primary fuzzy-finder replacing telescope; see [snacks-picker](snacks-picker.md). |
 | `lazygit` | on | `<leader>gg` floating lazygit; auto-themed from colorscheme. |
-| `terminal` | on | `<leader>/` toggleable floating shell. |
+| `terminal` | on | Floating shell module — kept because `Snacks.lazygit` uses it internally. No direct keybind (tmux handles terminals). |
 | `indent` | on, **animate off** | Static indent guides; animation disabled to avoid cursor jitter on fast motions. |
 | `statuscolumn` | on | Replaces nvim's default — combines signs, marks, fold, git-signs. |
 | `input` | on | Pretty `vim.ui.input` replacement (used by `:IncRename`, etc.). |
@@ -77,7 +77,6 @@ Top-level keymaps registered on the snacks spec — see per-module docs for the 
 |---|---|---|---|
 | `<leader>f*`, `<leader>s*`, `g[dryI]` | n | picker | [snacks-picker](snacks-picker.md) |
 | `<leader>gg` | n | `Snacks.lazygit()` | [snacks-misc](snacks-misc.md) |
-| `<leader>/` | n/t | `Snacks.terminal.toggle()` | [snacks-misc](snacks-misc.md) |
 | `<leader>fR` | n | `Snacks.rename.rename_file()` | [snacks-misc](snacks-misc.md) |
 | `<leader>.`, `<leader>fs` | n | `Snacks.scratch()` / `.select()` | [snacks-misc](snacks-misc.md) |
 

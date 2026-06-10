@@ -154,11 +154,21 @@ return {
       -- Find extras
       -- Tools
       { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
-      { "<leader>/", function() Snacks.terminal.toggle() end, mode = { "n", "t" }, desc = "Toggle terminal" },
       { "<leader>fR", function() Snacks.rename.rename_file() end, desc = "Rename file" },
       -- Scratch (project-scoped scratchpad, persisted under stdpath('data'))
       { "<leader>.",  function() Snacks.scratch() end,        desc = "Toggle scratch buffer" },
       { "<leader>fs", function() Snacks.scratch.select() end, desc = "Select scratch buffer" },
     },
+  },
+  {
+    -- Progressive file→grep seeker, built on the snacks.nvim picker.
+    -- <C-e> toggles file/grep mode; each switch refines the result set.
+    "2kabhishek/seeker.nvim",
+    dependencies = { "folke/snacks.nvim" },
+    cmd = { "Seeker" },
+    keys = {
+      { "<leader>/", "<cmd>Seeker<cr>", desc = "Seek (progressive file → grep)" },
+    },
+    opts = {},
   },
 }

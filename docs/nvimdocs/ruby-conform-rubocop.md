@@ -2,11 +2,11 @@
 > Ruby/ERB formatter wiring for conform.nvim — rubocop daemon for `.rb`, erb_format for `.erb`.
 
 **Repo:** https://github.com/stevearc/conform.nvim (host) — RuboCop https://github.com/rubocop/rubocop
-**Local spec:** /Users/rtanjaya/.config/nvim/lua/plugins/ror.lua:190-206
+**Local spec:** /Users/rtanjaya/.config/nvim/lua/plugins/rails.lua:141-157
 **Tags:** ruby, eruby, formatter, conform, rubocop
 
 ## Scope
-A `conform.nvim` `opts` extension block colocated in `ror.lua` that:
+A `conform.nvim` `opts` extension block colocated in `rails.lua` that:
 1. Registers `rubocop` as the Ruby formatter and `erb_format` as the eruby formatter.
 2. Overrides conform's stock `rubocop` formatter definition to use `--server` (rubocop daemon) and `--stderr` (redirect diagnostics to stderr), with `-a` autocorrect and `--fail-level fatal`.
 
@@ -51,7 +51,7 @@ Exactly the snippet above. Two filetypes, one formatter override. No format-on-s
 - rubocop daemon docs: https://docs.rubocop.org/rubocop/usage/server.html
 - erb_format: https://github.com/nebulab/erb-formatter
 - Sibling doc: [[format-conform]] (core conform setup, format-on-save, keymap)
-- Project siblings: [[ruby-ror]], [[ruby-vim-rails]], [[ruby-vim-projectionist]], [[ruby-vim-endwise]]
+- Project siblings: [[ruby-vim-rails]], [[ruby-vim-endwise]]
 
 ## Notes
 - The stdout-leak bug is the reason for `--stderr`. If you ever see your Ruby files growing a `Resolving dependencies…` header on save, this override regressed.

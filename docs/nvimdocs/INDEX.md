@@ -132,6 +132,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [nav-oil](nav-oil.md) — file explorer (`<leader>e`, `-` parent)
 - [nav-harpoon](nav-harpoon.md) — pinned files (`<leader>1`–`8`)
 - [nav-fff](nav-fff.md) — alt file finder
+- [nav-seeker](nav-seeker.md) — progressive file→grep seeker (`<leader>/`, `<C-e>` toggle)
 - [nav-vim-tmux-navigator](nav-vim-tmux-navigator.md) — `<C-h/j/k/l>` window + pane
 
 ## Git
@@ -160,9 +161,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 - [prod-typescript-tools](prod-typescript-tools.md) — TS LSP w/ source actions
 - [prod-dadbod](prod-dadbod.md) — DB client (`<leader>D*`)
-- [prod-hardtime](prod-hardtime.md) — habit breaker (repeat `hjkl` cap)
 - [prod-template-string](prod-template-string.md) — `"..."` → `` `...` `` on `${`
-- [prod-lensline](prod-lensline.md) — virtual-text code lens
 
 ## Workflow
 
@@ -175,9 +174,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 ## Ruby / Rails
 
-- [ruby-ror](ruby-ror.md) — ror.nvim Rails task palette `<leader>r*`
 - [ruby-vim-rails](ruby-vim-rails.md) — tpope/vim-rails `:R*` commands + `gf`
-- [ruby-vim-projectionist](ruby-vim-projectionist.md) — `:A`/`:Emodel`/... Rails heuristics
 - [ruby-vim-endwise](ruby-vim-endwise.md) — auto-`end` for Ruby/Lua/Vim/Bash
 - [ruby-conform-rubocop](ruby-conform-rubocop.md) — RuboCop formatter integration
 
