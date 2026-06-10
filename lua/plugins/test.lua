@@ -13,7 +13,10 @@ return {
       "sidlatau/neotest-dart",
       "rouge8/neotest-rust",
     },
-    ft = { "php", "typescript", "javascript", "python", "ruby", "dart", "rust" },
+    -- No ft trigger: loading neotest + 7 adapters cost ~68ms on the FIRST buffer
+    -- of any daily filetype, every session. The buffer-local keymaps that needed
+    -- it live in config/autocmds.lua now; pressing one lazy-loads neotest via
+    -- lazy.nvim's module autoloader on require("neotest").
     keys = function()
       local keys = {
         { "<leader>tl", function() require("neotest").run.run_last() end, desc = "Run last test" },
@@ -96,35 +99,6 @@ return {
     end,
     config = function(_, opts)
       if vim.g.gaf then require("gaf.test").extend(opts) end
-
-      local test_filetypes = { "php", "typescript", "javascript", "python", "ruby", "dart", "rust" }
-
-      local function attach_test_keys(buf, ft)
-        local o = { buffer = buf, silent = true }
-        vim.keymap.set("n", "<leader>tr", function() require("neotest").run.run() end, vim.tbl_extend("force", o, { desc = "Run nearest test" }))
-        vim.keymap.set("n", "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, vim.tbl_extend("force", o, { desc = "Run file tests" }))
-        vim.keymap.set("n", "<leader>tc", function() require("config.neotest-coverage").run_current() end, vim.tbl_extend("force", o, { desc = "Run file tests with coverage" }))
-        vim.keymap.set("n", "<leader>td", function()
-          require("dap") -- force-load so per-filetype dap.configurations are populated
-          require("neotest").run.run({ strategy = "dap" })
-        end, vim.tbl_extend("force", o, { desc = "Debug nearest test" }))
-        if ft == "ruby" then
-          vim.keymap.set("n", "<leader>tp", function() require("config.neotest-profile-ruby").run_current() end,
-            vim.tbl_extend("force", o, { desc = "Profile file tests (stackprof)" }))
-        end
-        if vim.g.gaf then require("gaf.test").attach_keys(buf, ft) end
-      end
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = test_filetypes,
-        callback = function(ev) attach_test_keys(ev.buf, ev.match) end,
-      })
-      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-        if vim.api.nvim_buf_is_loaded(buf) then
-          local ft = vim.bo[buf].filetype
-          if vim.tbl_contains(test_filetypes, ft) then attach_test_keys(buf, ft) end
-        end
-      end
-
       require("neotest").setup(opts)
     end,
   },

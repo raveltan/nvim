@@ -77,6 +77,21 @@ autocmd("TextYankPost", {
   end,
 })
 
+-- Sync real yanks (y only — not d/c/x) to the macOS clipboard. Replaces
+-- clipboard=unnamedplus: the pbcopy/pbpaste provider is uncached on macOS, so
+-- unnamedplus spawned a synchronous process per delete/change/put (100@q of dd
+-- measured ~912ms vs 0.4ms without; yanky's p paid an extra getreg("+")
+-- pbpaste per put). Paste from other apps with "+p; yanky's FocusGained
+-- ring-sync still captures external copies.
+autocmd("TextYankPost", {
+  group = augroup("yank_to_clipboard", { clear = true }),
+  callback = function()
+    if vim.v.event.operator == "y" and vim.v.event.regname == "" then
+      vim.fn.setreg("+", vim.fn.getreg('"'), vim.fn.getregtype('"'))
+    end
+  end,
+})
+
 -- Auto-resize splits on window resize
 autocmd("VimResized", {
   group = augroup("resize_splits", { clear = true }),
@@ -132,5 +147,30 @@ autocmd("FileType", {
   callback = function(event)
     vim.bo[event.buf].buflisted = false
     vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
+  end,
+})
+
+-- Buffer-local neotest keymaps (plain user config; pressing one lazy-loads
+-- neotest via lazy.nvim's module autoloader on require("neotest")). Lived in
+-- the neotest spec's config() before, which forced an ft trigger that loaded
+-- neotest + 7 adapters (~68ms) on every file open.
+autocmd("FileType", {
+  group = augroup("neotest_keys", { clear = true }),
+  pattern = { "php", "typescript", "javascript", "python", "ruby", "dart", "rust" },
+  callback = function(ev)
+    local buf, ft = ev.buf, ev.match
+    local o = { buffer = buf, silent = true }
+    vim.keymap.set("n", "<leader>tr", function() require("neotest").run.run() end, vim.tbl_extend("force", o, { desc = "Run nearest test" }))
+    vim.keymap.set("n", "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, vim.tbl_extend("force", o, { desc = "Run file tests" }))
+    vim.keymap.set("n", "<leader>tc", function() require("config.neotest-coverage").run_current() end, vim.tbl_extend("force", o, { desc = "Run file tests with coverage" }))
+    vim.keymap.set("n", "<leader>td", function()
+      require("dap") -- force-load so per-filetype dap.configurations are populated
+      require("neotest").run.run({ strategy = "dap" })
+    end, vim.tbl_extend("force", o, { desc = "Debug nearest test" }))
+    if ft == "ruby" then
+      vim.keymap.set("n", "<leader>tp", function() require("config.neotest-profile-ruby").run_current() end,
+        vim.tbl_extend("force", o, { desc = "Profile file tests (stackprof)" }))
+    end
+    if vim.g.gaf then require("gaf.test").attach_keys(buf, ft) end
   end,
 })

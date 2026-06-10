@@ -7,6 +7,7 @@
   "checkmate.nvim": { "branch": "main", "commit": "e57c8b502ab3e77e478e16460fcc2d2a16082f73" },
   "comfy-line-numbers.nvim": { "branch": "main", "commit": "9adedbaf1f410cdaacf4fb2ca8eb44f3d5f6d010" },
   "conform.nvim": { "branch": "master", "commit": "619363c30309d29ffa631e67c8183f2a72caa373" },
+  "dadbod-grip.nvim": { "branch": "main", "commit": "9ee6c057452bfd642b7d32b8cdc46eed811298b0" },
   "devdocs.nvim": { "branch": "main", "commit": "5d3690ea29179ede67ae661669f0434bc8b80339" },
   "diagram.nvim": { "branch": "master", "commit": "89d8110ec15021ac9a03ff2317d27b900c45bf60" },
   "dial.nvim": { "branch": "master", "commit": "f2634758455cfa52a8acea6f142dcd6271a1bf57" },

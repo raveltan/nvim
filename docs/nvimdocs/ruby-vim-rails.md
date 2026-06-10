@@ -23,7 +23,7 @@ Adds Rails-aware vim commands: `:Rcontroller`, `:Rmodel`, `:Rview`, `:Rmigration
 - WebFetch https://raw.githubusercontent.com/tpope/vim-rails/HEAD/README.markdown if uncertain about a specific command.
 
 ## Our config
-vim-rails itself needs no setup, but its spec doubles as the load carrier for the Ruby LSP stack — `ruby_lsp`, `sorbet`, `stimulus_ls`, the `rubyLsp.openFile` codelens handler, and the debounced codelens refresh autocmds all live in its `config` function (`lua/plugins/rails.lua:12-134`).
+vim-rails itself needs no setup, but its spec doubles as the load carrier for the Ruby LSP stack — `ruby_lsp`, `sorbet`, and `stimulus_ls` all live in its `config` function (`lua/plugins/rails.lua`). Codelens is intentionally disabled (never enabled client-side).
 
 ## Keymaps
 | Key | Mode | Action | Desc |

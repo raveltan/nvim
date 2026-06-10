@@ -175,6 +175,25 @@ return {
         })
       end, { desc = "NvimDocs: grep all docs" })
 
+      -- Defined BEFORE NvimDocsGrepVisual: a `local function` declared later in
+      -- the file compiles as a nil global inside closures created above it.
+      local function visual_selection()
+        local mode = vim.fn.mode()
+        local s_start, s_end, region_type
+        if mode == "v" or mode == "V" or mode == "\22" then
+          s_start = vim.fn.getpos("v")
+          s_end = vim.fn.getpos(".")
+          region_type = mode
+        else
+          s_start = vim.fn.getpos("'<")
+          s_end = vim.fn.getpos("'>")
+          region_type = "v"
+        end
+        local ok, lines = pcall(vim.fn.getregion, s_start, s_end, { type = region_type })
+        if not ok or not lines or #lines == 0 then return "" end
+        return table.concat(lines, " "):gsub("^%s+", ""):gsub("%s+$", "")
+      end
+
       vim.api.nvim_create_user_command("NvimDocsGrepVisual", function()
         local sel = visual_selection()
         if sel == "" then return end
@@ -218,23 +237,6 @@ return {
           search = seed,
           confirm = "edit",
         })
-      end
-
-      local function visual_selection()
-        local mode = vim.fn.mode()
-        local s_start, s_end, region_type
-        if mode == "v" or mode == "V" or mode == "\22" then
-          s_start = vim.fn.getpos("v")
-          s_end = vim.fn.getpos(".")
-          region_type = mode
-        else
-          s_start = vim.fn.getpos("'<")
-          s_end = vim.fn.getpos("'>")
-          region_type = "v"
-        end
-        local ok, lines = pcall(vim.fn.getregion, s_start, s_end, { type = region_type })
-        if not ok or not lines or #lines == 0 then return "" end
-        return table.concat(lines, " "):gsub("^%s+", ""):gsub("%s+$", "")
       end
 
       local function grep_visual()

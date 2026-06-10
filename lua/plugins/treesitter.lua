@@ -97,40 +97,57 @@ return {
       map("n", "<leader>csA", function() swap.swap_previous("@parameter.inner") end, { desc = "Swap with prev arg" })
 
       -- Incremental selection (expand/shrink by syntax node)
-      local current_node = nil
+      -- Per-buffer node stack: <BS> reverses <CR> one level; buffers don't share state.
+      local stacks = {} -- bufnr -> { TSNode, ... }
+
+      -- Treesitter ranges are end-exclusive; convert before setting (1,0)-indexed,
+      -- inclusive visual marks. A node ending at (line_count, 0) (e.g. the root)
+      -- would otherwise pass an out-of-range line to nvim_buf_set_mark.
+      local function select_node(node)
+        local sr, sc, er, ec = node:range()
+        if ec == 0 then
+          if er > 0 then
+            er = er - 1
+            ec = #vim.api.nvim_buf_get_lines(0, er, er + 1, true)[1]
+          end
+          if ec == 0 then ec = 1 end
+        end
+        local last = vim.api.nvim_buf_line_count(0)
+        vim.api.nvim_buf_set_mark(0, "<", math.min(sr + 1, last), sc, {})
+        vim.api.nvim_buf_set_mark(0, ">", math.min(er + 1, last), math.max(ec - 1, 0), {})
+        vim.cmd("normal! gv")
+      end
+
       map("n", "<CR>", function()
-        current_node = vim.treesitter.get_node()
-        if current_node then
-          local sr, sc, er, ec = current_node:range()
-          vim.api.nvim_buf_set_mark(0, "<", sr + 1, sc, {})
-          vim.api.nvim_buf_set_mark(0, ">", er + 1, ec - 1, {})
-          vim.cmd("normal! gv")
+        -- Pass <CR> through in the cmdwin (q:, q/) and special buffers
+        -- (quickfix, terminal, help, prompt) where <CR> has a real default.
+        if vim.fn.win_gettype() == "command" or vim.bo.buftype ~= "" then
+          return vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "n", false)
+        end
+        local node = vim.treesitter.get_node()
+        if node then
+          stacks[vim.api.nvim_get_current_buf()] = { node }
+          select_node(node)
         end
       end, { desc = "Start incremental select" })
 
       map("x", "<CR>", function()
-        if current_node then
-          local parent = current_node:parent()
+        local stack = stacks[vim.api.nvim_get_current_buf()]
+        local current = stack and stack[#stack]
+        if current then
+          local parent = current:parent()
           if parent then
-            current_node = parent
-            local sr, sc, er, ec = current_node:range()
-            vim.api.nvim_buf_set_mark(0, "<", sr + 1, sc, {})
-            vim.api.nvim_buf_set_mark(0, ">", er + 1, ec - 1, {})
-            vim.cmd("normal! gv")
+            stack[#stack + 1] = parent
+            select_node(parent)
           end
         end
       end, { desc = "Expand selection" })
 
       map("x", "<BS>", function()
-        if current_node then
-          local child = vim.treesitter.get_node()
-          if child and child ~= current_node then
-            current_node = child
-            local sr, sc, er, ec = current_node:range()
-            vim.api.nvim_buf_set_mark(0, "<", sr + 1, sc, {})
-            vim.api.nvim_buf_set_mark(0, ">", er + 1, ec - 1, {})
-            vim.cmd("normal! gv")
-          end
+        local stack = stacks[vim.api.nvim_get_current_buf()]
+        if stack and #stack > 1 then
+          table.remove(stack)
+          select_node(stack[#stack])
         end
       end, { desc = "Shrink selection" })
     end,

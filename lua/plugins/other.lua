@@ -107,7 +107,9 @@ return {
         },
         -- Controller (same-name / non-plural) → spec · views · helper
         -- Separate pattern so it doesn't double-match plural controllers above
-        { pattern = "/app/controllers/([^s].+)_controller%.rb$",
+        -- (.+[^s]) anchors the LAST char ≠ s; ([^s].+) wrongly excluded any
+        -- controller STARTING with s (search_controller, stripe_controller, …).
+        { pattern = "/app/controllers/(.+[^s])_controller%.rb$",
           target = {
             { target = "/spec/controllers/%1_controller_spec.rb",  context = "spec" },
             { target = "/spec/requests/%1_spec.rb",                context = "request spec" },

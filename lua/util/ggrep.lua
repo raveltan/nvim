@@ -1,63 +1,27 @@
 local M = {}
 
-local function run(pattern, extra_args)
-  if not pattern or pattern == "" then return end
-  local root = vim.fn.systemlist({ "git", "rev-parse", "--show-toplevel" })[1]
-  if not root or root == "" or vim.v.shell_error ~= 0 then
+-- Live, streaming git grep via the built-in snacks source (async proc finder).
+-- The old implementation ran `git grep` synchronously over the whole repo via
+-- vim.fn.systemlist and materialized every match before opening the picker —
+-- seconds of frozen UI on broad patterns in the GAF monorepo.
+-- cmd_args are extra `git grep` flags, passed through snacks' git args support.
+local function pick(search, cmd_args)
+  if not Snacks.git.get_root() then
     vim.notify("Not in a git repo", vim.log.levels.WARN)
     return
   end
-
-  local cmd = { "git", "-C", root, "grep", "-n", "--column", "-I", "--no-color" }
-  for _, a in ipairs(extra_args or {}) do table.insert(cmd, a) end
-  table.insert(cmd, "--")
-  table.insert(cmd, pattern)
-
-  local lines = vim.fn.systemlist(cmd)
-  if vim.v.shell_error ~= 0 and #lines == 0 then
-    vim.notify("No matches for: " .. pattern, vim.log.levels.INFO)
-    return
-  end
-
-  local items = {}
-  for _, line in ipairs(lines) do
-    local file, lnum, col, text = line:match("^([^:]+):(%d+):(%d+):(.*)$")
-    if file then
-      table.insert(items, {
-        text = string.format("%s:%s:%s: %s", file, lnum, col, text),
-        file = root .. "/" .. file,
-        pos = { tonumber(lnum), tonumber(col) - 1 },
-        line = text,
-      })
-    end
-  end
-
-  if #items == 0 then
-    vim.notify("No matches for: " .. pattern, vim.log.levels.INFO)
-    return
-  end
-
-  Snacks.picker.pick({
-    source = "ggrep",
-    title = "git grep: " .. pattern,
-    items = items,
-    format = "file",
-    preview = "file",
-    confirm = function(picker, item)
-      picker:close()
-      vim.cmd("edit " .. vim.fn.fnameescape(item.file))
-      vim.api.nvim_win_set_cursor(0, item.pos)
-    end,
+  Snacks.picker.git_grep({
+    cmd_args = cmd_args,
+    search = search or "",
   })
 end
 
 function M.prompt()
-  local pat = vim.fn.input("git grep: ")
-  run(pat)
+  pick() -- live: type in the picker input, results stream in per keystroke
 end
 
 function M.cword()
-  run(vim.fn.expand("<cword>"), { "-w" })
+  pick(vim.fn.expand("<cword>"), { "-w" })
 end
 
 function M.visual()
@@ -65,7 +29,7 @@ function M.visual()
   vim.cmd('normal! "vy')
   local sel = vim.fn.getreg("v")
   vim.fn.setreg("v", save)
-  run(sel, { "-F" })
+  pick(sel, { "-F" })
 end
 
 return M

@@ -1,6 +1,6 @@
 return {
   -- Emmet expansion for HTML/CSS/ERB/JSX/Vue/Svelte.
-  -- Leader `<C-y>` + trigger char (`,` to expand, `/` to comment, `n` to next edit point).
+  -- Leader `<C-z>` + trigger char (`,` to expand, `/` to comment, `n` to next edit point).
   -- ERB inherits HTML snippet set; `<%= %>` / `<% %>` written by hand or via vim-rails.
   {
     "mattn/emmet-vim",
@@ -18,7 +18,10 @@ return {
       "htmldjango",
     },
     init = function()
-      vim.g.user_emmet_leader_key = "<C-y>"
+      -- <C-z>: the default <C-y> leader collides with blink.cmp's <C-y> accept —
+      -- emmet's global insert-mode maps made <C-y> an ambiguous prefix, stalling
+      -- every completion accept for timeoutlen (1s).
+      vim.g.user_emmet_leader_key = "<C-z>"
       vim.g.user_emmet_settings = {
         indentation = "  ",
         eruby = { extends = "html" },

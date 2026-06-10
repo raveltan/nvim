@@ -92,7 +92,6 @@ return {
           vim.g.db_ui_auto_execute_table_helpers = 1
         end,
       },
-      "kristijanhusak/vim-dadbod-completion",
     },
     keys = {
       { "<leader>Du", "<cmd>DBUIToggle<cr>",         desc = "DB: toggle UI" },
@@ -101,14 +100,85 @@ return {
       { "<leader>Dr", "<cmd>DBUIRenameBuffer<cr>",   desc = "DB: rename buffer" },
       { "<leader>Dq", "<cmd>DBUILastQueryInfo<cr>",  desc = "DB: last query info" },
     },
-    config = function()
-      -- Wire dadbod-completion into SQL buffers. blink.cmp picks up omnifunc.
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "sql", "mysql", "plsql" },
-        callback = function()
-          vim.bo.omnifunc = "vim_dadbod_completion#omni"
-        end,
-      })
+  },
+
+  -- Completion is wired through blink.cmp's native dadbod source (see
+  -- sources.per_filetype in lsp.lua); ft trigger ensures the plugin loads
+  -- for standalone SQL buffers too. Standalone spec (not a dep of
+  -- vim-dadbod) so we can declare the reverse dependency without a cycle:
+  -- its FileType autocmd calls db#connect, which needs vim-dadbod loaded.
+  {
+    "kristijanhusak/vim-dadbod-completion",
+    ft = { "sql", "mysql", "plsql" },
+    dependencies = { "tpope/vim-dadbod" },
+  },
+
+  -- Editable database grids: stage cell edits like a buffer, apply as
+  -- transactional SQL (rollback on error). Complements dadbod — reads
+  -- g:dbs connections, open_smart() reuses DBUI result windows.
+  -- Grid keys: i/<CR> edit cell, n NULL, a apply staged, u undo,
+  -- gf follow FK, s sort, f filter, gE export, ? help.
+  {
+    "joryeugene/dadbod-grip.nvim",
+    -- Track main, NOT tags: the repo carries stray v3.x tags that outrank
+    -- the real 1.x releases, so version="*" checks out an old code line
+    -- missing the mysql `--batch` fix (upstream #11) and a valid lazy.lua.
+    version = false,
+    -- Command list mirrored from the plugin's lazy.lua packspec; kept
+    -- explicit as a guard since upstream has shipped a broken packspec before.
+    cmd = {
+      "Grip", "GripStart", "GripHome", "GripConnect", "GripSchema",
+      "GripTables", "GripQuery", "GripSave", "GripLoad", "GripHistory",
+      "GripProfile", "GripExplain", "GripAsk", "GripDiff", "GripCreate",
+      "GripDrop", "GripRename", "GripProperties", "GripExport",
+      "GripAttach", "GripDetach", "GripOpen",
+    },
+    keys = {
+      { "<leader>Dc", "<cmd>GripConnect<cr>", desc = "DB: grip connect" },
+      { "<leader>Dg", "<cmd>Grip<cr>",        desc = "DB: grip grid" },
+      { "<leader>Dt", "<cmd>GripTables<cr>",  desc = "DB: grip tables" },
+      { "<leader>Ds", "<cmd>GripSchema<cr>",  desc = "DB: grip schema" },
+      { "<leader>Dh", "<cmd>GripHistory<cr>", desc = "DB: grip history" },
+    },
+    opts = {
+      completion = false, -- blink.cmp + dadbod-completion already handle SQL
+      picker = "snacks",
+      -- No natural-language-to-SQL: :GripAsk would ship schema context to
+      -- an external LLM API. Keep the DB client offline.
+      ai = false,
+    },
+    config = function(_, opts)
+      require("dadbod-grip").setup(opts)
+
+      -- Upstream bug: grip's mysql adapter parses URLs by hand and never
+      -- percent-decodes credentials, so the encoded passwords that dadbod /
+      -- dadbod-ui require (grip exports its URL to g:db, which they consume)
+      -- reach the mysql CLI literally and fail auth. Wrap every adapter
+      -- function and decode the userinfo of any mysql:// string argument.
+      -- Runtime wrap survives plugin updates; remove once fixed upstream.
+      local mysql = require("dadbod-grip.adapters.mysql")
+      local function decode_userinfo(url)
+        local scheme, auth, rest = url:match("^(%w+://)([^@]+)(@.*)$")
+        if not auth then return url end
+        auth = auth:gsub("%%(%x%x)", function(h)
+          return string.char(tonumber(h, 16))
+        end)
+        return scheme .. auth .. rest
+      end
+      for name, fn in pairs(mysql) do
+        if type(fn) == "function" then
+          mysql[name] = function(...)
+            local args = { ... }
+            for i = 1, select("#", ...) do
+              local a = args[i]
+              if type(a) == "string" and a:match("^mysql://") then
+                args[i] = decode_userinfo(a)
+              end
+            end
+            return fn(unpack(args))
+          end
+        end
+      end
     end,
   },
 

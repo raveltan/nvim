@@ -6,7 +6,7 @@
 **Tags:** treesitter, brackets, ui
 
 ## Scope
-Colors matching delimiter pairs (`()`, `[]`, `{}`, etc.) by nesting depth using Treesitter queries. Loads on `BufReadPost`. Disables itself per-buffer when line count exceeds 1500 to avoid extmark cost on big files.
+Colors matching delimiter pairs (`()`, `[]`, `{}`, etc.) by nesting depth using Treesitter queries. Loads on `BufReadPost`. Skips attach per-buffer when line count exceeds 1500 to avoid extmark cost on big files.
 
 ## Install spec
 ```lua
@@ -14,8 +14,11 @@ Colors matching delimiter pairs (`()`, `[]`, `{}`, etc.) by nesting depth using 
   "HiPhish/rainbow-delimiters.nvim",
   event = "BufReadPost",
   config = function()
-    require("rainbow-delimiters.setup").setup({})
-    -- BufReadPost autocmd for 1500-line guard
+    require("rainbow-delimiters.setup").setup({
+      condition = function(buf)
+        return vim.api.nvim_buf_line_count(buf) <= 1500
+      end,
+    })
   end,
 }
 ```
@@ -30,11 +33,12 @@ All keys accept either a single value or a per-filetype table keyed by `&filetyp
 - `blacklist` *(list of filetype strings, `{}`)* — disable entirely for these filetypes.
 - `whitelist` *(list of filetype strings, nil)* — when set, only these filetypes get rainbows.
 
-Per-buffer disable: `vim.b[bufnr].rainbow_delimiters_disable = true`.
+- `condition` *(function(bufnr) -> bool)* — checked at attach time; return false to skip the buffer entirely.
+
+Per-buffer disable after attach: `require("rainbow-delimiters").disable(bufnr)` / `.toggle(bufnr)`. (There is NO `vim.b.rainbow_delimiters_disable` flag — that pattern belongs to mini.indentscope.)
 
 ## Our config
-- `setup({})` — all defaults: global strategy, `rainbow-delimiters` query, default highlight rotation.
-- `BufReadPost` autocmd: sets `vim.b[args.buf].rainbow_delimiters_disable = true` when buffer line count > 1500. Matches the same guard used by `mini.indentscope` and `hlargs.nvim`.
+- `setup({ condition = ... })` — defaults (global strategy, `rainbow-delimiters` query, default highlight rotation) plus a `condition` hook that skips attach for buffers over 1500 lines. Same intent as the mini.indentscope / hlargs guards, but via the plugin's own API.
 
 ## Keymaps
 None.
@@ -46,5 +50,5 @@ None.
 
 ## Notes
 - Requires the corresponding Treesitter parser for each language; without a parser the file is skipped silently.
-- The 1500-line guard runs on `BufReadPost` but doesn't *undo* highlights drawn before the guard fires — for already-open big buffers, toggle with `:lua vim.b.rainbow_delimiters_disable = true` then reopen.
+- The 1500-line `condition` is evaluated once at attach (FileType) — a buffer that grows past 1500 lines afterwards keeps its highlights; disable manually with `:lua require("rainbow-delimiters").disable(0)`.
 - Highlight group colors come from the active colorscheme; `gruvbox-baby` provides them. To recolor, override the seven `RainbowDelimiter*` groups via `vim.api.nvim_set_hl`.

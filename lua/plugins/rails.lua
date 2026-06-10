@@ -86,51 +86,9 @@ return {
         vim.lsp.enable("stimulus_ls")
       end
 
-      -- ruby_lsp CodeLens: handle rubyLsp.openFile execute_command requests
-      -- so route → controller action and action → view links work.
-      -- URI may carry `#L<line>` fragment; strip it and jump to that line.
-      vim.lsp.commands["rubyLsp.openFile"] = function(cmd)
-        local arg = cmd.arguments and cmd.arguments[1]
-        if not arg then return end
-        if type(arg) == "table" then arg = arg[1] end
-        local uri, line = arg:match("^(.+)#L(%d+)$")
-        if not uri then uri = arg end
-        local bufnr = vim.uri_to_bufnr(uri)
-        vim.fn.bufload(bufnr)
-        vim.api.nvim_set_option_value("buflisted", true, { buf = bufnr })
-        vim.api.nvim_set_current_buf(bufnr)
-        vim.api.nvim_win_set_cursor(0, { tonumber(line) or 1, 0 })
-      end
-
-      -- Auto-refresh codelens on Ruby buffers (LSP codelens not refreshed by default).
-      -- BufWritePost only (InsertLeave dropped — fired too often, flooded LSP with
-      -- codeLens/refresh requests that cascaded into cancel-loop on busy server).
-      -- Debounced so back-to-back saves coalesce.
-      local codelens_timer
-      local codelens_group = vim.api.nvim_create_augroup("rails_codelens", { clear = true })
-      vim.api.nvim_create_autocmd("BufWritePost", {
-        group = codelens_group,
-        pattern = { "*.rb", "*.erb" },
-        callback = function(args)
-          if codelens_timer then codelens_timer:stop() end
-          codelens_timer = vim.defer_fn(function()
-            if vim.api.nvim_buf_is_valid(args.buf)
-              and next(vim.lsp.get_clients({ bufnr = args.buf })) then
-              vim.lsp.codelens.enable(true, { bufnr = args.buf })
-            end
-          end, 1000)
-        end,
-      })
-
-      -- Run codelens under cursor (Ruby buffers).
-      vim.api.nvim_create_autocmd("FileType", {
-        group = vim.api.nvim_create_augroup("rails_codelens_keys", { clear = true }),
-        pattern = { "ruby", "eruby" },
-        callback = function(args)
-          vim.keymap.set("n", "<leader>cc", vim.lsp.codelens.run,
-            { buffer = args.buf, desc = "Run codelens" })
-        end,
-      })
+      -- Codelens intentionally NOT enabled (user preference: always disabled).
+      -- vim.lsp.codelens.enable() is never called, so ruby_lsp lenses (route →
+      -- controller / view links via rubyLsp.openFile) stay off.
     end,
   },
 
@@ -163,24 +121,7 @@ return {
     ft = { "ruby", "eruby", "lua", "vim", "sh", "bash", "zsh" },
   },
 
-  -- Herb: HTML+ERB language server (parser, linter, formatter via LSP)
-  -- Requires: npm install -g @herb-tools/language-server
-  -- Docs: https://herb-tools.dev
-  {
-    "neovim/nvim-lspconfig",
-    ft = { "eruby", "html" },
-    config = function()
-      if vim.fn.executable("herb-language-server") ~= 1 then
-        return
-      end
-      local capabilities = require("blink.cmp").get_lsp_capabilities()
-      vim.lsp.config("herb_ls", {
-        capabilities = capabilities,
-        cmd = { "herb-language-server", "--stdio" },
-        filetypes = { "eruby", "html" },
-        root_markers = { "Gemfile", ".git" },
-      })
-      vim.lsp.enable("herb_ls")
-    end,
-  },
+  -- Herb (HTML+ERB language server) moved to lua/plugins/lsp.lua: a second
+  -- nvim-lspconfig spec with its own `config` would clobber the main LSP config
+  -- (lazy.nvim last-wins merge for non-list props).
 }

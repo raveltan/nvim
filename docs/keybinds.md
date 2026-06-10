@@ -359,31 +359,31 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 | `<leader>ar` | n | Claude Code resume |
 | `<leader>av` | n | Claude Code verbose |
 
-## Emmet (emmet-vim) — `<C-y>` leader
+## Emmet (emmet-vim) — `<C-z>` leader
 
 Active in: `html`, `eruby`, `css`/`scss`/`sass`/`less`, `jsx`/`tsx`, `vue`, `svelte`, `htmldjango`. ERB inherits HTML snippet set.
 
 | Key | Mode | Description |
 |-----|------|-------------|
 | `<leader>ce` | n | Expand abbreviation (buffer-local in emmet filetypes) |
-| `<C-y>,` | i, n, v | Expand abbreviation (e.g. `div.card>h2{Title}+p.lead`) / wrap selection |
-| `<C-y>;` | i, n | Expand inline (no newlines) |
-| `<C-y>u` | n | Update tag (change `div` → `span`, etc.) |
-| `<C-y>d` | n, v | Balance tag inward (select inner) |
-| `<C-y>D` | n, v | Balance tag outward (select outer) |
-| `<C-y>n` / `<C-y>N` | n | Next / prev edit point |
-| `<C-y>i` | n | Update image size (HTML `<img>` width/height from file) |
-| `<C-y>m` | n | Merge lines into single tag |
-| `<C-y>k` | n | Remove tag |
-| `<C-y>j` | n | Split / join tag |
-| `<C-y>/` | n | Toggle HTML/CSS comment |
-| `<C-y>a` | n | Make anchor from URL on line |
-| `<C-y>A` | n | Make quoted text from URL on line |
+| `<C-z>,` | i, n, v | Expand abbreviation (e.g. `div.card>h2{Title}+p.lead`) / wrap selection |
+| `<C-z>;` | i, n | Expand inline (no newlines) |
+| `<C-z>u` | n | Update tag (change `div` → `span`, etc.) |
+| `<C-z>d` | n, v | Balance tag inward (select inner) |
+| `<C-z>D` | n, v | Balance tag outward (select outer) |
+| `<C-z>n` / `<C-z>N` | n | Next / prev edit point |
+| `<C-z>i` | n | Update image size (HTML `<img>` width/height from file) |
+| `<C-z>m` | n | Merge lines into single tag |
+| `<C-z>k` | n | Remove tag |
+| `<C-z>j` | n | Split / join tag |
+| `<C-z>/` | n | Toggle HTML/CSS comment |
+| `<C-z>a` | n | Make anchor from URL on line |
+| `<C-z>A` | n | Make quoted text from URL on line |
 
 ERB examples:
-- `ul>li.item*3{<%= item %>}` then `<C-y>,` → 3 `<li class="item">` each containing the ERB output tag
+- `ul>li.item*3{<%= item %>}` then `<C-z>,` → 3 `<li class="item">` each containing the ERB output tag
 - `div.card>h2{Title}+p.lead{<%= @user.bio %>}` → full card block
-- Visual-select a region, `<C-y>,`, type `div.container` → wraps selection in `<div class="container">`
+- Visual-select a region, `<C-z>,`, type `div.container` → wraps selection in `<div class="container">`
 
 ## Checkmate (Markdown todos) — `<leader>t*` in markdown buffers
 

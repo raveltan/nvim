@@ -117,6 +117,23 @@ local function local_snapshot_dir()
   return vim.g.gaf_xdebug_profile_dir or (vim.fn.stdpath("cache") .. "/gaf-xdebug")
 end
 
+-- Defined before M.profile_open_gui: as plain `local function`s further down the
+-- file they compiled as (nil) globals inside profile_open_gui's picker branch.
+local function snapshot_search_dirs()
+  local dirs = { local_snapshot_dir(), "/tmp" }
+  local root = find_root()
+  if root then table.insert(dirs, root) end
+  return dirs
+end
+
+local function all_local_snapshots()
+  local candidates = {}
+  for _, d in ipairs(snapshot_search_dirs()) do
+    vim.list_extend(candidates, vim.fn.glob(d .. "/cachegrind.out.*", false, true))
+  end
+  return candidates
+end
+
 function M.profile_download(name, then_fn)
   local root = project_root_or_notify()
   if not root then return end
@@ -192,21 +209,6 @@ function M.profile_open_gui(path)
     prompt = "Open in qcachegrind:",
     format_item = function(p) return vim.fn.fnamemodify(p, ":t") .. "  (" .. p .. ")" end,
   }, function(choice) open_path(choice) end)
-end
-
-local function snapshot_search_dirs()
-  local dirs = { local_snapshot_dir(), "/tmp" }
-  local root = find_root()
-  if root then table.insert(dirs, root) end
-  return dirs
-end
-
-local function all_local_snapshots()
-  local candidates = {}
-  for _, d in ipairs(snapshot_search_dirs()) do
-    vim.list_extend(candidates, vim.fn.glob(d .. "/cachegrind.out.*", false, true))
-  end
-  return candidates
 end
 
 local function newest_snapshot()

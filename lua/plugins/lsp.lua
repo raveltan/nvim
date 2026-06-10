@@ -186,6 +186,19 @@ return {
         },
       })
 
+      -- Herb: HTML+ERB language server (parser, linter, formatter via LSP)
+      -- Requires: npm install -g @herb-tools/language-server
+      -- Docs: https://herb-tools.dev
+      if vim.fn.executable("herb-language-server") == 1 then
+        vim.lsp.config("herb_ls", {
+          capabilities = capabilities,
+          cmd = { "herb-language-server", "--stdio" },
+          filetypes = { "eruby", "html" },
+          root_markers = { "Gemfile", ".git" },
+        })
+        vim.lsp.enable("herb_ls")
+      end
+
       -- mason-lspconfig 2.x `automatic_enable=true` (default) enables every
       -- server in `ensure_installed` automatically — no manual vim.lsp.enable.
 
@@ -378,8 +391,16 @@ return {
       signature = { enabled = true, window = { border = "rounded" } },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
+        -- blink does not consult omnifunc, so dadbod-completion must be
+        -- registered as a native source for SQL filetypes.
+        per_filetype = {
+          sql   = { "dadbod", "snippets", "buffer" },
+          mysql = { "dadbod", "snippets", "buffer" },
+          plsql = { "dadbod", "snippets", "buffer" },
+        },
         providers = {
           lsp = { max_items = 50 },
+          dadbod = { name = "Dadbod", module = "vim_dadbod_completion.blink" },
         },
       },
       fuzzy = { implementation = "prefer_rust" },

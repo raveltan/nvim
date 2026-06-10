@@ -147,12 +147,10 @@ return {
     "HiPhish/rainbow-delimiters.nvim",
     event = "BufReadPost",
     config = function()
-      require("rainbow-delimiters.setup").setup({})
-      vim.api.nvim_create_autocmd("BufReadPost", {
-        callback = function(args)
-          if vim.api.nvim_buf_line_count(args.buf) > 1500 then
-            vim.b[args.buf].rainbow_delimiters_disable = true
-          end
+      require("rainbow-delimiters.setup").setup({
+        -- Size guard: skip attach for files >1500 lines (checked at FileType attach time)
+        condition = function(buf)
+          return vim.api.nvim_buf_line_count(buf) <= 1500
         end,
       })
     end,

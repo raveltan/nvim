@@ -34,7 +34,9 @@ return {
 
       if vim.g.gaf then
         local phpcs = lint.linters.phpcs
-        phpcs.cmd = "./vendor/bin/phpcs"
+        -- Absolute path: a cwd-relative "./vendor/bin/phpcs" broke lint (spawn
+        -- error on every save) whenever nvim wasn't started from the fl-gaf root.
+        phpcs.cmd = require("gaf.paths").fl_gaf .. "/vendor/bin/phpcs"
         phpcs.args = require("gaf.formatting").phpcs_args()
         lint.linters_by_ft = { php = { "phpcs" } }
       else

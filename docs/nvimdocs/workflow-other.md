@@ -78,5 +78,5 @@ Not gated by `vim.g.gaf` — pattern rules are inert when paths don't match, so 
 - `main = "other-nvim"` is mandatory because lazy.nvim guesses module name as `other` from the repo name; the actual module is `other-nvim`. Without this, `:Other` errors with "module not found".
 - The `seperator` key (sic) is a known upstream typo — don't try to use `separator`, it's silently ignored.
 - For rules with multiple `target` candidates, the picker labels each entry with its `context` string (e.g. "service | handler | controller") so you can pick by role at a glance.
-- Plural/singular handling: Rails rules use two separate patterns (`(.+)s_controller` and `([^s].+)_controller`) so plural and same-name controllers don't double-match.
+- Plural/singular handling: Rails rules use two separate patterns (`(.+)s_controller` and `(.+[^s])_controller`) so plural and same-name controllers don't double-match. The non-plural capture anchors the LAST char ≠ s — `([^s].+)` would wrongly exclude controllers *starting* with s (search, stripe, …).
 - `(.*)%.spec%.ts$` → `%1.ts` lives at the bottom on purpose — more-specific patterns earlier in the list win.

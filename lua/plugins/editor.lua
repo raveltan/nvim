@@ -32,6 +32,12 @@ return {
             return
           end
           vim.opt_local.wrap = true
+          -- Commit messages: keep the ftplugin's textwidth=72 / fo+=tl so they
+          -- hard-wrap at the conventional width. Still re-assert soft wrap above,
+          -- because wrapping.nvim's set_nvim_opt_defaults turns global 'wrap' off.
+          if ev.match == "gitcommit" or ev.match == "NeogitCommitMessage" then
+            return
+          end
           vim.opt_local.textwidth = 150
           vim.opt_local.formatoptions:append("t")
           vim.opt_local.formatoptions:append("l")
@@ -266,6 +272,9 @@ return {
     event = "BufReadPost",
     opts = {
       default_mappings = true,
+      -- Default 150ms poll ran getmarklist()+getmarklist("%") on the main loop
+      -- ~7x/sec forever; manually-set mark signs tolerate 1s fine.
+      refresh_interval = 1000,
     },
   },
 
