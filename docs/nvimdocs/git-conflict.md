@@ -45,6 +45,6 @@ Default mappings from the plugin (we don't override):
 - README: https://github.com/akinsho/git-conflict.nvim/blob/main/README.md
 
 ## Notes
-- For a side-by-side 3-way view of the same conflict, open `:DiffviewOpen` (diffview is configured with `merge_tool.layout = "diff3_mixed"`).
+- For a side-by-side view of the conflicted file against the index, open `:Gdiffsplit` (fugitive); `:Gdiffsplit!` gives a 3-way OURS/THEIRS split during a merge.
 - `:GitConflictListQf` populates the quickfix list with all conflicts in the repo.
 - Plugin fires a `User GitConflictDetected` autocmd when a buffer has conflicts — useful for statusline integration if needed.

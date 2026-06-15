@@ -74,7 +74,6 @@ Top-level picker options (per `docs/picker.md`):
 | `gr` | n | `Snacks.picker.lsp_references()` | References |
 | `gI` | n | `Snacks.picker.lsp_implementations()` | Implementations |
 | `gy` | n | `Snacks.picker.lsp_type_definitions()` | Type definitions |
-| `<leader>gc` | n | `Snacks.picker.git_log()` | Git log |
 | `<leader>s"` | n | `Snacks.picker.registers()` | Registers |
 | `<leader>sm` | n | `Snacks.picker.marks()` | Marks |
 | `<leader>sj` | n | `Snacks.picker.jumps()` | Jumplist |

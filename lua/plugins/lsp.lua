@@ -98,7 +98,11 @@ return {
               maxSize = 5000000,
               associations = { "*.php" },
               exclude = {
-                "**/vendor/**",
+                -- Do NOT blanket-exclude vendor/ — that kills third-party symbol
+                -- resolution (Symfony AbstractController, Route, Request, etc).
+                -- Only trim vendor test dirs + nested vendor, matching intelephense defaults.
+                "**/vendor/**/{Tests,tests}/**",
+                "**/vendor/**/vendor/**",
                 "**/node_modules/**",
                 "**/.git/**",
                 "**/storage/**",

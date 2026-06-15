@@ -17,7 +17,7 @@ require("neotest-vitest")({ filter_dir = fn, is_test_file = fn })
 require("neotest-python")({ dap = { justMyCode = false } })
 require("neotest-rspec")({ rspec_cmd = fn, filter_dirs = {...} })
 require("neotest-minitest")({ test_cmd = fn })
-require("neotest-dart")({ command = "flutter", use_lsp = true })
+require("neotest-dart")({ command = "flutter", use_lsp = true })  -- only registered if a pubspec.yaml is found (Flutter project)
 require("neotest-rust")({ args = { "--no-capture" } })
 ```
 
@@ -49,6 +49,7 @@ Repo: https://github.com/zidhuss/neotest-minitest
 
 ### neotest-dart
 Dart/Flutter. `command = "flutter"`, `use_lsp = true` to leverage flutter-tools LSP for position discovery.
+**Conditionally registered** — only added to the adapters list when `vim.fn.findfile("pubspec.yaml", ".;")` finds a `pubspec.yaml` in cwd or an ancestor (i.e. an actual Flutter/Dart project), so the adapter isn't loaded in every session. The plugin stays in `dependencies` either way.
 Repo: https://github.com/sidlatau/neotest-dart
 
 ### neotest-rust

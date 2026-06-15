@@ -2,7 +2,7 @@
 > Flutter/Dart toolchain plugin — owns dartls, hot reload/restart, device selection, and Flutter's DAP.
 
 **Repo:** https://github.com/akinsho/flutter-tools.nvim
-**Local spec:** lua/plugins/flutter.lua:1-70
+**Local spec:** lua/plugins/flutter.lua:1-60 · keymaps in after/ftplugin/dart.lua
 **Tags:** flutter dart lsp dap hot-reload mobile fvm
 
 ## Scope
@@ -14,13 +14,12 @@ dartls is **owned by this plugin** — do NOT add it to mason-lspconfig (see hea
 ```lua
 {
   "akinsho/flutter-tools.nvim",
-  ft = { "dart" },
+  ft = { "dart" }, -- sole load trigger; <leader>F* maps live in after/ftplugin/dart.lua
   dependencies = {
     "nvim-lua/plenary.nvim",
     "neovim/nvim-lspconfig",
     "saghen/blink.cmp",
   },
-  keys = { ... <leader>F* ... },
   opts = function() return { ui = {...}, decorations = {...}, dev_log = {...}, debugger = {...}, lsp = {...} } end,
 }
 ```
@@ -58,7 +57,7 @@ dartls is **owned by this plugin** — do NOT add it to mason-lspconfig (see hea
 - `lsp.settings`: `showTodos = true`, `completeFunctionCalls = true`, `renameFilesWithClasses = "prompt"`, `updateImportsOnRename = true`, `enableSnippets = true`.
 
 ## Keymaps
-All under `<leader>F` (capital F, since lowercase `<leader>f` is owned by find/telescope-ish):
+All under `<leader>F` (capital F, since lowercase `<leader>f` is owned by find/telescope-ish). These — and the `<leader>F` "flutter" which-key group — are **buffer-local**, defined in `after/ftplugin/dart.lua`, so they only appear in dart buffers (not globally). A global lazy `keys` block would register them everywhere regardless of `ft`.
 
 | Key | Command | Desc |
 |---|---|---|
@@ -83,7 +82,7 @@ Step-debug keys are the generic nvim-dap ones — see [[dap-nvim-dap]].
 - Related: [[dap-nvim-dap]], [[lsp-nvim-lspconfig]], [[cmp-blink]]
 
 ## Notes
-- `keys` is a lazy.nvim trigger — opening a Dart file alone won't load the plugin; pressing any `<leader>F*` (or `ft = "dart"`) does. The first load also auto-starts dartls.
+- `ft = "dart"` is the sole lazy.nvim load trigger — opening any Dart file loads the plugin (and auto-starts dartls). The `<leader>F*` keymaps are buffer-local (`after/ftplugin/dart.lua`), so the `:Flutter*` commands they call exist by the time they can fire. There is intentionally no `keys` trigger — that would surface the maps + group in which-key on every (non-dart) buffer.
 - `run_via_dap = false` means `:FlutterRun` uses flutter-tools' built-in process runner. Breakpoint debugging still works because `debugger.enabled = true` registers the DAP adapter and a `dart` configuration — invoke via `:DapContinue` after launching.
 - `register_configurations` always overwrites `dap.configurations.dart` to a single entry. If you need multiple targets (e.g. `main_dev.dart` vs `main_prod.dart`), append to the table instead of reassigning.
 - The `on_attach` semantic-tokens nil-out is a deliberate workaround for dartls + treesitter color clashes — remove it if you prefer LSP semantic highlighting.

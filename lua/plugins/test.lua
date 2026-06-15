@@ -38,7 +38,7 @@ return {
       return keys
     end,
     opts = function()
-      return {
+      local opts = {
         adapters = {
           require("neotest-phpunit")({
             phpunit_cmd = "vendor/bin/phpunit",
@@ -81,10 +81,6 @@ return {
               return { "bundle", "exec", "ruby", "-Itest" }
             end,
           }),
-          require("neotest-dart")({
-            command = "flutter",
-            use_lsp = true,
-          }),
           require("neotest-rust")({
             args = { "--no-capture" },
           }),
@@ -93,6 +89,15 @@ return {
         status = { virtual_text = true, signs = true },
         output = { open_on_run = "short" },
       }
+      -- Flutter/Dart: only register neotest-dart on actual Flutter projects
+      -- (pubspec.yaml in cwd or a parent), not in every session.
+      if vim.fn.findfile("pubspec.yaml", ".;") ~= "" then
+        table.insert(opts.adapters, require("neotest-dart")({
+          command = "flutter",
+          use_lsp = true,
+        }))
+      end
+      return opts
     end,
     init = function()
       if vim.g.gaf then require("gaf.test").setup_autocmds() end

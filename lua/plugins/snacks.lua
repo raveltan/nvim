@@ -143,8 +143,6 @@ return {
       { "gr", function() Snacks.picker.lsp_references() end, desc = "References" },
       { "gI", function() Snacks.picker.lsp_implementations() end, desc = "Implementations" },
       { "gy", function() Snacks.picker.lsp_type_definitions() end, desc = "Type definitions" },
-      -- Git
-      { "<leader>gc", function() Snacks.picker.git_log() end, desc = "Git log" },
       -- History / Registers
       { '<leader>s"', function() Snacks.picker.registers() end, desc = "Registers" },
       { "<leader>sm", function() Snacks.picker.marks() end, desc = "Marks" },

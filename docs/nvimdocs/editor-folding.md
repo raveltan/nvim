@@ -45,9 +45,9 @@ Set in lua/config/options.lua:
 | `zR` / `zM` | n | built-in | Open / close all folds |
 | `zr` / `zm` | n | built-in | Reduce / increase fold level by one |
 | `zj` / `zk` | n | built-in | Jump to next / prev fold |
-| `<leader>zx` | n | `zx` | Recompute folds (config/keymaps.lua) |
+| `zx` | n | built-in | Recompute folds (update + reapply foldexpr) |
 
-`<leader>zx` is the one custom addition — native `foldexpr` can leave stale fold boundaries after rapid edits (neovim#26224); `zx` forces a recompute.
+Folding is all built-ins now — native `foldexpr` can leave stale fold boundaries after rapid edits (neovim#26224); the built-in `zx` forces a recompute. (The former `<leader>zx` alias was removed — just use `zx`.)
 
 ## Links
 
@@ -61,5 +61,5 @@ Set in lua/config/options.lua:
 - **`vim.treesitter.foldtext()` is `nil` in 0.12.2** (verified). Do not set `foldtext='v:lua.vim.treesitter.foldtext()'` — it errors. Use `foldtext=""` or the custom fn.
 - snacks draws fold marks only when `vim.wo[win].foldcolumn ~= "0"` (`fold_info()` FFI check). With no `foldcolumn` set, folds work but show no arrows — `foldcolumn="1"` is mandatory.
 - snacks hides the open-fold (down) chevron by default (`folds.open = false`); set `statuscolumn = { folds = { open = true } }` in snacks.lua to show it.
-- Fold computation is async since 0.11 — fold levels can be briefly stale right after opening a file until the parse finishes. Cosmetic, self-corrects; `<leader>zx` forces it.
+- Fold computation is async since 0.11 — fold levels can be briefly stale right after opening a file until the parse finishes. Cosmetic, self-corrects; the built-in `zx` forces it.
 - Cross-links: [ts-nvim-treesitter](ts-nvim-treesitter.md), [snacks-core](snacks-core.md), [config-options](config-options.md).

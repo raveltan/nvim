@@ -291,21 +291,18 @@ return {
         { "<leader>d",  group = "debug" },
         { "<leader>D",  group = "database" },
         { "<leader>f",  group = "find" },
-        { "<leader>F",  group = "flutter" },
         { "<leader>g",  group = "git" },
-        { "<leader>gh", group = "hunk" },
         { "<leader>h",  group = "harpoon" },
         { "<leader>k",  group = "docs (devdocs/nvimdocs)" },
         { "<leader>n",  group = "obsidian" },
         { "<leader>o",  group = "overseer/other" },
-        { "<leader>q",  group = "quit" },
         { "<leader>s",  group = "search" },
         { "<leader>S",  group = "snippets" },
         { "<leader>t",  group = "todo/test" },
         { "<leader>u",  group = "ui" },
         { "<leader>ud", group = "duck" },
         { "<leader>w",  group = "window" },
-        { "<leader>x",  group = "diagnostics" },
+        { "<leader>x",  group = "diagnostics/quickfix" },
         { "<leader>X",  group = "xdebug profile" },
         { "g",          group = "goto" },
         { "gs",         group = "surround" },
@@ -350,7 +347,6 @@ return {
       },
       ui = { enable = false },
       completion = {
-        nvim_cmp = false,
         blink = true,
         min_chars = 2,
       },
@@ -484,34 +480,6 @@ return {
   -- Case-preserving :Subvert/:S and `crs`/`crc`/`crm`/`cru`/`cr-`/`cr.` case coercions
   { "tpope/vim-abolish", event = "VeryLazy" },
 
-  -- Structural search-replace (treesitter-aware)
-  {
-    "cshuaimin/ssr.nvim",
-    keys = {
-      {
-        "<leader>cS",
-        function() require("ssr").open() end,
-        mode = { "n", "x" },
-        desc = "Structural replace (SSR)",
-      },
-    },
-    opts = {
-      border = "rounded",
-      min_width = 50,
-      min_height = 5,
-      max_width = 120,
-      max_height = 25,
-      adjust_window = true,
-      keymaps = {
-        close = "q",
-        next_match = "n",
-        prev_match = "N",
-        replace_confirm = "<cr>",
-        replace_all = "<leader><cr>",
-      },
-    },
-  },
-
   -- Better quickfix: editable, prettier
   {
     "stevearc/quicker.nvim",
@@ -523,7 +491,7 @@ return {
       },
     },
     keys = {
-      { "<leader>xQ", function() require("quicker").toggle() end, desc = "Toggle quickfix (quicker)" },
+      { "<leader>xq", function() require("quicker").toggle() end, desc = "Toggle quickfix" },
     },
   },
 

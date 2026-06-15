@@ -55,7 +55,6 @@ return {
       { "<leader>sw", function() require("fff").live_grep({ query = vim.fn.expand("<cword>") }) end, mode = { "n", "x" }, desc = "Grep word" },
       { "<leader>sz", function() require("fff").live_grep({ grep = { modes = { "fuzzy", "plain" } } }) end, desc = "Fuzzy grep" },
       { "<leader>s.", function() require("fff").live_grep({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Grep in current file dir" },
-      { "<leader>gs", function() require("fff").find_files({ query = "git:modified " }) end, desc = "Git modified files" },
     },
     opts = {
       prompt = "  ",

@@ -49,6 +49,8 @@ opt.foldnestmax = 4         -- don't fold absurdly deep
 opt.foldcolumn = "1"        -- REQUIRED: snacks statuscolumn only draws fold marks when foldcolumn ~= "0"
 opt.foldtext = "v:lua.require'config.foldtext'.foldtext()"
 opt.diffopt:append("vertical")
+opt.diffopt:append("algorithm:histogram") -- cleaner diffs than the default myers
+opt.diffopt:append("linematch:60")        -- align changed lines within a block (readable :Gdiffsplit / vimdiff / conflicts)
 opt.virtualedit = "block"
 opt.pumheight = 10
 opt.confirm = true

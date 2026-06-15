@@ -1,12 +1,12 @@
 # git-fugitive
-> Tpope's git porcelain inside Vim — `:G` for status/commit/push, `:Gedit` for revs, interactive blame.
+> Tpope's git porcelain inside Vim — `:G` for status/commit/push, `:Gedit` for revs, `:Gdiffsplit` diffs.
 
 **Repo:** https://github.com/tpope/vim-fugitive
-**Local spec:** lua/plugins/git.lua:79-105
-**Tags:** git, blame, log, porcelain
+**Local spec:** lua/plugins/git.lua:63-87
+**Tags:** git, log, diff, porcelain
 
 ## Scope
-Wraps git CLI subcommands as `:Git` (alias `:G`) with a buffer-driven status UI, opens any revision as a buffer via `:Gedit <rev>`, and provides the canonical interactive `:Git blame` buffer with one-key reblame and commit navigation. Lazy-loaded on its commands and our `<leader>g*` keymaps; the ggrep and line_history utils also shell out to git directly and rely on fugitive only for the `:Gedit <sha>` confirm action.
+Wraps git CLI subcommands as `:Git` (alias `:G`) with a buffer-driven status UI, opens any revision as a buffer via `:Gedit <rev>`, and provides side-by-side diffs via `:Gdiffsplit`. Lazy-loaded on its commands and our `<leader>g*` keymaps; the line_history util also shells out to git directly and relies on fugitive only for the `:Gedit <sha>` confirm action.
 
 ## Install spec
 ```lua
@@ -26,23 +26,21 @@ Fugitive is mostly configured via `:G` subcommands rather than a setup table. Kn
 - `g:fugitive_git_executable` *(string, "git")* — alternative git binary.
 - `g:fugitive_dynamic_colors` *(0/1, 1)* — translate git's ANSI colours to Vim highlights.
 
-Most workflows are driven by these commands instead: `:G` (status), `:G commit`, `:G push`, `:G blame`, `:G log`, `:Gdiffsplit`, `:Gedit <rev>`, `:Gread <rev>:%`, `:Gclog`, `:GBrowse` (via vim-rhubarb).
+Most workflows are driven by these commands instead: `:G` (status), `:G commit`, `:G push`, `:G log`, `:Gdiffsplit`, `:Gedit <rev>`, `:Gread <rev>:%`, `:Gclog`, `:GBrowse` (via vim-rhubarb).
 
 ## Our config
-No setup call — fugitive is loaded by the commands and the keymaps below. `<leader>gl` and `<leader>g/` delegate to util modules (line_history, ggrep) that prefer the snacks picker over fugitive's quickfix-based output.
+No setup call — fugitive is loaded by the commands and the keymaps below. `<leader>gl`/`<leader>gf` delegate to the `line_history` util, which builds a snacks picker over `git log` output and opens the chosen commit read-only with `:Gedit` (never checks out).
 
 ## Keymaps
 | Key | Mode | Action | Desc |
 |---|---|---|---|
-| `<leader>gl` | n | `require("util.line_history").pick()` | Line history (current line) |
+| `<leader>gl` | n | `require("util.line_history").pick()` | Line history (commits touching current line) |
 | `<leader>gl` | v | `util.line_history.pick(s, e)` | Range history (visual selection) |
-| `<leader>gB` | n | `:Git blame` | Interactive blame buffer |
-| `<leader>g/` | n | `require("util.ggrep").prompt()` | Git grep (prompt) |
-| `<leader>g*` | n | `require("util.ggrep").cword()` | Git grep word under cursor |
-| `<leader>g/` | v | `require("util.ggrep").visual()` | Git grep visual selection |
+| `<leader>gf` | n | `require("util.line_history").file()` | File history (commits touching current file) |
+| `<leader>gd` | n | `:Gdiffsplit` | Diff current file vs index (side-by-side) |
 
-Inside `:Git blame`: `<CR>` reblame at commit, `o`/`O` open commit in split/tab, `-` reblame parent, `~` reblame Nth ancestor, `q` close.
 Inside `:G` status: `s`/`u` stage/unstage, `=` toggle diff, `cc` commit, `dd` `:Gdiffsplit`, `<CR>` open file.
+Inside `:Gdiffsplit`: `]c`/`[c` next/prev change, `do`/`dp` diff get/put, `:diffupdate` refresh.
 
 ## Links
 - README: https://github.com/tpope/vim-fugitive/blob/master/README.markdown
@@ -50,7 +48,7 @@ Inside `:G` status: `s`/`u` stage/unstage, `=` toggle diff, `cc` commit, `dd` `:
 - `:help fugitive-maps` — buffer-local mappings inside fugitive UIs.
 
 ## Notes
-- `<leader>gb` (gitsigns blame pane) and `<leader>gB` (fugitive interactive blame) are intentionally distinct: gitsigns shows an author column you can scroll; fugitive opens a navigable blame buffer where `<CR>` walks commit history.
-- `:Gedit <sha>` is used by `util.line_history` to open a historical revision of a file as a read-only buffer — preserves syntax/filetype unlike `git show`.
-- `:GBrowse` (permalink to forge) requires vim-rhubarb (GitHub) or tpope/vim-rhubarb-equivalents; not installed here.
-- Avoid `:Ggrep` directly — `<leader>g/` uses our snacks-picker wrapper which is faster and has live preview.
+- `:Gedit <sha>` is used by `util.line_history` to open a historical commit as a read-only buffer — preserves syntax/filetype unlike `git show`, and crucially does **not** check the commit out.
+- `util.line_history` is the only util relying on fugitive's `:Gedit <sha>` confirm action.
+- `:GBrowse` (permalink to forge) requires vim-rhubarb (GitHub); not installed here.
+- Blame keymaps were removed (`<leader>gb`/`<leader>gB` no longer exist) — use `<leader>gl` for per-line commit history instead.

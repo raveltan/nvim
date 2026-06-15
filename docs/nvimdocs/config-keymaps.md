@@ -1,5 +1,5 @@
 # config-keymaps
-> Global keymaps: windows, buffers, LSP, diagnostics, case conversion, search centering, quickfix.
+> Global keymaps: windows, buffers, LSP, diagnostics, case conversion, search centering, loclist.
 
 **Local file:** lua/config/keymaps.lua
 **Tags:** config, keymaps, lsp, diagnostics, abolish, gaf
@@ -10,7 +10,7 @@
 
 ## Highlights
 
-- A custom **resize submode** (`<leader>wr`) consumes single keys via `vim.fn.getcharstr` so you can hammer `hjkl` (and `HJKL` for x5 steps) without re-pressing the leader.
+- A custom **resize submode** (`<leader>ur`) consumes single keys via `vim.fn.getcharstr` so you can hammer `hjkl` (and `HJKL` for x5 steps) without re-pressing the leader.
 - `<leader>cr` is a hand-rolled LSP rename that compensates for intelephense's `$` sigil bug — when the cursor sits on `$`, it advances one column, strips/re-prepends the sigil around the user input, and applies the workspace edit manually with `client:request`. See memory `nvim_php_rename.md`.
 - `gx` first delegates to GAF's `open_phab_under_cursor` (D-numbers, T-numbers, paste IDs) when `vim.g.gaf` is set, then falls back to `vim.ui.open` for normal URLs / `<cfile>`.
 - Search-result motions `n`/`N` recenter (`zzzv`) and trigger `hlslens.start()` so the lens annotations refresh.
@@ -26,7 +26,7 @@
 | `<C-Down>` | n | `:resize -2` | Decrease height |
 | `<C-Left>` | n | `:vertical resize -2` | Decrease width |
 | `<C-Right>` | n | `:vertical resize +2` | Increase width |
-| `<leader>wr` | n | resize submode | Loop on `hjkl`/`HJKL`/`=` |
+| `<leader>ur` | n | resize submode | Loop on `hjkl`/`HJKL`/`=` |
 
 ### Move lines
 | Key | Mode | Action | Desc |
@@ -34,11 +34,10 @@
 | `<A-j>` / `<A-k>` | n | `:m` + `==` | Move line down/up |
 | `<A-j>` / `<A-k>` | v | `:m` + `gv=gv` | Move selection down/up |
 
-### Save / Quit / Buffers
+### Save / Buffers
 | Key | Mode | Action | Desc |
 | --- | --- | --- | --- |
 | `<C-s>` | n,i,x,s | `:w` + `<esc>` | Save file |
-| `<leader>qq` | n | `:qa` | Quit all |
 | `<S-h>` / `<S-l>` | n | `:bprevious` / `:bnext` | Prev/next buffer |
 | `<leader>bo` | n | `%bd\|e#\|bd#` | Close other buffers |
 | `<leader>fn` | n | `:enew` | New file |
@@ -71,7 +70,6 @@
 | `[d` / `]d` | n | `vim.diagnostic.jump` | Prev/next diagnostic |
 | `[e` / `]e` | n | jump ERROR | Prev/next error |
 | `[w` / `]w` | n | jump WARN | Prev/next warning |
-| `<leader>ud` | n | toggle diagnostics | Toggle diagnostics |
 | `<leader>uf` | n | flip `g:disable_autoformat` | Toggle format-on-save |
 
 ### Case conversion (vim-abolish)
@@ -98,11 +96,12 @@
 
 (Single `<Esc>` deliberately passes through to TUI apps like `lazygit`.)
 
-### Quickfix / loclist
+### Loclist
 | Key | Mode | Action | Desc |
 | --- | --- | --- | --- |
-| `<leader>xq` | n | toggle qf | Toggle quickfix |
 | `<leader>xl` | n | toggle ll | Toggle loclist |
+
+(`<leader>xq` toggle-quickfix now lives in the quicker.nvim spec, not here.)
 
 ## Links
 

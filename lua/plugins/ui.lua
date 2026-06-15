@@ -196,7 +196,6 @@ return {
         "trouble", "Trouble", "oil", "undotree", "diff",
         "dap-view", "dap-view-term", "dap-repl",
         "noice", "checkhealth", "qf", "grug-far",
-        "DiffviewFiles", "DiffviewFileHistory",
         "fugitive", "fugitiveblame", "git",
         "markview", "Avante",
       },

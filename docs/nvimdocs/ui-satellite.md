@@ -47,7 +47,7 @@ Replaces the lack of a native Neovim scrollbar with a minimap-style indicator. P
 
 ## Our config
 - `current_only = true`, `winblend = 50` — minimalist, blends with transparent theme.
-- Broad `excluded_filetypes` covering trouble, oil, dap-view, noice, grug-far, diffview, fugitive, markview, avante — these own their own rendering and conflict with the satellite float.
+- Broad `excluded_filetypes` covering trouble, oil, dap-view, noice, grug-far, fugitive, markview, avante — these own their own rendering and conflict with the satellite float.
 - `ColorScheme` autocmd sets `SatelliteBar` bg to `#30363d` (GitHub dark grey) and clears `SatelliteBackground`, so the bar is visible on transparent backgrounds. Re-applied immediately via `pcall` so the first paint after startup is correct.
 - `diagnostic.min_severity = WARN` — only warnings and errors appear in the bar; hints/info would otherwise saturate it on LSP-heavy buffers.
 

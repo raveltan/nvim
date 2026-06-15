@@ -10,19 +10,9 @@ return {
       "neovim/nvim-lspconfig",
       "saghen/blink.cmp",
     },
-    keys = {
-      { "<leader>Fr", "<cmd>FlutterRun<cr>",           desc = "Flutter run" },
-      { "<leader>FR", "<cmd>FlutterReload<cr>",        desc = "Flutter hot reload" },
-      { "<leader>FM", "<cmd>FlutterRestart<cr>",       desc = "Flutter hot restart" },
-      { "<leader>Fq", "<cmd>FlutterQuit<cr>",          desc = "Flutter quit" },
-      { "<leader>Fd", "<cmd>FlutterDevices<cr>",       desc = "Flutter devices" },
-      { "<leader>Fe", "<cmd>FlutterEmulators<cr>",     desc = "Flutter emulators" },
-      { "<leader>Fl", "<cmd>FlutterLogToggle<cr>",     desc = "Flutter log toggle" },
-      { "<leader>Fo", "<cmd>FlutterOutlineToggle<cr>", desc = "Flutter outline" },
-      { "<leader>Fp", "<cmd>FlutterPubGet<cr>",        desc = "Flutter pub get" },
-      { "<leader>FP", "<cmd>FlutterPubUpgrade<cr>",    desc = "Flutter pub upgrade" },
-      { "<leader>Fc", "<cmd>FlutterLspRestart<cr>",    desc = "Flutter LSP restart" },
-    },
+    -- <leader>F* keymaps + the "flutter" which-key group are buffer-local,
+    -- defined in after/ftplugin/dart.lua so they only show in dart buffers
+    -- (lazy `keys` here would register them globally regardless of ft).
     opts = function()
       return {
         ui = { border = "rounded", notification_style = "native" },

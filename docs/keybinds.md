@@ -17,7 +17,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>bD` | n | Delete buffer (force) | mini.bufremove |
 | `<C-Up>` / `<C-Down>` | n | Resize height | config/keymaps.lua |
 | `<C-Left>` / `<C-Right>` | n | Resize width | config/keymaps.lua |
-| `<leader>wr` | n | Resize submode (hjkl, H/J/K/L=×5, ==equal, q=quit) | config/keymaps.lua |
+| `<leader>ur` | n | Resize submode (hjkl, H/J/K/L=×5, ==equal, q=quit) | config/keymaps.lua |
 | `<C-h/j/k/l>` | n | Window/tmux pane nav | vim-tmux-navigator |
 | `q` | n | Close help/qf/lspinfo/man/notify/grug-far/blame | config/autocmds.lua |
 
@@ -88,7 +88,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>ci` | n | Toggle inlay hints | config/keymaps.lua |
 | `<leader>cd` | n | Line diagnostics float | config/keymaps.lua |
 | `<leader>U` | n | Undo tree (undotree) | undotree |
-| `<leader>cS` | n, x | Structural search-replace | ssr.nvim |
 | `<leader>co` | n | TS: organize imports | typescript-tools |
 | `<leader>cM` | n | TS: add missing imports | typescript-tools |
 | `<leader>cU` | n | TS: remove unused imports | typescript-tools |
@@ -105,29 +104,16 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | Key | Mode | Description | Source |
 |-----|------|-------------|--------|
 | `<leader>gg` | n | Lazygit | snacks |
-| `<leader>gc` | n | Git log | snacks.picker |
-| `<leader>gs` | n | Git status | snacks.picker |
-| `<leader>gd` | n | Diff view (open) | diffview |
-| `<leader>gf` | n | File history | diffview |
-| `<leader>gb` | n | Blame file (author column) | gitsigns |
-| `<leader>gB` | n | Blame interactive (fugitive) | fugitive |
-| `<leader>gt` | n | Toggle line blame virt text | gitsigns |
-| `<leader>gl` | n | (worktree/log — see git.lua) | workflow.lua |
-| `<leader>g/` | n | Git grep (prompt) | util.ggrep |
-| `<leader>g/` | v | Git grep selection | util.ggrep |
-| `<leader>g*` | n | Git grep word under cursor | util.ggrep |
-| `]c` / `[c` | n | Next/Prev hunk | gitsigns |
-| `ih` | o, x | Select hunk (gitsigns textobj) | gitsigns |
-| `<leader>ghr` | n | Reset hunk | gitsigns |
-| `<leader>ghr` | v | Reset selected lines | gitsigns |
-| `<leader>ghR` | n | Reset whole file | gitsigns |
-| `<leader>ghp` | n | Preview hunk (popup) | gitsigns |
-| `<leader>ghi` | n | Preview hunk (inline) | gitsigns |
-| `<leader>ghb` | n | Blame line (full popup) | gitsigns |
-| `<leader>ghs` | n | Stage hunk | gitsigns |
-| `<leader>ghs` | v | Stage selected lines | gitsigns |
-| `<leader>ghu` | n | Undo stage hunk | gitsigns |
-| `<leader>gho` | n | Toggle diff overlay (word-level) | mini.diff |
+| `<leader>gl` | n | Line history — commits touching current line; `<CR>` opens commit read-only (`:Gedit <sha>`, no checkout) | util.line_history |
+| `<leader>gl` | v | Range history — commits touching the selection | util.line_history |
+| `<leader>gf` | n | File history — commits touching current file (`--follow`); `<CR>` opens commit read-only | util.line_history |
+| `<leader>gd` | n | Diff current file vs index (`:Gdiffsplit`) | fugitive |
+| `<leader>gp` | n | Preview hunk (inline) | gitsigns |
+| `<leader>gr` | n | Reset hunk | gitsigns |
+| `<leader>gr` | v | Reset selected lines | gitsigns |
+| `]c` / `[c` | n | Next/Prev hunk (centers cursor) | gitsigns |
+| `co` / `ct` / `cb` / `c0` | n | Conflict: take ours / theirs / both / none | git-conflict |
+| `]x` / `[x` | n | Next/Prev conflict | git-conflict |
 
 ## Diagnostics / Quickfix
 
@@ -137,10 +123,8 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `[d` / `]d` | n | Prev/Next diagnostic (auto-opens float) | config/keymaps.lua |
 | `[e` / `]e` | n | Prev/Next error | config/keymaps.lua |
 | `[w` / `]w` | n | Prev/Next warning | config/keymaps.lua |
-| `<leader>ud` | n | Toggle diagnostics | config/keymaps.lua |
 | `<leader>xx` | n | Trouble: diagnostics toggle | trouble |
-| `<leader>xq` | n | Toggle quickfix | config/keymaps.lua |
-| `<leader>xQ` | n | Toggle quickfix (quicker.nvim, editable) | quicker.nvim |
+| `<leader>xq` | n | Toggle quickfix (quicker.nvim, editable) | quicker.nvim |
 | `<leader>xl` | n | Toggle loclist | config/keymaps.lua |
 
 > Inside qf buffer (quicker.nvim): `>` expand context, `<` collapse, edit lines + `:w` to apply to source files.
@@ -237,7 +221,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `za` | n | Toggle fold under cursor | native (treesitter folds) |
 | `zR` / `zM` | n | Open / close all folds | native (treesitter folds) |
 | `zj` / `zk` | n | Jump to next / prev fold | native |
-| `<leader>zx` | n | Recompute folds | config/keymaps.lua |
 | `gx` | n | Open URL/file/Phab `D####`/`T####` under cursor | config/keymaps.lua |
 
 ## Obsidian — `<leader>n*`
@@ -318,16 +301,10 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 
 | Key | Mode | Description |
 |-----|------|-------------|
-| `<leader>ud` | n | Toggle diagnostics (conflicts with duck `<leader>ud*` prefix — 2-char fires after timeout) |
+| `<leader>ur` | n | Resize submode (see Buffers / Windows) |
 | `<leader>uM` | n | Toggle markdown render (markview) |
 | `<leader>udd` / `<leader>uda` | n | Hatch duck (slow / fast) |
 | `<leader>udk` / `<leader>udK` | n | Cook one duck / cook all |
-
-## Quit — `<leader>q`
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>qq` | n | Quit all |
 
 ## Terminal
 
@@ -336,6 +313,8 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 | `<esc><esc>` | t | Exit terminal mode |
 
 ## Flutter — `<leader>F*`
+
+> Buffer-local to dart files (`after/ftplugin/dart.lua`) — these and the `<leader>F` group only appear when editing dart, not globally.
 
 | Key | Mode | Description |
 |-----|------|-------------|
@@ -409,7 +388,7 @@ ERB examples:
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter · `<leader>g` git · `<leader>gh` hunk · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>q` quit · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics · `<leader>X` xdebug profile · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile · `g` goto · `gs` surround
 
 ## Known overlaps
 
@@ -427,3 +406,8 @@ ERB examples:
 - `<leader>de` was DAP eval. Now `DapViewWatch`.
 - `nvim-treesitter-endwise` reverted to `tpope/vim-endwise` (TS plugin broken on TS main branch).
 - `<leader>j*` Chrome DevTools group removed — vendored `webconnect/` Go bridge, `phab-inline.nvim/` plugin, and `web*` util modules deleted.
+- **Git overhaul** — `diffview.nvim` removed: `<leader>gd` is now `:Gdiffsplit`, `<leader>gf` is the line_history file-history picker. `mini.diff` removed: `<leader>gho`/`<leader>go` overlay gone — use `<leader>gp` inline hunk preview. `<leader>gb` blame, `<leader>gB`, `<leader>gt` line-blame toggle, `<leader>gc` git log, `<leader>gs` git status all removed. `<leader>g/`/`<leader>g*` git grep (`util.ggrep`) removed and the util deleted. gitsigns hunk stage/unstage/reset-buffer/blame-line dropped (stage via lazygit / `:Git`); only inline preview (`<leader>gp`) + reset (`<leader>gr`) survive, promoted off the `<leader>gh` prefix (group removed).
+- `<leader>cS` `ssr.nvim` (structural search-replace) removed.
+- `timber.nvim` (log injection, `<leader>l*`) removed.
+- `<leader>ud` toggle-diagnostics removed — tiny-inline-diagnostic ignored `vim.diagnostic.enable`, and it collided with the duck `<leader>ud*` prefix. `<leader>ud` is now purely the duck group.
+- `<leader>wr` resize submode → `<leader>ur` (moved under the `ui` group). `<leader>qq` quit-all and `<leader>zx` recompute-folds removed. `<leader>xQ` (quicker quickfix) merged into `<leader>xq`.

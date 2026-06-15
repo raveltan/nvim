@@ -20,9 +20,8 @@ map("n", "<A-k>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
 map("v", "<A-j>", ":m '>+1<cr>gv=gv", { desc = "Move selection down" })
 map("v", "<A-k>", ":m '<-2<cr>gv=gv", { desc = "Move selection up" })
 
--- Save / Quit
+-- Save
 map({ "n", "i", "x", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save file" })
-map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
 
 -- Buffer
 map("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev buffer" })
@@ -35,7 +34,7 @@ map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
 map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
 map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
--- Window resize submode: press <leader>wr, then h/j/k/l (shift = bigger step), = to equalize, Esc/q to exit
+-- Window resize submode: press <leader>ur, then h/j/k/l (shift = bigger step), = to equalize, Esc/q to exit
 local function resize_submode()
   local hint = "-- RESIZE -- h/l: width  j/k: height  H/J/K/L: x5  =: equal  q/<Esc>: quit"
   while true do
@@ -56,7 +55,7 @@ local function resize_submode()
   end
   vim.api.nvim_echo({ { "" } }, false, {})
 end
-map("n", "<leader>wr", resize_submode, { desc = "Resize submode (hjkl)" })
+map("n", "<leader>ur", resize_submode, { desc = "Resize submode (hjkl)" })
 
 -- Clear search highlights
 map("n", "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear highlights" })
@@ -141,11 +140,6 @@ map("n", "<leader>ci", function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end, { desc = "Toggle inlay hints" })
 
--- Toggle diagnostics
-map("n", "<leader>ud", function()
-  vim.diagnostic.enable(not vim.diagnostic.is_enabled())
-end, { desc = "Toggle diagnostics" })
-
 -- Case conversion via vim-abolish (operates on word under cursor)
 map("n", "<leader>cvs", "crsiw", { remap = true, desc = "snake_case" })
 map("n", "<leader>cvc", "crciw", { remap = true, desc = "camelCase" })
@@ -165,16 +159,7 @@ map("x", "<leader>p", [["_dP]], { desc = "Paste without overwrite" })
 -- New file
 map("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New file" })
 
--- Quickfix / Location list
-map("n", "<leader>xq", function()
-  for _, win in ipairs(vim.fn.getwininfo()) do
-    if win.quickfix == 1 and win.loclist == 0 then
-      vim.cmd.cclose()
-      return
-    end
-  end
-  vim.cmd.copen()
-end, { desc = "Toggle quickfix" })
+-- Location list (quickfix toggle lives in the quicker.nvim spec → <leader>xq)
 map("n", "<leader>xl", function()
   for _, win in ipairs(vim.fn.getwininfo()) do
     if win.loclist == 1 then
@@ -207,10 +192,6 @@ map("n", "[[", function() search_cword("N") end, { desc = "Prev occurrence of wo
 
 -- Join without moving cursor
 map("n", "J", "mzJ`z", { desc = "Join lines" })
-
--- Folding (native treesitter foldexpr). za/zR/zM/zr/zm are built-ins; zx
--- recomputes folds after foldexpr leaves stale boundaries (neovim#26224).
-map("n", "<leader>zx", "zx", { desc = "Recompute folds" })
 
 map("n", "gx", function()
   if vim.g.gaf and require("gaf.keymaps").open_phab_under_cursor() then return end

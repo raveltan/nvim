@@ -103,7 +103,6 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [editor-mini-surround](editor-mini-surround.md) — `gs*` surround ops
 - [editor-mini-bufremove](editor-mini-bufremove.md) — `<leader>bd` close-keep-window
 - [editor-flash](editor-flash.md) — `s`/`S` label jumps
-- [editor-ssr](editor-ssr.md) — structural search-replace `<leader>cS`
 - [editor-grug-far](editor-grug-far.md) — project-wide find/replace UI
 - [editor-folding](editor-folding.md) — native treesitter folding
 - [editor-undotree](editor-undotree.md) — undo history
@@ -137,10 +136,9 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 ## Git
 
-- [git-gitsigns](git-gitsigns.md) — gutter + hunk ops + blame
-- [git-diffview](git-diffview.md) — diff/history viewer
+- [git-gitsigns](git-gitsigns.md) — gutter signs + hunk preview/reset
 - [git-conflict](git-conflict.md) — merge conflict resolver
-- [git-fugitive](git-fugitive.md) — `:Git*` + `<leader>gB` blame
+- [git-fugitive](git-fugitive.md) — `:Gdiffsplit` + line/file history (`:Gedit`)
 
 ## UI
 
@@ -198,8 +196,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 ## Util
 
-- [util-ggrep](util-ggrep.md) — git grep helper (`<leader>g/`, `g*`)
-- [util-line-history](util-line-history.md) — per-line git history picker
+- [util-line-history](util-line-history.md) — per-line & per-file git history picker
 - [util-obsidian](util-obsidian.md) — obsidian.nvim utilities
 
 ## Docs
