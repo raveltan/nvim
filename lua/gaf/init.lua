@@ -9,6 +9,8 @@ function M.setup()
   -- Angular selector navigation on component buffers (treesitter + rg, no LSP):
   --   <leader>cp -> parent components (callers that use this selector, "up")
   --   <leader>cg -> definition under cursor: tag (component), attr (@Input/@Output), or class (scss)
+  --   <leader>cG -> prompt for a component name (class or selector) -> its definition
+  --   <leader>cR -> URL string under cursor -> routing module that handles it
   vim.api.nvim_create_autocmd("FileType", {
     pattern = "typescript",
     callback = function(ev)
@@ -18,6 +20,12 @@ function M.setup()
       vim.keymap.set("n", "<leader>cg", function()
         require("gaf.angular").goto_definition()
       end, { buffer = ev.buf, desc = "Angular: go to def (tag/attr)" })
+      vim.keymap.set("n", "<leader>cG", function()
+        require("gaf.angular").goto_component_prompt()
+      end, { buffer = ev.buf, desc = "Angular: go to component by name" })
+      vim.keymap.set("n", "<leader>cR", function()
+        require("gaf.angular").goto_route()
+      end, { buffer = ev.buf, desc = "Angular: go to route module for URL" })
     end,
   })
 end
