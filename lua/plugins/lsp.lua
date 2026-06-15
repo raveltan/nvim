@@ -47,6 +47,15 @@ return {
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
 
+      -- Advertise foldingRange so nvim-ufo (lua/plugins/fold.lua) can pull
+      -- semantic folds (import blocks, #region, multiline comments) from servers.
+      -- lineFoldingOnly: ufo folds by line, not character range.
+      capabilities.textDocument = capabilities.textDocument or {}
+      capabilities.textDocument.foldingRange = {
+        dynamicRegistration = false,
+        lineFoldingOnly = true,
+      }
+
       -- TypeScript is handled by typescript-tools.nvim (see productivity.lua).
 
       -- ESLint

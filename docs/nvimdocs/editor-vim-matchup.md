@@ -62,5 +62,5 @@ Treesitter integration is opt-in via the nvim-treesitter `matchup` module — we
 ## Notes
 
 - The popup floats at the top of the window; `<C-w>w` can't focus it (intentional).
-- Companion to indent providers in [[editor-ufo]] — matchup's text objects work well as fold targets.
+- Companion to the fold providers in [editor-folding](editor-folding.md) — matchup's text objects work well as fold targets.
 - If `%` feels slow on large files, set `vim.g.matchup_matchparen_deferred = 1`.

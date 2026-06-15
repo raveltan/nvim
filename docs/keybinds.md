@@ -218,9 +218,13 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `aa` / `ia` | x, o | Around/Inside argument | treesitter |
 | `<C-d>` / `<C-u>` | n | Half page down/up (centered) | config/keymaps.lua |
 | `n` / `N` | n | Next/Prev search (centered, hlslens) | config/keymaps.lua |
-| `za` | n | Toggle fold under cursor | native (treesitter folds) |
-| `zR` / `zM` | n | Open / close all folds | native (treesitter folds) |
+| `za` | n | Toggle fold under cursor | native |
+| `zR` / `zM` | n | Open / close all folds | ufo (fold.lua) |
+| `zr` / `zm` | n | Raise / lower fold level by one | ufo (fold.lua) |
+| `z1`..`z5` | n | Fold to level N | fold.lua |
+| `]z` / `[z` | n | Jump to next / prev closed fold | ufo (fold.lua) |
 | `zj` / `zk` | n | Jump to next / prev fold | native |
+| `zp` | n | Peek folded lines under cursor | ufo (fold.lua) |
 | `gx` | n | Open URL/file/Phab `D####`/`T####` under cursor | config/keymaps.lua |
 
 ## Obsidian — `<leader>n*`

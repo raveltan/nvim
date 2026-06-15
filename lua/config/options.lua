@@ -38,15 +38,16 @@ opt.laststatus = 3
 opt.smoothscroll = true
 opt.fillchars = { eob = " ", fold = " ", foldopen = "", foldclose = "", foldsep = "│" }
 
--- Folding. foldmethod/foldexpr are NOT set here — they're applied per-buffer in
--- the treesitter FileType autocmd (lua/plugins/treesitter.lua) so only buffers
--- with a parser (and under the large-buffer guard) get native treesitter folds.
--- vim.treesitter.foldtext() does not exist in 0.12, so foldtext is a custom fn.
-opt.foldenable = true       -- folds allowed; za/zc/zo work
-opt.foldlevel = 99          -- open everything by default (no collapse-on-open)
-opt.foldlevelstart = 99     -- new windows start fully unfolded
-opt.foldnestmax = 4         -- don't fold absurdly deep
+-- Folding. nvim-ufo (lua/plugins/fold.lua) drives folds: it sets
+-- foldmethod=manual and applies LSP/treesitter folds itself, and renders
+-- foldtext via its own fold_virt_text_handler. These global opts are the
+-- baseline ufo requires (foldenable + high foldlevel = open on load).
+opt.foldenable = true       -- folds allowed; za/zc/zo and z1..z5 work
+opt.foldlevel = 99          -- max; foldlevelstart sets the per-buffer open level
+opt.foldlevelstart = 1      -- buffers open folded to level 2 (zR opens all, z1..z5 re-fold)
 opt.foldcolumn = "1"        -- REQUIRED: snacks statuscolumn only draws fold marks when foldcolumn ~= "0"
+-- foldtext fallback for buffers ufo doesn't manage (ufo overrides it per-buffer).
+-- vim.treesitter.foldtext() does not exist in 0.12, so this is a custom fn.
 opt.foldtext = "v:lua.require'config.foldtext'.foldtext()"
 opt.diffopt:append("vertical")
 opt.diffopt:append("algorithm:histogram") -- cleaner diffs than the default myers

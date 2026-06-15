@@ -34,7 +34,7 @@
 
 ### Fold
 - `foldcolumn = "1"`, `foldenable = true`.
-- `foldlevel = 99`, `foldlevelstart = 99` — open everything by default; UFO / treesitter folds become available without auto-collapsing.
+- `foldlevel = 99` (max), `foldlevelstart = 2` — buffers open folded to level 2; `zR` opens all. nvim-ufo (LSP → treesitter folds) computes the folds. See [editor-folding](editor-folding.md).
 
 ### Splits & windows
 - `splitbelow`, `splitright` — natural placement.
@@ -85,7 +85,7 @@ opt.laststatus = 3
 opt.smoothscroll = true
 opt.foldcolumn = "1"
 opt.foldlevel = 99
-opt.foldlevelstart = 99
+opt.foldlevelstart = 2
 opt.foldenable = true
 opt.fillchars = { eob = " " }
 opt.diffopt:append("vertical")
@@ -106,6 +106,6 @@ opt.wrap = true
 
 ## Notes
 
-- Folds default to open (`foldlevel = 99`); use `zc` to collapse the current one.
+- Buffers open folded to level 2 (`foldlevelstart = 2`); use `zR` to open all, `z1`..`z5` to fold to a level, `zo`/`zc` per-fold, `zp` to peek (nvim-ufo, see [editor-folding](editor-folding.md)).
 - `winborder = "rounded"` is a Neovim 0.11+ option — applies to every floating window without each plugin needing to opt in.
 - If you change `shiftwidth`/`tabstop`, also update `.editorconfig` so external tools agree.
