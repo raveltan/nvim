@@ -2,8 +2,8 @@
 > Jump between related files (test ↔ source, component ↔ styles, handler ↔ service…).
 
 **Repo:** https://github.com/rgroli/other.nvim
-**Local spec:** lua/plugins/other.lua:28-906
-**Tags:** workflow navigation related-files rails php angular datastore
+**Local spec:** lua/plugins/other.lua:28-650
+**Tags:** workflow navigation related-files php angular datastore
 
 ## Scope
 Lazy-loaded on `Other*` commands and `<leader>o{o,s,V}`. Pure pattern-matching: each rule has a Lua-pattern `pattern` capturing `%1` (and sometimes `%2`) and a list of candidate `target` paths with human-readable `context` labels. `showMissingFiles = false` means the picker only lists files that actually exist, so we can offer many candidates without noise.
@@ -32,10 +32,7 @@ Lazy-loaded on `Other*` commands and `<leader>o{o,s,V}`. Pure pattern-matching: 
 - `style.newFileIndicator` *(string, "(+)" )* — suffix shown next to missing targets when `showMissingFiles = true`.
 
 ## Our config
-~880 lines of mappings covering five domains:
-
-### Ruby on Rails
-Bidirectional Model ↔ Controller (plural/singular bridge: `users_controller` ↔ `user.rb`) ↔ Spec ↔ Test ↔ Views (index/show/new/edit/_form) ↔ Helper ↔ Policy (Pundit) ↔ Serializer ↔ Decorator (Draper) ↔ Form. Separate Mailer / Job / Service file types each pair with their `spec/` and `test/` counterparts.
+~620 lines of mappings covering four domains: PHP legacy (`src/`), PHP new (`src2/`), Angular webapp, Angular datastore. **Rails navigation was removed (Jun 2026)** — it now lives entirely in vim-rails (`:A`/`:R`/`:E*` + projections), see [[ruby-vim-rails]]. vim-rails is context-aware (`:R` from a controller action jumps to *that* action's view), which flat pattern rules here could not be.
 
 ### PHP legacy (`src/`)
 - `src/<M>/Foo.php` ↔ `test/unit/src/<M>/FooTest.php` / `test/functional/src/<M>/FooFunctionalTest.php` / `test/double/<M>/Foo.php` (infra mocks for `src/Core/{Grpc,Rabbit}`).
@@ -78,5 +75,4 @@ Not gated by `vim.g.gaf` — pattern rules are inert when paths don't match, so 
 - `main = "other-nvim"` is mandatory because lazy.nvim guesses module name as `other` from the repo name; the actual module is `other-nvim`. Without this, `:Other` errors with "module not found".
 - The `seperator` key (sic) is a known upstream typo — don't try to use `separator`, it's silently ignored.
 - For rules with multiple `target` candidates, the picker labels each entry with its `context` string (e.g. "service | handler | controller") so you can pick by role at a glance.
-- Plural/singular handling: Rails rules use two separate patterns (`(.+)s_controller` and `(.+[^s])_controller`) so plural and same-name controllers don't double-match. The non-plural capture anchors the LAST char ≠ s — `([^s].+)` would wrongly exclude controllers *starting* with s (search, stripe, …).
 - `(.*)%.spec%.ts$` → `%1.ts` lives at the bottom on purpose — more-specific patterns earlier in the list win.

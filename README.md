@@ -16,6 +16,7 @@ nvim
 - [`docs/obsidian.md`](docs/obsidian.md) — Obsidian note-taking workflow guide
 - [`docs/nvimdocs/config-init.md`](docs/nvimdocs/config-init.md) — bootstrap order
 - [`docs/nvimdocs/gaf-overview.md`](docs/nvimdocs/gaf-overview.md) — GAF profile
+- [`docs/nvimdocs/ruby-vim-rails.md`](docs/nvimdocs/ruby-vim-rails.md) — Rails navigation (vim-rails `:A`/`:R`/`:E*` + projections)
 
 ## Layout
 

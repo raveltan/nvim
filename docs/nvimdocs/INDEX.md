@@ -165,14 +165,14 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 - [workflow-overseer](workflow-overseer.md) — task runner + auto-discovered templates
 - [workflow-claude-code](workflow-claude-code.md) — Claude Code terminal toggle
-- [workflow-other](workflow-other.md) — related-file navigation (`<leader>o{o,s,v}`)
+- [workflow-other](workflow-other.md) — related-file picker for PHP + Angular (`<leader>o{o,s,v}`); Rails nav delegated to vim-rails
 - [workflow-emmet](workflow-emmet.md) — `<C-y>,` HTML/CSS expansion
 - [workflow-scripts](workflow-scripts.md) — `scripts/` helper shell scripts
 - [workflow-silicon](workflow-silicon.md) — code → image screenshot
 
 ## Ruby / Rails
 
-- [ruby-vim-rails](ruby-vim-rails.md) — tpope/vim-rails `:R*` commands + `gf`
+- [ruby-vim-rails](ruby-vim-rails.md) — Rails nav owner: `:A`/`:R`/`:E*` + projections (Avo, Turbo, FactoryBot, policy/serializer/decorator/form)
 - [ruby-vim-endwise](ruby-vim-endwise.md) — auto-`end` for Ruby/Lua/Vim/Bash
 - [ruby-conform-rubocop](ruby-conform-rubocop.md) — RuboCop formatter integration
 
