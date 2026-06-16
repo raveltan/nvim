@@ -43,8 +43,8 @@ opt.fillchars = { eob = " ", fold = " ", foldopen = "", foldclose = "", fo
 -- foldtext via its own fold_virt_text_handler. These global opts are the
 -- baseline ufo requires (foldenable + high foldlevel = open on load).
 opt.foldenable = true       -- folds allowed; za/zc/zo and z1..z5 work
-opt.foldlevel = 99          -- max; foldlevelstart sets the per-buffer open level
-opt.foldlevelstart = 3      -- buffers open folded to level 3 (zR opens all, z1..z5 re-fold)
+opt.foldlevel = 99         -- all folds open on load; zM/z1..z5 re-fold on demand
+opt.foldlevelstart = 99     -- buffers open fully unfolded (zM closes all, z1..z5 re-fold)
 opt.foldcolumn = "1"        -- REQUIRED: snacks statuscolumn only draws fold marks when foldcolumn ~= "0"
 -- foldtext fallback for buffers ufo doesn't manage (ufo overrides it per-buffer).
 -- vim.treesitter.foldtext() does not exist in 0.12, so this is a custom fn.
