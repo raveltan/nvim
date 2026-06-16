@@ -206,6 +206,28 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>Dr` | n | DB: rename buffer |
 | `<leader>Dq` | n | DB: last query info |
 
+## Redash — `<leader>r*` (GAF=1 only)
+
+`redash.nvim` (local: `~/redash.nvim`) runs ad-hoc SQL through Redash's HTTP API
+— no direct DB access needed. Registered **only** under the GAF profile (the
+plugin spec returns nothing when `GAF` is unset, so `<leader>r` is free
+otherwise). URL via `$REDASH_URL`, API key from `~/brainskey.txt`, default data
+source `FLN-Redshift (Regular Access)`; results render via csvview.
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>ro` | n | Open scratch SQL buffer (full tab) |
+| `<leader>rr` | n, x | Run buffer / visual selection (in sql buffers) |
+| `<leader>rt` | n | Browse schema sidebar (searchable tables/columns) |
+| `<leader>rs` | n | Pick / switch data source |
+| `<leader>rk` | n | Cancel the running query (local + Redash job) |
+
+**In the result window:** `<CR>` row detail · `e` export (CSV/TSV/JSON/MD/clipboard) · `q`/`<Esc>` close · `<Tab>`/`<S-Tab>` next/prev column · `if`/`af` field text-objects (csvview).
+
+**In the schema sidebar:** `<CR>` expand table / insert column · `i` insert name · `p` preview table · `/` filter · `f` fuzzy pick · `r` refresh · `q` close.
+
+**Commands:** `:Redash` · `:RedashRun` · `:RedashSource` · `:RedashTables` · `:RedashCancel`.
+
 ## Navigation / Motion
 
 | Key | Mode | Description | Source |
@@ -393,7 +415,7 @@ ERB examples:
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile · `g` goto · `gs` surround
 
 ## Known overlaps
 

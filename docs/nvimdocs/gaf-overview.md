@@ -39,6 +39,7 @@ Provided by sub-modules — these are the GAF-gated additions on top of base key
 | `<leader>tp`/`tP` | n | neotest-profile.lua | Run/replay with `XDEBUG_MODE=profile` |
 | `<leader>tm`/`tw` | n | test.lua | UI test mobile / watch flags |
 | `gx` on `D####`/`T####` | n | keymaps.lua | Open Phabricator URL |
+| `<leader>r*` / `:Redash*` | n, cmd | redash.nvim ([prod-redash](prod-redash.md)) | Run SQL via Redash HTTP API — scratch, run, schema sidebar, cancel |
 
 ## Workflow examples
 

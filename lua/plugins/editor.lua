@@ -282,8 +282,8 @@ return {
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
-    opts = {
-      spec = {
+    opts = function()
+      local spec = {
         { "<leader>b",  group = "buffer" },
         { "<leader>c",  group = "code" },
         { "<leader>cs", group = "swap" },
@@ -306,8 +306,14 @@ return {
         { "<leader>X",  group = "xdebug profile" },
         { "g",          group = "goto" },
         { "gs",         group = "surround" },
-      },
-    },
+      }
+      -- Redash keys are registered only under the GAF profile — keep the
+      -- which-key group out of <leader>r when redash.nvim isn't loaded.
+      if vim.g.gaf then
+        table.insert(spec, { "<leader>r", group = "redash" })
+      end
+      return { spec = spec }
+    end,
   },
   -- Obsidian vault integration (community-maintained fork; epwalsh's repo is abandoned).
   -- ui.enable = false: checkmate.nvim owns checkbox rendering, prevents extmark collision.
