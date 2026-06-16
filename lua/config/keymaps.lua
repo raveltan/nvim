@@ -126,7 +126,11 @@ map("n", "<leader>cr", function()
     end, bufnr)
   end)
 end, { desc = "Rename symbol" })
-map("n", "K", vim.lsp.buf.hover, { desc = "Hover docs" })
+-- Wrap in a closure: keymaps.lua runs at startup (init.lua), but noice swaps
+-- `vim.lsp.buf.hover` for its styled view later on VeryLazy. Binding the bare
+-- reference here captures the native float (plain markdown, ugly since markview
+-- skips `nofile`). The closure dereferences at call-time, so K hits noice.
+map("n", "K", function() vim.lsp.buf.hover() end, { desc = "Hover docs" })
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })
 map("n", "[d", function() vim.diagnostic.jump({ count = -1 }) end, { desc = "Prev diagnostic" })
 map("n", "]d", function() vim.diagnostic.jump({ count = 1 }) end, { desc = "Next diagnostic" })
