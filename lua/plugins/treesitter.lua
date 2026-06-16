@@ -8,10 +8,13 @@ return {
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter").install({
-        "angular", "bash", "css", "dart", "embedded_template", "html", "javascript", "json", "lua",
+        "angular", "bash", "blade", "css", "dart", "diff", "embedded_template", "html", "javascript", "json", "lua",
         "markdown", "markdown_inline", "php", "php_only", "python", "regex",
         "ruby", "rust", "tsx", "typescript", "vim", "vimdoc", "yaml",
       })
+      -- `diff`: actions-preview.nvim renders the code-action preview in a `diff`
+      -- filetype buffer and calls vim.treesitter.start, which asserts hard if the
+      -- parser is missing. LSP code actions (e.g. intelephense quickfixes) hit this.
       -- `angular` parser auto-injects into @Component({ template: `...` })
       -- backtick strings via nvim-treesitter's ecma/injections.scm — no extra
       -- query needed. The archived nvim-treesitter-angular plugin is NOT added

@@ -96,7 +96,7 @@ return {
         end,
       })
 
-      -- Intelephense (PHP) — replaces phpantom
+      -- Intelephense (PHP)
       vim.lsp.config("intelephense", {
         capabilities = capabilities,
         filetypes = { "php" },

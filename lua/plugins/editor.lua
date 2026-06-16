@@ -134,7 +134,11 @@ return {
     opts = {
       preview = {
         filetypes = { "markdown", "Avante" },
-        ignore_buftypes = {},
+        -- Ignore `nofile` buffers: LSP hover floats (vim.lsp.buf.hover) are
+        -- nofile + filetype=markdown, so an empty list let markview attach and
+        -- draw its code-block box on them — collapsing intelephense's `<?php` hover
+        -- to a ~3-char-wide popup. Real .md files are normal buftype, still render.
+        ignore_buftypes = { "nofile" },
       },
     },
   },
