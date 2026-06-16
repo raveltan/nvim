@@ -34,6 +34,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>fr` | n | Recent files | snacks.picker |
 | `<leader>fc` | n | Find config file | snacks.picker |
 | `<leader>fR` | n | Rename file | snacks.rename |
+| `<leader>fo` | n | Open current file's dir in Finder | fff.nvim |
 | `<leader>ha` | n | Harpoon add | harpoon |
 | `<leader>hh` | n | Harpoon menu | harpoon |
 | `<leader>1`–`<leader>8` | n | Harpoon slot 1–8 | harpoon |
@@ -392,7 +393,7 @@ ERB examples:
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile · `g` goto · `gs` surround
 
 ## Known overlaps
 

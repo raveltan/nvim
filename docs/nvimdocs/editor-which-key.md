@@ -16,7 +16,7 @@
   "folke/which-key.nvim",
   event = "VeryLazy",
   opts = {
-    spec = { { "<leader>f", group = "find" }, ... },
+    spec = { { "<leader>f", group = "find/files" }, ... },
   },
 }
 ```
@@ -43,7 +43,7 @@ All customisation is in `opts.spec`. Registered group prefixes:
 
 | Prefix | Label |
 |--------|-------|
-| `<leader>f` | find |
+| `<leader>f` | find/files |
 | `<leader>s` | search |
 | `<leader>g` | git |
 | `<leader>gh` | hunks |

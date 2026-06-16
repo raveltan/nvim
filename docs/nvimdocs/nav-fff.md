@@ -65,6 +65,7 @@ A single-purpose picker focused on the two most-common motions: "find a file" an
 | `<leader>ff` | n | `fff.find_files()` | Find files (fresh, no resume) |
 | `<leader>fd` | n | `fff.find_files_in_dir(%:p:h)` | Files in current buffer's dir |
 | `<leader>fc` | n | indexes `stdpath("config")` then restores cwd on close | Files in nvim config |
+| `<leader>fo` | n | `vim.ui.open(%:p:h or cwd)` | Open current file's dir in Finder |
 | `<leader>sg` | n | `fff.live_grep({ query = last_query.grep })` | Live grep cwd, resumes last query |
 | `<leader>sw` | n / x | `fff.live_grep({ query = <cword> })` | Grep word under cursor / selection |
 | `<leader>sz` | n | `fff.live_grep({ grep.modes = {"fuzzy","plain"} })` | Fuzzy grep |

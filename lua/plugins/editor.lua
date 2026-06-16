@@ -290,7 +290,7 @@ return {
         { "<leader>cv", group = "case convert" },
         { "<leader>d",  group = "debug" },
         { "<leader>D",  group = "database" },
-        { "<leader>f",  group = "find" },
+        { "<leader>f",  group = "find/files" },
         { "<leader>g",  group = "git" },
         { "<leader>h",  group = "harpoon" },
         { "<leader>k",  group = "docs (devdocs/nvimdocs)" },

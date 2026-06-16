@@ -50,6 +50,12 @@ return {
             pcall(require("fff").change_indexing_directory, cwd)
           end
         end, desc = "Config files" },
+      { "<leader>fo", function()
+          -- %:p:h = current file's dir; fall back to cwd for unnamed buffers.
+          local dir = vim.fn.expand("%:p:h")
+          if dir == "" then dir = vim.fn.getcwd() end
+          vim.ui.open(dir)
+        end, desc = "Open file dir in Finder" },
       { "<leader>sg", function() patch_close_once(); require("fff").live_grep() end, desc = "Live grep" },
       { "<leader>sG", function() patch_close_once(); require("fff").live_grep({ query = last_query.grep }) end, desc = "Live grep (resume last query)" },
       { "<leader>sw", function() require("fff").live_grep({ query = vim.fn.expand("<cword>") }) end, mode = { "n", "x" }, desc = "Grep word" },
