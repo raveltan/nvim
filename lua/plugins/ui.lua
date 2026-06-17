@@ -272,7 +272,12 @@ return {
         view = "cmdline", -- use inline cmdline to avoid E11 split errors in command-line window
       },
       lsp = {
-        hover = { enabled = true },
+        -- silent: noice's hover is a per-client handler (noice/lsp/hover.lua) run
+        -- once per client via buf_request. On multi-client buffers (TS attaches
+        -- typos_lsp + tailwindcss alongside typescript-tools) any client with no
+        -- hover at the cursor fires `vim.notify("No information available")` even
+        -- when another client returns real hover. Suppress that spurious notify.
+        hover = { enabled = true, silent = true },
         signature = { enabled = false }, -- blink.cmp handles signature help
         message = { enabled = true },
         progress = { enabled = false },  -- fidget.nvim owns LSP progress
