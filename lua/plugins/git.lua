@@ -41,6 +41,8 @@ return {
           end, { desc = "Prev hunk" })
 
           -- Hunk actions — promoted to <leader>g (inline preview + reset only)
+          map("n", "<leader>gb", function() require("util.blame").blame("diff") end, { desc = "Blame line (diff)" })
+          map("n", "<leader>gB", function() require("util.blame").blame("message") end, { desc = "Blame line (message)" })
           map("n", "<leader>gp", gs.preview_hunk_inline, { desc = "Preview hunk (inline)" })
           map("n", "<leader>gr", gs.reset_hunk, { desc = "Reset hunk" })
           map("v", "<leader>gr", function()

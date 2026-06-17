@@ -69,7 +69,7 @@ local function pick_commits(opts)
         ctx.preview:reset()
         ctx.preview:set_lines({ "Loading " .. sha .. " …" })
         vim.system(
-          { "git", "show", "--stat", "-p", sha, "--", opts.rel },
+          { "git", "show", "--format=", "--stat", "-p", sha, "--", opts.rel },
           { text = true },
           vim.schedule_wrap(function(show_res)
             local out = vim.split(show_res.stdout or "", "\n")
