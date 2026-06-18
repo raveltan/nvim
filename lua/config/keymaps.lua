@@ -131,25 +131,25 @@ map("n", "<leader>ci", function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end, { desc = "Toggle inlay hints" })
 
--- Case conversion via vim-abolish (operates on word under cursor).
--- One picker → choose target case, feeds the abolish `cr{x}iw` coercion.
+-- Case conversion 
 map("n", "<leader>cv", function()
+  local win = vim.api.nvim_get_current_win()
+  local pos = vim.api.nvim_win_get_cursor(win)
   local cases = {
     { label = "snake_case", key = "s" },
     { label = "camelCase",  key = "c" },
     { label = "PascalCase", key = "m" },
     { label = "UPPER_CASE", key = "u" },
     { label = "kebab-case", key = "-" },
-    { label = "dot.case",   key = "." },
-    { label = "Title Case", key = "t" },
   }
   vim.ui.select(cases, {
     prompt = "Convert case:",
     format_item = function(item) return item.label end,
   }, function(choice)
-    if not choice then return end
-    -- "m" (remap) so vim-abolish's `cr` coercion operator is honored
-    vim.api.nvim_feedkeys("cr" .. choice.key .. "iw", "m", false)
+    if not choice or not vim.api.nvim_win_is_valid(win) then return end
+    vim.api.nvim_set_current_win(win)
+    vim.api.nvim_win_set_cursor(win, pos)
+    vim.cmd.normal({ "cr" .. choice.key, bang = false })
   end)
 end, { desc = "Convert case (picker)" })
 

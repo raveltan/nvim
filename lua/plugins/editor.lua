@@ -485,8 +485,16 @@ return {
   -- Makes `.` repeat plugin mappings (mini.surround, yanky, etc.)
   { "tpope/vim-repeat", event = "VeryLazy" },
 
-  -- Case-preserving :Subvert/:S and `crs`/`crc`/`crm`/`cru`/`cr-`/`cr.` case coercions
-  { "tpope/vim-abolish", event = "VeryLazy" },
+  -- Case conversion. Used only for its pure string functions
+  -- (require("textcase.conversions.stringcase")), driven by the <leader>cv
+  -- picker in lua/config/keymaps.lua. Default `ga`/`gA` keymaps off.
+  {
+    "johmsalas/text-case.nvim",
+    lazy = true,
+    config = function()
+      require("textcase").setup({ default_keymappings_enabled = false })
+    end,
+  },
 
   -- Better quickfix: editable, prettier
   {
