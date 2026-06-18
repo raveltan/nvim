@@ -41,10 +41,11 @@ return {
             if not skip_ts_indent[vim.bo[args.buf].filetype] then
               vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
             end
-            -- Folding is NOT wired here. nvim-ufo (lua/plugins/fold.lua) owns folds:
-            -- it sets foldmethod=manual and applies LSP/treesitter folds itself, so
-            -- setting foldmethod=expr here would fight it. ufo's treesitter provider
-            -- still uses these parsers as the fallback when a buffer has no LSP folds.
+            -- Treesitter folding (window-local). foldlevel=99 in config/options.lua
+            -- keeps folds open on load; zc/za fold a function on demand. Set only
+            -- when a parser exists, so large/parserless buffers keep default folds.
+            vim.api.nvim_set_option_value("foldmethod", "expr", { scope = "local" })
+            vim.api.nvim_set_option_value("foldexpr", "v:lua.vim.treesitter.foldexpr()", { scope = "local" })
           end
         end,
       })
