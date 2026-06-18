@@ -18,7 +18,7 @@ require("lazy").setup({
   spec = {
     { import = "plugins" },
   },
-  install = { colorscheme = { "gruvbox-baby", "habamax" } },
+  install = { colorscheme = { "gruvbox-baby" } },
   checker = {
     enabled = false,
   },
@@ -33,8 +33,6 @@ require("lazy").setup({
         "tohtml",
         "tutor",
         "zipPlugin",
-        -- oil (canola) owns file exploration; netrw runtime is dead weight.
-        -- `gx` uses vim.ui.open (keymaps.lua), not netrw.
         "netrwPlugin",
         -- vim-matchup supersedes the built-in matchit/matchparen. Disabling
         -- the builtins is matchup's recommended setup (avoids the runtime

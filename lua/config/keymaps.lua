@@ -1,15 +1,5 @@
 local map = vim.keymap.set
 
--- Granular undo: break the insert-undo so one `u` doesn't wipe a whole insert
--- session. C-w/C-u become separately undoable; sentence punctuation splits a
--- paragraph into per-sentence undo steps. (Tradeoff: `.` dot-repeat only
--- replays the last chunk after a break.)
-map("i", "<C-w>", "<C-g>u<C-w>", { desc = "Delete word (undo break)" })
-map("i", "<C-u>", "<C-g>u<C-u>", { desc = "Delete to BOL (undo break)" })
-for _, ch in ipairs({ ".", ",", ";", "!", "?" }) do
-  map("i", ch, ch .. "<C-g>u")
-end
-
 -- Window splits
 map("n", "<leader>|", "<cmd>vsplit<cr>", { desc = "Vertical split" })
 map("n", "<leader>-", "<cmd>split<cr>", { desc = "Horizontal split" })
@@ -20,19 +10,8 @@ map("n", "<A-k>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
 map("v", "<A-j>", ":m '>+1<cr>gv=gv", { desc = "Move selection down" })
 map("v", "<A-k>", ":m '<-2<cr>gv=gv", { desc = "Move selection up" })
 
--- Save
-map({ "n", "i", "x", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save file" })
-
 -- Buffer
-map("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev buffer" })
-map("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 map("n", "<leader>bo", "<cmd>%bd|e#|bd#<cr>", { desc = "Close other buffers" })
-
--- Window resize
-map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
-map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
-map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
-map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
 -- Window resize submode: press <leader>ur, then h/j/k/l (shift = bigger step), = to equalize, Esc/q to exit
 local function resize_submode()
@@ -134,34 +113,52 @@ map("n", "K", function() vim.lsp.buf.hover() end, { desc = "Hover docs" })
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })
 map("n", "[d", function() vim.diagnostic.jump({ count = -1 }) end, { desc = "Prev diagnostic" })
 map("n", "]d", function() vim.diagnostic.jump({ count = 1 }) end, { desc = "Next diagnostic" })
-map("n", "[e", function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR }) end, { desc = "Prev error" })
-map("n", "]e", function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR }) end, { desc = "Next error" })
-map("n", "[w", function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.WARN }) end, { desc = "Prev warning" })
-map("n", "]w", function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.WARN }) end, { desc = "Next warning" })
+
+-- Quickfix list navigation (wraps around; centers cursor line)
+local function qf_jump(forward)
+  if not pcall(vim.cmd, forward and "cnext" or "cprev") then
+    pcall(vim.cmd, forward and "cfirst" or "clast")
+  end
+  vim.cmd("normal! zz")
+end
+map("n", "]q", function() qf_jump(true) end, { desc = "Next quickfix item" })
+map("n", "[q", function() qf_jump(false) end, { desc = "Prev quickfix item" })
+map("n", "]Q", "<cmd>silent! clast<cr>zz", { desc = "Last quickfix item" })
+map("n", "[Q", "<cmd>silent! cfirst<cr>zz", { desc = "First quickfix item" })
 
 -- Inlay hints toggle
 map("n", "<leader>ci", function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end, { desc = "Toggle inlay hints" })
 
--- Case conversion via vim-abolish (operates on word under cursor)
-map("n", "<leader>cvs", "crsiw", { remap = true, desc = "snake_case" })
-map("n", "<leader>cvc", "crciw", { remap = true, desc = "camelCase" })
-map("n", "<leader>cvp", "crmiw", { remap = true, desc = "PascalCase" })
-map("n", "<leader>cvu", "cruiw", { remap = true, desc = "UPPER_CASE" })
-map("n", "<leader>cvk", "cr-iw", { remap = true, desc = "kebab-case" })
-map("n", "<leader>cvd", "cr.iw", { remap = true, desc = "dot.case" })
-map("n", "<leader>cvt", "crtiw", { remap = true, desc = "Title Case" })
+-- Case conversion via vim-abolish (operates on word under cursor).
+-- One picker → choose target case, feeds the abolish `cr{x}iw` coercion.
+map("n", "<leader>cv", function()
+  local cases = {
+    { label = "snake_case", key = "s" },
+    { label = "camelCase",  key = "c" },
+    { label = "PascalCase", key = "m" },
+    { label = "UPPER_CASE", key = "u" },
+    { label = "kebab-case", key = "-" },
+    { label = "dot.case",   key = "." },
+    { label = "Title Case", key = "t" },
+  }
+  vim.ui.select(cases, {
+    prompt = "Convert case:",
+    format_item = function(item) return item.label end,
+  }, function(choice)
+    if not choice then return end
+    -- "m" (remap) so vim-abolish's `cr` coercion operator is honored
+    vim.api.nvim_feedkeys("cr" .. choice.key .. "iw", "m", false)
+  end)
+end, { desc = "Convert case (picker)" })
 
 -- Better indentation (keep selection)
 map("v", "<", "<gv")
 map("v", ">", ">gv")
 
--- Paste without overwriting register
-map("x", "<leader>p", [["_dP]], { desc = "Paste without overwrite" })
-
--- New file
-map("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New file" })
+-- Paste over selection without clobbering the unnamed register (default in visual mode)
+map("x", "p", [["_dP]], { desc = "Paste without overwrite" })
 
 -- Location list (quickfix toggle lives in the quicker.nvim spec → <leader>xq)
 map("n", "<leader>xl", function()
@@ -173,11 +170,6 @@ map("n", "<leader>xl", function()
   end
   pcall(vim.cmd.lopen)
 end, { desc = "Toggle loclist" })
-
--- Grep word under cursor
-map("n", "gw", function()
-  Snacks.picker.grep({ search = vim.fn.expand("<cword>") })
-end, { desc = "Grep word under cursor" })
 
 -- Center after jumps
 map("n", "<C-d>", "15jzz", { desc = "Small jump down (centered)" })
@@ -197,6 +189,7 @@ map("n", "[[", function() search_cword("N") end, { desc = "Prev occurrence of wo
 -- Join without moving cursor
 map("n", "J", "mzJ`z", { desc = "Join lines" })
 
+-- Open URL/file under cursor (Phabricator-aware under the GAF profile)
 map("n", "gx", function()
   if vim.g.gaf and require("gaf.keymaps").open_phab_under_cursor() then return end
   local cfile = vim.fn.expand("<cfile>")

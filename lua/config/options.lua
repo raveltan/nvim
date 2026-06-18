@@ -62,12 +62,4 @@ opt.wrap = true
 opt.textwidth = 150
 opt.colorcolumn = "80,150"
 opt.formatoptions:append("t")
-
--- LSP logging OFF. The stale-cancel spam ("Cannot find request with id N whilst
--- attempting to cancel") is emitted at ERROR level (vim/lsp/client.lua), so it
--- passes every threshold except OFF — WARN/ERROR thresholds still write it
--- (87k+ lines, ~95% of a 32MB log, ruby_lsp worst). Each write is a blocking
--- io.write+flush on the main loop; bursts of 30+/sec while typing stalled the UI
--- and made blink.cmp + which-key fail to render. OFF disables lsp.log entirely;
--- re-enable temporarily for debugging with :lua vim.lsp.log.set_level("error").
 vim.lsp.log.set_level(vim.log.levels.OFF)
