@@ -126,6 +126,24 @@ map("n", "[q", function() qf_jump(false) end, { desc = "Prev quickfix item" })
 map("n", "]Q", "<cmd>silent! clast<cr>zz", { desc = "Last quickfix item" })
 map("n", "[Q", "<cmd>silent! cfirst<cr>zz", { desc = "First quickfix item" })
 
+-- Quickfix operators: act on the whole list, not one entry at a time.
+-- Typical flow: <leader>sg grep → <C-q> (fff/snacks send to qf) → <leader>xr.
+-- Find/replace across every qf entry, saving each touched file (:cdo … | update).
+map("n", "<leader>xr", function()
+  if vim.fn.getqflist({ size = 0 }).size == 0 then
+    vim.notify("Quickfix list is empty", vim.log.levels.WARN)
+    return
+  end
+  local pat = vim.fn.input("cdo s/")
+  if pat == "" then return end
+  -- pcall: a bad pattern or zero substitutions on an entry shouldn't abort the run.
+  pcall(vim.cmd, "cdo s/" .. pat .. " | update")
+end, { desc = "Replace across quickfix (:cdo)" })
+-- Dump all project diagnostics into the quickfix list (walkable with ]q, editable via quicker).
+map("n", "<leader>xd", function() vim.diagnostic.setqflist() end, { desc = "Diagnostics → quickfix" })
+-- All TODO/FIX/HACK comments → quickfix (todo-comments.nvim registers the command on VeryLazy).
+map("n", "<leader>xt", "<cmd>TodoQuickFix<cr>", { desc = "TODOs → quickfix" })
+
 -- Inlay hints toggle
 map("n", "<leader>ci", function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
