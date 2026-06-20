@@ -30,7 +30,7 @@ return {
       notifier = { enabled = true },
       quickfile = { enabled = true },
       scope = { enabled = true },
-      scratch = { enabled = true },
+      scratch = { enabled = false },
       dashboard = {
         enabled = true,
         sections = {
@@ -130,12 +130,10 @@ return {
       { "<leader>fp", function() Snacks.picker.projects() end, desc = "Projects" },
       { "<leader>,", function() Snacks.picker.buffers() end, desc = "Buffers" },
       -- Search
-      { "<leader>sb", function() Snacks.picker.lines() end, desc = "Buffer lines" },
       { "<leader>sh", function() Snacks.picker.help() end, desc = "Help pages" },
       { "<leader>sk", function() Snacks.picker.keymaps() end, desc = "Keymaps" },
       { "<leader>sc", function() Snacks.picker.commands() end, desc = "Commands" },
       { "<leader>sd", function() Snacks.picker.diagnostics() end, desc = "Diagnostics" },
-      { "<leader>sl", function() Snacks.picker.resume() end, desc = "Resume last picker" },
       -- LSP
       { "<leader>ss", function() Snacks.picker.lsp_symbols() end, desc = "Document symbols" },
       { "<leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "Workspace symbols" },
@@ -153,9 +151,6 @@ return {
       -- Tools
       { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
       { "<leader>fR", function() Snacks.rename.rename_file() end, desc = "Rename file" },
-      -- Scratch (project-scoped scratchpad, persisted under stdpath('data'))
-      { "<leader>.",  function() Snacks.scratch() end,        desc = "Toggle scratch buffer" },
-      { "<leader>fs", function() Snacks.scratch.select() end, desc = "Select scratch buffer" },
     },
   },
   {

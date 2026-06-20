@@ -9,7 +9,7 @@ return {
       vim.opt.splitkeep = "screen"
     end,
     opts = {
-      animate = { enabled = false }, -- indentscope already animates; avoids panel-open lag
+      animate = { enabled = false }, 
       wo = {
         winbar = true,
         winfixwidth = true,

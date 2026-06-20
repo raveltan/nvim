@@ -354,7 +354,7 @@ return {
         accept = { resolve_timeout_ms = 500 },
         documentation = {
           auto_show = true,
-          auto_show_delay_ms = 200,
+          auto_show_delay_ms = 100,
           window = { border = "rounded", winblend = 0 },
         },
         -- Disabled: inline ghost text (virt_text_pos='inline' in ns blink_cmp)

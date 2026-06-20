@@ -19,37 +19,7 @@ return {
     build = function() require("fff.download").download_or_build_binary() end,
     cmd = { "FFFScan", "FFFRefreshGit", "FFFClearCache", "FFFHealth", "FFFDebug", "FFFOpenLog" },
     keys = {
-      { "<leader><leader>", function() patch_close_once(); require("fff").find_files({ query = last_query.files }) end, desc = "Find files (resume last query)" },
-      { "<leader>ff", function() require("fff").find_files() end, desc = "Find files" },
-      { "<leader>fd", function()
-          -- Query prefill instead of find_files_in_dir: change_indexing_directory
-          -- permanently re-points the index at the subdir (and re-indexes), so all
-          -- later <leader>ff searches would silently stay scoped there.
-          local dir = vim.fn.expand("%:.:h")
-          local query = (dir ~= "" and dir ~= ".") and (dir .. "/") or ""
-          require("fff").find_files({ query = query })
-        end, desc = "Files in buffer dir" },
-      { "<leader>fc", function()
-          local cwd = vim.fn.getcwd()
-          require("fff").find_files_in_dir(vim.fn.stdpath("config"))
-          local win = require("fff.picker_ui").state.input_win
-          if win then
-            -- WinClosed's pattern is matched against the window ID, so this
-            -- fires only when the picker's input window closes (picker_ui.close
-            -- always closes input_win), not on unrelated floats — a patternless
-            -- once=true autocmd was consumed by ANY closing window (fidget,
-            -- notifications), restoring the index under the open picker.
-            vim.api.nvim_create_autocmd("WinClosed", {
-              pattern = tostring(win),
-              once = true,
-              callback = function() pcall(require("fff").change_indexing_directory, cwd) end,
-            })
-          else
-            -- Picker failed to open but find_files_in_dir already re-pointed
-            -- the index; restore immediately.
-            pcall(require("fff").change_indexing_directory, cwd)
-          end
-        end, desc = "Config files" },
+      { "<leader><leader>", function() require("fff").find_files() end, desc = "Find files" },
       { "<leader>fo", function()
           -- %:p:h = current file's dir; fall back to cwd for unnamed buffers.
           local dir = vim.fn.expand("%:p:h")
@@ -57,7 +27,6 @@ return {
           vim.ui.open(dir)
         end, desc = "Open file dir in Finder" },
       { "<leader>sg", function() patch_close_once(); require("fff").live_grep() end, desc = "Live grep" },
-      { "<leader>sG", function() patch_close_once(); require("fff").live_grep({ query = last_query.grep }) end, desc = "Live grep (resume last query)" },
       { "<leader>sw", function() require("fff").live_grep({ query = vim.fn.expand("<cword>") }) end, mode = { "n", "x" }, desc = "Grep word" },
       { "<leader>sz", function() require("fff").live_grep({ grep = { modes = { "fuzzy", "plain" } } }) end, desc = "Fuzzy grep" },
       { "<leader>s.", function() require("fff").live_grep({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Grep in current file dir" },

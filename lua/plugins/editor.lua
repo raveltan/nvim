@@ -542,15 +542,4 @@ return {
       { "];", function() require("dropbar.api").select_next_context() end, desc = "Select next context" },
     },
   },
-
-  -- Cycle LSP references inline with ]r / [r (no picker)
-  {
-    "mawkler/refjump.nvim",
-    keys = { "]r", "[r" },
-    opts = {
-      keymaps = { enable = true },
-      highlights = { enable = true },
-    },
-  },
-
 }
