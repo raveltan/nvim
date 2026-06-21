@@ -228,6 +228,31 @@ source `FLN-Redshift (Regular Access)`; results render via csvview.
 
 **Commands:** `:Redash` · `:RedashRun` · `:RedashSource` · `:RedashTables` · `:RedashCancel`.
 
+## REST client (Kulala) — `<leader>R*`
+
+`kulala.nvim` runs HTTP requests from `.http`/`.rest` files. The first five keys
+work in any buffer (and lazy-load the plugin); the rest are scoped to
+`http`/`rest` buffers. `curl` required, `jq` recommended for JSON formatting.
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>Ro` | n | Open Kulala UI |
+| `<leader>Rb` | n | Scratchpad (ad-hoc request buffer) |
+| `<leader>Rs` | n, v | Send request under cursor / selection |
+| `<leader>Ra` | n, v | Send all requests in file |
+| `<leader>Rr` | n | Replay last request |
+| `<leader>Rt` | n | Toggle headers/body view |
+| `<leader>Ri` | n | Inspect parsed request |
+| `<leader>RS` | n | Show response stats |
+| `<leader>Rf` | n | Find request (picker) |
+| `<leader>Rn` / `<leader>Rp` | n | Next / prev request |
+| `<leader>Re` | n | Select environment |
+| `<leader>Rc` / `<leader>RC` | n | Copy as cURL / paste from cURL |
+| `<leader>Rj` | n | Open cookies jar |
+| `<leader>Rg` | n | Download GraphQL schema |
+| `<leader>Rq` | n | Close result window |
+| `<leader>Rx` / `<leader>RX` | n | Clear global vars / cached files |
+
 ## Navigation / Motion
 
 | Key | Mode | Description | Source |
@@ -415,7 +440,7 @@ ERB examples:
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile · `g` goto · `gs` surround
 
 ## Known overlaps
 

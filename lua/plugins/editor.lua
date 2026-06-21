@@ -299,6 +299,7 @@ return {
         { "<leader>k",  group = "docs (devdocs/nvimdocs)" },
         { "<leader>n",  group = "obsidian" },
         { "<leader>o",  group = "overseer/other" },
+        { "<leader>R",  group = "rest (kulala)" },
         { "<leader>s",  group = "search" },
         { "<leader>S",  group = "snippets" },
         { "<leader>t",  group = "todo/test" },

@@ -182,4 +182,58 @@ return {
     end,
   },
 
+  -- REST/HTTP client: edit `.http`/`.rest` files and fire requests from inside
+  -- nvim. kulala-core (the request runner) auto-downloads from GitHub releases
+  -- on first run; `curl` is the transport, `jq` pretty-prints JSON responses.
+  --
+  -- We drive everything off explicit `<leader>R*` keymaps below and keep
+  -- `global_keymaps = false` so kulala doesn't also register its own default
+  -- bindings — this config owns the prefix and the which-key descriptions.
+  -- Global entry points (open / send / scratchpad / replay) load the plugin
+  -- from any buffer; the rest are gated to `http`/`rest` buffers via `ft` so
+  -- they only surface where a request actually exists.
+  {
+    "mistweaverco/kulala.nvim",
+    version = "*", -- stable releases; the core binary is matched to the tag
+    ft = { "http", "rest" },
+    opts = {
+      global_keymaps = false,
+      default_env = "default",
+      -- Also read VSCode rest-client `.vscode/settings.json` /
+      -- `*.code-workspace` env vars when present, merged under http-client.env.json.
+      vscode_rest_client_environmentvars = true,
+      ui = {
+        display_mode = "split",     -- result opens in a split, not a float
+        split_direction = "vertical",
+        default_view = "body",      -- show response body first; toggle to headers
+        winbar = true,              -- pane switcher (body/headers/verbose/stats)
+        show_request_summary = true,
+      },
+    },
+    keys = {
+      -- Global entry points (work from any buffer; also lazy-load the plugin)
+      { "<leader>Ro", function() require("kulala").open() end,       desc = "Kulala: open UI" },
+      { "<leader>Rb", function() require("kulala").scratchpad() end, desc = "Kulala: scratchpad" },
+      { "<leader>Rs", function() require("kulala").run() end,        mode = { "n", "v" }, desc = "Kulala: send request" },
+      { "<leader>Ra", function() require("kulala").run_all() end,    mode = { "n", "v" }, desc = "Kulala: send all requests" },
+      { "<leader>Rr", function() require("kulala").replay() end,     desc = "Kulala: replay last request" },
+
+      -- http/rest buffer actions
+      { "<leader>Rt", function() require("kulala").toggle_view() end,            ft = { "http", "rest" }, desc = "Kulala: toggle headers/body" },
+      { "<leader>Ri", function() require("kulala").inspect() end,                ft = { "http", "rest" }, desc = "Kulala: inspect request" },
+      { "<leader>RS", function() require("kulala").show_stats() end,             ft = { "http", "rest" }, desc = "Kulala: show stats" },
+      { "<leader>Rf", function() require("kulala").search() end,                 ft = { "http", "rest" }, desc = "Kulala: find request" },
+      { "<leader>Rn", function() require("kulala").jump_next() end,              ft = { "http", "rest" }, desc = "Kulala: next request" },
+      { "<leader>Rp", function() require("kulala").jump_prev() end,              ft = { "http", "rest" }, desc = "Kulala: prev request" },
+      { "<leader>Re", function() require("kulala").set_selected_env() end,       ft = { "http", "rest" }, desc = "Kulala: select environment" },
+      { "<leader>Rc", function() require("kulala").copy() end,                   ft = { "http", "rest" }, desc = "Kulala: copy as cURL" },
+      { "<leader>RC", function() require("kulala").from_curl() end,              ft = { "http", "rest" }, desc = "Kulala: paste from cURL" },
+      { "<leader>Rj", function() require("kulala").open_cookies_jar() end,       ft = { "http", "rest" }, desc = "Kulala: open cookies jar" },
+      { "<leader>Rg", function() require("kulala").download_graphql_schema() end, ft = { "http", "rest" }, desc = "Kulala: download GraphQL schema" },
+      { "<leader>Rq", function() require("kulala").close() end,                  ft = { "http", "rest" }, desc = "Kulala: close window" },
+      { "<leader>Rx", function() require("kulala").scripts_clear_global() end,   ft = { "http", "rest" }, desc = "Kulala: clear global vars" },
+      { "<leader>RX", function() require("kulala").clear_cached_files() end,     ft = { "http", "rest" }, desc = "Kulala: clear cached files" },
+    },
+  },
+
 }

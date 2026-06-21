@@ -160,6 +160,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [prod-typescript-tools](prod-typescript-tools.md) — TS LSP w/ source actions
 - [prod-dadbod](prod-dadbod.md) — DB client (`<leader>D*`)
 - [prod-redash](prod-redash.md) — Redash HTTP SQL client (`<leader>r*`, GAF=1)
+- [prod-kulala](prod-kulala.md) — REST/HTTP client for `.http`/`.rest` files (`<leader>R*`)
 - [prod-template-string](prod-template-string.md) — `"..."` → `` `...` `` on `${`
 
 ## Workflow
