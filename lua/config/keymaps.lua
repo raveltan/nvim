@@ -149,25 +149,45 @@ map("n", "<leader>ci", function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
 end, { desc = "Toggle inlay hints" })
 
--- Case conversion 
+-- Case conversion
 map("n", "<leader>cv", function()
   local win = vim.api.nvim_get_current_win()
-  local pos = vim.api.nvim_win_get_cursor(win)
+  local pos = vim.api.nvim_win_get_cursor(win) -- (row, col) 1-based row, 0-based col
+  local row, col = pos[1] - 1, pos[2]
+  local line = vim.api.nvim_get_current_line()
+
+  -- Identify the full identifier under the cursor, including separators (`-`,
+  -- `_`). text-case's current_word() operates on `aw`/<cword>, which stops at
+  -- `-`, so a kebab-case token like `hello-world` is only seen as `hello`.
+  -- We extract the whole [%w_-] run ourselves and convert the raw string.
+  local function is_tok(c) return c ~= "" and c:match("[%w_%-]") ~= nil end
+  local s = col -- 0-based start
+  while s > 0 and is_tok(line:sub(s, s)) do s = s - 1 end
+  if not is_tok(line:sub(s + 1, s + 1)) then s = s + 1 end
+  local e = col + 1 -- 1-based end (inclusive)
+  while e < #line and is_tok(line:sub(e + 1, e + 1)) do e = e + 1 end
+  local token = line:sub(s + 1, e)
+  if not is_tok(token) or token == "" then
+    vim.notify("No identifier under cursor", vim.log.levels.WARN)
+    return
+  end
+
+  local stringcase = require("textcase.conversions.stringcase")
   local cases = {
-    { label = "snake_case", key = "s" },
-    { label = "camelCase",  key = "c" },
-    { label = "PascalCase", key = "m" },
-    { label = "UPPER_CASE", key = "u" },
-    { label = "kebab-case", key = "-" },
+    { label = "snake_case", fn = stringcase.to_snake_case },
+    { label = "camelCase",  fn = stringcase.to_camel_case },
+    { label = "PascalCase", fn = stringcase.to_pascal_case },
+    { label = "UPPER_CASE", fn = stringcase.to_constant_case },
+    { label = "kebab-case", fn = stringcase.to_dash_case },
   }
   vim.ui.select(cases, {
     prompt = "Convert case:",
     format_item = function(item) return item.label end,
   }, function(choice)
     if not choice or not vim.api.nvim_win_is_valid(win) then return end
-    vim.api.nvim_set_current_win(win)
-    vim.api.nvim_win_set_cursor(win, pos)
-    vim.cmd.normal({ "cr" .. choice.key, bang = false })
+    local converted = choice.fn(token)
+    -- Replace [s, e) on the original line; col args are 0-based, end exclusive.
+    vim.api.nvim_buf_set_text(0, row, s, row, e, { converted })
   end)
 end, { desc = "Convert case (picker)" })
 
