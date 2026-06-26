@@ -34,9 +34,10 @@ function M.run(file, ft)
     markers = { "pubspec.yaml", ".git" }
     extra_args = { "--coverage" }
   elseif ft == "rust" then
-    -- Requires cargo-llvm-cov installed. The neotest-rust adapter shells out to
-    -- `cargo test`; setting CARGO env vars makes llvm-cov instrument the build
-    -- and dump lcov to coverage/lcov.info on test exit.
+    -- Requires cargo-llvm-cov installed. rustaceanvim's neotest adapter shells
+    -- out to `cargo test`; neotest merges this run_env into the spawn env, so
+    -- the CARGO vars make llvm-cov instrument the build and dump lcov to
+    -- coverage/lcov.info on test exit.
     coverage_rel = "coverage/lcov.info"
     run_env = {
       CARGO_LLVM_COV = "1",

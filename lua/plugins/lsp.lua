@@ -318,7 +318,7 @@ return {
     "saghen/blink.cmp",
     event = "InsertEnter",
     version = "1.*",
-    dependencies = { "rafamadriz/friendly-snippets", "L3MON4D3/LuaSnip", "onsails/lspkind.nvim" },
+    dependencies = { "rafamadriz/friendly-snippets", "L3MON4D3/LuaSnip" },
     ---@type blink.cmp.Config
     opts = function()
       return {
@@ -347,7 +347,7 @@ return {
       },
       appearance = {
         nerd_font_variant = "mono",
-        kind_icons = require("lspkind").symbol_map,
+        -- blink.cmp v1 ships a complete Nerd Font kind_icons set; no lspkind needed.
       },
       snippets = { preset = "luasnip" },
       completion = {

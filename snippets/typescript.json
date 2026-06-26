@@ -1,76 +1,5 @@
 {
-  "Freelancer Angular Component": {
-    "prefix": "a-comp",
-    "description": "GAF-style Angular component (non-standalone, OnPush, inject)",
-    "body": [
-      "import type { OnInit } from '@angular/core';",
-      "import { ChangeDetectionStrategy, Component, inject } from '@angular/core';",
-      "",
-      "@Component({",
-      "\tstandalone: false,",
-      "\tselector: 'app-${1:selector-name}',",
-      "\ttemplateUrl: './${2:${1}}.component.html',",
-      "\tstyleUrls: ['./${2}.component.scss'],",
-      "\tchangeDetection: ChangeDetectionStrategy.OnPush,",
-      "})",
-      "export class ${3:Name}Component implements OnInit {",
-      "\tngOnInit(): void {",
-      "\t\t$0",
-      "\t}",
-      "}"
-    ]
-  },
-  "Freelancer Angular Standalone Component": {
-    "prefix": "a-comp-sa",
-    "description": "GAF-style standalone Angular component",
-    "body": [
-      "import type { OnInit } from '@angular/core';",
-      "import { ChangeDetectionStrategy, Component, inject } from '@angular/core';",
-      "",
-      "@Component({",
-      "\tstandalone: true,",
-      "\timports: [$1],",
-      "\tselector: 'app-${2:selector-name}',",
-      "\ttemplateUrl: './${3:${2}}.component.html',",
-      "\tstyleUrls: ['./${3}.component.scss'],",
-      "\tchangeDetection: ChangeDetectionStrategy.OnPush,",
-      "})",
-      "export class ${4:Name}Component implements OnInit {",
-      "\tngOnInit(): void {",
-      "\t\t$0",
-      "\t}",
-      "}"
-    ]
-  },
-  "Angular Service": {
-    "prefix": "a-service",
-    "description": "Injectable service with inject()",
-    "body": [
-      "import { Injectable, inject } from '@angular/core';",
-      "",
-      "@Injectable({ providedIn: '${1:root}' })",
-      "export class ${2:Name}Service {",
-      "\t$0",
-      "}"
-    ]
-  },
-  "Angular Pipe": {
-    "prefix": "a-pipe",
-    "description": "Pipe with transform",
-    "body": [
-      "import { Pipe, PipeTransform } from '@angular/core';",
-      "",
-      "@Pipe({ name: '${1:name}', standalone: ${2:true} })",
-      "export class ${3:Name}Pipe implements PipeTransform {",
-      "\ttransform(value: ${4:unknown}): ${5:unknown} {",
-      "\t\t$0",
-      "\t}",
-      "}"
-    ]
-  },
   "Angular Directive": {
-    "prefix": "a-directive",
-    "description": "Directive skeleton",
     "body": [
       "import { Directive, inject } from '@angular/core';",
       "",
@@ -81,11 +10,36 @@
       "export class ${3:Name}Directive {",
       "\t$0",
       "}"
-    ]
+    ],
+    "description": "Directive skeleton",
+    "prefix": "a-directive"
+  },
+  "Angular Functional Guard": {
+    "body": [
+      "import { inject } from '@angular/core';",
+      "import type { CanActivateFn } from '@angular/router';",
+      "",
+      "export const ${1:name}Guard: CanActivateFn = (route, state) => {",
+      "\t$0",
+      "\treturn true;",
+      "};"
+    ],
+    "description": "Functional CanActivate guard",
+    "prefix": "a-guard"
+  },
+  "Angular Functional Resolver": {
+    "body": [
+      "import { inject } from '@angular/core';",
+      "import type { ResolveFn } from '@angular/router';",
+      "",
+      "export const ${1:name}Resolver: ResolveFn<${2:unknown}> = route => {",
+      "\t$0",
+      "};"
+    ],
+    "description": "Functional resolver",
+    "prefix": "a-resolver"
   },
   "Angular NgModule": {
-    "prefix": "a-module",
-    "description": "NgModule skeleton",
     "body": [
       "import { NgModule } from '@angular/core';",
       "",
@@ -95,195 +49,84 @@
       "\texports: [$3],",
       "})",
       "export class ${4:Name}Module {}"
-    ]
+    ],
+    "description": "NgModule skeleton",
+    "prefix": "a-module"
   },
-  "Angular Functional Guard": {
-    "prefix": "a-guard",
-    "description": "Functional CanActivate guard",
+  "Angular Pipe": {
     "body": [
-      "import { inject } from '@angular/core';",
-      "import type { CanActivateFn } from '@angular/router';",
+      "import { Pipe, PipeTransform } from '@angular/core';",
       "",
-      "export const ${1:name}Guard: CanActivateFn = (route, state) => {",
-      "\t$0",
-      "\treturn true;",
-      "};"
-    ]
+      "@Pipe({ name: '${1:name}', standalone: ${2:true} })",
+      "export class ${3:Name}Pipe implements PipeTransform {",
+      "\ttransform(value: ${4:unknown}): ${5:unknown} {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ],
+    "description": "Pipe with transform",
+    "prefix": "a-pipe"
   },
-  "Angular Functional Resolver": {
-    "prefix": "a-resolver",
-    "description": "Functional resolver",
+  "Angular Service": {
     "body": [
-      "import { inject } from '@angular/core';",
-      "import type { ResolveFn } from '@angular/router';",
+      "import { Injectable, inject } from '@angular/core';",
       "",
-      "export const ${1:name}Resolver: ResolveFn<${2:unknown}> = route => {",
+      "@Injectable({ providedIn: '${1:root}' })",
+      "export class ${2:Name}Service {",
       "\t$0",
-      "};"
-    ]
+      "}"
+    ],
+    "description": "Injectable service with inject()",
+    "prefix": "a-service"
   },
   "Angular Signal Input": {
-    "prefix": "a-input",
+    "body": [
+      "${1:name} = input${2:.required}<${3:Type}>();$0"
+    ],
     "description": "Signal input",
-    "body": ["${1:name} = input${2:.required}<${3:Type}>();$0"]
+    "prefix": "a-input"
   },
   "Angular Signal Output": {
-    "prefix": "a-output",
+    "body": [
+      "${1:name} = output<${2:Type}>();$0"
+    ],
     "description": "Signal output",
-    "body": ["${1:name} = output<${2:Type}>();$0"]
+    "prefix": "a-output"
   },
   "Angular inject()": {
-    "prefix": "a-inject",
+    "body": [
+      "private ${1:name} = inject(${2:Type});$0"
+    ],
     "description": "private x = inject(X);",
-    "body": ["private ${1:name} = inject(${2:Type});$0"]
-  },
-  "Angular ngOnInit": {
-    "prefix": "a-oninit",
-    "description": "ngOnInit lifecycle",
-    "body": ["ngOnInit(): void {", "\t$0", "}"]
+    "prefix": "a-inject"
   },
   "Angular ngOnDestroy": {
-    "prefix": "a-ondestroy",
+    "body": [
+      "ngOnDestroy(): void {",
+      "\t$0",
+      "}"
+    ],
     "description": "ngOnDestroy lifecycle",
-    "body": ["ngOnDestroy(): void {", "\t$0", "}"]
+    "prefix": "a-ondestroy"
+  },
+  "Angular ngOnInit": {
+    "body": [
+      "ngOnInit(): void {",
+      "\t$0",
+      "}"
+    ],
+    "description": "ngOnInit lifecycle",
+    "prefix": "a-oninit"
   },
   "BehaviorSubject pair": {
-    "prefix": "a-bs",
-    "description": "BehaviorSubject + asObservable pair",
     "body": [
       "private ${1:name}Subject\\$ = new BehaviorSubject<${2:Type}>(${3:initial});",
       "${1}\\$ = this.${1}Subject\\$.asObservable();$0"
-    ]
-  },
-  "Subject": {
-    "prefix": "a-subj",
-    "description": "Subject<T>",
-    "body": ["private ${1:name}Subject\\$ = new Subject<${2:Type}>();$0"]
-  },
-  "ReplaySubject": {
-    "prefix": "a-replay",
-    "description": "ReplaySubject<T>",
-    "body": [
-      "private ${1:name}Subject\\$ = new ReplaySubject<${2:Type}>(${3:1});$0"
-    ]
-  },
-  "firstValueFrom await": {
-    "prefix": "a-fvf",
-    "description": "await firstValueFrom(...)",
-    "body": ["const ${1:value} = await firstValueFrom(${2:source\\$});$0"]
-  },
-  "Observable field": {
-    "prefix": "a-obs",
-    "description": "Observable<T> field",
-    "body": ["${1:name}\\$: Observable<${2:Type}>;$0"]
-  },
-  "combineLatest map": {
-    "prefix": "a-combine",
-    "description": "combineLatest + map",
-    "body": [
-      "combineLatest([${1:a\\$}, ${2:b\\$}]).pipe(",
-      "\tmap(([${3:a}, ${4:b}]) => ${0}),",
-      ")"
-    ]
-  },
-  "takeUntilDestroyed": {
-    "prefix": "a-tud",
-    "description": "pipe takeUntilDestroyed",
-    "body": [".pipe(takeUntilDestroyed(${1:this.destroyRef}))$0"]
-  },
-  "pipe map": {
-    "prefix": "a-pmap",
-    "description": "pipe(map(...))",
-    "body": [".pipe(map(${1:x} => ${0}))"]
-  },
-  "pipe filter isDefined": {
-    "prefix": "a-pfilter",
-    "description": "pipe(filter(isDefined))",
-    "body": [".pipe(filter(isDefined))$0"]
-  },
-  "switchMap": {
-    "prefix": "a-switch",
-    "description": "pipe(switchMap)",
-    "body": [".pipe(switchMap(${1:x} => ${0}))"]
-  },
-  "mergeMap": {
-    "prefix": "a-merge",
-    "description": "pipe(mergeMap)",
-    "body": [".pipe(mergeMap(${1:x} => ${0}))"]
-  },
-  "Datastore inject": {
-    "prefix": "fl-ds-inject",
-    "description": "inject Datastore",
-    "body": ["private datastore = inject(Datastore);$0"]
-  },
-  "Datastore collection": {
-    "prefix": "fl-ds-coll",
-    "description": "datastore.collection valueChanges",
-    "body": [
-      "this.${1:name}\\$ = this.datastore",
-      "\t.collection<${2:Name}Collection>('${3:name}')",
-      "\t.valueChanges();$0"
-    ]
-  },
-  "Datastore collection with query": {
-    "prefix": "fl-ds-coll-q",
-    "description": "collection with query.where",
-    "body": [
-      "this.${1:name}\\$ = this.datastore",
-      "\t.collection<${2:Name}Collection>('${3:name}', query =>",
-      "\t\tquery.where('${4:field}', '${5:==}', ${6:value}),",
-      "\t)",
-      "\t.valueChanges();$0"
-    ]
-  },
-  "Datastore document": {
-    "prefix": "fl-ds-doc",
-    "description": "datastore.document valueChanges",
-    "body": [
-      "this.${1:name}\\$ = this.datastore",
-      "\t.document<${2:Name}Collection>('${3:name}', ${4:id\\$})",
-      "\t.valueChanges();$0"
-    ]
-  },
-  "Datastore push": {
-    "prefix": "fl-ds-push",
-    "description": "collection.push payload",
-    "body": [
-      "const ${1:result} = await this.datastore",
-      "\t.collection<${2:Name}Collection>('${3:name}')",
-      "\t.push(${4:payload});$0"
-    ]
-  },
-  "Datastore set": {
-    "prefix": "fl-ds-set",
-    "description": "document.set",
-    "body": [
-      "await this.datastore",
-      "\t.document<${1:Name}Collection>('${2:name}', ${3:id})",
-      "\t.set(${4:payload});$0"
-    ]
-  },
-  "Datastore update": {
-    "prefix": "fl-ds-update",
-    "description": "document.update",
-    "body": [
-      "const ${1:result} = await this.datastore",
-      "\t.document<${2:Name}Collection>('${3:name}', ${4:id})",
-      "\t.update(${5:payload});$0"
-    ]
-  },
-  "Datastore remove": {
-    "prefix": "fl-ds-remove",
-    "description": "document.remove",
-    "body": [
-      "await this.datastore",
-      "\t.document<${1:Name}Collection>('${2:name}', ${3:id})",
-      "\t.remove();$0"
-    ]
+    ],
+    "description": "BehaviorSubject + asObservable pair",
+    "prefix": "a-bs"
   },
   "Datastore Collection types": {
-    "prefix": "fl-ds-types",
-    "description": "XCollection interface scaffold",
     "body": [
       "import type { ${1:Name} } from './${2:name}.model';",
       "",
@@ -303,11 +146,11 @@
       "\t\treadonly WebsocketType: never;",
       "\t};",
       "}$0"
-    ]
+    ],
+    "description": "XCollection interface scaffold",
+    "prefix": "fl-ds-types"
   },
   "Datastore backend": {
-    "prefix": "fl-ds-backend",
-    "description": "backend fn skeleton",
     "body": [
       "import type { Backend } from '@freelancer/datastore/core';",
       "import { OrderByDirection } from '@freelancer/datastore/core';",
@@ -326,11 +169,122 @@
       "\t\tremove: undefined,",
       "\t};$0",
       "}"
-    ]
+    ],
+    "description": "backend fn skeleton",
+    "prefix": "fl-ds-backend"
+  },
+  "Datastore collection": {
+    "body": [
+      "this.${1:name}\\$ = this.datastore",
+      "\t.collection<${2:Name}Collection>('${3:name}')",
+      "\t.valueChanges();$0"
+    ],
+    "description": "datastore.collection valueChanges",
+    "prefix": "fl-ds-coll"
+  },
+  "Datastore collection with query": {
+    "body": [
+      "this.${1:name}\\$ = this.datastore",
+      "\t.collection<${2:Name}Collection>('${3:name}', query =>",
+      "\t\tquery.where('${4:field}', '${5:==}', ${6:value}),",
+      "\t)",
+      "\t.valueChanges();$0"
+    ],
+    "description": "collection with query.where",
+    "prefix": "fl-ds-coll-q"
+  },
+  "Datastore document": {
+    "body": [
+      "this.${1:name}\\$ = this.datastore",
+      "\t.document<${2:Name}Collection>('${3:name}', ${4:id\\$})",
+      "\t.valueChanges();$0"
+    ],
+    "description": "datastore.document valueChanges",
+    "prefix": "fl-ds-doc"
+  },
+  "Datastore effect": {
+    "body": [
+      "import { Injectable, inject } from '@angular/core';",
+      "import type { TypedAction } from '@freelancer/datastore/core';",
+      "import { Actions, createEffect } from '@ngrx/effects';",
+      "import { filter, map } from 'rxjs/operators';",
+      "",
+      "@Injectable()",
+      "export class ${1:Name}Effect {",
+      "\tprivate actions\\$ = inject<Actions<TypedAction>>(Actions);",
+      "",
+      "\treadonly effect\\$ = createEffect(() =>",
+      "\t\tthis.actions\\$.pipe(",
+      "\t\t\tfilter(action => action.type === 'API_FETCH_SUCCESS'),",
+      "\t\t\tmap(action => {",
+      "\t\t\t\t$0",
+      "\t\t\t}),",
+      "\t\t),",
+      "\t);",
+      "}"
+    ],
+    "description": "Effect class skeleton",
+    "prefix": "fl-ds-effect"
+  },
+  "Datastore index barrel": {
+    "body": [
+      "export * from './${1:name}.seed';",
+      "export type * from './${1}.model';",
+      "export * from './${1}.module';",
+      "export type * from './${1}.types';$0"
+    ],
+    "description": "barrel exports for collection",
+    "prefix": "fl-ds-index"
+  },
+  "Datastore inject": {
+    "body": [
+      "private datastore = inject(Datastore);$0"
+    ],
+    "description": "inject Datastore",
+    "prefix": "fl-ds-inject"
+  },
+  "Datastore model": {
+    "body": [
+      "export interface ${1:Name} {",
+      "\treadonly id: ${2:number};",
+      "\t$0",
+      "}"
+    ],
+    "description": "document interface",
+    "prefix": "fl-ds-model"
+  },
+  "Datastore module": {
+    "body": [
+      "import { NgModule } from '@angular/core';",
+      "import { BackendModule } from '@freelancer/datastore/core';",
+      "import { EffectsModule } from '@ngrx/effects';",
+      "import { StoreModule } from '@ngrx/store';",
+      "import { ${1:name}Backend } from './${1}.backend';",
+      "import { ${2:Name}Effect } from './${1}.effect';",
+      "import { ${1}Reducer } from './${1}.reducer';",
+      "",
+      "@NgModule({",
+      "\timports: [",
+      "\t\tStoreModule.forFeature('${1}', ${1}Reducer),",
+      "\t\tBackendModule.forFeature('${1}', ${1}Backend),",
+      "\t\tEffectsModule.forFeature([${2}Effect]),",
+      "\t],",
+      "})",
+      "export class Datastore${2}Module {}$0"
+    ],
+    "description": "DatastoreXModule",
+    "prefix": "fl-ds-module"
+  },
+  "Datastore push": {
+    "body": [
+      "const ${1:result} = await this.datastore",
+      "\t.collection<${2:Name}Collection>('${3:name}')",
+      "\t.push(${4:payload});$0"
+    ],
+    "description": "collection.push payload",
+    "prefix": "fl-ds-push"
   },
   "Datastore reducer": {
-    "prefix": "fl-ds-reducer",
-    "description": "collection reducer skeleton",
     "body": [
       "import type {",
       "\tCollectionActions,",
@@ -364,68 +318,20 @@
       "\t\t\treturn state;",
       "\t}",
       "}$0"
-    ]
+    ],
+    "description": "collection reducer skeleton",
+    "prefix": "fl-ds-reducer"
   },
-  "Datastore effect": {
-    "prefix": "fl-ds-effect",
-    "description": "Effect class skeleton",
+  "Datastore remove": {
     "body": [
-      "import { Injectable, inject } from '@angular/core';",
-      "import type { TypedAction } from '@freelancer/datastore/core';",
-      "import { Actions, createEffect } from '@ngrx/effects';",
-      "import { filter, map } from 'rxjs/operators';",
-      "",
-      "@Injectable()",
-      "export class ${1:Name}Effect {",
-      "\tprivate actions\\$ = inject<Actions<TypedAction>>(Actions);",
-      "",
-      "\treadonly effect\\$ = createEffect(() =>",
-      "\t\tthis.actions\\$.pipe(",
-      "\t\t\tfilter(action => action.type === 'API_FETCH_SUCCESS'),",
-      "\t\t\tmap(action => {",
-      "\t\t\t\t$0",
-      "\t\t\t}),",
-      "\t\t),",
-      "\t);",
-      "}"
-    ]
-  },
-  "Datastore module": {
-    "prefix": "fl-ds-module",
-    "description": "DatastoreXModule",
-    "body": [
-      "import { NgModule } from '@angular/core';",
-      "import { BackendModule } from '@freelancer/datastore/core';",
-      "import { EffectsModule } from '@ngrx/effects';",
-      "import { StoreModule } from '@ngrx/store';",
-      "import { ${1:name}Backend } from './${1}.backend';",
-      "import { ${2:Name}Effect } from './${1}.effect';",
-      "import { ${1}Reducer } from './${1}.reducer';",
-      "",
-      "@NgModule({",
-      "\timports: [",
-      "\t\tStoreModule.forFeature('${1}', ${1}Reducer),",
-      "\t\tBackendModule.forFeature('${1}', ${1}Backend),",
-      "\t\tEffectsModule.forFeature([${2}Effect]),",
-      "\t],",
-      "})",
-      "export class Datastore${2}Module {}$0"
-    ]
-  },
-  "Datastore transformer": {
-    "prefix": "fl-ds-transformer",
-    "description": "transform fn",
-    "body": [
-      "export function transform${1:Name}(api: ${2:${1}Api}): ${1} {",
-      "\treturn {",
-      "\t\t$0",
-      "\t};",
-      "}"
-    ]
+      "await this.datastore",
+      "\t.document<${1:Name}Collection>('${2:name}', ${3:id})",
+      "\t.remove();$0"
+    ],
+    "description": "document.remove",
+    "prefix": "fl-ds-remove"
   },
   "Datastore seed": {
-    "prefix": "fl-ds-seed",
-    "description": "seed fn",
     "body": [
       "import type { ${1:Name} } from './${2:name}.model';",
       "",
@@ -438,21 +344,144 @@
       "\t\t...overrides,",
       "\t};",
       "}"
-    ]
+    ],
+    "description": "seed fn",
+    "prefix": "fl-ds-seed"
   },
-  "Datastore model": {
-    "prefix": "fl-ds-model",
-    "description": "document interface",
-    "body": ["export interface ${1:Name} {", "\treadonly id: ${2:number};", "\t$0", "}"]
-  },
-  "Datastore index barrel": {
-    "prefix": "fl-ds-index",
-    "description": "barrel exports for collection",
+  "Datastore set": {
     "body": [
-      "export * from './${1:name}.seed';",
-      "export type * from './${1}.model';",
-      "export * from './${1}.module';",
-      "export type * from './${1}.types';$0"
-    ]
+      "await this.datastore",
+      "\t.document<${1:Name}Collection>('${2:name}', ${3:id})",
+      "\t.set(${4:payload});$0"
+    ],
+    "description": "document.set",
+    "prefix": "fl-ds-set"
+  },
+  "Datastore transformer": {
+    "body": [
+      "export function transform${1:Name}(api: ${2:${1}Api}): ${1} {",
+      "\treturn {",
+      "\t\t$0",
+      "\t};",
+      "}"
+    ],
+    "description": "transform fn",
+    "prefix": "fl-ds-transformer"
+  },
+  "Datastore update": {
+    "body": [
+      "const ${1:result} = await this.datastore",
+      "\t.document<${2:Name}Collection>('${3:name}', ${4:id})",
+      "\t.update(${5:payload});$0"
+    ],
+    "description": "document.update",
+    "prefix": "fl-ds-update"
+  },
+  "Freelancer Angular Component": {
+    "body": [
+      "import { ChangeDetectionStrategy, Component } from '@angular/core';",
+      "",
+      "@Component({",
+      "\tstandalone: false,",
+      "\tselector: 'app-${1:selector-name}',",
+      "\ttemplate: ``,",
+      "\tstyleUrls: ['./${2}.component.scss'],",
+      "\tchangeDetection: ChangeDetectionStrategy.OnPush,",
+      "})",
+      "export class ${3:Name}Component {",
+      "}"
+    ],
+    "description": "GAF-style Angular component (non-standalone, OnPush, inject)",
+    "prefix": "a-comp"
+  },
+  "Freelancer Angular Standalone Component": {
+    "body": [
+      "import { ChangeDetectionStrategy, Component } from '@angular/core';",
+      "",
+      "@Component({",
+      "\tstandalone: true,",
+      "\timports: [],",
+      "\tselector: 'app-${1:selector-name}',",
+      "\ttemplateUrl: './${2:${1}}.component.html',",
+      "\tstyleUrls: ['./${3}.component.scss'],",
+      "\tchangeDetection: ChangeDetectionStrategy.OnPush,",
+      "})",
+      "export class ${3:Name}Component implements OnInit {",
+      "}"
+    ],
+    "description": "GAF-style standalone Angular component",
+    "prefix": "a-comp-sa"
+  },
+  "Observable field": {
+    "body": [
+      "${1:name}\\$: Observable<${2:Type}>;$0"
+    ],
+    "description": "Observable<T> field",
+    "prefix": "a-obs"
+  },
+  "ReplaySubject": {
+    "body": [
+      "private ${1:name}Subject\\$ = new ReplaySubject<${2:Type}>(${3:1});$0"
+    ],
+    "description": "ReplaySubject<T>",
+    "prefix": "a-replay"
+  },
+  "Subject": {
+    "body": [
+      "private ${1:name}Subject\\$ = new Subject<${2:Type}>();$0"
+    ],
+    "description": "Subject<T>",
+    "prefix": "a-subj"
+  },
+  "combineLatest map": {
+    "body": [
+      "combineLatest([${1:a\\$}, ${2:b\\$}]).pipe(",
+      "\tmap(([${3:a}, ${4:b}]) => ${0}),",
+      ")"
+    ],
+    "description": "combineLatest + map",
+    "prefix": "a-combine"
+  },
+  "firstValueFrom await": {
+    "body": [
+      "const ${1:value} = await firstValueFrom(${2:source\\$});$0"
+    ],
+    "description": "await firstValueFrom(...)",
+    "prefix": "a-fvf"
+  },
+  "mergeMap": {
+    "body": [
+      ".pipe(mergeMap(${1:x} => ${0}))"
+    ],
+    "description": "pipe(mergeMap)",
+    "prefix": "a-merge"
+  },
+  "pipe filter isDefined": {
+    "body": [
+      ".pipe(filter(isDefined))$0"
+    ],
+    "description": "pipe(filter(isDefined))",
+    "prefix": "a-pfilter"
+  },
+  "pipe map": {
+    "body": [
+      ".pipe(map(${1:x} => ${0}))"
+    ],
+    "description": "pipe(map(...))",
+    "prefix": "a-pmap"
+  },
+  "switchMap": {
+    "body": [
+      ".pipe(switchMap(${1:x} => ${0}))"
+    ],
+    "description": "pipe(switchMap)",
+    "prefix": "a-switch"
+  },
+  "takeUntilDestroyed": {
+    "body": [
+      ".pipe(takeUntilDestroyed(${1:this.destroyRef}))$0"
+    ],
+    "description": "pipe takeUntilDestroyed",
+    "prefix": "a-tud"
   }
 }

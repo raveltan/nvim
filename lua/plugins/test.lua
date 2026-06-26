@@ -11,7 +11,6 @@ return {
       "olimorris/neotest-rspec",
       "zidhuss/neotest-minitest",
       "sidlatau/neotest-dart",
-      "rouge8/neotest-rust",
     },
     -- No ft trigger: loading neotest + 7 adapters cost ~68ms on the FIRST buffer
     -- of any daily filetype, every session. The buffer-local keymaps that needed
@@ -81,9 +80,6 @@ return {
               return { "bundle", "exec", "ruby", "-Itest" }
             end,
           }),
-          require("neotest-rust")({
-            args = { "--no-capture" },
-          }),
         },
         discovery = { enabled = false },
         status = { virtual_text = true, signs = true },
@@ -96,6 +92,14 @@ return {
           command = "flutter",
           use_lsp = true,
         }))
+      end
+      -- Rust: rustaceanvim ships its own neotest adapter (replaces the archived
+      -- rouge8/neotest-rust). Register only on actual Cargo projects. requiring
+      -- the module pulls in rustaceanvim, which owns rust-analyzer + test exec;
+      -- pcall-guard so a non-rust session never hard-errors on the require.
+      if vim.fn.findfile("Cargo.toml", ".;") ~= "" then
+        local ok, rust_adapter = pcall(require, "rustaceanvim.neotest")
+        if ok then table.insert(opts.adapters, rust_adapter) end
       end
       return opts
     end,
