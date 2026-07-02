@@ -158,7 +158,25 @@ return {
   -- Auto-close and auto-rename HTML/JSX tags
   {
     "windwp/nvim-ts-autotag",
-    event = "InsertEnter",
-    opts = {},
+    -- Load on file read, NOT InsertEnter. The plugin attaches to buffers via a
+    -- `FileType` autocmd it registers at setup time, so any buffer whose FileType
+    -- already fired before the plugin loaded is never attached (no `>` map, no
+    -- auto-close). Loading on BufReadPre puts that autocmd in place before the
+    -- first file's FileType fires, so every buffer gets attached normally. (The
+    -- original `event = "InsertEnter"` loaded too late and orphaned buffers
+    -- opened before the first insert of the session.)
+    event = { "BufReadPre", "BufNewFile" },
+    -- GAF components use inline `template:` backticks, parsed by an *injected*
+    -- `angular` tree. The plugin's inline-template detection (is_in_template_tag)
+    -- walks parents looking for a `template_string`, but injected-tree nodes
+    -- can't cross the injection boundary — so it never fires and falls back to
+    -- the default `typescript`->`typescriptreact` (JSX) patterns, which don't
+    -- match angular's `start_tag`/`element`/`end_tag` nodes -> no auto-close.
+    -- Alias `typescript` to the `html` config instead: it matches the angular
+    -- tag nodes, and only triggers when a start_tag actually exists (injected
+    -- templates), so plain `.ts` (generics `Foo<T>`, `=>`) is unaffected.
+    opts = {
+      aliases = { ["typescript"] = "html" },
+    },
   },
 }

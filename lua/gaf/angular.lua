@@ -178,6 +178,52 @@ local function target_under_cursor(buf)
   end
 end
 
+-- Identifiers that live in a template *expression* (RHS of a binding, an event
+-- handler, a structural `*ngIf`, or an `{{ interpolation }}`) rather than being
+-- a tag or attribute name. These resolve to a TS definition, not the DOM.
+local VALUE_CTX = { expression = true, interpolation = true, structural_expression = true }
+-- Direct parent of an identifier that IS an attribute/binding NAME (not a value).
+local NAME_PARENT = { binding_name = true, structural_directive = true }
+
+-- If the cursor sits on an identifier inside a template expression, resolve the
+-- symbol to look up: `{ name, member }`. For `ButtonSize.SMALL`, both the object
+-- (`ButtonSize`) and the property (`SMALL`) yield name="ButtonSize", member="SMALL".
+-- Returns nil when the cursor is on a tag/attribute name or plain markup.
+local function symbol_under_cursor(buf)
+  local node = injected_node(buf)
+  if not node then return nil end
+  local t = node:type()
+  if t ~= "identifier" and t ~= "property_identifier" then return nil end
+  local parent = node:parent()
+  if parent and NAME_PARENT[parent:type()] then return nil end -- attr/binding name
+
+  -- Must sit inside a value expression, not e.g. a plain quoted attribute.
+  local in_value, anc = false, node
+  while anc do
+    if VALUE_CTX[anc:type()] then in_value = true break end
+    if TAG_NODES[anc:type()] then break end
+    anc = anc:parent()
+  end
+  if not in_value then return nil end
+
+  local name = vim.treesitter.get_node_text(node, buf)
+  local member
+  if parent and parent:type() == "member_expression" then
+    local obj = parent:field("object")[1]
+    local prop = parent:field("property")[1]
+    if prop and prop:id() == node:id() and obj then
+      -- cursor on `.SMALL` -> the type is the object's rightmost identifier.
+      local objtext = vim.treesitter.get_node_text(obj, buf)
+      name = objtext:match("[%w_%$]+$") or objtext
+      member = vim.treesitter.get_node_text(node, buf)
+    elseif obj and obj:id() == node:id() and prop then
+      -- cursor on `ButtonSize` -> keep it, remember the member to land on.
+      member = vim.treesitter.get_node_text(prop, buf)
+    end
+  end
+  return { name = name, member = member }
+end
+
 -- ── rg pattern builders ────────────────────────────────────────────────────
 
 -- Exact selector definition: the tag is a whole token, never `x-app-foo` or
@@ -206,6 +252,32 @@ end
 -- Attribute-selector directive: selector: '[name]'.
 local function directive_patterns(name)
   return { "selector:\\s*['\"][^'\"]*\\[" .. rx(name) .. "\\]" }
+end
+
+-- Definition of a type-like symbol referenced inside a template expression
+-- (`[size]="ButtonSize.SMALL"` -> the `ButtonSize` enum/class/type/const).
+local function symbol_def_patterns(name)
+  name = rx(name)
+  return {
+    "(export\\s+)?(declare\\s+)?(const\\s+)?enum\\s+" .. name .. "\\b",
+    "(export\\s+)?(abstract\\s+)?class\\s+" .. name .. "\\b",
+    "(export\\s+)?interface\\s+" .. name .. "\\b",
+    "(export\\s+)?type\\s+" .. name .. "\\b",
+    "(export\\s+)?(declare\\s+)?const\\s+" .. name .. "\\b",
+    "(export\\s+)?function\\s+" .. name .. "\\b",
+  }
+end
+
+-- Declaration of a component-class member (`plainVar`, `onClick`) referenced in
+-- a template expression -- anchored at line start so a template usage of the
+-- same name (in the decorator above) is not mistaken for the declaration.
+local function member_decl_patterns(name)
+  name = rx(name)
+  local mods = "(readonly\\s+|private\\s+|public\\s+|protected\\s+|static\\s+|override\\s+|abstract\\s+|get\\s+|set\\s+|async\\s+)*"
+  return {
+    "^\\s*" .. mods .. name .. "\\s*[?!]?\\s*[:=(]",
+    "^\\s*(public\\s+|private\\s+|protected\\s+|readonly\\s+)+" .. name .. "\\b",
+  }
 end
 
 -- Locate a component by free-text name: matches a class declaration whose name
@@ -379,13 +451,26 @@ local function stylesheet_paths(buf)
   return paths
 end
 
--- Trailing BEM segment: TabsContainer--olarkEnabled -> --olarkEnabled (matches
--- scss `&--olarkEnabled` nested under the block).
-local function bem_suffix(cls)
-  local idx = 0
-  for s in cls:gmatch("()%-%-") do idx = math.max(idx, s) end
-  for s in cls:gmatch("()__") do idx = math.max(idx, s) end
-  return idx > 0 and cls:sub(idx) or nil
+-- SCSS ampersand suffixes for a class produced by nested `&`-concatenation.
+-- One candidate per delimiter run (`-`, `--`, `__`), so a class maps to any of
+-- the `&`-nestings that could have built it:
+--   `Data-name`      -> { "-name" }             (.Data { &-name {} })
+--   `Tabs--olark`    -> { "--olark" }           (.Tabs { &--olark {} })
+--   `Foo-bar-baz`    -> { "-bar-baz", "-baz" }  (one nest, or two)
+-- Longest (closest-to-block) suffix first, so the most specific match wins.
+local function bem_suffixes(cls)
+  local out, seen = {}, {}
+  for s in cls:gmatch("()[-_]+") do
+    if s > 1 then -- a leading delimiter isn't a suffix of a parent block
+      local suf = cls:sub(s)
+      if not seen[suf] then
+        seen[suf] = true
+        out[#out + 1] = suf
+      end
+    end
+  end
+  table.sort(out, function(a, b) return #a > #b end)
+  return out
 end
 
 -- Append `.cls { }` to the stylesheet, save, drop the cursor inside the braces.
@@ -418,15 +503,51 @@ local function goto_css(cls, buf)
       jump_item(items[1])
       return
     end
-    local suf = bem_suffix(cls)
-    if suf then
-      rg_run({ "&" .. rx(suf) .. "\\b" }, paths, function(items2)
+    local sufs = bem_suffixes(cls)
+    if #sufs > 0 then
+      local pats = {}
+      for _, s in ipairs(sufs) do pats[#pats + 1] = "&" .. rx(s) .. "\\b" end
+      rg_run(pats, paths, function(items2)
         if #items2 > 0 then jump_item(items2[1]) else offer_create() end
       end, { no_type = true })
     else
       offer_create()
     end
   end, { no_type = true })
+end
+
+-- Jump to a value symbol's definition. PascalCase/CONST names -> a type, enum,
+-- class or const anywhere under the search root (landing on `member` inside it
+-- when the cursor was on `Enum.MEMBER`); lowerCamel names -> a class member
+-- declared in the component file itself.
+local function goto_symbol(name, member, buf, root)
+  local function land(item)
+    if not member then jump_item(item); return end
+    rg_run({ "\\b" .. rx(member) .. "\\b" }, { item.file }, function(m)
+      jump_item(m[1] or item)
+    end)
+  end
+
+  if name:match("^%u") then
+    rg_run(symbol_def_patterns(name), { root }, function(items)
+      if #items == 0 then
+        notify("No type/enum/class definition found for '" .. name .. "'", vim.log.levels.WARN)
+      elseif #items == 1 or member then
+        land(items[1])
+      else
+        show("Definition of " .. name, items, { dedupe = true })
+      end
+    end)
+  else
+    local fname = vim.api.nvim_buf_get_name(buf)
+    rg_run(member_decl_patterns(name), { fname }, function(items)
+      if #items > 0 then
+        jump_item(items[1])
+      else
+        notify("No definition found for '" .. name .. "'", vim.log.levels.WARN)
+      end
+    end, { no_type = true })
+  end
 end
 
 function M.goto_definition()
@@ -436,6 +557,14 @@ function M.goto_definition()
   end
   local buf = vim.api.nvim_get_current_buf()
   local root = search_root(vim.api.nvim_buf_get_name(buf))
+
+  -- A symbol in a binding value/interpolation (`ButtonSize.SMALL`, `plainVar`)
+  -- resolves to its TS definition, before tag/attribute classification.
+  local sym = symbol_under_cursor(buf)
+  if sym then
+    goto_symbol(sym.name, sym.member, buf, root)
+    return
+  end
 
   local tgt = target_under_cursor(buf)
   if not tgt then
@@ -448,8 +577,10 @@ function M.goto_definition()
       notify("'" .. (tgt.name or "?") .. "' is a native element, not a component", vim.log.levels.WARN)
       return
     end
-    -- Exact selector match -> jump straight, no picker.
-    rg_search("Definition of " .. tgt.name, selector_patterns(tgt.name), root, { jump_first = true })
+    -- Selector definition: one file -> jump straight; multiple files defining the
+    -- same selector (e.g. projects + contests both define `app-collaborator-info`)
+    -- -> picker, so a duplicated name is still reachable.
+    rg_search("Definition of " .. tgt.name, selector_patterns(tgt.name), root, { dedupe = true })
   else
     -- A class binding -> jump to the CSS; anything else -> @Input/@Output/directive.
     local name = tgt.name
