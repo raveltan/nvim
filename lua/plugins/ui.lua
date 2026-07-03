@@ -1,13 +1,21 @@
 return {
   -- Colorscheme
   {
-    "luisiacc/gruvbox-baby",
+    "bluz71/vim-moonfly-colors",
+    name = "moonfly",
     priority = 1000,
     lazy = false,
     config = function()
-      vim.cmd.colorscheme("gruvbox-baby")
+      -- No setup() — moonfly is a VimScript colorscheme configured via g:moonfly*
+      -- globals read at load time, so set them BEFORE the colorscheme command.
+      -- Transparency MUST be boolean true (not 1), else statusline/tabline stay
+      -- opaque (some branches test `== true`). moonfly sets termguicolors +
+      -- background=dark itself.
+      vim.g.moonflyTransparent = true
+      vim.cmd.colorscheme("moonfly")
 
-      -- Clear backgrounds for full terminal transparency
+      -- Belt-and-suspenders: force-clear backgrounds on groups the theme's own
+      -- transparency may leave opaque (statusline, separators, float borders).
       local transparent_groups = {
         "Normal",
         "NormalNC",
@@ -81,7 +89,7 @@ return {
 
       return {
         options = {
-          theme = "gruvbox-baby",
+          theme = "moonfly",
           globalstatus = true,
           section_separators = { left = "", right = "" },
           component_separators = { left = "", right = "" },
@@ -157,8 +165,9 @@ return {
   },
 
   -- Inline color swatches for hex, rgb, hsl
+  -- (catgoose fork — NvChad's repo was transferred here; it's the maintained one)
   {
-    "NvChad/nvim-colorizer.lua",
+    "catgoose/nvim-colorizer.lua",
     event = "BufReadPost",
     opts = {
       user_default_options = {

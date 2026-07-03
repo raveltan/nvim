@@ -28,7 +28,7 @@ return {
     config = function(_, opts)
       -- Strip inline SVG data URIs from HTML before pandoc.
       -- DevDocs SVGs use CSS vars (var(--primary-contrast)) that ImageMagick
-      -- cannot parse, causing image.nvim render errors and UI lag.
+      -- cannot parse, causing snacks.image render errors and UI lag.
       local D = require("devdocs.docs")
       local orig = D.ConvertHtmlToMarkdown
       D.ConvertHtmlToMarkdown = function(htmlContent, outputFile, callback)

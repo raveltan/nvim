@@ -10,7 +10,7 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     opts = function()
-      local servers = { "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense", "tailwindcss", "typos_lsp" }
+      local servers = { "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense", "tailwindcss", "typos_lsp", "emmet_language_server" }
       if vim.g.gaf then
         servers = require("gaf.lsp").filter_mason_servers(servers)
       end
@@ -180,6 +180,21 @@ return {
       vim.lsp.config("cssls", {
         capabilities = capabilities,
         filetypes = { "css", "scss", "less" },
+      })
+
+      -- Emmet abbreviation expansion (LSP). Replaces mattn/emmet-vim: there's no
+      -- <plug> expand map anymore — abbreviations (`div>ul>li`, `.foo`, `!`) surface
+      -- in the blink completion menu; accept to expand. svelte added to the server's
+      -- default filetype set (defaults omit it).
+      vim.lsp.config("emmet_language_server", {
+        capabilities = capabilities,
+        filetypes = {
+          "html", "eruby", "css", "scss", "sass", "less",
+          "javascriptreact", "typescriptreact", "vue", "svelte", "htmldjango",
+        },
+        init_options = {
+          showExpandedAbbreviation = "always",
+        },
       })
 
       -- Typos LSP — fast spell/typo checker (Rust). Hint severity to stay quiet.

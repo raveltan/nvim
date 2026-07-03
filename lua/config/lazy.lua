@@ -18,7 +18,7 @@ require("lazy").setup({
   spec = {
     { import = "plugins" },
   },
-  install = { colorscheme = { "gruvbox-baby" } },
+  install = { colorscheme = { "moonfly" } },
   checker = {
     enabled = false,
   },
