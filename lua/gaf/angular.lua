@@ -550,11 +550,12 @@ local function goto_symbol(name, member, buf, root)
   end
 end
 
+-- Returns true when the cursor was on an Angular template target (tag, attribute,
+-- CSS class, or a symbol in a binding expression) and this function claimed the
+-- jump -- even if the target could not be resolved. Returns false only when the
+-- cursor is on plain TypeScript, so the caller can fall back to LSP `gd`.
 function M.goto_definition()
-  if vim.bo.filetype ~= "typescript" then
-    notify("Not a TypeScript component buffer", vim.log.levels.WARN)
-    return
-  end
+  if vim.bo.filetype ~= "typescript" then return false end
   local buf = vim.api.nvim_get_current_buf()
   local root = search_root(vim.api.nvim_buf_get_name(buf))
 
@@ -563,19 +564,16 @@ function M.goto_definition()
   local sym = symbol_under_cursor(buf)
   if sym then
     goto_symbol(sym.name, sym.member, buf, root)
-    return
+    return true
   end
 
   local tgt = target_under_cursor(buf)
-  if not tgt then
-    notify("Cursor is not on a tag or attribute", vim.log.levels.WARN)
-    return
-  end
+  if not tgt then return false end -- plain TS: let the caller use LSP definition
 
   if tgt.kind == "tag" then
     if not tgt.name or not tgt.name:find("%-") then
       notify("'" .. (tgt.name or "?") .. "' is a native element, not a component", vim.log.levels.WARN)
-      return
+      return true
     end
     -- Selector definition: one file -> jump straight; multiple files defining the
     -- same selector (e.g. projects + contests both define `app-collaborator-info`)
@@ -591,7 +589,7 @@ function M.goto_definition()
       cls = class_token_under_cursor()
       if not cls or cls == "class" or cls == "ngClass" then
         notify("Place the cursor on a class name", vim.log.levels.WARN)
-        return
+        return true
       end
     end
     if cls then
@@ -600,6 +598,7 @@ function M.goto_definition()
       goto_attr(name, tgt.tag, root)
     end
   end
+  return true
 end
 
 -- ── URL string -> routing module ───────────────────────────────────────────
