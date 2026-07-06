@@ -81,6 +81,7 @@ return {
     "echasnovski/mini.surround",
     event = "VeryLazy",
     opts = {
+      n_lines = 500,
       mappings = {
         add = "gsa",
         delete = "gsd",
@@ -89,6 +90,15 @@ return {
         highlight = "gsh",
         replace = "gsr",
         update_n_lines = "gsn",
+      },
+      custom_surroundings = {
+        -- Same hyphen fix as the mini.ai `t` override below: upstream's `(%w-)` tag
+        -- name stops at the first hyphen, breaking `gsdt`/`gsrt` on custom elements
+        -- (`<fl-button>`, `<app-foo-bar>`). Only `input` overridden; default output
+        -- (add prompt) is unaffected.
+        t = {
+          input = { "<([%w%-]-)%f[^<%w%-][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
+        },
       },
     },
   },
@@ -148,6 +158,7 @@ return {
     "echasnovski/mini.ai",
     event = "VeryLazy",
     opts = {
+      n_lines = 500,
       custom_textobjects = {
         -- Override the default `t` tag text object so `dit`/`cit`/`dat`/`cat` match
         -- hyphenated custom elements (`<fl-button>`, `<app-foo-bar>`). Upstream uses

@@ -130,6 +130,13 @@ return {
       { "<leader>fp", function() Snacks.picker.projects() end, desc = "Projects" },
       { "<leader>,", function() Snacks.picker.buffers() end, desc = "Buffers" },
       -- Search
+      -- Workspace grep lives on snacks (async rg, streams full results).
+      -- fff live_grep is synchronous per keystroke with a time budget, so on
+      -- big repos it only covers the highest-frecency files — looked like
+      -- "grep only searches the current file's dir".
+      { "<leader>sg", function() Snacks.picker.grep() end, desc = "Grep (workspace)" },
+      { "<leader>sw", function() Snacks.picker.grep_word() end, mode = { "n", "x" }, desc = "Grep word" },
+      { "<leader>s.", function() Snacks.picker.grep({ dirs = { vim.fn.expand("%:p:h") } }) end, desc = "Grep in current file dir" },
       { "<leader>sh", function() Snacks.picker.help() end, desc = "Help pages" },
       { "<leader>sk", function() Snacks.picker.keymaps() end, desc = "Keymaps" },
       { "<leader>sc", function() Snacks.picker.commands() end, desc = "Commands" },

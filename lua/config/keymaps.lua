@@ -47,6 +47,12 @@ map("n", "<leader>cA", function()
   vim.lsp.buf.code_action({ context = { only = { "source" }, diagnostics = {} } })
 end, { desc = "Source action" })
 map("n", "<leader>cr", function()
+  -- Context-smart: CSS class under cursor → buffer-wide class rename; tag name under
+  -- cursor → tagmatch pair rename; anything else → LSP symbol rename below.
+  local rename = require("config.rename")
+  if rename.class_rename() then return end
+  if rename.tag_rename() then return end
+
   local bufnr = vim.api.nvim_get_current_buf()
   local clients = vim.lsp.get_clients({ bufnr = bufnr, method = "textDocument/rename" })
   if #clients == 0 then

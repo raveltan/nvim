@@ -1,14 +1,19 @@
-# tagmatch.nvim
+# tagmatch
 
 Treesitter-based tag matching for Neovim. Jump between an element's opening and
-closing tag with `%`, and operate on tags with the `i%` / `a%` text objects — across
-**every grammar that exposes HTML- or JSX-style element nodes**.
+closing tag with `%`, operate on tags with the `i%` / `a%` text objects, and rename
+tag pairs — across **every grammar that exposes HTML- or JSX-style element nodes**.
+
+In-repo module (`lua/tagmatch/`), not a lazy.nvim plugin — loaded eagerly from
+`init.lua` via `require("tagmatch").setup()` (cheap: one FileType autocmd + two
+`<Plug>` maps).
 
 | Keys | Action |
 |------|--------|
 | `%` (normal/visual) | jump between `<tag>` and `</tag>` |
 | `di%` `ci%` `yi%` `vi%` … | inner tag (content between the tags) |
 | `da%` `ca%` `ya%` `va%` … | around tag (the whole element incl. tags) |
+| `<leader>cr` on a tag name | rename the open/close pair (routed via `config/rename.lua`; calls `require("tagmatch").rename()`) |
 
 Works in: **html, xml, Angular** (including inline `template:` strings in `.ts`),
 **JSX/TSX** (React, incl. fragments `<>…</>`), **Vue, Svelte, eruby, php, markdown** —
@@ -25,20 +30,27 @@ the open/close **tag pair**. The treesitter tree knows the real structure.
 tagmatch only takes over when the cursor is on a tag — otherwise it **falls back** to
 vim-matchup (if installed) or the builtin `%`, so ordinary bracket matching is intact.
 
-## Install (lazy.nvim)
+## Install
 
-```lua
-{
-  "you/tagmatch.nvim",
-  dependencies = { "nvim-treesitter/nvim-treesitter" }, -- and optionally vim-matchup
-  ft = { "html", "xml", "vue", "svelte", "eruby", "php", "markdown",
-         "javascript", "javascriptreact", "typescript", "typescriptreact" },
-  opts = {},
-}
-```
+Lives at `lua/tagmatch/` in this config; `init.lua` calls
+`require("tagmatch").setup()` at startup. (To extract it as a standalone plugin
+again, move this directory to `<plugin>/lua/tagmatch/` and load it with any plugin
+manager.)
 
 Requires the relevant treesitter parsers installed (`html`, `angular`, `tsx`,
-`javascript`, `php`, `embedded_template`, …).
+`javascript`, `php`, `embedded_template`, …). vim-matchup is optional (fallback
+target for `%` off-tag).
+
+## Rename API
+
+- `require("tagmatch").rename()` — prompt (`vim.ui.input`) and rename the tag pair
+  under the cursor; both name spans update, self-closing tags get one. Returns
+  `false` without prompting when the cursor isn't on tag markup (name or `<` `>` `/`
+  punctuation — attributes and content decline, so callers can fall through to LSP
+  rename).
+- `require("tagmatch").rename_info()` — the current tag name (or nil) without
+  prompting; used by `config/rename.lua` to defer uppercase JSX/Vue components to
+  LSP rename.
 
 ## Configuration (defaults)
 

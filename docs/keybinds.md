@@ -49,7 +49,8 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 
 | Key | Mode | Description | Source |
 |-----|------|-------------|--------|
-| `<leader>sg` | n | Live grep (resumes last query) | fff.nvim |
+| `<leader>sg` | n | Grep workspace (async rg) | snacks.picker |
+| `<leader>sz` | n | Fuzzy grep (frecency-first, partial on big repos) | fff.nvim |
 | `<leader>/` | n | Seek: progressive file → grep (`<C-e>` toggle, `<Tab>` multi-select) | seeker.nvim |
 | `<leader>sw` | n, x | Grep word/selection | snacks.picker |
 | `<leader>sb` | n | Buffer lines | snacks.picker |

@@ -23,6 +23,12 @@ local OPEN = { start_tag = true, jsx_opening_element = true }
 local CLOSE = { end_tag = true, jsx_closing_element = true }
 local SELF = { self_closing_tag = true, jsx_self_closing_element = true }
 local ELEMENT = { element = true, jsx_element = true }
+-- Tag-name node types (html family: tag_name; jsx family: identifier plus the dotted /
+-- namespaced component forms).
+local NAME = {
+  tag_name = true, identifier = true, member_expression = true,
+  nested_identifier = true, jsx_namespace_name = true,
+}
 
 local function is_tagish(t)
   return ELEMENT[t] or OPEN[t] or CLOSE[t] or SELF[t]
@@ -114,6 +120,42 @@ local function child_tags(element)
     end
   end
   return open, close
+end
+
+local function name_of(tag)
+  for child in tag:iter_children() do
+    if NAME[child:type()] then return child end
+  end
+end
+
+-- Name nodes to edit for a rename -- {open, close} or {name} for self-closing -- but
+-- only when the cursor sits on tag markup: on the name itself, or on the tag's
+-- punctuation (`<`, `>`, `/`). Anywhere else (attributes, content) returns nil so the
+-- caller can fall through to LSP rename.
+local function rename_targets()
+  local row, col = cursor_rc()
+  local node = tag_node_at(row, col)
+  if not node then return nil end
+  local tag = ancestor(node, function(t) return OPEN[t] or CLOSE[t] or SELF[t] end)
+  if not tag then return nil end
+  if not (OPEN[node:type()] or CLOSE[node:type()] or SELF[node:type()]) then
+    local name = name_of(tag)
+    if not (name and vim.treesitter.is_in_node_range(name, row, col)) then return nil end
+  end
+
+  local names = {}
+  if SELF[tag:type()] then
+    names[1] = name_of(tag)
+  else
+    local element = ancestor(tag:parent(), function(t) return ELEMENT[t] end)
+    if not element then return nil end
+    local open, close = child_tags(element)
+    local on, cn = open and name_of(open), close and name_of(close)
+    if on then names[#names + 1] = on end
+    if cn then names[#names + 1] = cn end
+  end
+  if #names == 0 then return nil end
+  return names
 end
 
 -- treesitter exclusive end (row, col) -> inclusive (row, col), wrapping a col-0 end to
@@ -222,6 +264,41 @@ function M.select(inner)
   end
   if sr > er or (sr == er and sc > ec) then return end -- empty element
   select_charwise(sr, sc, er, ec)
+end
+
+-- Current tag name when the cursor is on tag markup (name or punctuation), else nil.
+-- Lets callers decide routing (e.g. defer uppercase JSX components to LSP rename)
+-- without triggering the prompt.
+function M.rename_info()
+  local targets = rename_targets()
+  if not targets then return nil end
+  return vim.treesitter.get_node_text(targets[1], 0)
+end
+
+-- Rename the tag under the cursor: prompts for a new name and updates the opening and
+-- closing tag (or the single name of a self-closing tag). Returns false when the
+-- cursor isn't on tag markup, true once the prompt is issued.
+function M.rename()
+  local targets = rename_targets()
+  if not targets then return false end
+  local old = vim.treesitter.get_node_text(targets[1], 0)
+
+  vim.ui.input({ prompt = "Rename tag: ", default = old }, function(new)
+    if not new or new == "" or new == old then return end
+    -- Bottom-up so earlier ranges stay valid after each edit.
+    table.sort(targets, function(a, b)
+      local ar, ac = a:start()
+      local br, bc = b:start()
+      return ar > br or (ar == br and ac > bc)
+    end)
+    for _, n in ipairs(targets) do
+      local sr, sc, er, ec = n:range()
+      vim.api.nvim_buf_set_text(0, sr, sc, er, ec, { new })
+    end
+    vim.notify(("Renamed <%s> → <%s> (%d tag%s)"):format(
+      old, new, #targets, #targets == 1 and "" or "s"))
+  end)
+  return true
 end
 
 -- ── setup ────────────────────────────────────────────────────────────────────
