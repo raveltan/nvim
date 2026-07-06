@@ -218,6 +218,25 @@ return {
         vim.lsp.enable("herb_ls")
       end
 
+      -- SourceKit (Swift) — ships with the Xcode toolchain, not mason.
+      -- xcode-build-server (brew) generates buildServer.json so it understands
+      -- .xcodeproj/.xcworkspace; plain SPM packages work out of the box.
+      -- Build/run/test/debug live in xcodebuild.nvim (lua/plugins/swift.lua).
+      if vim.fn.executable("sourcekit-lsp") == 1 then
+        vim.lsp.config("sourcekit", {
+          -- sourcekit relies on dynamically-registered file watching to pick up
+          -- cross-file changes; blink's capabilities don't advertise it.
+          capabilities = vim.tbl_deep_extend("force", {}, capabilities, {
+            workspace = {
+              didChangeWatchedFiles = { dynamicRegistration = true },
+            },
+          }),
+          -- Default filetypes also claim c/cpp/objc — keep it to swift only.
+          filetypes = { "swift" },
+        })
+        vim.lsp.enable("sourcekit")
+      end
+
       -- mason-lspconfig 2.x `automatic_enable=true` (default) enables every
       -- server in `ensure_installed` automatically — no manual vim.lsp.enable.
 

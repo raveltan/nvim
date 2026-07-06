@@ -1,6 +1,6 @@
 # Neovim Configuration
 
-Modular, LSP-first Neovim built on [lazy.nvim](https://github.com/folke/lazy.nvim). Polyglot: TypeScript, PHP, Ruby on Rails, Python, Rust, Flutter. Opt-in GAF profile (`GAF=1 nvim`).
+Modular, LSP-first Neovim built on [lazy.nvim](https://github.com/folke/lazy.nvim). Polyglot: TypeScript, PHP, Ruby on Rails, Python, Rust, Flutter, Swift/SwiftUI. Opt-in GAF profile (`GAF=1 nvim`).
 
 ## Install
 

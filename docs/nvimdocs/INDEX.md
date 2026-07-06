@@ -188,6 +188,10 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 - [flutter-tools](flutter-tools.md) — Flutter / Dart LSP + emulator + hot reload
 
+## Swift
+
+- [swift-xcodebuild](swift-xcodebuild.md) — Xcode build/run/test/debug + SwiftUI previews; sourcekit-lsp via xcode-build-server
+
 ## Diagram
 
 - [diagram-nvim](diagram-nvim.md) — **removed** — was: Mermaid/PlantUML/D2/Gnuplot inline render

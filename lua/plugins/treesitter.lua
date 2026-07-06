@@ -10,7 +10,7 @@ return {
       require("nvim-treesitter").install({
         "angular", "bash", "blade", "css", "dart", "diff", "embedded_template", "html", "javascript", "json", "lua",
         "markdown", "markdown_inline", "php", "php_only", "python", "regex",
-        "ruby", "rust", "tsx", "typescript", "vim", "vimdoc", "yaml",
+        "ruby", "rust", "swift", "tsx", "typescript", "vim", "vimdoc", "yaml",
       })
       -- `diff`: actions-preview.nvim renders the code-action preview in a `diff`
       -- filetype buffer and calls vim.treesitter.start, which asserts hard if the

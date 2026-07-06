@@ -16,6 +16,7 @@ return {
         python = { "ruff_organize_imports", "ruff_format" },
         dart = { "dart_format" },
         rust = { "rustfmt" },
+        swift = { "swiftformat" },
       }
       local formatters = {}
       if vim.g.gaf then
@@ -41,6 +42,12 @@ return {
         lint.linters_by_ft = { php = { "phpcs" } }
       else
         lint.linters_by_ft = {}
+      end
+
+      -- Guarded: try_lint on every save would spam spawn errors if the
+      -- binary is missing (same failure mode as the phpcs note above).
+      if vim.fn.executable("swiftlint") == 1 then
+        lint.linters_by_ft.swift = { "swiftlint" }
       end
 
       vim.api.nvim_create_autocmd({ "BufWritePost" }, {
