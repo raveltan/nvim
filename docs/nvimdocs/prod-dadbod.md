@@ -6,7 +6,7 @@
 - ui: https://github.com/kristijanhusak/vim-dadbod-ui
 - completion: https://github.com/kristijanhusak/vim-dadbod-completion
 
-**Local spec:** lua/plugins/productivity.lua:100-138
+**Local spec:** lua/plugins/productivity.lua:76
 **Tags:** database sql postgres mysql sqlite completion
 
 ## Scope

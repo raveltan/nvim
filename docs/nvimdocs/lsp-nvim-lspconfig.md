@@ -2,7 +2,7 @@
 > Per-server `vim.lsp.config()` definitions for every LSP we use plus diagnostic UI tuning.
 
 **Repo:** https://github.com/neovim/nvim-lspconfig
-**Local spec:** lua/plugins/lsp.lua:39-218
+**Local spec:** lua/plugins/lsp.lua:42
 **Tags:** lsp, config, capabilities, diagnostics, intelephense
 
 ## Scope
@@ -73,7 +73,7 @@ Defined in `lua/config/keymaps.lua`, not in this spec. Neovim 0.11+ defaults (`g
 | `gO` | n | (default) `vim.lsp.buf.document_symbol` | Document symbols |
 | `<leader>ca` | n,v | `actions-preview.code_actions()` | Code action with diff preview |
 | `<leader>cA` | n | `vim.lsp.buf.code_action({ context.only = "source" })` | Source action |
-| `<leader>cr` | n | Custom rename (handles PHP `$` sigil) | Rename symbol |
+| `<leader>cr` | n | Smart rename: class → tag → LSP (PHP `$` sigil aware) | Rename class/tag/symbol |
 | `<leader>cf` | n | `conform.format({ async = true })` | Format file |
 | `<leader>cd` | n | `vim.diagnostic.open_float` | Line diagnostics |
 | `<leader>ci` | n | toggle `vim.lsp.inlay_hint` | Toggle inlay hints |
@@ -85,7 +85,7 @@ Defined in `lua/config/keymaps.lua`, not in this spec. Neovim 0.11+ defaults (`g
 ## GAF integration
 
 - Under `vim.g.gaf`, `basedpyright.analysis.extraPaths` is extended with `libgafthrift` and `restutils` so cross-repo Python imports resolve.
-- `<leader>cr` detects PHP buffers, advances the cursor past `$`, strips `$` from `cword`, then re-adds it to `newName` if the symbol is a variable. Built to dodge intelephense's broken `prepareProvider` range for `$var`. See [[ftplugin-php]].
+- `<leader>cr` first routes CSS-class and tag contexts to `config/rename.lua` (see [[config-rename]]); the LSP fallback detects PHP buffers, advances the cursor past `$`, strips `$` from `cword`, then re-adds it to `newName` if the symbol is a variable. Built to dodge intelephense's broken `prepareProvider` range for `$var`. See [[ftplugin-php]].
 - See [[gaf-lsp]] for the full GAF LSP integration layer.
 
 ## Links

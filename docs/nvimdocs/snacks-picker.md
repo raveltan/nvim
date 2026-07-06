@@ -2,7 +2,7 @@
 > Modern fuzzy-finder — our primary file/grep/LSP/git picker.
 
 **Repo:** https://github.com/folke/snacks.nvim
-**Local spec:** lua/plugins/snacks.lua:9-20, 97-122
+**Local spec:** lua/plugins/snacks.lua:3, 97-122
 **Tags:** snacks picker fuzzy-finder telescope-alternative lsp git
 
 ## Scope

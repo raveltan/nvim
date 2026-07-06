@@ -2,7 +2,7 @@
 > Pretty diagnostics / references / quickfix list in a dedicated window.
 
 **Repo:** https://github.com/folke/trouble.nvim
-**Local spec:** lua/plugins/lsp.lua:250-257
+**Local spec:** lua/plugins/lsp.lua:285
 **Tags:** lsp, diagnostics, quickfix, ui
 
 ## Scope

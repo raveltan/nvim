@@ -2,7 +2,7 @@
 > Sign-column git indicators and hunk navigation/actions.
 
 **Repo:** https://github.com/lewis6991/gitsigns.nvim
-**Local spec:** lua/plugins/git.lua:3-52
+**Local spec:** lua/plugins/git.lua:4
 **Tags:** git, signs, hunk
 
 ## Scope

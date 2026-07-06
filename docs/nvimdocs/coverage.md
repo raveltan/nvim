@@ -2,7 +2,7 @@
 > Gutter signs + summary panel for line coverage across PHP, Ruby, Python, Rust.
 
 **Repo:** https://github.com/andythigpen/nvim-coverage
-**Local spec:** lua/plugins/coverage.lua:1-58
+**Local spec:** lua/plugins/coverage.lua:8
 **Tags:** coverage cobertura simplecov lcov phpunit pytest cargo-llvm-cov
 
 ## Scope

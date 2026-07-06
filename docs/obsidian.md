@@ -1,6 +1,6 @@
 # Obsidian — Note-taking Guide
 
-Comprehensive guide for using `obsidian.nvim` inside this config. Covers vault layout, every template, the full `<leader>n*` keymap surface, capture/triage/review workflows, and integration with checkmate, markview, blink, and Obsidian.app.
+Comprehensive guide for using `obsidian.nvim` inside this config. Covers vault layout, every template, the full `<leader>n*` keymap surface, capture/triage/review workflows, and integration with blink and Obsidian.app. (checkmate.nvim and markview.nvim have been removed from the config.)
 
 > Plugin spec: [`docs/nvimdocs/editor-obsidian.md`](nvimdocs/editor-obsidian.md) · helpers: [`docs/nvimdocs/util-obsidian.md`](nvimdocs/util-obsidian.md) · keymap row: [`docs/keybinds.md`](keybinds.md) §Obsidian.
 
@@ -22,11 +22,10 @@ UI rendering split:
 | Concern | Owner |
 |---------|-------|
 | Checkbox glyphs / cycle | [checkmate.nvim](nvimdocs/editor-checkmate.md) |
-| Markdown render (headings, code, tables) | [markview.nvim](nvimdocs/markview.md) |
 | Wiki-link completion (`[[` + 2 chars) | [blink.cmp](nvimdocs/cmp-blink.md) via obsidian bridge |
 | Image inline preview | [snacks image](nvimdocs/snacks-misc.md) |
 
-`obsidian.nvim`'s own `ui` is **disabled** (`ui.enable = false`) — checkmate owns checkbox extmarks; markview owns the rest.
+`obsidian.nvim`'s own `ui` is **disabled** (`ui.enable = false`) — kept off from the checkmate/markview era; re-enable if plain rendering bothers you.
 
 ---
 
@@ -310,7 +309,7 @@ Plugin spec lives at `lua/plugins/editor.lua:317-412`. Helpers at `lua/util/obsi
 
 ## 12. Troubleshooting
 
-- **Checkboxes look wrong / duplicated glyphs** — checkmate vs obsidian extmark fight. Verify `ui.enable = false` in editor.lua.
+- **Checkboxes look wrong / duplicated glyphs** — historic checkmate vs obsidian extmark fight; `ui.enable = false` in editor.lua still guards this (checkmate itself was removed).
 - **`[[` completion not firing** — ensure file is markdown (`ft=markdown`), wait 2 chars, check blink isn't deferred. See [cmp-blink](nvimdocs/cmp-blink.md).
 - **`:Obsidian new` lands in wrong folder** — `notes_subdir` is `"inbox"`; change there, not at call site.
 - **Daily missing `{{yesterday}}` link** — substitution defined in `opts.templates.substitutions`; if you copy a template ensure the curly form is `{{yesterday}}` not `{{ yesterday }}`.

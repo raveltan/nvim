@@ -2,7 +2,7 @@
 > Ruby debugger (rdbg / debug.gem) configurations for nvim-dap.
 
 **Repo:** https://github.com/suketa/nvim-dap-ruby
-**Local spec:** lua/plugins/dap.lua:95-99
+**Local spec:** lua/plugins/dap.lua:95
 **Tags:** dap ruby rdbg rspec rails
 
 ## Scope

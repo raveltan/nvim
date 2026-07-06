@@ -2,7 +2,7 @@
 > Smarter `a`/`i` text objects with next/last variants, treesitter integration, and richer pair handling.
 
 **Repo:** https://github.com/echasnovski/mini.ai (part of https://github.com/echasnovski/mini.nvim)
-**Local spec:** lua/plugins/editor.lua:131-134
+**Local spec:** lua/plugins/editor.lua:158
 **Tags:** text-objects, mini, motion
 
 ## Scope
@@ -13,7 +13,14 @@ Replaces and extends Neovim's built-in `a`/`i` text objects so that `vaq`, `cin`
 {
   "echasnovski/mini.ai",
   event = "VeryLazy",
-  opts = {},
+  opts = {
+    n_lines = 500, -- default 50 misses tall multi-line elements
+    custom_textobjects = {
+      -- hyphen-aware `t`: upstream's `(%w-)` tag-name pattern stops at the first
+      -- hyphen, so dit/dat fail on custom elements (<fl-button>, <app-foo-bar>).
+      t = { "<([%w%-]-)%f[^<%w%-][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
+    },
+  },
 }
 ```
 
@@ -29,7 +36,7 @@ Replaces and extends Neovim's built-in `a`/`i` text objects so that `vaq`, `cin`
 - `custom_textobjects` *(table)* — define new identifiers, e.g. `{ F = require("mini.ai").gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }) }`.
 
 ## Our config
-Defaults (`opts = {}`). All built-in identifiers active.
+`n_lines = 500` (find objects across tall multi-line constructs) and a hyphen-aware `t` tag override so `dit`/`cit`/`dat`/`cat` match hyphenated custom elements. All other built-in identifiers at defaults. mini.surround carries the same `t` fix on its side ([editor-mini-surround](editor-mini-surround.md)).
 
 ## Keymaps
 | Key | Mode | Action | Desc |

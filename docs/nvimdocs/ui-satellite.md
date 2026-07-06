@@ -2,7 +2,7 @@
 > Decorated scrollbar in the right gutter showing marks, gitsigns, diagnostics, cursor, search, and quickfix positions.
 
 **Repo:** https://github.com/lewis6991/satellite.nvim
-**Local spec:** lua/plugins/ui.lua:188-228
+**Local spec:** lua/plugins/ui.lua:195
 **Tags:** ui, scrollbar, gitsigns, diagnostics, marks
 
 ## Scope

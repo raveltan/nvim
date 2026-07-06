@@ -8,6 +8,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [config-options](config-options.md) — `vim.opt` defaults, leader keys, providers
 - [config-lazy](config-lazy.md) — lazy.nvim bootstrap + `plugins/` auto-import
 - [config-keymaps](config-keymaps.md) — global plugin-agnostic keymaps
+- [config-rename](config-rename.md) — smart `<leader>cr`: CSS class (cross-file, scss `&`-aware) → tag pair → LSP
 - [config-autocmds](config-autocmds.md) — autocmd groups + LSP hover patch
 - [config-profile](config-profile.md) — startup profiling helper
 - [config-neotest-coverage](config-neotest-coverage.md) — PHP/Ruby neotest run-with-coverage helper
@@ -101,6 +102,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [editor-textobjects-cheatsheet](editor-textobjects-cheatsheet.md) — master textobject + motion + surround guide
 - [editor-mini-ai](editor-mini-ai.md) — extended textobjects
 - [editor-mini-surround](editor-mini-surround.md) — `gs*` surround ops
+- [editor-tagmatch](editor-tagmatch.md) — treesitter `%` tag jump, `i%`/`a%` objects, tag rename (in-repo `lua/tagmatch/`)
 - [editor-mini-bufremove](editor-mini-bufremove.md) — `<leader>bd` close-keep-window
 - [editor-flash](editor-flash.md) — `s`/`S` label jumps
 - [editor-grug-far](editor-grug-far.md) — project-wide find/replace UI
@@ -109,20 +111,20 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [editor-marks](editor-marks.md) — mark gutter + picker
 - [editor-yanky](editor-yanky.md) — yank ring
 - [editor-dial](editor-dial.md) — extended `<C-a>`/`<C-x>` (dates, bools, ...)
-- [editor-vim-abolish](editor-vim-abolish.md) — `cr*` case coercion + `:S` substitute
+- [editor-vim-abolish](editor-vim-abolish.md) — **removed** — was: `cr*` case coercion + `:S` substitute
 - [editor-vim-repeat](editor-vim-repeat.md) — `.` plugin-action repeat support
 - [editor-vim-sleuth](editor-vim-sleuth.md) — auto-detect indent/tabs
 - [editor-vim-matchup](editor-vim-matchup.md) — extended `%` matching
 - [editor-ultimate-autopair](editor-ultimate-autopair.md) — bracket / quote autopair
 - [editor-ts-comments](editor-ts-comments.md) — context-aware comments
 - [editor-scissors](editor-scissors.md) — `<leader>S*` snippet edit/add
-- [editor-checkmate](editor-checkmate.md) — markdown todo plugin (owns `<leader>t*` in md)
+- [editor-checkmate](editor-checkmate.md) — **removed** — was: markdown todo plugin (owns `<leader>t*` in md)
 - [editor-todo-comments](editor-todo-comments.md) — TODO/FIXME highlight + picker
 - [editor-hlslens](editor-hlslens.md) — search match count + virt text
 - [editor-highlight-undo](editor-highlight-undo.md) — flash region on undo/redo
-- [editor-refjump](editor-refjump.md) — `]r`/`[r` LSP reference cycle
-- [editor-dropbar](editor-dropbar.md) — winbar breadcrumb picker `<leader>;`
-- [editor-bqf](editor-bqf.md) — better quickfix preview
+- [editor-refjump](editor-refjump.md) — **removed** — was: `]r`/`[r` LSP reference cycle
+- [editor-dropbar](editor-dropbar.md) — **removed** — was: winbar breadcrumb picker `<leader>;`
+- [editor-bqf](editor-bqf.md) — **removed** — was: better quickfix preview
 - [editor-quicker](editor-quicker.md) — editable quickfix
 - [editor-obsidian](editor-obsidian.md) — obsidian vault integration
 
@@ -144,7 +146,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 - [ui-lualine](ui-lualine.md) — statusline
 - [ui-noice](ui-noice.md) — cmdline + LSP hover/messages
-- [ui-gruvbox-baby](ui-gruvbox-baby.md) — colorscheme option
+- [ui-gruvbox-baby](ui-gruvbox-baby.md) — **removed** — was: colorscheme option
 - [ui-mini-icons](ui-mini-icons.md) — icon provider
 - [ui-mini-indentscope](ui-mini-indentscope.md) — indent scope highlight
 - [ui-colorizer](ui-colorizer.md) — inline color preview
@@ -166,9 +168,9 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 ## Workflow
 
 - [workflow-overseer](workflow-overseer.md) — task runner + auto-discovered templates
-- [workflow-claude-code](workflow-claude-code.md) — Claude Code terminal toggle
+- [workflow-claude-code](workflow-claude-code.md) — **removed** — was: Claude Code terminal toggle
 - [workflow-other](workflow-other.md) — related-file picker for PHP + Angular (`<leader>o{o,s,v}`); Rails nav delegated to vim-rails
-- [workflow-emmet](workflow-emmet.md) — `<C-y>,` HTML/CSS expansion
+- [workflow-emmet](workflow-emmet.md) — **removed** — was: `<C-y>,` HTML/CSS expansion
 - [workflow-scripts](workflow-scripts.md) — `scripts/` helper shell scripts
 - [workflow-silicon](workflow-silicon.md) — code → image screenshot
 
@@ -188,9 +190,9 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 ## Diagram
 
-- [diagram-nvim](diagram-nvim.md) — Mermaid/PlantUML/D2/Gnuplot inline render
-- [diagram-image-nvim](diagram-image-nvim.md) — Kitty image protocol backend
-- [markview](markview.md) — markdown rendering (`<leader>uM`)
+- [diagram-nvim](diagram-nvim.md) — **removed** — was: Mermaid/PlantUML/D2/Gnuplot inline render
+- [diagram-image-nvim](diagram-image-nvim.md) — **removed** — was: Kitty image protocol backend
+- [markview](markview.md) — **removed** — was: markdown rendering (`<leader>uM`)
 
 ## Ftplugin
 

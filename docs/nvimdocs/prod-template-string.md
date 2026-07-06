@@ -2,7 +2,7 @@
 > Auto-converts `"..."` / `'...'` to template literals `` `...` `` when you type `${`.
 
 **Repo:** https://github.com/axelvc/template-string.nvim
-**Local spec:** lua/plugins/productivity.lua:62-70
+**Local spec:** lua/plugins/productivity.lua:56
 **Tags:** typescript javascript jsx template-literal quality-of-life
 
 ## Scope

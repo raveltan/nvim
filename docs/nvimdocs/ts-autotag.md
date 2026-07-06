@@ -2,7 +2,7 @@
 > Auto-close and auto-rename paired HTML/JSX/Vue/Angular tags using treesitter.
 
 **Repo:** https://github.com/windwp/nvim-ts-autotag
-**Local spec:** lua/plugins/treesitter.lua:131-end
+**Local spec:** lua/plugins/treesitter.lua:160end
 **Tags:** treesitter, html, jsx, tags, editing
 
 ## Scope

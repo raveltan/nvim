@@ -2,7 +2,7 @@
 > Native tsserver client for Neovim — replaces ts_ls/vtsls with TS-specific actions.
 
 **Repo:** https://github.com/pmizio/typescript-tools.nvim
-**Local spec:** lua/plugins/productivity.lua:4-59
+**Local spec:** lua/plugins/productivity.lua:5
 **Tags:** typescript javascript lsp tsserver imports code-action
 
 ## Scope

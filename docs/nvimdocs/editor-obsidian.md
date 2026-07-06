@@ -2,7 +2,7 @@
 > Obsidian vault integration — daily notes, templates, backlinks, picker-driven search.
 
 **Repo:** https://github.com/obsidian-nvim/obsidian.nvim
-**Local spec:** lua/plugins/editor.lua:321-413
+**Local spec:** lua/plugins/editor.lua:306
 **Tags:** obsidian, notes, markdown, vault, templates
 
 ## Scope
@@ -50,7 +50,7 @@ WebFetch https://raw.githubusercontent.com/obsidian-nvim/obsidian.nvim/HEAD/READ
 - **Inbox-first**: new notes default to `inbox/` (`notes_subdir = "inbox"`, `new_notes_location = "notes_subdir"`).
 - **Daily notes** under `daily/`, filename `YYYY-MM-DD`, tagged `daily`, instantiated from `daily.md` template.
 - **Templates** in `templates/`. Custom substitutions inject `{{yesterday}}` / `{{tomorrow}}` as YYYY-MM-DD.
-- **UI off** (`ui.enable = false`) — checkmate.nvim handles checkbox glyphs; obsidian's link conceal also disabled to avoid extmark conflicts. Markdown rendering comes from `markview.nvim` instead.
+- **UI off** (`ui.enable = false`) — originally so checkmate.nvim could own checkbox glyphs; both checkmate and markview have since been removed, but the setting stays (no conceal/extmark surprises).
 - **Completion via blink** (`nvim_cmp = false`, `blink = true`) with 2-char minimum.
 - **Picker = snacks.pick** for tags/backlinks/quick-switch.
 - **Wiki links** with alias-only rendering and `[[wiki]]` syntax preferred.

@@ -1,5 +1,5 @@
 # config-init
-> Entrypoint: sets the GAF flag, hushes LSP logs, then loads each config module in order.
+> Entrypoint: sets the GAF flag, then loads each config module in order.
 
 **Local file:** init.lua
 **Tags:** config, bootstrap, gaf
@@ -11,25 +11,25 @@
 ## Highlights
 
 - `vim.g.gaf = vim.env.GAF == "1"` — single source of truth for "is this the Freelancer profile". Every GAF-only plugin spec and keymap branch checks this global. See memory `nvim_gaf_profile.md`.
-- `vim.lsp.log.set_level(vim.log.levels.ERROR)` — keeps `~/.local/state/nvim/lsp.log` from filling up with INFO chatter from intelephense and ts_ls. Set before any LSP attaches.
+- LSP log silencing (`vim.lsp.log.set_level(vim.log.levels.OFF)`) lives in `config/options.lua`, not here.
 - Boot order is intentional:
   1. `config.options` — sets `mapleader` first so subsequent `<leader>…` mappings resolve correctly.
   2. `config.lazy` — bootstraps lazy.nvim and imports all plugin specs (plugins must exist before keymaps can reference them).
   3. `config.keymaps` — global mappings; some reference plugin globals like `Snacks` and `require("hlslens")`.
   4. `config.autocmds` — patches `vim.lsp.util.open_floating_preview` (must run after Neovim's LSP module is loaded, which lazy may have already touched).
-  5. `gaf.setup()` — applies the GAF-specific overlay; internally no-ops when `vim.g.gaf` is false.
+  5. `tagmatch.setup()` — in-repo treesitter tag module (`lua/tagmatch/`, see [editor-tagmatch](editor-tagmatch.md)). Eager because setup only registers a FileType autocmd + two `<Plug>` maps; must run before the first file's FileType fires.
+  6. `gaf.setup()` — applies the GAF-specific overlay; internally no-ops when `vim.g.gaf` is false.
 
 ## Full listing
 
 ```lua
 vim.g.gaf = vim.env.GAF == "1"
 
-vim.lsp.log.set_level(vim.log.levels.ERROR)
-
 require("config.options")
 require("config.lazy")
 require("config.keymaps")
 require("config.autocmds")
+require("tagmatch").setup()
 require("gaf").setup()
 ```
 

@@ -2,7 +2,7 @@
 > Replaces Neovim's cmdline, messages, and popupmenu UI with floating windows; routes LSP hover and progress through a nicer renderer.
 
 **Repo:** https://github.com/folke/noice.nvim
-**Local spec:** lua/plugins/ui.lua:267-300 (deps include `MunifTanjim/nui.nvim`)
+**Local spec:** lua/plugins/ui.lua:274 (deps include `MunifTanjim/nui.nvim`)
 **Tags:** ui, cmdline, messages, lsp, hover
 
 ## Scope

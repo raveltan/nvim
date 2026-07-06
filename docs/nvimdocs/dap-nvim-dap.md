@@ -2,7 +2,7 @@
 > Debug Adapter Protocol client for Neovim — language-agnostic step debugging.
 
 **Repo:** https://github.com/mfussenegger/nvim-dap
-**Local spec:** lua/plugins/dap.lua:1-259
+**Local spec:** lua/plugins/dap.lua:3
 **Tags:** dap debugger breakpoint step-debug adapter
 
 ## Scope

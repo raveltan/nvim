@@ -1,4 +1,6 @@
 # ui-gruvbox-baby
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (colorscheme no longer installed). Doc kept for history.
 > Warm gruvbox-derived dark colorscheme; loaded eagerly with high priority and patched for terminal transparency.
 
 **Repo:** https://github.com/luisiacc/gruvbox-baby

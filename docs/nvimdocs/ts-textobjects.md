@@ -2,7 +2,7 @@
 > Treesitter-powered text objects, motions, swaps, and incremental selection.
 
 **Repo:** https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-**Local spec:** lua/plugins/treesitter.lua:57-130
+**Local spec:** lua/plugins/treesitter.lua:69
 **Tags:** treesitter, textobjects, motions, selection
 
 ## Scope

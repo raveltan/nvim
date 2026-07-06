@@ -2,7 +2,7 @@
 > Spawns wandering animal emojis (ducks by default) that aimlessly walk around the buffer for fun.
 
 **Repo:** https://github.com/tamton-aquib/duck.nvim
-**Local spec:** lua/plugins/ui.lua:248-264
+**Local spec:** lua/plugins/ui.lua:255
 **Tags:** ui, fun, easter-egg
 
 ## Scope

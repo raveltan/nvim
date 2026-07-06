@@ -2,7 +2,7 @@
 > Delete a buffer without closing the window that holds it.
 
 **Repo:** https://github.com/echasnovski/mini.bufremove (part of https://github.com/echasnovski/mini.nvim)
-**Local spec:** lua/plugins/editor.lua:122-127
+**Local spec:** lua/plugins/editor.lua:149
 **Tags:** buffer, window, mini
 
 ## Scope

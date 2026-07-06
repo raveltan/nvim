@@ -2,7 +2,7 @@
 > Mark a handful of "pinned" files and teleport to them with `<leader>1..8`.
 
 **Repo:** https://github.com/ThePrimeagen/harpoon (branch `harpoon2`)
-**Local spec:** lua/plugins/nav.lua:42-61
+**Local spec:** lua/plugins/nav.lua:44
 **Tags:** navigation, marks, bookmarks, files
 
 ## Scope

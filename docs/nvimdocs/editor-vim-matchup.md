@@ -2,7 +2,7 @@
 > Smarter `%` that jumps between language constructs (if/else/end, do/end, etc.).
 
 **Repo:** https://github.com/andymass/vim-matchup
-**Local spec:** lua/plugins/editor.lua:249-255
+**Local spec:** lua/plugins/editor.lua:235
 **Tags:** matching, motion, treesitter, vimscript
 
 ## Scope
@@ -64,3 +64,4 @@ Treesitter integration is opt-in via the nvim-treesitter `matchup` module — we
 - The popup floats at the top of the window; `<C-w>w` can't focus it (intentional).
 - Companion to the fold providers in [editor-folding](editor-folding.md) — matchup's text objects work well as fold targets.
 - If `%` feels slow on large files, set `vim.g.matchup_matchparen_deferred = 1`.
+- **On HTML/JSX tags, `%` and `i%`/`a%` are taken over by the in-repo [editor-tagmatch](editor-tagmatch.md) module** (treesitter-resolved, handles hyphenated custom elements and injected templates); matchup remains the fallback everywhere else.

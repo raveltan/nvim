@@ -2,7 +2,7 @@
 > Popup hint window that documents leader-prefixed keymap groups.
 
 **Repo:** https://github.com/folke/which-key.nvim
-**Local spec:** lua/plugins/editor.lua:281-318
+**Local spec:** lua/plugins/editor.lua:269
 **Tags:** keymap, ui, discovery, help
 
 ## Scope

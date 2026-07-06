@@ -2,7 +2,7 @@
 > Add, delete, replace, find, and highlight surrounding pairs with the `gs` prefix.
 
 **Repo:** https://github.com/echasnovski/mini.surround (part of https://github.com/echasnovski/mini.nvim)
-**Local spec:** lua/plugins/editor.lua:48-61
+**Local spec:** lua/plugins/editor.lua:81
 **Tags:** text-objects, surround, mini
 
 ## Scope
@@ -14,6 +14,7 @@ Provides operators to manipulate pairs of brackets, quotes, tags, and custom sur
   "echasnovski/mini.surround",
   event = "VeryLazy",
   opts = {
+    n_lines = 500, -- default 20 is too small for tall HTML elements
     mappings = {
       add = "gsa",
       delete = "gsd",
@@ -22,6 +23,14 @@ Provides operators to manipulate pairs of brackets, quotes, tags, and custom sur
       highlight = "gsh",
       replace = "gsr",
       update_n_lines = "gsn",
+    },
+    custom_surroundings = {
+      -- hyphen-aware `t` input: upstream's tag-name pattern stops at the first
+      -- hyphen, breaking gsdt/gsrt on custom elements (<fl-button>). Only `input`
+      -- is overridden; the default add/replace prompt is untouched.
+      t = {
+        input = { "<([%w%-]-)%f[^<%w%-][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
+      },
     },
   },
 }
@@ -43,7 +52,7 @@ Provides operators to manipulate pairs of brackets, quotes, tags, and custom sur
 - `search_method` *(string, "cover")* — `cover`, `cover_or_next`, `cover_or_prev`, `cover_or_nearest`, `next`, `prev`, `nearest`.
 
 ## Our config
-All seven default mappings reprefixed under `gs*`. Which-key registers the `gs` group label (`<leader>` table in editor.lua:314 sets `{ "gs", group = "surround" }`).
+All seven default mappings reprefixed under `gs*`. Which-key registers the `gs` group label (`<leader>` table in editor.lua:293 sets `{ "gs", group = "surround" }`). `n_lines = 500` so multi-line tags are found from anywhere inside them, and the `t` surrounding's input pattern is widened to match hyphenated custom elements (same fix as mini.ai's `t`, see [editor-mini-ai](editor-mini-ai.md)).
 
 ## Keymaps
 | Key | Mode | Action | Desc |
@@ -62,4 +71,7 @@ All seven default mappings reprefixed under `gs*`. Which-key registers the `gs` 
 
 ## Notes
 - Built-in identifiers: `(`, `[`, `{`, `<`, `"`, `'`, `` ` ``, `t` (tag), `f` (function call), `?` (interactive).
-- vim-repeat (loaded in editor.lua:483) makes `.` repeat `gsd"`, `gsr"'`, etc.
+- vim-repeat (loaded in editor.lua:402) makes `.` repeat `gsd"`, `gsr"'`, etc.
+- **Unwrap a tag pair, keep content:** `gsdt` from anywhere inside the element (even multi-line). `2gsdt` targets the second-nearest (outer) tag when nested.
+- **`gsr` takes TWO identifiers** (target, then replacement): to rename a tag it's `gsrtt` — the second `t` opens the full "Tag name" prompt. `gsrt<char>` would replace the tag with that literal char.
+- For a treesitter-based tag-pair rename bound to `<leader>cr`, see [config-rename](config-rename.md) / [editor-tagmatch](editor-tagmatch.md).

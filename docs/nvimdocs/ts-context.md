@@ -2,7 +2,7 @@
 > Sticky header showing the enclosing function/class/scope at the top of the window.
 
 **Repo:** https://github.com/nvim-treesitter/nvim-treesitter-context
-**Local spec:** lua/plugins/treesitter.lua:48-56
+**Local spec:** lua/plugins/treesitter.lua:60
 **Tags:** treesitter, context, sticky-header, ui
 
 ## Scope

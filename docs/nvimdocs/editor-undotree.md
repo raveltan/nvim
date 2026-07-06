@@ -2,7 +2,7 @@
 > Visual side-panel for navigating Vim's persistent undo history tree.
 
 **Repo:** https://github.com/mbbill/undotree
-**Local spec:** lua/plugins/editor.lua:23-28
+**Local spec:** lua/plugins/editor.lua:53
 **Tags:** undo, history, ui, vimscript
 
 ## Scope

@@ -2,7 +2,7 @@
 > Preview LSP code actions as a diff before applying.
 
 **Repo:** https://github.com/aznhe21/actions-preview.nvim
-**Local spec:** lua/plugins/lsp.lua:241-247
+**Local spec:** lua/plugins/lsp.lua:276
 **Tags:** lsp, code-action, preview, telescope
 
 ## Scope

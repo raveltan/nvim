@@ -1,4 +1,6 @@
 # workflow-emmet
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (mattn/emmet-vim dropped; emmet now via `emmet_language_server` LSP completions). Doc kept for history.
 > Expand CSS-like abbreviations into HTML/JSX/ERB/Vue/Svelte markup.
 
 **Repo:** https://github.com/mattn/emmet-vim

@@ -2,7 +2,7 @@
 > Persist nvim-dap breakpoints across nvim restarts (per-file JSON in stdpath/data).
 
 **Repo:** https://github.com/Weissle/persistent-breakpoints.nvim
-**Local spec:** lua/plugins/dap.lua:100-106
+**Local spec:** lua/plugins/dap.lua:100
 **Tags:** dap breakpoint persistence session
 
 ## Scope

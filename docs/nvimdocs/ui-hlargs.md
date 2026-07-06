@@ -2,7 +2,7 @@
 > Highlights function argument occurrences in a distinct color via Treesitter for fast visual lookup.
 
 **Repo:** https://github.com/m-demare/hlargs.nvim
-**Local spec:** lua/plugins/ui.lua:231-245
+**Local spec:** lua/plugins/ui.lua:238
 **Tags:** ui, treesitter, highlight, semantic
 
 ## Scope

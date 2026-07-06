@@ -1,4 +1,6 @@
 # editor-dropbar
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (`<leader>;` winbar picker no longer bound). Doc kept for history.
 > Winbar breadcrumbs of LSP/treesitter symbol path with keyboard-navigable picker.
 
 **Repo:** https://github.com/Bekaboo/dropbar.nvim

@@ -2,7 +2,7 @@
 > Async linter runner that pushes diagnostics into Neovim's native vim.diagnostic.
 
 **Repo:** https://github.com/mfussenegger/nvim-lint
-**Local spec:** lua/plugins/formatting.lua:29-49
+**Local spec:** lua/plugins/formatting.lua:30
 **Tags:** lint diagnostics phpcs
 
 ## Scope

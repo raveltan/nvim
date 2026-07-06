@@ -2,7 +2,7 @@
 > Treesitter parser installer + highlighting/indent engine for Neovim.
 
 **Repo:** https://github.com/nvim-treesitter/nvim-treesitter
-**Local spec:** lua/plugins/treesitter.lua:1-47
+**Local spec:** lua/plugins/treesitter.lua:3
 **Tags:** treesitter, syntax, highlight, indent, parser
 
 ## Scope

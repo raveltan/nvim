@@ -2,7 +2,7 @@
 > Highlight TODO/FIX/HACK/NOTE/WARN/PERF comments and surface them in a picker.
 
 **Repo:** https://github.com/folke/todo-comments.nvim
-**Local spec:** lua/plugins/editor.lua:111-118
+**Local spec:** lua/plugins/editor.lua:138
 **Tags:** todo, comments, picker, highlight, editor
 
 ## Scope
@@ -75,4 +75,4 @@ The plugin's own commands are also available without binding:
 - The `<leader>s` prefix is registered as group "search" in which-key, so `<leader>st` reads as "search todos".
 - `highlight.comments_only = true` means lines like `let x = "TODO"` are not highlighted — only real comments. If you ever see misses, check that treesitter parser is installed for the filetype.
 - Snacks reads keywords + highlight groups from todo-comments' setup, so adding a custom keyword (e.g. `REVIEW`) automatically appears in the picker.
-- Don't combine with `<leader>tt` — `t` prefix is "todo/test" (checkmate.nvim) which is for markdown todo-items, not comment keywords.
+- Don't confuse with `<leader>t*` — that prefix is neotest (checkmate.nvim markdown todos were removed); todo-comments is about comment keywords.

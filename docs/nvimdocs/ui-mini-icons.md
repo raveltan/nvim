@@ -2,7 +2,7 @@
 > Lightweight icon provider; lazy-loaded and registered as a `nvim-web-devicons` shim so legacy consumers work without the heavier plugin.
 
 **Repo:** https://github.com/echasnovski/mini.icons
-**Local spec:** lua/plugins/ui.lua:29-38
+**Local spec:** lua/plugins/ui.lua:37
 **Tags:** icons, devicons, ui
 
 ## Scope

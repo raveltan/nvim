@@ -2,7 +2,7 @@
 > Fast fuzzy file finder + live grep backed by a Rust binary, with frecency ranking.
 
 **Repo:** https://github.com/dmtrKovalenko/fff.nvim
-**Local spec:** lua/plugins/fff.lua:1-50
+**Local spec:** lua/plugins/fff.lua:3
 **Tags:** picker, fuzzy, grep, frecency, files
 
 ## Scope

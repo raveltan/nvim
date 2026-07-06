@@ -25,8 +25,8 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 
 | Key | Mode | Description | Source |
 |-----|------|-------------|--------|
-| `<leader>e` | n | Explorer (Oil) | oil.nvim |
-| `-` | n | Open parent directory (Oil) | oil.nvim |
+| `<leader>e` | n | Explorer (Oil) | canola.nvim (oil fork) |
+| `-` | n | Open parent directory (Oil) | canola.nvim (oil fork) |
 | `<leader>fn` | n | New file | config/keymaps.lua |
 | `<leader>ff` | n | Find files | snacks.picker |
 | `<leader><leader>` | n | Find files (resumes last query) | fff.nvim |
@@ -39,8 +39,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>hh` | n | Harpoon menu | harpoon |
 | `<leader>1`–`<leader>8` | n | Harpoon slot 1–8 | harpoon |
 | `<C-o>` / `<C-i>` | n | Jumplist back/forward (Jumppack preview) | Jumppack.nvim |
-| `<leader>;` | n | Dropbar pick — h=parent, l=child, i=fuzzy, q=close | dropbar.nvim |
-| `[;` / `];` | n | Goto context start / select next context | dropbar.nvim |
 | `<leader>oo` | n | Other: pick related file | other.nvim |
 | `<leader>os` | n | Other: pick (split) | other.nvim |
 | `<leader>oV` | n | Other: pick (vsplit) | other.nvim |
@@ -81,11 +79,10 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `gr` | n | References | snacks.picker |
 | `gI` | n | Implementations | snacks.picker |
 | `gy` | n | Type definitions | snacks.picker |
-| `]r` / `[r` | n | Cycle LSP references inline | refjump.nvim |
 | `]]` / `[[` | n | Next/prev occurrence of word under cursor (text search) | config/keymaps.lua |
 | `<leader>ca` | n, v | Code action (preview) | actions-preview |
 | `<leader>cA` | n | Source action | config/keymaps.lua |
-| `<leader>cr` | n | Rename symbol (PHP `$` sigil aware) | config/keymaps.lua |
+| `<leader>cr` | n | Smart rename: CSS class (cross-file, scss `&`-aware) → tag pair → LSP symbol (PHP `$` sigil aware) | config/rename.lua + keymaps.lua |
 | `<leader>cf` | n, v | Format file/selection (conform) | plugins/formatting.lua |
 | `<leader>ci` | n | Toggle inlay hints | config/keymaps.lua |
 | `<leader>cd` | n | Line diagnostics float | config/keymaps.lua |
@@ -98,8 +95,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>cD` | n | TS: go to source definition | typescript-tools |
 | `:w` (TS/JS) | n | Auto: add missing + remove unused imports on save (`:let g:disable_ts_organize_on_save = 1` to disable) | productivity.lua |
 | `<leader>csa` / `<leader>csA` | n | Swap with next/prev arg | treesitter |
-| `<leader>dd` | n | Better-ts-errors toggle (TS) / Diagram show (md) | better-ts-errors / diagram |
-| `<leader>dx` | n | Better-ts-errors: go to def (TS) | better-ts-errors |
 
 ## Git
 
@@ -167,7 +162,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>tm` | n | Run UI test (mobile) — `ui-tests/*.spec.ts` |
 | `<leader>tw` | n | Run UI test (watch) — `ui-tests/*.spec.ts` |
 
-> In markdown buffers, `<leader>t*` is owned by Checkmate (see Markdown todos). Neotest keys still work outside markdown.
 
 ## Debugging (DAP)
 
@@ -317,31 +311,24 @@ work in any buffer (and lazy-load the plugin); the rest are scoped to
 | `<C-a>` / `<C-x>` | n, v | Increment / decrement | dial |
 | `u` / `<C-r>` | n | Undo / redo (with region flash) | highlight-undo |
 | `gsa` | n, x | Surround add | mini.surround |
-| `gsd` | n | Surround delete | mini.surround |
+| `gsd` | n | Surround delete (`gsdt` unwraps a tag pair, keeps content; `2gsdt` outer tag) | mini.surround |
 | `gsf` / `gsF` | n | Surround find right/left | mini.surround |
 | `gsh` | n | Surround highlight | mini.surround |
-| `gsr` | n | Surround replace | mini.surround |
+| `gsr` | n | Surround replace (two ids: `gsrtt` renames a tag via prompt) | mini.surround |
 | `gsn` | n | Surround update n lines | mini.surround |
+| `%` | n, x | Jump between `<tag>`/`</tag>` (treesitter; falls back to matchup/builtin) | tagmatch |
+| `i%` / `a%` | x, o | Inner / around tag element (e.g. `di%`, `da%`) | tagmatch |
 | `<leader>Se` | n | Edit snippet | scissors |
 | `<leader>Sa` | n, x | Add snippet | scissors |
 | `<CR>` | i | Accept completion / newline with pair expand | blink.cmp |
 | `<C-Space>` | i | Show completion & docs | blink.cmp |
 
-### vim-abolish — case coercion (`cr` prefix)
+### Case conversion — `<leader>cv` (text-case.nvim)
 
-Operates on word under cursor. Case-preserving rename across forms.
-
-| Key | Result on `myVar` | Style |
-|-----|-------------------|-------|
-| `crs` | `my_var` | snake_case |
-| `crc` | `myVar` | camelCase |
-| `crm` | `MyVar` | MixedCase / PascalCase |
-| `cru` | `MY_VAR` | UPPER_SNAKE |
-| `cr-` | `my-var` | kebab-case |
-| `cr.` | `my.var` | dot.case |
-| `crt` | `My Var` | Title Case |
-
-Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural in one pass.
+`<leader>cv` opens a `vim.ui.select` picker over the identifier under the cursor
+(hyphen-aware, so kebab-case tokens convert whole): snake_case, camelCase,
+PascalCase, UPPER_CASE, kebab-case. Source: `lua/config/keymaps.lua` +
+`text-case.nvim` conversions.
 
 ### Filetype tricks — `after/ftplugin/`
 
@@ -355,7 +342,6 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 | Key | Mode | Description |
 |-----|------|-------------|
 | `<leader>ur` | n | Resize submode (see Buffers / Windows) |
-| `<leader>uM` | n | Toggle markdown render (markview) |
 | `<leader>udd` / `<leader>uda` | n | Hatch duck (slow / fast) |
 | `<leader>udk` / `<leader>udK` | n | Cook one duck / cook all |
 
@@ -382,78 +368,25 @@ Multi-form replace: `:%S/facilit{y,ies}/building{,s}/g` swaps singular + plural 
 | `<leader>Fp` / `<leader>FP` | n | Pub get / Pub upgrade |
 | `<leader>Fc` | n | Flutter LSP restart |
 
-## Claude Code — `<leader>a`
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>ac` | n | Toggle Claude Code |
-| `<leader>aC` | n | Claude Code continue |
-| `<leader>ar` | n | Claude Code resume |
-| `<leader>av` | n | Claude Code verbose |
-
-## Emmet (emmet-vim) — `<C-z>` leader
-
-Active in: `html`, `eruby`, `css`/`scss`/`sass`/`less`, `jsx`/`tsx`, `vue`, `svelte`, `htmldjango`. ERB inherits HTML snippet set.
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>ce` | n | Expand abbreviation (buffer-local in emmet filetypes) |
-| `<C-z>,` | i, n, v | Expand abbreviation (e.g. `div.card>h2{Title}+p.lead`) / wrap selection |
-| `<C-z>;` | i, n | Expand inline (no newlines) |
-| `<C-z>u` | n | Update tag (change `div` → `span`, etc.) |
-| `<C-z>d` | n, v | Balance tag inward (select inner) |
-| `<C-z>D` | n, v | Balance tag outward (select outer) |
-| `<C-z>n` / `<C-z>N` | n | Next / prev edit point |
-| `<C-z>i` | n | Update image size (HTML `<img>` width/height from file) |
-| `<C-z>m` | n | Merge lines into single tag |
-| `<C-z>k` | n | Remove tag |
-| `<C-z>j` | n | Split / join tag |
-| `<C-z>/` | n | Toggle HTML/CSS comment |
-| `<C-z>a` | n | Make anchor from URL on line |
-| `<C-z>A` | n | Make quoted text from URL on line |
-
-ERB examples:
-- `ul>li.item*3{<%= item %>}` then `<C-z>,` → 3 `<li class="item">` each containing the ERB output tag
-- `div.card>h2{Title}+p.lead{<%= @user.bio %>}` → full card block
-- Visual-select a region, `<C-z>,`, type `div.container` → wraps selection in `<div class="container">`
-
-## Checkmate (Markdown todos) — `<leader>t*` in markdown buffers
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>tt` | n, v | Toggle todo |
-| `<leader>tc` / `<leader>tu` | n, v | Check / uncheck |
-| `<leader>t=` / `<leader>t-` | n, v | Cycle next / previous state |
-| `<leader>tn` | n, v | New todo |
-| `<leader>tx` | n, v | Remove todo marker |
-| `<leader>tR` | n, v | Remove all metadata |
-| `<leader>ta` | n | Archive completed |
-| `<leader>tf` | n | Find todo (picker) |
-| `<leader>tv` | n | Set metadata value |
-| `<leader>t]` / `<leader>t[` | n | Next / prev metadata tag |
-| `<leader>tp` / `<leader>ts` / `<leader>td` | n | Insert priority / started / done metadata |
-
-## Diagram (markdown/norg)
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>dd` | n | Diagram: show at cursor in new tab (markdown/norg only) |
-
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` todo/test · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` test (neotest) · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile · `g` goto · `gs` surround
 
 ## Known overlaps
 
 - **`<leader>sR`** — snacks resume picker vs grug-far cword (n). Last-loaded wins; grug-far visual mode (`x`) safe.
-- **`<leader>dd`** — better-ts-errors (TS buffers) vs diagram.nvim (markdown/norg). Filetype-scoped, no real clash.
-- **`<leader>t*`** — Checkmate (markdown only) vs neotest (everywhere). Buffer-scope resolves.
 - **`<C-p>` / `<C-n>`** — yanky yank-ring cycling (n). Blink.cmp uses its own keys in insert.
 - **`q`** — global (no map) vs buffer-local close-window in help/qf/man/grug-far/blame.
 - **`<CR>`** — blink.cmp in insert. Treesitter incremental-select start in normal / expand in visual (if enabled).
 
 ## Removed / replaced (history)
 
+- `vim-abolish` removed — `cr*` coercions replaced by the `<leader>cv` text-case picker. `:S` subvert gone (use grug-far).
+- `refjump.nvim` (`]r`/`[r`), `dropbar.nvim` (`<leader>;`), `nvim-bqf`, `better-ts-errors` (`<leader>dd`/`dx`), `markview.nvim` (`<leader>uM`), `checkmate.nvim` (`<leader>t*` markdown todos), `claude-code.nvim` (`<leader>a*`), `diagram.nvim`/`image.nvim`, `gruvbox-baby` all removed.
+- `emmet-vim` (`<C-z>*`) removed — emmet now via `emmet_language_server` completions.
+- `oil.nvim` swapped for the `canola.nvim` fork (same `<leader>e` / `-` keys, `main = "oil"`).
+- `tagmatch.nvim/` local plugin folded into the repo as `lua/tagmatch/` (loaded eagerly from `init.lua`, no lazy spec). Keys unchanged (`%`, `i%`/`a%`); gained tag-pair rename via `<leader>cr`.
+- `<leader>cr` upgraded from LSP-only rename to smart routing: CSS class (cross-file, scss `&`-aware) → tag pair (tagmatch) → LSP symbol.
 - `<leader>cn` was `neogen` annotation. Now `ts-node-action`.
 - `<leader>du` opened `nvim-dap-ui`. Now `nvim-dap-view`.
 - `<leader>de` was DAP eval. Now `DapViewWatch`.

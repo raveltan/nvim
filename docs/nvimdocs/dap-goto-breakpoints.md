@@ -2,7 +2,7 @@
 > `]b` / `[b` navigation between nvim-dap breakpoints in the current buffer or workspace.
 
 **Repo:** https://github.com/ofirgall/goto-breakpoints.nvim
-**Local spec:** lua/plugins/dap.lua:107-109
+**Local spec:** lua/plugins/dap.lua:107
 **Tags:** dap breakpoint navigation jump
 
 ## Scope

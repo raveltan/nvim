@@ -2,7 +2,7 @@
 > Bridge mason.nvim and nvim-dap — auto-install and auto-configure debug adapters.
 
 **Repo:** https://github.com/jay-babu/mason-nvim-dap.nvim
-**Local spec:** lua/plugins/dap.lua:54-94
+**Local spec:** lua/plugins/dap.lua:54
 **Tags:** mason dap adapter installation js-debug codelldb
 
 ## Scope

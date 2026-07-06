@@ -2,7 +2,7 @@
 > Offline programming documentation browser sourcing devdocs.io archives.
 
 **Repo:** https://github.com/maskudo/devdocs.nvim
-**Local spec:** lua/plugins/docs.lua:1-232
+**Local spec:** lua/plugins/docs.lua:3
 **Tags:** docs devdocs reference offline markdown snacks-picker
 
 ## Scope

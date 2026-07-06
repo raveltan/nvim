@@ -2,7 +2,7 @@
 > Overview of folke/snacks.nvim — the QoL meta-plugin, which modules we enable, and why.
 
 **Repo:** https://github.com/folke/snacks.nvim
-**Local spec:** lua/plugins/snacks.lua:1-33
+**Local spec:** lua/plugins/snacks.lua:3
 **Tags:** snacks meta plugin-suite folke
 
 ## Scope

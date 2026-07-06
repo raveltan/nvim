@@ -2,7 +2,7 @@
 > Highlight git merge-conflict markers and resolve them with one-key choose-ours/theirs/both/none.
 
 **Repo:** https://github.com/akinsho/git-conflict.nvim
-**Local spec:** lua/plugins/git.lua:56-61
+**Local spec:** lua/plugins/git.lua:58
 **Tags:** git, merge, conflict
 
 ## Scope

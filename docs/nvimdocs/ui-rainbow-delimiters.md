@@ -2,7 +2,7 @@
 > Treesitter-based rainbow brackets/parentheses; default config plus a 1500-line size guard.
 
 **Repo:** https://github.com/HiPhish/rainbow-delimiters.nvim
-**Local spec:** lua/plugins/ui.lua:147-159
+**Local spec:** lua/plugins/ui.lua:155
 **Tags:** treesitter, brackets, ui
 
 ## Scope

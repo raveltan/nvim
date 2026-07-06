@@ -2,7 +2,7 @@
 > Set `commentstring` based on treesitter context — fixes JSX/Vue/Svelte/Astro nested commenting.
 
 **Repo:** https://github.com/folke/ts-comments.nvim
-**Local spec:** lua/plugins/editor.lua:243-246
+**Local spec:** lua/plugins/editor.lua:228
 **Tags:** comments, treesitter, jsx, vue, commentstring, editor
 
 ## Scope

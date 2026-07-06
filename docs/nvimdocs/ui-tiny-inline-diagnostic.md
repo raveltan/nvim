@@ -2,7 +2,7 @@
 > Pretty inline LSP diagnostic display with a powerline-style decoration; replaces vim.diagnostic's default virtual-text.
 
 **Repo:** https://github.com/rachartier/tiny-inline-diagnostic.nvim
-**Local spec:** lua/plugins/ui.lua:176-184
+**Local spec:** lua/plugins/ui.lua:183
 **Tags:** lsp, diagnostics, ui, virtualtext
 
 ## Scope

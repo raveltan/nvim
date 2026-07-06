@@ -1,4 +1,6 @@
 # editor-bqf
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (quickfix preview now plain + quicker.nvim). Doc kept for history.
 > Better quickfix: live preview window, fzf filter, syntax-highlighted entries.
 
 **Repo:** https://github.com/kevinhwang91/nvim-bqf

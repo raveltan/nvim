@@ -1,4 +1,6 @@
 # markview
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (markdown rendering plugin dropped (`<leader>uM` gone)). Doc kept for history.
 > Inline markdown rendering — headings, code blocks, tables, LaTeX, links — without leaving the buffer.
 
 **Repo:** https://github.com/OXY2DEV/markview.nvim

@@ -2,7 +2,7 @@
 > Tpope's git porcelain inside Vim — `:G` for status/commit/push, `:Gedit` for revs, `:Gdiffsplit` diffs.
 
 **Repo:** https://github.com/tpope/vim-fugitive
-**Local spec:** lua/plugins/git.lua:63-87
+**Local spec:** lua/plugins/git.lua:66
 **Tags:** git, log, diff, porcelain
 
 ## Scope

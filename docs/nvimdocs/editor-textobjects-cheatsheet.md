@@ -1,7 +1,7 @@
 # editor-textobjects-cheatsheet
 > One-page guide to every text object, motion, surround op, and node-select binding active in this config.
 
-**Local spec:** synthesizes [editor-mini-ai](editor-mini-ai.md), [ts-textobjects](ts-textobjects.md), [editor-mini-surround](editor-mini-surround.md), [editor-vim-matchup](editor-vim-matchup.md), [editor-flash](editor-flash.md)
+**Local spec:** synthesizes [editor-mini-ai](editor-mini-ai.md), [ts-textobjects](ts-textobjects.md), [editor-mini-surround](editor-mini-surround.md), [editor-tagmatch](editor-tagmatch.md), [editor-vim-matchup](editor-vim-matchup.md), [editor-flash](editor-flash.md)
 **Tags:** textobjects, motions, surround, treesitter, cheatsheet
 
 ## Mental model
@@ -43,7 +43,7 @@ Example: `cin)` change inside the next `(...)`, `dal{` delete around the previou
 | `q` | inside any quote | any quote pair | mini.ai |
 | `b` | inside any bracket | any bracket pair | mini.ai |
 | `?` | prompted left/right delim | with prompted delim | mini.ai interactive |
-| `t` | inside tag (multi-line) | full tag block | mini.ai (better than native) |
+| `t` | inside tag (multi-line) | full tag block | mini.ai (better than native; hyphen-aware — matches `<fl-button>`) |
 
 ### Treesitter text objects (this config's keymaps)
 Bound directly, not through mini.ai's `{id}` slot:
@@ -56,12 +56,12 @@ Bound directly, not through mini.ai's `{id}` slot:
 
 > Source: `lua/plugins/treesitter.lua:72-77`. `lookahead = true` — works even when cursor sits *before* the function.
 
-### vim-matchup
+### tagmatch + vim-matchup
 | id | Inside | Around |
 |---|---|---|
-| `%` | inside matched pair (`if/end`, `do/end`, `<tag>/</tag>`, etc.) | pair included |
+| `%` | inside matched pair (tags via tagmatch treesitter; `if/end`, `do/end` via matchup) | pair included |
 
-Example: in Ruby, `da%` deletes the whole `def ... end`; `ci%` clears the body.
+On a tag, `i%`/`a%` are treesitter-resolved by the in-repo [editor-tagmatch](editor-tagmatch.md) module (handles hyphenated custom elements, JSX, Angular inline templates, injected html in eruby/php); off-tag they fall back to vim-matchup. Example: in Ruby, `da%` deletes the whole `def ... end`; `ci%` clears the body; in html, `di%` clears an element's content.
 
 ## Motions (jump without operator)
 
@@ -69,6 +69,7 @@ Example: in Ruby, `da%` deletes the whole `def ... end`; `ci%` clears the body.
 |---|---|---|---|
 | `]f` / `[f` | n,x,o | next/prev function start | ts-textobjects |
 | `]a` / `[a` | n,x,o | next/prev parameter start | ts-textobjects |
+| `%` | n,x | open ↔ close tag toggle (on a tag) | tagmatch |
 | `]%` / `[%` | n,x,o | end/start of containing pair | vim-matchup |
 | `g%` | n,x,o | other side of pair (back) | vim-matchup |
 | `z%` | n,x,o | inside next pair | vim-matchup |
@@ -86,11 +87,11 @@ mini.ai's `g[{id}` / `g]{id}` works with **every** id, not just the ones in the 
 | Key | Mode | Action | Example |
 |---|---|---|---|
 | `gsa` | n,x | add | `gsaiw)` wrap word in parens; `gsa$"` wrap to EOL in quotes |
-| `gsd` | n | delete | `gsd"` drop surrounding quotes |
-| `gsr` | n | replace | `gsr"'` swap `"` for `'`; `gsr(t` parens → HTML tag (prompts) |
+| `gsd` | n | delete | `gsd"` drop surrounding quotes; `gsdt` unwrap tag pair keep content (`2gsdt` outer) |
+| `gsr` | n | replace | `gsr"'` swap `"` for `'`; `gsrtt` rename tag (prompts); `gsr(t` parens → HTML tag |
 | `gsf` / `gsF` | n | find right/left | jump to next/prev surround char |
 | `gsh` | n | highlight | brief flash of the pair |
-| `gsn` | n | update n_lines | extend scan range (default 20) |
+| `gsn` | n | update n_lines | change scan range (configured to 500) |
 
 `.` (vim-repeat) repeats the last surround op.
 
@@ -128,7 +129,9 @@ Useful for reordering function args, list elements, hash entries. Reuses ts-text
 | Delete previous argument | `dala` |
 | Re-indent the enclosing class | `=ac` |
 | Jump to end of current `if/end` block | `]%` |
-| Select whole HTML tag (incl. attrs) | `vat` |
+| Select whole HTML tag (incl. attrs) | `vat` or `va%` |
+| Unwrap a multi-line `<div>` (keep content) | `gsdt` from anywhere inside |
+| Rename a tag pair | `<leader>cr` on the tag name, or `gsrtt` |
 | Swap two function args | `<leader>csa` |
 | Select expanding by AST | `<CR>` then `<CR><CR>...`, shrink with `<BS>` |
 | Operate on a far-away `()` without moving | `dr` then flash label → operates remotely |
@@ -196,6 +199,7 @@ Genuinely additive (don't duplicate what mini.ai + ts-textobjects already give):
 - mini.ai docs: [editor-mini-ai](editor-mini-ai.md)
 - ts-textobjects: [ts-textobjects](ts-textobjects.md)
 - mini.surround: [editor-mini-surround](editor-mini-surround.md)
+- tagmatch (tag `%` + `i%`/`a%` + rename): [editor-tagmatch](editor-tagmatch.md)
 - vim-matchup: [editor-vim-matchup](editor-vim-matchup.md)
 - flash: [editor-flash](editor-flash.md)
 - Master keybind cheatsheet: `docs/keybinds.md` (one level up)

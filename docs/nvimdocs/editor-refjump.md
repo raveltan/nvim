@@ -1,4 +1,6 @@
 # editor-refjump
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (`]r`/`[r` reference cycling no longer bound). Doc kept for history.
 > Cycle through LSP references inline with `]r` / `[r` — no picker, no quickfix.
 
 **Repo:** https://github.com/mawkler/refjump.nvim

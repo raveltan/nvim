@@ -1,4 +1,6 @@
 # diagram-image-nvim
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (image backend dropped with diagram.nvim). Doc kept for history.
 > Terminal-native image rendering — the canvas that diagram.nvim and markdown preview draw onto.
 
 **Repo:** https://github.com/3rd/image.nvim

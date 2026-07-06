@@ -2,7 +2,7 @@
 > Global keymaps: windows, buffers, LSP, diagnostics, case conversion, search centering, loclist.
 
 **Local file:** lua/config/keymaps.lua
-**Tags:** config, keymaps, lsp, diagnostics, abolish, gaf
+**Tags:** config, keymaps, lsp, diagnostics, text-case, gaf
 
 ## Scope
 
@@ -11,7 +11,7 @@
 ## Highlights
 
 - A custom **resize submode** (`<leader>ur`) consumes single keys via `vim.fn.getcharstr` so you can hammer `hjkl` (and `HJKL` for x5 steps) without re-pressing the leader.
-- `<leader>cr` is a hand-rolled LSP rename that compensates for intelephense's `$` sigil bug — when the cursor sits on `$`, it advances one column, strips/re-prepends the sigil around the user input, and applies the workspace edit manually with `client:request`. See memory `nvim_php_rename.md`.
+- `<leader>cr` is context-smart: it first tries a CSS class rename (cross-file, scss `&`-nesting aware) and a tag-pair rename (tagmatch) via `lua/config/rename.lua`, then falls through to a hand-rolled LSP rename that compensates for intelephense's `$` sigil bug — when the cursor sits on `$`, it advances one column, strips/re-prepends the sigil around the user input, and applies the workspace edit manually with `client:request`. See [config-rename](config-rename.md) and memory `nvim_php_rename.md`.
 - `gx` first delegates to GAF's `open_phab_under_cursor` (D-numbers, T-numbers, paste IDs) when `vim.g.gaf` is set, then falls back to `vim.ui.open` for normal URLs / `<cfile>`.
 - Search-result motions `n`/`N` recenter (`zzzv`) and trigger `hlslens.start()` so the lens annotations refresh.
 
@@ -57,7 +57,7 @@
 | --- | --- | --- | --- |
 | `K` | n | `vim.lsp.buf.hover` | Hover docs |
 | `<leader>cA` | n | source code action | Source action |
-| `<leader>cr` | n | sigil-aware rename | Rename symbol |
+| `<leader>cr` | n | smart rename: class → tag → LSP | Rename class/tag/symbol |
 | `<leader>cf` | n | `conform.format` | Format file |
 | `<leader>ci` | n | toggle inlay hints | Toggle inlay hints |
 
@@ -72,16 +72,12 @@
 | `[w` / `]w` | n | jump WARN | Prev/next warning |
 | `<leader>uf` | n | flip `g:disable_autoformat` | Toggle format-on-save |
 
-### Case conversion (vim-abolish)
+### Case conversion (text-case.nvim)
 | Key | Mode | Action | Desc |
 | --- | --- | --- | --- |
-| `<leader>cvs` | n | `crsiw` | snake_case |
-| `<leader>cvc` | n | `crciw` | camelCase |
-| `<leader>cvp` | n | `crmiw` | PascalCase |
-| `<leader>cvu` | n | `cruiw` | UPPER_CASE |
-| `<leader>cvk` | n | `cr-iw` | kebab-case |
-| `<leader>cvd` | n | `cr.iw` | dot.case |
-| `<leader>cvt` | n | `crtiw` | Title Case |
+| `<leader>cv` | n | `vim.ui.select` picker | Convert identifier under cursor: snake_case / camelCase / PascalCase / UPPER_CASE / kebab-case |
+
+The token is extracted with a hyphen-aware scan (text-case's own `current_word()` stops at `-`, which would truncate kebab-case identifiers), then converted via `textcase.conversions.stringcase` and written back with `nvim_buf_set_text`.
 
 ### Visual helpers
 | Key | Mode | Action | Desc |
@@ -107,13 +103,14 @@
 
 - Related [config-init](config-init.md)
 - Related [config-autocmds](config-autocmds.md)
+- `<leader>cr` class/tag backends: [config-rename](config-rename.md), [editor-tagmatch](editor-tagmatch.md)
 - LSP rename context: [ftplugin-php](ftplugin-php.md), memory `nvim_php_rename.md`
 - GAF `gx` hook: `lua/gaf/keymaps.lua` (`open_phab_under_cursor`)
-- Plugins referenced: `hlslens`, `Snacks.picker`, `conform.nvim`, `vim-abolish`, `actions-preview.nvim`
+- Plugins referenced: `hlslens`, `Snacks.picker`, `conform.nvim`, `text-case.nvim`, `actions-preview.nvim`
 
 ## Notes
 
-- `<leader>cr` only fires when at least one attached client supports `textDocument/rename`; otherwise it warns and bails.
-- After a successful rename it runs `silent! wall` so the edit is written to disk immediately.
+- `<leader>cr` routes CSS-class and tag contexts to `config/rename.lua` first; the LSP path only fires when at least one attached client supports `textDocument/rename`; otherwise it warns and bails.
+- After a successful LSP rename it runs `silent! wall`; the class-rename backend likewise writes every touched file.
 - `<leader>uf` flips a global, not a buffer-local — `conform.format_after_save` reads `vim.g.disable_autoformat`.
 - The resize submode redraws and prints a hint line; press `q` or `<Esc>` (or any non-listed key) to leave.

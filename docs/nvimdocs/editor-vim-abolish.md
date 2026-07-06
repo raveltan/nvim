@@ -1,4 +1,6 @@
 # editor-vim-abolish
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (replaced by text-case.nvim — `<leader>cv` opens a convert-case picker (see config-keymaps)). Doc kept for history.
 > Case-preserving search/replace (`:S`/`:Subvert`) and `cr*` case coercions.
 
 **Repo:** https://github.com/tpope/vim-abolish

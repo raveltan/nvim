@@ -1,4 +1,6 @@
 # diagram-nvim
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (inline diagram rendering dropped). Doc kept for history.
 > Render mermaid / plantuml / d2 / gnuplot code blocks inline in markdown and neorg.
 
 **Repo:** https://github.com/3rd/diagram.nvim

@@ -2,7 +2,7 @@
 > Rust-fuzzy completion engine driving LSP/snippet/path/buffer sources.
 
 **Repo:** https://github.com/saghen/blink.cmp
-**Local spec:** lua/plugins/lsp.lua:291-376
+**Local spec:** lua/plugins/lsp.lua:333
 **Tags:** completion, lsp, snippets, fuzzy, ui
 
 ## Scope

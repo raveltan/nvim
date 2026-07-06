@@ -2,7 +2,7 @@
 > Package manager for LSP servers, DAP adapters, linters, and formatters.
 
 **Repo:** https://github.com/mason-org/mason.nvim
-**Local spec:** lua/plugins/lsp.lua:2-6
+**Local spec:** lua/plugins/lsp.lua:3
 **Tags:** mason, lsp, install, registry
 
 ## Scope

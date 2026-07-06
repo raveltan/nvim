@@ -2,7 +2,7 @@
 > Unified test runner with per-language adapters, summary panel, and DAP debugging.
 
 **Repo:** https://github.com/nvim-neotest/neotest
-**Local spec:** lua/plugins/test.lua:1-148
+**Local spec:** lua/plugins/test.lua:3
 **Tags:** neotest test runner dap coverage profile gaf
 
 ## Scope

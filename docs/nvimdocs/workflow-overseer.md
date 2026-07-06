@@ -2,7 +2,7 @@
 > Task runner: define, launch, and manage shell/build tasks from inside Neovim.
 
 **Repo:** https://github.com/stevearc/overseer.nvim
-**Local spec:** lua/plugins/workflow.lua:4-21
+**Local spec:** lua/plugins/workflow.lua:4
 **Tags:** workflow task-runner overseer dap ui-tests gaf
 
 ## Scope

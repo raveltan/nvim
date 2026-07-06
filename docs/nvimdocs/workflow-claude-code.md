@@ -1,4 +1,6 @@
 # workflow-claude-code
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (claude-code.nvim terminal toggle dropped (Claude Code runs outside nvim)). Doc kept for history.
 > Toggleable in-Neovim terminal hosting Anthropic's `claude` CLI.
 
 **Repo:** https://github.com/greggh/claude-code.nvim

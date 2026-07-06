@@ -2,7 +2,7 @@
 > Enhanced `<C-a>` / `<C-x>` increment/decrement: booleans, dates, semver, hex, custom word swaps.
 
 **Repo:** https://github.com/monaqa/dial.nvim
-**Local spec:** lua/plugins/editor.lua:213-239
+**Local spec:** lua/plugins/editor.lua:198
 **Tags:** editor, increment, dates, semver, augend
 
 ## Scope

@@ -2,7 +2,7 @@
 > Auto-installs non-LSP Mason tools (formatters, linters, DAP adapters not handled elsewhere).
 
 **Repo:** https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
-**Local spec:** lua/plugins/lsp.lua:23-36
+**Local spec:** lua/plugins/lsp.lua:24
 **Tags:** mason, formatters, linters, ensure_installed
 
 ## Scope

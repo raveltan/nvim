@@ -2,7 +2,7 @@
 > Loads Neovim Lua API types into `lua_ls` on demand — for Neovim config development.
 
 **Repo:** https://github.com/folke/lazydev.nvim
-**Local spec:** lua/plugins/lsp.lua:260-268
+**Local spec:** lua/plugins/lsp.lua:295
 **Tags:** lua, lsp, lua_ls, neovim-api, types
 
 ## Scope

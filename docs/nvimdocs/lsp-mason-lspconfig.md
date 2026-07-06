@@ -2,7 +2,7 @@
 > Bridges Mason package names to `nvim-lspconfig` server names and auto-enables installed servers.
 
 **Repo:** https://github.com/mason-org/mason-lspconfig.nvim
-**Local spec:** lua/plugins/lsp.lua:8-19
+**Local spec:** lua/plugins/lsp.lua:9
 **Tags:** mason, lspconfig, ensure_installed, automatic_enable
 
 ## Scope

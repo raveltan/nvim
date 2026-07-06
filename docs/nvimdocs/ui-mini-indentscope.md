@@ -2,7 +2,7 @@
 > Animated indent-scope guide (vertical bar marking the current block); animation disabled for performance, large buffers and noisy filetypes opt out.
 
 **Repo:** https://github.com/echasnovski/mini.indentscope
-**Local spec:** lua/plugins/ui.lua:115-143
+**Local spec:** lua/plugins/ui.lua:123
 **Tags:** indent, ui, visual-guide
 
 ## Scope

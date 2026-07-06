@@ -2,7 +2,7 @@
 > Editable, prettified quickfix window with context-expansion controls.
 
 **Repo:** https://github.com/stevearc/quicker.nvim
-**Local spec:** lua/plugins/editor.lua:535-547
+**Local spec:** lua/plugins/editor.lua:417
 **Tags:** quickfix, refactor, ui
 
 ## Scope
@@ -55,6 +55,6 @@ Replaces the default quickfix rendering with a column-aligned, icon-decorated vi
 - Default opts: https://github.com/stevearc/quicker.nvim/blob/master/lua/quicker/config.lua
 
 ## Notes
-- Pairs naturally with `nvim-bqf` (editor.lua:197) — bqf adds preview + fzf filter; quicker handles render + edit.
+- `nvim-bqf` (preview + fzf filter) has been removed — quicker is the sole quickfix enhancer now.
 - Which-key labels `<leader>x` as the `diagnostics` group (editor.lua:298).
 - Save (`:w`) inside the qf buffer to apply edits to all referenced files at once.

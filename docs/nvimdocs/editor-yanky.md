@@ -2,7 +2,7 @@
 > Persistent yank history ring with cycling through previous yanks after paste.
 
 **Repo:** https://github.com/gbprod/yanky.nvim
-**Local spec:** lua/plugins/editor.lua:138-150
+**Local spec:** lua/plugins/editor.lua:175
 **Tags:** yank, paste, clipboard, history
 
 ## Scope

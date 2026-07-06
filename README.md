@@ -21,8 +21,9 @@ nvim
 ## Layout
 
 - `init.lua` — entry
-- `lua/config/` — options, lazy, keymaps, autocmds
+- `lua/config/` — options, lazy, keymaps, autocmds, smart rename (`rename.lua` + `scss.lua`)
 - `lua/plugins/` — plugin specs (auto-imported)
+- `lua/tagmatch/` — in-repo treesitter tag module (`%` jump, `i%`/`a%`, tag rename)
 - `lua/gaf/` — GAF profile modules (gated on `vim.g.gaf`)
 - `lua/overseer/template/user/` — task templates
 - `after/ftplugin/` — per-filetype tweaks

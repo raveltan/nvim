@@ -2,7 +2,7 @@
 > Declarative startup dashboard — 2-pane layout with todo shortcut, recents, projects, and live git status.
 
 **Repo:** https://github.com/folke/snacks.nvim
-**Local spec:** lua/plugins/snacks.lua:34-94
+**Local spec:** lua/plugins/snacks.lua:3
 **Tags:** snacks dashboard startup alpha-alternative
 
 ## Scope

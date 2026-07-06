@@ -2,7 +2,7 @@
 > Remaining enabled snacks modules — notifier, terminal, lazygit, statuscolumn, indent, bigfile, image, input, rename, quickfile, scope, scratch.
 
 **Repo:** https://github.com/folke/snacks.nvim
-**Local spec:** lua/plugins/snacks.lua:8, 21-33, 125-130
+**Local spec:** lua/plugins/snacks.lua:3, 21-33, 125-130
 **Tags:** snacks notifier terminal lazygit statuscolumn indent image scratch
 
 ## Scope

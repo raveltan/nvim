@@ -2,7 +2,7 @@
 > Label-based jump navigation across the visible window, treesitter nodes, and remote operators.
 
 **Repo:** https://github.com/folke/flash.nvim
-**Local spec:** lua/plugins/editor.lua:77-91
+**Local spec:** lua/plugins/editor.lua:120
 **Tags:** motion, navigation, treesitter, search
 
 ## Scope

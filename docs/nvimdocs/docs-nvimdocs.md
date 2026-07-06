@@ -22,7 +22,7 @@ This is not a plugin — it is the convention for the per-plugin markdown refere
 - **Cross-links** — use `[label](slug.md)` for sibling files; relative paths only.
 
 ## Our config
-Each doc file follows this fixed skeleton (kept under ~150 lines so it fits a single screen-page in `markview`):
+Each doc file follows this fixed skeleton (kept under ~150 lines so it fits a single screen-page):
 
 ```
 # <slug>
@@ -66,7 +66,7 @@ Bindings live next to the other `<leader>k…` doc bindings (`ko`/`kj`/`ks`/`kS`
 
 ## Links
 - Related: [docs-devdocs](docs-devdocs.md) — offline devdocs.io browser (different docset, same prefix).
-- Markdown rendering inside Neovim: [markview](markview.md).
+- Markdown rendering inside Neovim: was [markview](markview.md) (removed).
 
 ## Notes
 - Keep each file under 150 lines. If a plugin's notes grow past that, split out the GAF-specific or workflow-specific bits into their own `gaf-…` / `workflow-…` file and cross-link.

@@ -2,7 +2,7 @@
 > Sign-column indicators and richer keymaps for vim marks and bookmarks.
 
 **Repo:** https://github.com/chentoast/marks.nvim
-**Local spec:** lua/plugins/editor.lua:272-277
+**Local spec:** lua/plugins/editor.lua:257
 **Tags:** marks, bookmarks, signs, navigation, editor
 
 ## Scope

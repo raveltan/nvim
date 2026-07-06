@@ -2,7 +2,7 @@
 > Flutter/Dart toolchain plugin — owns dartls, hot reload/restart, device selection, and Flutter's DAP.
 
 **Repo:** https://github.com/akinsho/flutter-tools.nvim
-**Local spec:** lua/plugins/flutter.lua:1-60 · keymaps in after/ftplugin/dart.lua
+**Local spec:** lua/plugins/flutter.lua:6 · keymaps in after/ftplugin/dart.lua
 **Tags:** flutter dart lsp dap hot-reload mobile fvm
 
 ## Scope

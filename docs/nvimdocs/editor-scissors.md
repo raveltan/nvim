@@ -2,7 +2,7 @@
 > Create and edit VSCode-format snippets from inside Neovim.
 
 **Repo:** https://github.com/chrisgrieser/nvim-scissors
-**Local spec:** lua/plugins/editor.lua:259-268
+**Local spec:** lua/plugins/editor.lua:244
 **Tags:** snippets, luasnip, vscode, friendly-snippets, editor
 
 ## Scope

@@ -2,7 +2,7 @@
 > Jump between related files (test ↔ source, component ↔ styles, handler ↔ service…).
 
 **Repo:** https://github.com/rgroli/other.nvim
-**Local spec:** lua/plugins/other.lua:28-650
+**Local spec:** lua/plugins/other.lua:29
 **Tags:** workflow navigation related-files php angular datastore
 
 ## Scope

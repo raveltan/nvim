@@ -2,7 +2,7 @@
 > Buffer-based project-wide find-and-replace with live preview powered by ripgrep.
 
 **Repo:** https://github.com/MagicDuck/grug-far.nvim
-**Local spec:** lua/plugins/editor.lua:65-73
+**Local spec:** lua/plugins/editor.lua:108
 **Tags:** search, replace, ripgrep, refactor
 
 ## Scope

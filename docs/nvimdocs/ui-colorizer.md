@@ -1,8 +1,8 @@
 # ui-colorizer
 > Inline color swatches for hex / rgb() / hsl() / named / Tailwind colors, rendered as virtual text after the value.
 
-**Repo:** https://github.com/NvChad/nvim-colorizer.lua
-**Local spec:** lua/plugins/ui.lua:163-172
+**Repo:** https://github.com/catgoose/nvim-colorizer.lua (maintained fork of NvChad/nvim-colorizer.lua)
+**Local spec:** lua/plugins/ui.lua:170
 **Tags:** colors, css, tailwind, virtualtext
 
 ## Scope

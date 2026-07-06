@@ -2,7 +2,7 @@
 > Batteries-included Rust toolchain plugin — owns rust-analyzer LSP, Cargo, and DAP via codelldb.
 
 **Repo:** https://github.com/mrcjkb/rustaceanvim
-**Local spec:** lua/plugins/rust.lua:1-69
+**Local spec:** lua/plugins/rust.lua:9
 **Tags:** rust rust-analyzer lsp dap codelldb cargo clippy
 
 ## Scope

@@ -2,7 +2,7 @@
 > Statusline with global mode/git/diagnostics, conditional encoding/fileformat, macro-recording indicator, and active LSP clients.
 
 **Repo:** https://github.com/nvim-lualine/lualine.nvim
-**Local spec:** lua/plugins/ui.lua:42-111
+**Local spec:** lua/plugins/ui.lua:50
 **Tags:** statusline, ui, lsp, git
 
 ## Scope

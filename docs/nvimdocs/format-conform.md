@@ -2,7 +2,7 @@
 > Lightweight, async formatter runner driven by filetype tables.
 
 **Repo:** https://github.com/stevearc/conform.nvim
-**Local spec:** lua/plugins/formatting.lua:4-27
+**Local spec:** lua/plugins/formatting.lua:4
 **Tags:** format formatter prettier stylua ruff php-cs-fixer
 
 ## Scope

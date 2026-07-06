@@ -2,7 +2,7 @@
 > Snippet engine; loads friendly-snippets and the local `snippets/` dir.
 
 **Repo:** https://github.com/L3MON4D3/LuaSnip
-**Local spec:** lua/plugins/lsp.lua:271-288
+**Local spec:** lua/plugins/lsp.lua:306
 **Tags:** snippets, completion
 
 ## Scope

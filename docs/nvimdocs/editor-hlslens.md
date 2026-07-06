@@ -2,7 +2,7 @@
 > Floating "1/27" virt-text overlay on every search match, plus relative offsets.
 
 **Repo:** https://github.com/kevinhwang91/nvim-hlslens
-**Local spec:** lua/plugins/editor.lua:206-209
+**Local spec:** lua/plugins/editor.lua:191
 **Tags:** search, hlsearch, ui, virt-text, editor
 
 ## Scope

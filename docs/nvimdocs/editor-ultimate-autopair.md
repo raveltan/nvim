@@ -2,7 +2,7 @@
 > Autopairs with smart multiline, JSX, and quote handling. `<CR>` handler disabled to keep vim-endwise working.
 
 **Repo:** https://github.com/altermo/ultimate-autopair.nvim
-**Local spec:** lua/plugins/editor.lua:37-44
+**Local spec:** lua/plugins/editor.lua:71
 **Tags:** autopair, insert, brackets
 
 ## Scope

@@ -2,7 +2,7 @@
 > Seamless `<C-h/j/k/l>` window navigation that crosses the nvim/tmux boundary.
 
 **Repo:** https://github.com/christoomey/vim-tmux-navigator
-**Local spec:** lua/plugins/nav.lua:4-17
+**Local spec:** lua/plugins/nav.lua:4
 **Tags:** navigation, tmux, splits, window
 
 ## Scope

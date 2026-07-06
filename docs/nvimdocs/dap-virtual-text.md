@@ -2,7 +2,7 @@
 > Inline variable values as virtual text while stopped at a breakpoint.
 
 **Repo:** https://github.com/theHamsta/nvim-dap-virtual-text
-**Local spec:** lua/plugins/dap.lua:28-52
+**Local spec:** lua/plugins/dap.lua:28
 **Tags:** dap virtual-text inline-values treesitter
 
 ## Scope

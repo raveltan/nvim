@@ -1,8 +1,8 @@
 # nav-oil
 > Edit your filesystem like a normal Neovim buffer — `-` opens the parent directory.
 
-**Repo:** https://github.com/stevearc/oil.nvim
-**Local spec:** lua/plugins/nav.lua:20-39
+**Repo:** https://github.com/barrettruth/canola.nvim (oil.nvim fork; loaded with `main = "oil"`, so `:Oil` and all oil APIs/keys are unchanged)
+**Local spec:** lua/plugins/nav.lua:19
 **Tags:** explorer, filesystem, buffer, navigation
 
 ## Scope

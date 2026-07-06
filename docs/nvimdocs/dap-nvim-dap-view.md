@@ -2,7 +2,7 @@
 > Modern, single-window winbar UI for nvim-dap (scopes/watches/breakpoints/threads/repl/console).
 
 **Repo:** https://github.com/igorlfs/nvim-dap-view
-**Local spec:** lua/plugins/dap.lua:6-26
+**Local spec:** lua/plugins/dap.lua:6
 **Tags:** dap ui winbar scopes watches repl
 
 ## Scope

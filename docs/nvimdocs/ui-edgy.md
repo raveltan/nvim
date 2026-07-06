@@ -2,7 +2,7 @@
 > Pins sidebar and bottom-panel windows to deterministic positions so trouble, qf, dap-view, undotree, etc. always land in the right slot.
 
 **Repo:** https://github.com/folke/edgy.nvim
-**Local spec:** lua/plugins/edgy.lua:1-83
+**Local spec:** lua/plugins/edgy.lua:4
 **Tags:** ui, layout, sidebar, panels
 
 ## Scope

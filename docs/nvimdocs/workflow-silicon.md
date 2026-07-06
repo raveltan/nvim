@@ -2,7 +2,7 @@
 > Render the current selection (or buffer) to a PNG via the silicon CLI.
 
 **Repo:** https://github.com/michaelrommel/nvim-silicon
-**Local spec:** lua/plugins/silicon.lua:1-42
+**Local spec:** lua/plugins/silicon.lua:4
 **Tags:** workflow silicon screenshot code-image gruvbox
 
 ## Scope

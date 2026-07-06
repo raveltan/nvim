@@ -2,7 +2,7 @@
 > Briefly flash the region affected by `u` / `<C-r>` so you see what changed.
 
 **Repo:** https://github.com/tzachar/highlight-undo.nvim
-**Local spec:** lua/plugins/editor.lua:551-554
+**Local spec:** lua/plugins/editor.lua:432
 **Tags:** undo, redo, highlight, feedback, editor
 
 ## Scope

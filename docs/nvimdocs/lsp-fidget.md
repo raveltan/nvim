@@ -2,7 +2,7 @@
 > Floating LSP progress + notification UI in the bottom-right corner.
 
 **Repo:** https://github.com/j-hui/fidget.nvim
-**Local spec:** lua/plugins/lsp.lua:222-238
+**Local spec:** lua/plugins/lsp.lua:257
 **Tags:** lsp, progress, notify, ui
 
 ## Scope

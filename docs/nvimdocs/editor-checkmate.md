@@ -1,4 +1,6 @@
 # editor-checkmate
+
+> ⚠️ **REMOVED** — plugin is no longer in this config (`<leader>t*` markdown-todo maps no longer bound). Doc kept for history.
 > Visual todo-list overlay for markdown — checkbox states, metadata, archiving.
 
 **Repo:** https://github.com/bngarren/checkmate.nvim
