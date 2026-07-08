@@ -101,6 +101,26 @@ return {
         opts = {
           load_breakpoints_event = { "BufReadPost" },
         },
+        -- nvim-dap only loads via its keys, so the BufReadPost autocmd this
+        -- plugin registers in setup() doesn't exist in a fresh session and
+        -- saved breakpoints never restore until a DAP key is pressed. This
+        -- startup autocmd cheaply checks whether the cwd has a saved-
+        -- breakpoints file and only then pulls the plugin (and nvim-dap) to
+        -- restore them; projects without breakpoints pay nothing.
+        init = function()
+          vim.api.nvim_create_autocmd("BufReadPost", {
+            group = vim.api.nvim_create_augroup("persistent_breakpoints_restore", { clear = true }),
+            once = true,
+            callback = function()
+              -- Mirrors persistent-breakpoints' utils.get_bps_path() naming.
+              local bps_file = vim.fn.stdpath("data") .. "/nvim_checkpoints/"
+                .. vim.fn.getcwd():gsub("/", "_") .. ".json"
+              if vim.uv.fs_stat(bps_file) then
+                require("persistent-breakpoints.api").reload_breakpoints()
+              end
+            end,
+          })
+        end,
       },
 
       {

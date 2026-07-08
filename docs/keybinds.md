@@ -256,9 +256,9 @@ work in any buffer (and lazy-load the plugin); the rest are scoped to
 | `S` | n, x, o | Flash Treesitter | flash.nvim |
 | `]f` / `[f` | n, x, o | Next/Prev function | treesitter |
 | `]a` / `[a` | n, x, o | Next/Prev argument | treesitter |
-| `af` / `if` | x, o | Around/Inside function | treesitter |
-| `ac` / `ic` | x, o | Around/Inside class | treesitter |
-| `aa` / `ia` | x, o | Around/Inside argument | treesitter |
+| `af` / `if` | x, o | Around/Inside function (counts, `an`/`al` variants, dot-repeat) | mini.ai (treesitter) |
+| `ac` / `ic` | x, o | Around/Inside class | mini.ai (treesitter) |
+| `aa` / `ia` | x, o | Around/Inside argument | mini.ai (treesitter) |
 | `<C-d>` / `<C-u>` | n | Half page down/up (centered) | config/keymaps.lua |
 | `n` / `N` | n | Next/Prev search (centered, hlslens) | config/keymaps.lua |
 | `za` | n | Toggle fold under cursor | native |

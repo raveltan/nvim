@@ -9,10 +9,13 @@ function M.setup()
   -- Angular selector navigation on component buffers (treesitter + rg, no LSP):
   --   <leader>cp -> parent components (callers that use this selector, "up")
   --   gd         -> definition under cursor: tag (component), attr (@Input/@Output),
-  --                 or class (scss); falls back to LSP definition on plain TS
+  --                 class (scss), a symbol in a binding expression (its TS def), or
+  --                 a template-local (@if `as`, @for var, @let, #ref) binding site;
+  --                 falls back to LSP definition on plain TS
   --   <leader>cG -> prompt for a component name (class or selector) -> its definition
   --   <leader>cR -> URL string under cursor -> routing module that handles it
   vim.api.nvim_create_autocmd("FileType", {
+    group = vim.api.nvim_create_augroup("gaf_angular_nav", { clear = true }),
     pattern = "typescript",
     callback = function(ev)
       vim.keymap.set("n", "<leader>cp", function()

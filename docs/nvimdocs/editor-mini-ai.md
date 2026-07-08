@@ -13,14 +13,21 @@ Replaces and extends Neovim's built-in `a`/`i` text objects so that `vaq`, `cin`
 {
   "echasnovski/mini.ai",
   event = "VeryLazy",
-  opts = {
-    n_lines = 500, -- default 50 misses tall multi-line elements
-    custom_textobjects = {
-      -- hyphen-aware `t`: upstream's `(%w-)` tag-name pattern stops at the first
-      -- hyphen, so dit/dat fail on custom elements (<fl-button>, <app-foo-bar>).
-      t = { "<([%w%-]-)%f[^<%w%-][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
-    },
-  },
+  opts = function()
+    local ai = require("mini.ai")
+    return {
+      n_lines = 500, -- default 50 misses tall multi-line elements
+      custom_textobjects = {
+        -- hyphen-aware `t`: upstream's `(%w-)` tag-name pattern stops at the first
+        -- hyphen, so dit/dat fail on custom elements (<fl-button>, <app-foo-bar>).
+        t = { "<([%w%-]-)%f[^<%w%-][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
+        -- Treesitter-backed f/c/a (definitions) — sole owner of af/if/ac/ic/aa/ia.
+        f = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }),
+        c = ai.gen_spec.treesitter({ a = "@class.outer", i = "@class.inner" }),
+        a = ai.gen_spec.treesitter({ a = "@parameter.outer", i = "@parameter.inner" }),
+      },
+    }
+  end,
 }
 ```
 
@@ -36,7 +43,7 @@ Replaces and extends Neovim's built-in `a`/`i` text objects so that `vaq`, `cin`
 - `custom_textobjects` *(table)* — define new identifiers, e.g. `{ F = require("mini.ai").gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }) }`.
 
 ## Our config
-`n_lines = 500` (find objects across tall multi-line constructs) and a hyphen-aware `t` tag override so `dit`/`cit`/`dat`/`cat` match hyphenated custom elements. All other built-in identifiers at defaults. mini.surround carries the same `t` fix on its side ([editor-mini-surround](editor-mini-surround.md)).
+`n_lines = 500` (find objects across tall multi-line constructs) and a hyphen-aware `t` tag override so `dit`/`cit`/`dat`/`cat` match hyphenated custom elements. `f`/`c`/`a` are treesitter-backed via `gen_spec.treesitter` (definitions, not mini.ai's default call/argument patterns) — mini.ai is the sole owner of `af`/`if`/`ac`/`ic`/`aa`/`ia`; the equivalent nvim-treesitter-textobjects select maps were removed (they shadowed mini.ai and lost counts, `an`/`al` variants, dot-repeat). All other built-in identifiers at defaults. mini.surround carries the same `t` fix on its side ([editor-mini-surround](editor-mini-surround.md)).
 
 ## Keymaps
 | Key | Mode | Action | Desc |
@@ -50,7 +57,7 @@ Replaces and extends Neovim's built-in `a`/`i` text objects so that `vaq`, `cin`
 | `g[{id}` | n / x / o | goto_left | Jump to left edge |
 | `g]{id}` | n / x / o | goto_right | Jump to right edge |
 
-Built-in identifiers: `(` `)` `[` `]` `{` `}` `<` `>` `"` `'` `` ` `` `t` (tag) `f` (function call) `a` (argument) `?` (prompt) `q` (any quote) `b` (any bracket).
+Built-in identifiers: `(` `)` `[` `]` `{` `}` `<` `>` `"` `'` `` ` `` `t` (tag) `?` (prompt) `q` (any quote) `b` (any bracket). Overridden here: `f` (function def), `c` (class), `a` (parameter) — treesitter definitions via `gen_spec.treesitter`.
 
 ## Links
 - README: https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-ai.md
@@ -58,4 +65,4 @@ Built-in identifiers: `(` `)` `[` `]` `{` `}` `<` `>` `"` `'` `` ` `` `t` (tag) 
 
 ## Notes
 - The `a` argument object treats commas correctly across nested calls/generics.
-- Combine with `nvim-treesitter-textobjects` for `@function.outer`, `@class.inner` via `gen_spec.treesitter`.
+- The `gen_spec.treesitter` specs read the `textobjects.scm` queries shipped by `nvim-treesitter-textobjects` ([ts-textobjects](ts-textobjects.md)), which stays installed for queries, motions (`]f` `[f` `]a` `[a`) and swaps.

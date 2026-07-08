@@ -54,10 +54,22 @@ opt.virtualedit = "block"
 opt.pumheight = 10
 opt.confirm = true
 opt.inccommand = "split"
-opt.jumpoptions = "stack,view"
+-- "clean" (0.11+ default) drops jumplist entries whose buffer was wiped.
+opt.jumpoptions = "stack,view,clean"
 opt.shortmess:append("I")
 opt.wrap = true
+-- textwidth drives gq/gw formatting width only; drop "t" from the default
+-- formatoptions ("tcqj") — "t" auto-hard-wraps code (not just comments)
+-- while typing, inserting surprise newlines in long lines. Prose ftplugins
+-- (markdown, gitcommit) re-add it per buffer where auto-wrap makes sense.
 opt.textwidth = 150
 opt.colorcolumn = "80,150"
-opt.formatoptions:append("t")
+opt.formatoptions:remove("t")
 vim.lsp.log.set_level(vim.log.levels.OFF)
+
+-- No remote-plugin hosts in use; disabling skips provider probing and the
+-- perl/ruby/node/python checkhealth warnings.
+vim.g.loaded_node_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_ruby_provider = 0

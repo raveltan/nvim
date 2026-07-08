@@ -13,6 +13,12 @@ return {
         typescript = { "prettierd", "prettier", stop_after_first = true },
         javascriptreact = { "prettierd", "prettier", stop_after_first = true },
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
+        -- stylelint first: the GAF webapp formats scss via `stylelint --fix`
+        -- (its prettier only covers *.ts). conform resolves stylelint from
+        -- node_modules and skips it when a project doesn't ship it, falling
+        -- through to prettier for other repos.
+        scss = { "stylelint", "prettierd", "prettier", stop_after_first = true },
+        css = { "stylelint", "prettierd", "prettier", stop_after_first = true },
         python = { "ruff_organize_imports", "ruff_format" },
         dart = { "dart_format" },
         rust = { "rustfmt" },

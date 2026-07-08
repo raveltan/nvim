@@ -3,7 +3,7 @@
 
 **Repo:** https://github.com/stevearc/conform.nvim
 **Local spec:** lua/plugins/formatting.lua:4
-**Tags:** format formatter prettier stylua ruff php-cs-fixer
+**Tags:** format formatter prettier stylelint stylua ruff php-cs-fixer
 
 ## Scope
 Runs external formatters per filetype. Our spec is **manual-only** — there is no `format_on_save`. The user triggers formatting via `<leader>cf` (normal & visual). GAF gate adds `php_cs_fixer` for PHP using the Freelancer-specific binary path and config.
@@ -36,6 +36,7 @@ See `:help conform-options` and `:help conform-formatters`.
 - `formatters_by_ft`:
   - `lua` → `stylua`
   - `javascript`/`typescript`/`javascriptreact`/`typescriptreact` → `prettierd`, then `prettier`, `stop_after_first = true`
+  - `scss`/`css` → `stylelint`, then `prettierd`/`prettier`, `stop_after_first = true` — stylelint first because the GAF webapp formats scss via `stylelint --fix` (its prettier only covers `*.ts`); conform resolves stylelint from project `node_modules` and falls through to prettier in repos without it
   - `python` → `ruff_organize_imports` then `ruff_format`
   - `dart` → `dart_format`
   - `rust` → `rustfmt`

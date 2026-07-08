@@ -6,7 +6,7 @@
 
 ## Scope
 
-`lua/config/autocmds.lua` registers a small set of QoL autocmds (yank highlight, last-cursor, auto-mkdir, swap-exists, resize, close-with-q) and wraps `vim.lsp.util.open_floating_preview` to work around a Neovim 0.12.x hover-shrink bug. Each autocmd lives in its own augroup with `clear = true` so re-sourcing the file is idempotent.
+`lua/config/autocmds.lua` registers a small set of QoL autocmds (yank highlight, last-cursor, auto-mkdir, swap-exists, resize, `]]`/`[[` word-search re-assert, close-with-q) and wraps `vim.lsp.util.open_floating_preview` to work around a Neovim 0.12.x hover-shrink bug. Each autocmd lives in its own augroup with `clear = true` so re-sourcing the file is idempotent.
 
 ## Highlights
 
@@ -27,7 +27,8 @@ Removal instructions live in the same comment: when neovim/neovim#32607, #32639,
 | `highlight_yank` | `TextYankPost` | — | Flashes yanked region via `vim.hl.on_yank()`. |
 | `resize_splits` | `VimResized` | — | Equalizes splits across every tab without leaving the current tab — saves tab number, `tabdo wincmd =`, restores tab. |
 | `auto_create_dir` | `BufWritePre` | — | `mkdir -p` the parent dir of the file about to be written. Skips URI-style buffers (`oil://`, `term://`, …) via the `^%w%w+:[\\/][\\/]` guard. Resolves through `fs_realpath` to follow symlinks. |
-| `last_cursor_position` | `BufReadPost` | — | Restore cursor to the `"` mark if it points inside the buffer. Wrapped in `pcall` so weird buffer states never raise. |
+| `last_cursor_position` | `BufReadPost` | — | Restore cursor to the `"` mark if it points inside the buffer. Skips `gitcommit`/`gitrebase` (stale position from the last commit) and non-file buftypes. Wrapped in `pcall` so weird buffer states never raise. |
+| `universal_word_search` | `FileType` | — | Re-asserts buffer-local `]]`/`[[` word-under-cursor text-search maps after runtime ftplugins (ruby, python, rust, markdown, …) rebind them to section motions. Real file buffers only — the check runs in `vim.schedule` because `:help` sets `buftype` *after* FileType fires; qf/help/terminal/prompt keep their native `[[`/`]]`. |
 | `close_with_q` | `FileType` | `help`, `qf`, `lspinfo`, `man`, `notify`, `checkhealth`, `grug-far`, `gitsigns-blame` | Maps `q` to `:close` in transient/inspect buffers and sets `buflisted = false` so they don't pollute `<S-h>/<S-l>` cycling. |
 
 ## Links

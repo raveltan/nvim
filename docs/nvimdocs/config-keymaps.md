@@ -11,7 +11,7 @@
 ## Highlights
 
 - A custom **resize submode** (`<leader>ur`) consumes single keys via `vim.fn.getcharstr` so you can hammer `hjkl` (and `HJKL` for x5 steps) without re-pressing the leader.
-- `<leader>cr` is context-smart: it first tries a CSS class rename (cross-file, scss `&`-nesting aware) and a tag-pair rename (tagmatch) via `lua/config/rename.lua`, then falls through to a hand-rolled LSP rename that compensates for intelephense's `$` sigil bug — when the cursor sits on `$`, it advances one column, strips/re-prepends the sigil around the user input, and applies the workspace edit manually with `client:request`. See [config-rename](config-rename.md) and memory `nvim_php_rename.md`.
+- `<leader>cr` is context-smart: it first tries a CSS class rename (cross-file, scss `&`-nesting aware) and a tag-pair rename (tagmatch) via `lua/config/rename.lua`, then falls through to a hand-rolled LSP rename that compensates for intelephense's `$` sigil bug — when the cursor sits on `$`, it advances one column (restored if the rename is cancelled), strips/re-prepends the sigil around the user input, and applies the workspace edit manually with `client:request`. See [config-rename](config-rename.md) and memory `nvim_php_rename.md`.
 - `gx` first delegates to GAF's `open_phab_under_cursor` (D-numbers, T-numbers, paste IDs) when `vim.g.gaf` is set, then falls back to `vim.ui.open` for normal URLs / `<cfile>`.
 - Search-result motions `n`/`N` recenter (`zzzv`) and trigger `hlslens.start()` so the lens annotations refresh.
 

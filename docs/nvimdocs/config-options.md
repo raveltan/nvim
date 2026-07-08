@@ -47,7 +47,9 @@
 - `mouse = "a"` — mouse on in all modes.
 - `virtualedit = "block"` — visual-block can move past EOL.
 - `confirm = true` — prompt instead of erroring on unsaved quit.
-- `jumpoptions = "stack,view"` — branching jump stack + preserves view on jump-back.
+- `jumpoptions = "stack,view,clean"` — branching jump stack + preserves view on jump-back; `clean` (kept from the 0.11+ default) drops jumplist entries whose buffer was wiped.
+- `formatoptions:remove("t")` — `t` in the default `tcqj` auto-hard-wraps *code* (not just comments) at `textwidth` (150) while typing; prose ftplugins (markdown, gitcommit) re-add it per buffer.
+- node/perl/python3/ruby remote-plugin providers disabled (`vim.g.loaded_*_provider = 0`) — no hosts in use; skips provider probing and the checkhealth warnings.
 - `shortmess:append("I")` — suppress the intro screen.
 - `smoothscroll = true` — wrapped-line aware `<C-d>`/`<C-u>`.
 - `wrap = true` — soft-wrap long lines.
@@ -93,9 +95,15 @@ opt.virtualedit = "block"
 opt.pumheight = 10
 opt.confirm = true
 opt.inccommand = "split"
-opt.jumpoptions = "stack,view"
+opt.jumpoptions = "stack,view,clean"
 opt.shortmess:append("I")
 opt.wrap = true
+opt.formatoptions:remove("t")
+
+vim.g.loaded_node_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_ruby_provider = 0
 ```
 
 ## Links

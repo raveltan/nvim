@@ -1,5 +1,5 @@
 # lsp-mason-tool-installer
-> Auto-installs non-LSP Mason tools (formatters, linters, DAP adapters not handled elsewhere).
+> Installs non-LSP Mason tools (formatters, linters) on demand via `:MasonToolsInstall`/`:MasonToolsUpdate`.
 
 **Repo:** https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim
 **Local spec:** lua/plugins/lsp.lua:24
@@ -14,7 +14,7 @@ A thin wrapper around Mason that ensures a list of CLI tools is installed and (o
 {
   "WhoIsSethDaniel/mason-tool-installer.nvim",
   dependencies = { "mason-org/mason.nvim" },
-  event = { "BufReadPre", "BufNewFile" },
+  cmd = { "MasonToolsInstall", "MasonToolsInstallSync", "MasonToolsUpdate", "MasonToolsUpdateSync", "MasonToolsClean" },
   opts = {
     ensure_installed = {
       "stylua",
@@ -22,7 +22,7 @@ A thin wrapper around Mason that ensures a list of CLI tools is installed and (o
       "prettier",
     },
     auto_update = false,
-    run_on_start = true,
+    run_on_start = false,
   },
 }
 ```
@@ -42,7 +42,8 @@ A thin wrapper around Mason that ensures a list of CLI tools is installed and (o
 - `stylua` — Lua formatter (conform).
 - `prettierd` / `prettier` — JS/TS/JSON/MD/CSS/YAML/HTML formatter (conform; daemon variant + fallback).
 - `auto_update = false` — pin versions; manual `:MasonToolsUpdate` to refresh.
-- `run_on_start = true` — install on first buffer load if missing.
+- `run_on_start = false` — don't probe the registry on load; install/update only when a `:MasonTools*` command runs.
+- Lazy-loads on `cmd`, not `event`: with `run_on_start = false` the plugin does nothing on file open anyway, and its `setup()` pcall-probes `mason-nvim-dap.mappings.source` — lazy.nvim's require-autoloader turned that probe into loading the entire DAP stack (nvim-dap, dap-view, virtual-text, persistent-breakpoints, …) on every first `BufReadPre`. The mason-nvim-dap integration still works when `:MasonToolsUpdate` actually runs.
 
 ## Keymaps
 

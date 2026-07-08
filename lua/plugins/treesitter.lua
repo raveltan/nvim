@@ -10,7 +10,7 @@ return {
       require("nvim-treesitter").install({
         "angular", "bash", "blade", "css", "dart", "diff", "embedded_template", "html", "javascript", "json", "lua",
         "markdown", "markdown_inline", "php", "php_only", "python", "regex",
-        "ruby", "rust", "swift", "tsx", "typescript", "vim", "vimdoc", "yaml",
+        "ruby", "rust", "scss", "swift", "tsx", "typescript", "vim", "vimdoc", "yaml",
       })
       -- `diff`: actions-preview.nvim renders the code-action preview in a `diff`
       -- filetype buffer and calls vim.treesitter.start, which asserts hard if the
@@ -74,19 +74,16 @@ return {
         select = { lookahead = true },
       })
 
-      local select = require("nvim-treesitter-textobjects.select")
       local move = require("nvim-treesitter-textobjects.move")
       local swap = require("nvim-treesitter-textobjects.swap")
 
       local map = vim.keymap.set
 
-      -- Select textobjects (second arg names the query file: textobjects.scm)
-      map({ "x", "o" }, "af", function() select.select_textobject("@function.outer", "textobjects") end, { desc = "Around function" })
-      map({ "x", "o" }, "if", function() select.select_textobject("@function.inner", "textobjects") end, { desc = "Inside function" })
-      map({ "x", "o" }, "ac", function() select.select_textobject("@class.outer", "textobjects") end, { desc = "Around class" })
-      map({ "x", "o" }, "ic", function() select.select_textobject("@class.inner", "textobjects") end, { desc = "Inside class" })
-      map({ "x", "o" }, "aa", function() select.select_textobject("@parameter.outer", "textobjects") end, { desc = "Around argument" })
-      map({ "x", "o" }, "ia", function() select.select_textobject("@parameter.inner", "textobjects") end, { desc = "Inside argument" })
+      -- Select textobjects (af/if/ac/ic/aa/ia) live in mini.ai via
+      -- gen_spec.treesitter (lua/plugins/editor.lua) — this plugin only
+      -- provides the textobjects.scm queries plus move/swap below. Mapping
+      -- them here too would shadow mini.ai's versions (no counts, no
+      -- next/last variants, no dot-repeat).
 
       -- Move to next/prev
       map({ "n", "x", "o" }, "]f", function() move.goto_next_start("@function.outer", "textobjects") end, { desc = "Next function" })

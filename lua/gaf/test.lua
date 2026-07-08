@@ -49,6 +49,9 @@ function M.setup_autocmds()
     group = vim.api.nvim_create_augroup("gaf_uitest_keys", { clear = true }),
     pattern = "*/ui-tests/src/*.spec.ts",
     callback = function(ev)
+      -- BufEnter refires on every buffer switch; map once per buffer.
+      if vim.b[ev.buf].gaf_uitest_keys then return end
+      vim.b[ev.buf].gaf_uitest_keys = true
       local o = { buffer = ev.buf }
       vim.keymap.set("n", "<leader>tm", function()
         require("neotest").run.run({ extra_args = { "--mobile" } })

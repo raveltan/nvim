@@ -38,23 +38,18 @@ Example: `cin)` change inside the next `(...)`, `dal{` delete around the previou
 ### mini.ai adds / replaces
 | id | Inside | Around | Source |
 |---|---|---|---|
-| `f` | call args | full `name(...)` call | mini.ai |
-| `a` | one argument | arg + comma | mini.ai (treesitter-aware) |
+| `f` | function body | full function def | mini.ai (ts `@function`) |
+| `c` | class body | full class | mini.ai (ts `@class`) |
+| `a` | one parameter | param + comma | mini.ai (ts `@parameter`) |
 | `q` | inside any quote | any quote pair | mini.ai |
 | `b` | inside any bracket | any bracket pair | mini.ai |
 | `?` | prompted left/right delim | with prompted delim | mini.ai interactive |
 | `t` | inside tag (multi-line) | full tag block | mini.ai (better than native; hyphen-aware — matches `<fl-button>`) |
 
-### Treesitter text objects (this config's keymaps)
-Bound directly, not through mini.ai's `{id}` slot:
+### Treesitter text objects (via mini.ai)
+`f`/`c`/`a` above are treesitter-backed (`gen_spec.treesitter` on `@function`/`@class`/`@parameter` definitions), so `if`/`af`, `ic`/`ac`, `ia`/`aa` go through mini.ai's `{id}` slot and get all its extras — counts, `an`/`in`/`al`/`il` next/last variants, dot-repeat.
 
-| Key | Mode | Region |
-|---|---|---|
-| `if` / `af` | x,o | function body / full function |
-| `ic` / `ac` | x,o | class body / full class |
-| `ia` / `aa` | x,o | one parameter (ts) / param + comma (ts) |
-
-> Source: `lua/plugins/treesitter.lua:72-77`. `lookahead = true` — works even when cursor sits *before* the function.
+> Source: `lua/plugins/editor.lua:176-178`. The nvim-treesitter-textobjects select maps were removed (they shadowed mini.ai); that plugin still ships the queries plus the motions/swap below. `cover_or_next` search — works even when cursor sits *before* the function.
 
 ### tagmatch + vim-matchup
 | id | Inside | Around |
@@ -114,14 +109,14 @@ Useful for reordering function args, list elements, hash entries. Reuses ts-text
 | `<CR>` | x | expand: grow to parent node |
 | `<BS>` | x | shrink: drop to child at cursor |
 
-> Source: `lua/plugins/treesitter.lua:89-125`. Drives `'<` / `'>` marks directly; pairs well with `gv` to restore last selection.
+> Source: `lua/plugins/treesitter.lua:98-151`. Drives `'<` / `'>` marks directly; pairs well with `gv` to restore last selection.
 
 ## Common idioms (recipes)
 
 | Goal | Keys |
 |---|---|
 | Replace word under cursor with yank | `viwp` then `==` |
-| Yank function call args | `yif` |
+| Yank a function's body | `yif` |
 | Delete current function | `daf` |
 | Comment paragraph | `gcip` |
 | Wrap visual selection in backticks | `<select>` then `gsa` `` ` `` |
@@ -192,7 +187,7 @@ Genuinely additive (don't duplicate what mini.ai + ts-textobjects already give):
 - `r` in operator mode (after `d`/`c`/`y`) is flash remote, not "replace char" (which is normal-mode only — still works).
 - mini.surround's default `s*` was remapped to `gs*` to free `s` for flash. Upstream tutorials referencing `sa`/`sd` need translation.
 - vim-matchup's `g%` collides with nothing important; but if you've memorized `g%` from elsewhere as "case toggle", that's `g~` here.
-- ts-textobjects `aa`/`ia` (parameter) overlaps with mini.ai's `aa`/`ia`. The explicit per-key `map()` in `treesitter.lua` wins because it's registered after mini.ai loads. The ts version is slightly smarter for multi-line args.
+- `f` is a function *definition*, not a call (mini.ai's default): `dif` deletes a body, not call args. For call args, use `ib`/`ab` on the parens or `ia`/`aa` per argument.
 
 ## Links
 

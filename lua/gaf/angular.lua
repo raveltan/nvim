@@ -69,7 +69,15 @@ local function rg_run(patterns, paths, cb, ropts)
   end
   vim.list_extend(args, paths)
   vim.system(args, { text = true }, function(res)
-    vim.schedule(function() cb(vimgrep_items(res.stdout)) end)
+    vim.schedule(function()
+      -- rg exits 1 for "no matches" (fine); anything else is a real failure
+      -- (missing binary surfaces as ENOENT before this, bad pattern as 2).
+      if res.code > 1 then
+        vim.notify("rg failed: " .. (res.stderr or ""), vim.log.levels.ERROR)
+        return cb({})
+      end
+      cb(vimgrep_items(res.stdout))
+    end)
   end)
 end
 
@@ -274,8 +282,13 @@ end
 local function member_decl_patterns(name)
   name = rx(name)
   local mods = "(readonly\\s+|private\\s+|public\\s+|protected\\s+|static\\s+|override\\s+|abstract\\s+|get\\s+|set\\s+|async\\s+)*"
+  -- Optional inline decorator before the member, e.g. `@Input({ required: true })
+  -- foo$: Observable<...>` -- the name isn't at line start then. (`[^)]*` covers
+  -- the common option-object/alias args; a decorator on its own line is matched by
+  -- the plain form since the member line then starts with the name.)
+  local decorator = "(@\\w+\\([^)]*\\)\\s*)?"
   return {
-    "^\\s*" .. mods .. name .. "\\s*[?!]?\\s*[:=(]",
+    "^\\s*" .. decorator .. mods .. name .. "\\s*[?!]?\\s*[:=(]",
     "^\\s*(public\\s+|private\\s+|protected\\s+|readonly\\s+)+" .. name .. "\\b",
   }
 end
@@ -516,6 +529,147 @@ local function goto_css(cls, buf)
   end, { no_type = true })
 end
 
+-- ── template-local declarations (@if `as`, @for vars, @let, *ngIf/*ngFor,
+--    #refs, <ng-template let-x>) ─────────────────────────────────────────────
+-- A name used in a template expression may be introduced by the template itself
+-- rather than the component class -- an `@if (x$ | async; as foo)` alias, an
+-- `@for (item of xs$)` loop variable, an `@let total = ...`, an `*ngIf="e as v"`
+-- / `*ngFor="let i of ..."` binding, a `#ref`, or a `<ng-template let-ctx>` var.
+-- `gd` on such a name should land on that binding site: the class-member search
+-- never finds these, so it must run first. We collect every local the template
+-- declares (with the node range it's visible in) and jump to the innermost
+-- declaration whose scope encloses the cursor.
+
+local function ancestor_of_type(node, t)
+  local n = node
+  while n do
+    if n:type() == t then return n end
+    n = n:parent()
+  end
+end
+
+local function child_by_type(node, t)
+  for c in node:iter_children() do
+    if c:type() == t then return c end
+  end
+end
+
+-- Record a declaration: identifier `id_node` is visible within `scope_node`.
+-- opts.name/opts.col_off override the name/column (for `#ref`, `let-x` attrs).
+local function push_local(out, buf, id_node, scope_node, opts)
+  if not id_node or not scope_node then return end
+  opts = opts or {}
+  local dr, dc = id_node:range()
+  local sr, sc, er, ec = scope_node:range()
+  out[#out + 1] = {
+    name = opts.name or vim.treesitter.get_node_text(id_node, buf),
+    drow = dr + 1,
+    dcol = dc + (opts.col_off or 0),
+    srow = sr, scol = sc, erow = er, ecol = ec,
+  }
+end
+
+-- Top-level `document` of an injected template tree (scope of template-wide refs).
+local function template_root(node)
+  local n = node
+  while n:parent() do n = n:parent() end
+  return n
+end
+
+-- Walk the injected angular tree, appending every declared local to `out`.
+local function scan_locals(node, out, buf)
+  local t = node:type()
+  if t == "if_reference" then -- `@if (...; as x)` / `@else if (...; as x)`
+    push_local(out, buf, child_by_type(node, "identifier"), node:parent())
+  elseif t == "for_declaration" then -- `@for (item of xs)`
+    local id = (node:field("name") or {})[1] or child_by_type(node, "identifier")
+    push_local(out, buf, id, node:parent()) -- parent = for_statement (covers track expr + body)
+  elseif t == "for_reference" then -- `@for (...; let i = $index)`
+    local asgn = child_by_type(node, "assignment_expression")
+    if asgn then push_local(out, buf, child_by_type(asgn, "identifier"), node:parent()) end
+  elseif t == "let_statement" then -- `@let total = ...`
+    local asgn = child_by_type(node, "assignment_expression")
+    if asgn then push_local(out, buf, child_by_type(asgn, "identifier"), node:parent()) end
+  elseif t == "structural_expression" then -- `*ngIf="e as v"`
+    local armed, elem = false, ancestor_of_type(node, "element")
+    for c in node:iter_children() do
+      if c:type() == "special_keyword" and vim.treesitter.get_node_text(c, buf) == "as" then
+        armed = true
+      elseif armed and c:type() == "identifier" then
+        push_local(out, buf, c, elem)
+        break
+      end
+    end
+  elseif t == "structural_declaration" then -- `*ngFor="let item of xs; let i = index"`
+    local elem = ancestor_of_type(node, "element")
+    for sa in node:iter_children() do
+      if sa:type() == "structural_assignment" then
+        local ids, let_kw = {}, false
+        for c in sa:iter_children() do
+          local ct = c:type()
+          if ct == "special_keyword" and vim.treesitter.get_node_text(c, buf) == "let" then
+            let_kw = true
+          elseif ct == "identifier" then
+            ids[#ids + 1] = c
+          end
+        end
+        if let_kw and ids[1] then
+          push_local(out, buf, ids[1], elem) -- `let i = index`
+        elseif ids[2] then
+          local sep = vim.treesitter.get_node_text(ids[2], buf)
+          if sep == "of" or sep == "in" then
+            push_local(out, buf, ids[1], elem) -- `let item of items`
+          end
+        end
+      end
+    end
+  elseif t == "attribute_name" then
+    local txt = vim.treesitter.get_node_text(node, buf)
+    if txt:sub(1, 1) == "#" then -- `#ref` -- visible across the whole template
+      push_local(out, buf, node, template_root(node), { name = txt:sub(2), col_off = 1 })
+    elseif txt:sub(1, 4) == "let-" then -- `<ng-template let-ctx>`
+      push_local(out, buf, node, ancestor_of_type(node, "element"), { name = txt:sub(5), col_off = 4 })
+    end
+  end
+  for c in node:iter_children() do
+    scan_locals(c, out, buf)
+  end
+end
+
+local function scope_encloses(d, row, col)
+  if row < d.srow or row > d.erow then return false end
+  if row == d.srow and col < d.scol then return false end
+  if row == d.erow and col >= d.ecol then return false end
+  return true
+end
+
+-- If `name` binds to a template-local declaration in scope at the cursor, jump to
+-- its binding site and return true; else return false so the class-member search
+-- runs. The innermost enclosing declaration (latest-starting scope) wins.
+local function goto_template_local(buf, name)
+  local ok, parser = pcall(vim.treesitter.get_parser, buf, "typescript")
+  if not ok or not parser then return false end
+  parser:parse(true)
+  local out = {}
+  parser:for_each_tree(function(tree, ltree)
+    if ltree:lang() == "angular" then scan_locals(tree:root(), out, buf) end
+  end)
+
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local crow, ccol = pos[1] - 1, pos[2]
+  local best
+  for _, d in ipairs(out) do
+    if d.name == name and scope_encloses(d, crow, ccol) then
+      if not best or d.srow > best.srow or (d.srow == best.srow and d.scol > best.scol) then
+        best = d
+      end
+    end
+  end
+  if not best then return false end
+  jump_to(vim.api.nvim_buf_get_name(buf), best.drow, best.dcol)
+  return true
+end
+
 -- Jump to a value symbol's definition. PascalCase/CONST names -> a type, enum,
 -- class or const anywhere under the search root (landing on `member` inside it
 -- when the cursor was on `Enum.MEMBER`); lowerCamel names -> a class member
@@ -560,10 +714,14 @@ function M.goto_definition()
   local root = search_root(vim.api.nvim_buf_get_name(buf))
 
   -- A symbol in a binding value/interpolation (`ButtonSize.SMALL`, `plainVar`)
-  -- resolves to its TS definition, before tag/attribute classification.
+  -- resolves to its TS definition, before tag/attribute classification. A name
+  -- the template itself binds (`@if ... as x`, `@for` var, `@let`, `#ref`) wins
+  -- over the class-member search -- that's the name's lexical declaration.
   local sym = symbol_under_cursor(buf)
   if sym then
-    goto_symbol(sym.name, sym.member, buf, root)
+    if not goto_template_local(buf, sym.name) then
+      goto_symbol(sym.name, sym.member, buf, root)
+    end
     return true
   end
 

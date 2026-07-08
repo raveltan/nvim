@@ -47,7 +47,11 @@ autocmd("BufWritePre", {
 -- Go to last cursor position when opening file
 autocmd("BufReadPost", {
   group = augroup("last_cursor_position", { clear = true }),
-  callback = function()
+  callback = function(event)
+    -- Skip commit/rebase messages (stale position from last commit) and
+    -- special buffers.
+    local ft = vim.bo[event.buf].filetype
+    if vim.bo[event.buf].buftype ~= "" or ft == "gitcommit" or ft == "gitrebase" then return end
     local mark = vim.api.nvim_buf_get_mark(0, '"')
     local lcount = vim.api.nvim_buf_line_count(0)
     if mark[1] > 0 and mark[1] <= lcount then
@@ -64,11 +68,16 @@ autocmd("BufReadPost", {
 autocmd("FileType", {
   group = augroup("universal_word_search", { clear = true }),
   callback = function(ev)
-    local search_cword = require("util.wordsearch").search_cword
-    vim.keymap.set("n", "]]", function() search_cword("n") end,
-      { buffer = ev.buf, desc = "Next occurrence of word (text search)" })
-    vim.keymap.set("n", "[[", function() search_cword("N") end,
-      { buffer = ev.buf, desc = "Prev occurrence of word (text search)" })
+    -- Real file buffers only; qf/help/terminal/prompt keep their own [[ ]].
+    -- Scheduled: for :help buffers buftype is set *after* FileType fires.
+    vim.schedule(function()
+      if not vim.api.nvim_buf_is_valid(ev.buf) or vim.bo[ev.buf].buftype ~= "" then return end
+      local search_cword = require("util.wordsearch").search_cword
+      vim.keymap.set("n", "]]", function() search_cword("n") end,
+        { buffer = ev.buf, desc = "Next occurrence of word (text search)" })
+      vim.keymap.set("n", "[[", function() search_cword("N") end,
+        { buffer = ev.buf, desc = "Prev occurrence of word (text search)" })
+    end)
   end,
 })
 

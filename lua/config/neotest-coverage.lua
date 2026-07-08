@@ -55,9 +55,14 @@ function M.run(file, ft)
   local root = find_project_root(file, markers)
   local coverage_file = root .. "/" .. coverage_rel
 
-  local prev_mtime = 0
-  local stat = vim.uv.fs_stat(coverage_file)
-  if stat then prev_mtime = stat.mtime.sec end
+  -- Fingerprint with nsec + size too: a rewrite within the same wall-clock
+  -- second as this stat would otherwise look unchanged and the poll below
+  -- would run to timeout.
+  local function fingerprint(s)
+    if not s then return "" end
+    return s.mtime.sec .. ":" .. s.mtime.nsec .. ":" .. s.size
+  end
+  local prev_fp = fingerprint(vim.uv.fs_stat(coverage_file))
 
   vim.notify("Running test with coverage...", vim.log.levels.INFO)
   require("neotest").run.run({ file, env = run_env, extra_args = extra_args })
@@ -69,7 +74,7 @@ function M.run(file, ft)
   timer:start(interval_ms, interval_ms, vim.schedule_wrap(function()
     elapsed_ms = elapsed_ms + interval_ms
     local s = vim.uv.fs_stat(coverage_file)
-    if s and s.mtime.sec ~= prev_mtime then
+    if s and fingerprint(s) ~= prev_fp then
       timer:stop(); timer:close()
       pcall(vim.cmd, "CoverageLoad")
       pcall(vim.cmd, "CoverageShow")

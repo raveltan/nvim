@@ -5,10 +5,10 @@
 **Tags:** coverage neotest cobertura lcov simplecov llvm-cov nvim-coverage
 
 ## Scope
-Runs the current file's tests through neotest with env/flags that emit a coverage report file, then polls that file's mtime and invokes `:CoverageLoad` + `:CoverageShow` when it updates. Supports PHP, Ruby, TypeScript/JavaScript, Python, Rust, Dart — each with its own root markers, env vars, extra args, and coverage path.
+Runs the current file's tests through neotest with env/flags that emit a coverage report file, then polls that file and invokes `:CoverageLoad` + `:CoverageShow` when it updates. Supports PHP, Ruby, TypeScript/JavaScript, Python, Rust, Dart — each with its own root markers, env vars, extra args, and coverage path.
 
 ## Public API
-- `M.run(file, ft)` — dispatches by filetype, sets env/extra_args, calls `neotest.run.run`, then starts a 1s-interval timer (10min cap) polling the coverage file. On mtime change, loads/show coverage and stops the timer.
+- `M.run(file, ft)` — dispatches by filetype, sets env/extra_args, calls `neotest.run.run`, then starts a 1s-interval timer (10min cap) polling the coverage file. On fingerprint change (`mtime.sec:mtime.nsec:size`), loads/shows coverage and stops the timer.
 - `M.run_current()` — `M.run(vim.fn.expand("%:p"), vim.bo.filetype)`.
 - `M.run_last()` — replays last run; warns if none.
 
@@ -34,7 +34,7 @@ Not bound here. Consumed by:
 - Ruby has no env — assumes `SimpleCov.start` is in `spec_helper.rb`/`test_helper.rb`.
 - Rust requires `cargo-llvm-cov` installed; the env triggers llvm-cov-instrumented build via the neotest-rust adapter.
 - 10-minute timeout — long enough for full-suite runs on big repos.
-- mtime-based detection: avoids needing neotest result callbacks (which don't fire reliably for coverage post-processing).
+- Stat-fingerprint detection (`mtime.sec` + `mtime.nsec` + `size`): avoids needing neotest result callbacks (which don't fire reliably for coverage post-processing). mtime seconds alone missed same-second rewrites, letting the poll run to timeout.
 
 ## Links
 - Related: [test-neotest](test-neotest.md)
@@ -43,7 +43,7 @@ Not bound here. Consumed by:
 
 ## Notes
 - Polls every 1s — cheap but visible if you `:CoverageShow` manually before the timer fires.
-- `prev_mtime` snapshot is taken BEFORE the run, so even if the file already existed, only a fresh write triggers load.
+- `prev_fp` fingerprint snapshot is taken BEFORE the run, so even if the file already existed, only a fresh write triggers load.
 - Python's `--cov` requires `pytest-cov`; Ruby relies on SimpleCov; nothing here installs these — assumed present in the project.
 - `pcall(vim.cmd, ...)` swallows errors if nvim-coverage isn't loaded — coverage just silently doesn't render.
 - `last` is module-local; not persisted across restart.

@@ -29,7 +29,7 @@ Provides the parser-install command (`:TSUpdate`) and the runtime API used to st
 - The legacy `ensure_installed`/`highlight = { enable = true }` table-style config is `master`-branch only; this config is `main`.
 
 ## Our config
-- **Parsers installed:** `angular`, `bash`, `css`, `dart`, `embedded_template`, `html`, `javascript`, `json`, `lua`, `markdown`, `markdown_inline`, `php`, `php_only`, `python`, `regex`, `ruby`, `rust`, `tsx`, `typescript`, `vim`, `vimdoc`, `yaml`.
+- **Parsers installed:** `angular`, `bash`, `blade`, `css`, `dart`, `diff`, `embedded_template`, `html`, `javascript`, `json`, `lua`, `markdown`, `markdown_inline`, `php`, `php_only`, `python`, `regex`, `ruby`, `rust`, `scss`, `swift`, `tsx`, `typescript`, `vim`, `vimdoc`, `yaml`.
 - Angular template injections come from mainline ECMA `injections.scm` — the archived `nvim-treesitter-angular` plugin is intentionally not added.
 - **Indent skip list:** `ruby`, `eruby` — defers to vim's built-in `GetRubyIndent` (handles continuations, hanging args, hash rockets that the TS query misses).
 - **Size guards:** skip TS for buffers `> 500 KiB` or `> 10000 lines` to avoid slow parse on generated/minified files.

@@ -23,7 +23,13 @@ return {
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     dependencies = { "mason-org/mason.nvim" },
-    event = { "BufReadPre", "BufNewFile" },
+    -- cmd (not event): with run_on_start=false the plugin does nothing on
+    -- file open, but its setup() probes mason-nvim-dap for name mappings and
+    -- lazy.nvim's require-autoloader turns that pcall probe into a full load
+    -- of the whole DAP stack (nvim-dap, dap-view, virtual-text, ...) on
+    -- every first BufReadPre. Loading on the commands avoids that; the
+    -- integration still works when :MasonToolsUpdate actually runs.
+    cmd = { "MasonToolsInstall", "MasonToolsInstallSync", "MasonToolsUpdate", "MasonToolsUpdateSync", "MasonToolsClean" },
     opts = {
       ensure_installed = {
         "stylua",
@@ -31,8 +37,7 @@ return {
         "prettier",
       },
       auto_update = false,
-      -- Don't probe the registry on first file open; run :MasonToolsUpdate
-      -- manually. Shaves startup work off the first BufReadPre.
+      -- Don't probe the registry on load; run :MasonToolsUpdate manually.
       run_on_start = false,
     },
   },

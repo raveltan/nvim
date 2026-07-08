@@ -36,7 +36,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 - [lsp-mason](lsp-mason.md) — Mason tool installer / `:Mason` UI
 - [lsp-mason-lspconfig](lsp-mason-lspconfig.md) — server ensure_installed bridge
-- [lsp-mason-tool-installer](lsp-mason-tool-installer.md) — non-LSP tool auto-install
+- [lsp-mason-tool-installer](lsp-mason-tool-installer.md) — non-LSP tool install via `:MasonTools*`
 - [lsp-nvim-lspconfig](lsp-nvim-lspconfig.md) — server configs (basedpyright, intelephense, ...)
 - [lsp-actions-preview](lsp-actions-preview.md) — diff preview for code actions
 - [lsp-fidget](lsp-fidget.md) — LSP progress notifier
@@ -53,7 +53,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 - [ts-nvim-treesitter](ts-nvim-treesitter.md) — parsers + highlight + indent
 - [ts-context](ts-context.md) — sticky context header
-- [ts-textobjects](ts-textobjects.md) — `af`/`if`/`ac`/`ic`/`aa`/`ia`
+- [ts-textobjects](ts-textobjects.md) — textobject queries + `]f`/`[f` motions + arg swap
 - [ts-autotag](ts-autotag.md) — HTML/JSX auto close/rename tags
 
 ## DAP

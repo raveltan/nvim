@@ -15,6 +15,10 @@ Wraps nvim-dap's breakpoint API and serialises breakpoint state to `stdpath('dat
   opts = {
     load_breakpoints_event = { "BufReadPost" },
   },
+  init = function()
+    -- once-only BufReadPost: if the cwd has a saved-breakpoints file,
+    -- load the plugin (pulls nvim-dap) and reload_breakpoints()
+  end,
 }
 ```
 
@@ -26,7 +30,8 @@ Wraps nvim-dap's breakpoint API and serialises breakpoint state to `stdpath('dat
 - `always_reload` *(bool, default `false`)* — reload on every event fire (needed if you use session plugins that swap buffer contents).
 
 ## Our config
-- `load_breakpoints_event = { "BufReadPost" }` — auto-reload on file open. Default `nil` means breakpoints sit on disk but never come back.
+- `load_breakpoints_event = { "BufReadPost" }` — auto-reload on file open. Default `nil` means breakpoints sit on disk but never come back. Only takes effect once the plugin is loaded — and since it lives in nvim-dap's `dependencies` and nvim-dap loads via keys, a fresh session never registers this autocmd on its own.
+- `init` — registers a `once` BufReadPost autocmd at startup that checks for the cwd's saved-breakpoints file (`stdpath('data')/nvim_checkpoints/<cwd with / → _>.json`, mirroring the plugin's `get_bps_path()` naming) and only then loads the plugin (pulling nvim-dap) and calls `api.reload_breakpoints()`. Fixes saved breakpoints never restoring until a DAP key was pressed; projects without a saved file pay nothing.
 
 ## Keymaps
 | Key | Mode | Action | Desc |

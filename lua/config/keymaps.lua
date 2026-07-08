@@ -61,11 +61,14 @@ map("n", "<leader>cr", function()
   end
   local client = clients[1]
 
-  -- PHP/intelephense: rename range starts after `$` sigil. If cursor sits on `$`, advance one column.
+  -- PHP/intelephense: rename range starts after `$` sigil. If cursor sits on `$`,
+  -- advance one column (restored below if the rename is cancelled).
+  local orig_cursor = nil
   if vim.bo[bufnr].filetype == "php" then
     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
     local line = vim.api.nvim_buf_get_lines(bufnr, row - 1, row, false)[1] or ""
     if line:sub(col + 1, col + 1) == "$" then
+      orig_cursor = { row, col }
       vim.api.nvim_win_set_cursor(0, { row, col + 1 })
     end
   end
@@ -86,11 +89,14 @@ map("n", "<leader>cr", function()
   end
 
   vim.ui.input({ prompt = "Rename: ", default = cword }, function(new_name)
-    if not new_name or new_name == "" then return end
+    local function restore_cursor()
+      if orig_cursor then pcall(vim.api.nvim_win_set_cursor, 0, orig_cursor) end
+    end
+    if not new_name or new_name == "" then return restore_cursor() end
     if is_php then
       new_name = new_name:gsub("^%$", "")
     end
-    if new_name == cword then return end
+    if new_name == cword then return restore_cursor() end
     if php_is_var then
       params.newName = "$" .. new_name
     else

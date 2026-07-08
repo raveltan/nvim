@@ -157,17 +157,28 @@ return {
   {
     "echasnovski/mini.ai",
     event = "VeryLazy",
-    opts = {
-      n_lines = 500,
-      custom_textobjects = {
-        -- Override the default `t` tag text object so `dit`/`cit`/`dat`/`cat` match
-        -- hyphenated custom elements (`<fl-button>`, `<app-foo-bar>`). Upstream uses
-        -- `(%w-)` for the tag name, which stops at the first hyphen; widen the name
-        -- class and its frontier to include `-`. Second pattern (inner/around split)
-        -- is mini.ai's default, unchanged.
-        t = { "<([%w%-]-)%f[^<%w%-][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
-      },
-    },
+    opts = function()
+      local ai = require("mini.ai")
+      return {
+        n_lines = 500,
+        custom_textobjects = {
+          -- Override the default `t` tag text object so `dit`/`cit`/`dat`/`cat` match
+          -- hyphenated custom elements (`<fl-button>`, `<app-foo-bar>`). Upstream uses
+          -- `(%w-)` for the tag name, which stops at the first hyphen; widen the name
+          -- class and its frontier to include `-`. Second pattern (inner/around split)
+          -- is mini.ai's default, unchanged.
+          t = { "<([%w%-]-)%f[^<%w%-][^<>]->.-</%1>", "^<.->().*()</[^/]->$" },
+          -- Treesitter-backed f/c/a (definitions, not mini.ai's default call/arg
+          -- patterns). Sole owner of af/if/ac/ic/aa/ia — the equivalent
+          -- nvim-treesitter-textobjects select maps were removed (they shadowed
+          -- mini.ai and lost its counts, `an`/`al` next/last variants and
+          -- dot-repeat). Queries ship with nvim-treesitter-textobjects.
+          f = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }),
+          c = ai.gen_spec.treesitter({ a = "@class.outer", i = "@class.inner" }),
+          a = ai.gen_spec.treesitter({ a = "@parameter.outer", i = "@parameter.inner" }),
+        },
+      }
+    end,
   },
 
   -- Yank history ring

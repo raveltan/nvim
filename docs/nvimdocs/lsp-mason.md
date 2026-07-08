@@ -18,7 +18,7 @@ Mason is a portable package manager that downloads and installs external tooling
 }
 ```
 
-Loaded lazily on `:Mason` because installs are driven by `mason-lspconfig` and `mason-tool-installer`, which pull Mason in as a dependency before any LSP buffer event.
+Loaded lazily on `:Mason` because installs are driven by `mason-lspconfig` and `mason-tool-installer`, which pull Mason in as a dependency (mason-lspconfig on the first file open; mason-tool-installer only when a `:MasonTools*` command runs).
 
 ## Common customizations
 - `install_root_dir` *(string, `stdpath('data') .. '/mason'`)* — where packages are installed.
