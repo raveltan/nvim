@@ -1,9 +1,13 @@
 -- Navigate Angular components by selector, with treesitter + ripgrep. No LSP.
+-- Not GAF-specific: works in any Angular project (the GAF webapp is just one).
 --
--- GAF webapp uses inline `template:` only, so selector definitions and their
--- usages live in `.ts` files. The `angular` treesitter parser auto-injects into
--- the @Component template backtick string (see lua/plugins/treesitter.lua),
--- which lets us read tag/attribute names under the cursor precisely.
+-- Tuned for INLINE-template Angular (`@Component({ template: `...` })`): selector
+-- definitions and their usages live in `.ts` files, and the `angular` treesitter
+-- parser auto-injects into the template backtick string (see
+-- lua/plugins/treesitter.lua), which lets us read tag/attribute names under the
+-- cursor precisely. Projects with external `.component.html` templates get the
+-- .ts-side navigation (selectors, @Input/@Output, routes) but not the in-template
+-- reads, which need the injected tree.
 --
 --   goto_parents()    -- cursor in a component -> components that use its selector (callers, "up")
 --   goto_definition() -- cursor on a tag  -> that component's definition
@@ -19,10 +23,14 @@ local function rx(s)
   return (s:gsub("([%$%.])", "\\%1"))
 end
 
--- Search root: nearest .../webapp/src ancestor of the current file.
+-- Search root: nearest Angular source ancestor of the current file. Prefer a
+-- `webapp/src` (GAF monorepo layout), else any `webapp`, else a plain `src`
+-- (standalone Angular repos), else the cwd. Tries the more specific patterns
+-- first so a GAF file still narrows to `webapp/src`, not its outer `src`.
 local function search_root(fname)
   return fname:match("(.*/webapp/src)/")
     or fname:match("(.*/webapp)/")
+    or fname:match("(.*/src)/")
     or vim.fn.getcwd()
 end
 
@@ -764,7 +772,7 @@ end
 -- Angular route tree from the app root, following loadChildren across files,
 -- and land on the matching `path:` line in the deepest routing module.
 --
--- Facts the walk relies on (verified in the GAF webapp):
+-- Facts the walk relies on (standard Angular conventions; verified in the GAF webapp):
 --   * baseUrl is `src`, so a bare/aliased import specifier resolves to
 --     `<src>/<specifier>`; `./` and `../` resolve against the importing file.
 --   * loadChildren points at a `*.module.ts`, whose sibling
@@ -1107,6 +1115,645 @@ function M.goto_component_prompt()
     if input == "" then return end
     rg_search("Component " .. input, component_patterns(input), root, { dedupe = true })
   end)
+end
+
+-- ── inline-template @Input/@Output completion data ─────────────────────────
+-- Feeds a blink.cmp source (lua/angular/inputs_source.lua): when the cursor is
+-- inside a component start tag (`<app-foo …>`) in an inline template, offer that
+-- component's @Input/@Output/signal members as completion items, with types.
+-- The heavy lookup (rg for the selector's file) is cached per selector, and the
+-- parsed member list is cached per file+mtime, so only the first hit on a fresh
+-- tag pays the rg cost -- everything after is a table read.
+
+-- The component tag whose *open* start tag encloses the cursor (`<app-foo …▏`),
+-- or nil. A backward text scan, deliberately NOT treesitter: while the attribute
+-- is still being typed the tag is unclosed, and treesitter's error recovery
+-- misattributes the cursor to the nearest well-formed *enclosing* element (so a
+-- cursor in `<app-foo [` resolves to the surrounding `<div>`). Instead we take
+-- the last `<tag` before the cursor with no intervening `>` -- precisely the
+-- "inside an open start tag" state that completion fires in. Scans a 30-line
+-- window so multiline start tags resolve. The caller gates on a `-` in the name
+-- (component selectors always have one), discarding the false hits this can
+-- produce -- a `<` in a binding expression, or a TS generic like `Array<`.
+local function enclosing_tag_name(buf)
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local lines = vim.api.nvim_buf_get_lines(buf, math.max(0, pos[1] - 30), pos[1], false)
+  if #lines == 0 then return nil end
+  lines[#lines] = lines[#lines]:sub(1, pos[2]) -- up to the cursor only
+  local text = table.concat(lines, "\n")
+  local lt = text:find("<[^<>]*$") -- last `<` with no `<`/`>` after it
+  if not lt then return nil end
+  return text:sub(lt):match("^<([%w%-]+)")
+end
+
+-- True when the cursor sits inside a quoted attribute value of the current open
+-- start tag (typing a binding *value*, not an attribute *name*). Tracks quote
+-- state across the tag segment from the last `<` to the cursor.
+local function in_attr_value(buf)
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local lines = vim.api.nvim_buf_get_lines(buf, math.max(0, pos[1] - 30), pos[1], false)
+  if #lines == 0 then return false end
+  lines[#lines] = lines[#lines]:sub(1, pos[2])
+  local text = table.concat(lines, "\n")
+  local lt = text:find("<[^<>]*$")
+  if not lt then return false end
+  local q
+  for ch in text:sub(lt):gmatch(".") do
+    if q then
+      if ch == q then q = nil end
+    elseif ch == '"' or ch == "'" then
+      q = ch
+    end
+  end
+  return q ~= nil
+end
+
+-- True when the cursor is inside a `template_string` (a `@Component` inline
+-- template). Uses the plain TS tree -- present regardless of the angular
+-- injection -- so it's reliable even before the injected parser has run.
+local function in_template(buf)
+  local ok, parser = pcall(vim.treesitter.get_parser, buf, "typescript")
+  if not ok or not parser then return false end
+  local tree = (parser:parse() or {})[1]
+  if not tree then return false end
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local node = tree:root():named_descendant_for_range(pos[1] - 1, pos[2], pos[1] - 1, pos[2])
+  while node do
+    if node:type() == "template_string" then return true end
+    node = node:parent()
+  end
+  return false
+end
+
+local function strip_ann(s)
+  return (s:gsub("^%s*:%s*", ""))
+end
+
+-- Strip comment markers from a doc comment's raw text -> clean markdown-ish body.
+-- Handles `/** … */` / `/* … */` (drops the delimiters and per-line leading `*`)
+-- and `//` line comments.
+local function clean_comment(text)
+  text = text:gsub("^/%*%*?", ""):gsub("%*/%s*$", "")
+  local lines = {}
+  for line in (text .. "\n"):gmatch("(.-)\n") do
+    line = line:gsub("^%s*%*+%s?", "") -- block-comment continuation `*`
+    line = line:gsub("^%s*//+%s?", "") -- line comment
+    lines[#lines + 1] = line
+  end
+  return vim.trim(table.concat(lines, "\n"))
+end
+
+-- The doc comment attached to `member`: the contiguous `comment` siblings
+-- collected in `comments`, but only when the block sits directly above the
+-- member (a gap means it documents something else / is a stray comment).
+local function leading_doc(comments, member, src)
+  if #comments == 0 then return nil end
+  local msrow = member:range()
+  local _, _, lerow = comments[#comments]:range()
+  if msrow - lerow > 1 then return nil end -- not adjacent
+  local parts = {}
+  for _, c in ipairs(comments) do
+    parts[#parts + 1] = clean_comment(vim.treesitter.get_node_text(c, src))
+  end
+  local doc = vim.trim(table.concat(parts, "\n"))
+  return doc ~= "" and doc or nil
+end
+
+-- First balanced `<...>` generic argument in a call/new-expression's text
+-- (`EventEmitter<Map<a,b>>` -> `Map<a,b>`, `input<ButtonSize>()` -> `ButtonSize`).
+local function angle_generic(text)
+  local i = text:find("<")
+  if not i then return nil end
+  local depth = 0
+  for k = i, #text do
+    local ch = text:sub(k, k)
+    if ch == "<" then
+      depth = depth + 1
+    elseif ch == ">" then
+      depth = depth - 1
+      if depth == 0 then
+        local inner = vim.trim(text:sub(i + 1, k - 1))
+        return inner ~= "" and inner or nil
+      end
+    end
+  end
+end
+
+-- Decorator's called name + its call node: `@Input('x')` -> "Input", <call>.
+local function decorator_call(dec, src)
+  for c in dec:iter_children() do
+    local t = c:type()
+    if t == "call_expression" then
+      local fn = c:field("function")[1]
+      return fn and vim.treesitter.get_node_text(fn, src), c
+    elseif t == "identifier" then -- `@Input` with no parens
+      return vim.treesitter.get_node_text(c, src), nil
+    end
+  end
+end
+
+-- First argument of a call if it's a string literal (the @Input/@Output alias).
+local function first_string_arg(call, src)
+  if not call then return nil end
+  local args = call:field("arguments")[1]
+  local a = args and args:named_child(0)
+  if a and a:type() == "string" then
+    return (vim.treesitter.get_node_text(a, src):gsub("['\"]", ""))
+  end
+end
+
+-- Type of an @Input setter's parameter: `set x(v: T)` -> "T".
+local function setter_param_type(method, src)
+  local params = method:field("parameters")[1]
+  local p = params and params:named_child(0)
+  if not p then return nil end
+  for c in p:iter_children() do
+    if c:type() == "type_annotation" then
+      return strip_ann(vim.treesitter.get_node_text(c, src))
+    end
+  end
+end
+
+-- Classify one class member -> { name, prop, kind = input|output|model, type,
+-- doc } or nil. `name` is the template binding name (alias if any), `prop` the
+-- field, `doc` the cleaned leading comment (or nil). `pending` holds decorator
+-- nodes that preceded the member as siblings (how the TS parser attaches a
+-- decorator to a setter method, vs a field where it's a child).
+local function member_input(member, pending, doc, src)
+  local mt = member:type()
+  if mt ~= "public_field_definition" and mt ~= "method_definition" then return nil end
+  local nn = member:field("name")[1]
+  if not nn then return nil end
+  local prop = vim.treesitter.get_node_text(nn, src)
+
+  local decs = {}
+  for _, d in ipairs(pending) do decs[#decs + 1] = d end
+  for c in member:iter_children() do
+    if c:type() == "decorator" then decs[#decs + 1] = c end
+  end
+
+  -- 1. classic @Input()/@Output() decorator.
+  for _, d in ipairs(decs) do
+    local dn, call = decorator_call(d, src)
+    if dn == "Input" or dn == "Output" then
+      local kind = dn == "Input" and "input" or "output"
+      local ty
+      if kind == "input" then
+        if mt == "method_definition" then
+          ty = setter_param_type(member, src)
+        else
+          local tn = member:field("type")[1]
+          ty = tn and strip_ann(vim.treesitter.get_node_text(tn, src))
+        end
+      else -- output: the EventEmitter<T> payload from the initialiser
+        local v = member:field("value")[1]
+        ty = v and angle_generic(vim.treesitter.get_node_text(v, src))
+      end
+      return { name = first_string_arg(call, src) or prop, prop = prop, kind = kind, type = ty, doc = doc }
+    end
+  end
+
+  -- 2. signal API: `x = input<T>() / input.required<T>() / model<T>() / output<T>()`.
+  if mt == "public_field_definition" then
+    local v = member:field("value")[1]
+    if v and v:type() == "call_expression" then
+      local vt = vim.treesitter.get_node_text(v, src)
+      local base = (vt:match("^([%w_%.]+)") or ""):match("^([%w_]+)")
+      local kind = base == "input" and "input"
+        or base == "model" and "model"
+        or base == "output" and "output"
+        or nil
+      if kind then
+        local alias = vt:match("alias%s*:%s*['\"]([^'\"]+)")
+        return { name = alias or prop, prop = prop, kind = kind, type = angle_generic(vt), doc = doc }
+      end
+    end
+  end
+end
+
+local function each_node(node, t, cb)
+  if node:type() == t then cb(node) end
+  for c in node:iter_children() do each_node(c, t, cb) end
+end
+
+-- Every @Input/@Output/signal member declared in `file`, deduped by binding
+-- name. Reads + parses off disk (no buffer); scans all classes in the file
+-- (component files hold one class in practice, so cross-class mixing is moot).
+local function parse_inputs(file)
+  local src = table.concat(vim.fn.readfile(file), "\n")
+  local ok, parser = pcall(vim.treesitter.get_string_parser, src, "typescript")
+  if not ok or not parser then return {} end
+  local tree = (parser:parse() or {})[1]
+  if not tree then return {} end
+
+  local out, seen = {}, {}
+  each_node(tree:root(), "class_body", function(body)
+    local pending, comments = {}, {}
+    for member in body:iter_children() do
+      local mt = member:type()
+      if mt == "decorator" then
+        pending[#pending + 1] = member
+      elseif mt == "comment" then
+        comments[#comments + 1] = member
+      else
+        local r = member_input(member, pending, leading_doc(comments, member, src), src)
+        if r and not seen[r.name] then
+          seen[r.name] = true
+          out[#out + 1] = r
+        end
+        if mt == "public_field_definition" or mt == "method_definition" then
+          pending, comments = {}, {}
+        end
+      end
+    end
+  end)
+  return out
+end
+
+local sel_file_cache = {} -- selector -> component file path, or false (no def)
+local input_cache = {}    -- file -> { mtime = <sec>, list = { ... } }
+
+local function inputs_for_file(file)
+  local st = vim.uv.fs_stat(file)
+  if not st then return {} end
+  local c = input_cache[file]
+  if c and c.mtime == st.mtime.sec then return c.list end
+  local list = parse_inputs(file)
+  input_cache[file] = { mtime = st.mtime.sec, list = list }
+  return list
+end
+
+-- ── enum resolution + auto-import (drives value-seeding in the blink source) ─
+-- When an input's type is an exported enum (`[size]="ButtonSize.…"`), the source
+-- seeds the binding value with the enum and, on accept, adds the missing import.
+-- Resolving the enum's file/members costs one rg + one parse, cached per type.
+
+local type_cache = {} -- type name -> resolved def (enum|union) or false (neither)
+
+-- Does the barrel `index_file` re-export `name`? Matches a named re-export
+-- (`export { … name … }`), a direct `export enum name`, or any `export *`
+-- (wildcard -- assume it may carry the symbol).
+local function reexports(index_file, name)
+  local txt = table.concat(vim.fn.readfile(index_file), "\n")
+  for list in txt:gmatch("export%s*{(.-)}") do
+    for tok in list:gmatch("[%w_]+") do
+      if tok == name then return true end
+    end
+  end
+  if txt:match("export%s*%*%s*from") then return true end
+  if txt:match("export[^\n]-enum%s+" .. name .. "%f[%W]") then return true end
+  return false
+end
+
+-- Public import specifier for the file defining `name`, assuming baseUrl = `src`
+-- (verified in the GAF webapp). Prefers the nearest ancestor barrel (an
+-- `index.ts` re-exporting `name`) so we import `@freelancer/ui/button`, not the
+-- deep `@freelancer/ui/button/button-size`. Falls back to the file's own
+-- src-relative path when no barrel re-exports it.
+local function import_spec(file, name)
+  local src = file:match("(.*/webapp/src)/") or file:match("(.*/src)/")
+  if not src then return nil end
+  if file:match("/index%.ts$") then -- enum declared straight in a barrel
+    return vim.fs.dirname(file):sub(#src + 2)
+  end
+  local dir = vim.fs.dirname(file)
+  while dir and #dir > #src do
+    local idx = dir .. "/index.ts"
+    if vim.uv.fs_stat(idx) and reexports(idx, name) then
+      return dir:sub(#src + 2)
+    end
+    dir = vim.fs.dirname(dir)
+  end
+  return (file:sub(#src + 2):gsub("%.ts$", ""))
+end
+
+-- Member names of `enum <name>` declared in `file`.
+local function enum_members(file, name)
+  local src = table.concat(vim.fn.readfile(file), "\n")
+  local ok, parser = pcall(vim.treesitter.get_string_parser, src, "typescript")
+  if not ok then return {} end
+  local tree = (parser:parse() or {})[1]
+  if not tree then return {} end
+  local out = {}
+  each_node(tree:root(), "enum_declaration", function(ed)
+    local id = child_by_type(ed, "identifier")
+    if not id or vim.treesitter.get_node_text(id, src) ~= name then return end
+    local body = child_by_type(ed, "enum_body")
+    if not body then return end
+    for c in body:iter_children() do
+      local pid = c:type() == "property_identifier" and c
+        or (c:type() == "enum_assignment" and child_by_type(c, "property_identifier"))
+      if pid then out[#out + 1] = vim.treesitter.get_node_text(pid, src) end
+    end
+  end)
+  return out
+end
+
+-- RHS of `export type <name> = …` in `file`, or nil.
+local function type_alias_value(file, name)
+  local src = table.concat(vim.fn.readfile(file), "\n")
+  local ok, parser = pcall(vim.treesitter.get_string_parser, src, "typescript")
+  if not ok then return nil end
+  local tree = (parser:parse() or {})[1]
+  if not tree then return nil end
+  local out
+  each_node(tree:root(), "type_alias_declaration", function(n)
+    local nm, val = n:field("name")[1], n:field("value")[1]
+    if nm and val and vim.treesitter.get_node_text(nm, src) == name then
+      out = vim.treesitter.get_node_text(val, src)
+    end
+  end)
+  return out
+end
+
+-- Reduce a type annotation to a lone named type, dropping ` | null`,
+-- ` | undefined`, `readonly`, and a trailing `[]` -- so `ButtonSize | null` and
+-- `readonly ButtonSize[]` both yield `ButtonSize`. nil when what remains isn't a
+-- single PascalCase identifier.
+local function enum_name_of(t)
+  local core = t:gsub("%s*|%s*null", ""):gsub("%s*|%s*undefined", ""):gsub("readonly%s+", ""):gsub("%[%]", "")
+  core = vim.trim(core)
+  return core:match("^%u[%w_]*$") and core or nil
+end
+
+-- Classify an input's declared type for value completion:
+--   { kind = "enum",  name = "ButtonSize" }              (bare/nullable enum)
+--   { kind = "union", values = { "'a'", "'b'" } }        (string/number literals)
+-- or nil. A union with any non-literal, non-null member is not offered.
+local function classify_type(t)
+  local name = enum_name_of(t)
+  if name then return { kind = "enum", name = name } end
+  local vals, pure, has = {}, true, false
+  for part in t:gmatch("[^|]+") do
+    part = vim.trim(part)
+    if part == "" or part == "null" or part == "undefined" then -- ignore
+    elseif part:match("^'[^']*'$") or part:match('^"[^"]*"$') or part:match("^%-?%d+%.?%d*$") then
+      vals[#vals + 1] = part
+      has = true
+    else
+      pure = false
+    end
+  end
+  if has and pure then return { kind = "union", values = vals } end
+end
+
+-- Resolve a named type (bare or nullable) to its exported definition, for value
+-- completion. `cb` gets one of, or nil (cached per normalized name, misses too):
+--   { kind = "enum",  name, file, spec, members }   -- `export enum X`
+--   { kind = "union", name, file, spec, values }    -- `export type X = 'a'|'b'`
+-- A string-valued enum in Angular is often modelled as a string-literal type
+-- alias, not an `enum` -- both resolve here so both drive completion.
+function M.resolve_type(type_name, cb)
+  local core = enum_name_of(type_name)
+  if not core then return cb(nil) end
+  local cached = type_cache[core]
+  if cached ~= nil then return cb(cached or nil) end
+  local root = search_root(vim.api.nvim_buf_get_name(0))
+  local pats = {
+    "export\\s+(declare\\s+)?(const\\s+)?enum\\s+" .. rx(core) .. "\\b",
+    "export\\s+type\\s+" .. rx(core) .. "\\b",
+  }
+  rg_run(pats, { root }, function(items)
+    local hit = items[1]
+    local res
+    if hit and hit.line and hit.line:match("enum%s+" .. core .. "%f[%W]") then
+      res = { kind = "enum", name = core, file = hit.file,
+        spec = import_spec(hit.file, core), members = enum_members(hit.file, core) }
+    elseif hit then
+      local cls = classify_type(type_alias_value(hit.file, core) or "")
+      if cls and cls.kind == "union" then
+        res = { kind = "union", name = core, file = hit.file,
+          spec = import_spec(hit.file, core), values = cls.values }
+      end
+    end
+    type_cache[core] = res or false
+    cb(res)
+  end)
+end
+
+-- Enum-only view of resolve_type (for `Enum.` member completion + attr seeding).
+function M.resolve_enum(type_name, cb)
+  M.resolve_type(type_name, function(t) cb(t and t.kind == "enum" and t or nil) end)
+end
+
+-- An LSP TextEdit importing `name` from `spec` into `bufnr`, or nil when it's
+-- already imported, defined in this very file, or the spec is unknown. Merges
+-- into an existing single-line import from the same module; else adds a new line
+-- after the last import.
+function M.build_import_edit(bufnr, name, spec, deffile)
+  if not spec then return nil end
+  if deffile and vim.api.nvim_buf_get_name(bufnr) == deffile then return nil end
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  -- Already imported? (multiline-safe: scan every `import { … }` brace list.)
+  for list in table.concat(lines, "\n"):gmatch("import%s*{(.-)}") do
+    for tok in list:gmatch("[%w_]+") do
+      if tok == name then return nil end
+    end
+  end
+  local last_import = -1
+  for i, line in ipairs(lines) do
+    if line:match("^%s*import%s") then last_import = i - 1 end
+    if line:match("import%s*{[^}]*}%s*from%s*['\"]" .. spec:gsub("[%-%.]", "%%%1") .. "['\"]") then
+      return {
+        range = { start = { line = i - 1, character = 0 }, ["end"] = { line = i - 1, character = #line } },
+        newText = (line:gsub("{", "{ " .. name .. ",", 1)),
+      }
+    end
+  end
+  local at = last_import + 1
+  return {
+    range = { start = { line = at, character = 0 }, ["end"] = { line = at, character = 0 } },
+    newText = "import { " .. name .. " } from '" .. spec .. "';\n",
+  }
+end
+
+-- An LSP TextEdit adding `<name> = <name>;` as the first field of the component
+-- class whose inline template holds the cursor -- the GAF idiom for exposing an
+-- enum to a template (a template can only reference class members, not imported
+-- symbols). nil when the class already exposes it, or no class is found. The
+-- cursor sits in the `@Component` decorator's template string, a sibling of the
+-- class under the same `export_statement`, so we walk up to that and back down.
+function M.build_enum_field_edit(bufnr, name)
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr, "typescript")
+  if not ok or not parser then return nil end
+  local tree = (parser:parse() or {})[1]
+  if not tree then return nil end
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local node = tree:root():named_descendant_for_range(pos[1] - 1, pos[2], pos[1] - 1, pos[2])
+
+  local cls
+  while node do
+    local t = node:type()
+    if t == "class_declaration" then
+      cls = node
+      break
+    elseif t == "export_statement" then
+      cls = child_by_type(node, "class_declaration")
+      break
+    end
+    node = node:parent()
+  end
+  local body = cls and child_by_type(cls, "class_body")
+  if not body then return nil end
+
+  local empty = true
+  for m in body:iter_children() do
+    local t = m:type()
+    if t ~= "{" and t ~= "}" then empty = false end
+    if t == "public_field_definition" then
+      local nm, val = m:field("name")[1], m:field("value")[1]
+      if nm and val
+        and vim.treesitter.get_node_text(nm, bufnr) == name
+        and vim.treesitter.get_node_text(val, bufnr) == name then
+        return nil -- already exposed
+      end
+    end
+  end
+
+  local brace = child_by_type(body, "{")
+  if not brace then return nil end
+  local _, _, br, bc = brace:range() -- end position of the `{`
+  return {
+    range = { start = { line = br, character = bc }, ["end"] = { line = br, character = bc } },
+    newText = "\n  " .. name .. " = " .. name .. ";" .. (empty and "\n" or ""),
+  }
+end
+
+-- Resolve the component tag under the cursor to its member list and call
+-- `cb(inputs, { tag, file })`, or `cb(nil)` when the cursor isn't inside a
+-- component tag (native element, plain markup, or unknown selector). Async only
+-- on a cache miss (one rg for the selector's file); a warm selector is sync.
+-- Resolve the component tag under the cursor to its member list + meta, with no
+-- value-context gate. Async only on a selector cache miss. Internal helper for
+-- both attribute-name and attribute-value completion.
+local function tag_inputs(cb)
+  local buf = vim.api.nvim_get_current_buf()
+  if vim.bo[buf].filetype ~= "typescript" then return cb(nil) end
+  local tag = enclosing_tag_name(buf)
+  if not tag or not tag:find("%-") then return cb(nil) end -- native el / none
+
+  local cached = sel_file_cache[tag]
+  if cached ~= nil then
+    if not cached then return cb(nil) end
+    return cb(inputs_for_file(cached), { tag = tag, file = cached })
+  end
+
+  local root = search_root(vim.api.nvim_buf_get_name(buf))
+  rg_run(selector_patterns(tag), { root }, function(defs)
+    local file = defs[1] and defs[1].file
+    sel_file_cache[tag] = file or false
+    if not file then return cb(nil) end
+    cb(inputs_for_file(file), { tag = tag, file = file })
+  end)
+end
+
+-- Attribute-NAME completion: the component's inputs/outputs. Suppressed once the
+-- cursor is inside a quoted value, where a value expression belongs instead.
+function M.component_inputs(cb)
+  if in_attr_value(vim.api.nvim_get_current_buf()) then return cb(nil) end
+  tag_inputs(cb)
+end
+
+-- The attribute whose value the cursor is inside: its input name (brackets
+-- stripped) and whether it's a property binding (`[x]="…"`) vs static (`x="…"`).
+local function value_attr(buf)
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local lines = vim.api.nvim_buf_get_lines(buf, math.max(0, pos[1] - 30), pos[1], false)
+  if #lines == 0 then return nil end
+  lines[#lines] = lines[#lines]:sub(1, pos[2])
+  local text = table.concat(lines, "\n")
+  local lt = text:find("<[^<>]*$")
+  if not lt then return nil end
+  local br, attr = text:sub(lt):match("(%[?)([%w%-]+)%]?%s*=%s*['\"][^'\"]*$")
+  if not attr then return nil end
+  return attr, br == "["
+end
+
+-- Attribute-VALUE completion: when the cursor is inside a component input's value
+-- and that input's type is an enum or a string/number-literal union, call
+-- `cb(spec, meta)` where spec is { kind="enum", enum, en } or
+-- { kind="union", values, is_binding }; else `cb(nil)`.
+function M.template_value_completions(cb)
+  local buf = vim.api.nvim_get_current_buf()
+  if vim.bo[buf].filetype ~= "typescript" then return cb(nil) end
+  if not in_attr_value(buf) then return cb(nil) end
+  local attr, is_binding = value_attr(buf)
+  if not attr then return cb(nil) end
+  tag_inputs(function(inputs, meta)
+    if not inputs then return cb(nil) end
+    local input
+    for _, it in ipairs(inputs) do
+      if it.name == attr then input = it break end
+    end
+    if not input or not input.type then return cb(nil) end
+    local cls = classify_type(input.type)
+    if not cls then return cb(nil) end
+    if cls.kind == "union" then -- literal union written inline in the annotation
+      return cb({ kind = "union", values = cls.values, is_binding = is_binding }, meta)
+    end
+    -- Named type: resolve to an enum (members) or a type-alias literal union.
+    M.resolve_type(cls.name, function(t)
+      if not t then return cb(nil) end
+      if t.kind == "enum" then
+        if #t.members == 0 then return cb(nil) end
+        cb({ kind = "enum", enum = t.name, en = t }, meta)
+      else
+        cb({ kind = "union", values = t.values, is_binding = is_binding }, meta)
+      end
+    end)
+  end)
+end
+
+-- Enum-member completion inside a template: when the cursor sits right after
+-- `SomeEnum.` in an inline template and `SomeEnum` resolves to an exported enum,
+-- call `cb(members, name, enumInfo)` (enumInfo = { file, spec, members }); else
+-- `cb(nil)`. Gated to templates so it never doubles up on tsserver, which
+-- completes enum members itself in real TS code (and treats the template as an
+-- opaque string, offering nothing there).
+function M.template_enum_members(cb)
+  local buf = vim.api.nvim_get_current_buf()
+  if vim.bo[buf].filetype ~= "typescript" then return cb(nil) end
+  if not in_template(buf) then return cb(nil) end
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local before = vim.api.nvim_get_current_line():sub(1, pos[2])
+  local enum = before:match("([%u][%w_]*)%.[%w_]*$") -- `Enum.` or `Enum.partial`
+  if not enum then return cb(nil) end
+  M.resolve_enum(enum, function(en)
+    if not en or #en.members == 0 then return cb(nil) end
+    cb(en.members, enum, en)
+  end)
+end
+
+-- ── setup ──────────────────────────────────────────────────────────────────
+-- Angular selector navigation on TypeScript buffers (treesitter + rg, no LSP).
+-- Not GAF-gated: available in any Angular project. GAF-only features live in
+-- lua/gaf/. Buffer-local `gd` shadows the global snacks `gd` on TS buffers, and
+-- falls back to LSP definition when the cursor isn't on an Angular target.
+--   <leader>cp -> parent components (callers that use this selector, "up")
+--   gd         -> definition under cursor: tag (component), attr (@Input/@Output),
+--                 class (scss), a symbol in a binding expression (its TS def), or
+--                 a template-local (@if `as`, @for var, @let, #ref) binding site;
+--                 falls back to LSP definition on plain TS
+--   <leader>cG -> prompt for a component name (class or selector) -> its definition
+--   <leader>cR -> URL string under cursor -> routing module that handles it
+function M.setup()
+  vim.api.nvim_create_autocmd("FileType", {
+    group = vim.api.nvim_create_augroup("angular_nav", { clear = true }),
+    pattern = "typescript",
+    callback = function(ev)
+      vim.keymap.set("n", "<leader>cp", M.goto_parents,
+        { buffer = ev.buf, desc = "Angular: go to parent components" })
+      vim.keymap.set("n", "gd", function()
+        if not M.goto_definition() then
+          Snacks.picker.lsp_definitions()
+        end
+      end, { buffer = ev.buf, desc = "Go to definition (Angular template-aware)" })
+      vim.keymap.set("n", "<leader>cG", M.goto_component_prompt,
+        { buffer = ev.buf, desc = "Angular: go to component by name" })
+      vim.keymap.set("n", "<leader>cR", M.goto_route,
+        { buffer = ev.buf, desc = "Angular: go to route module for URL" })
+    end,
+  })
 end
 
 return M

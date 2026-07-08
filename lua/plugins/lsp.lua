@@ -440,10 +440,20 @@ return {
           sql   = { "dadbod", "snippets", "buffer" },
           mysql = { "dadbod", "snippets", "buffer" },
           plsql = { "dadbod", "snippets", "buffer" },
+          -- Angular inline-template @Input/@Output completion (see
+          -- lua/angular/inputs_source.lua) on top of the normal TS sources.
+          typescript = { "angular_inputs", "lsp", "path", "snippets", "buffer" },
         },
         providers = {
           lsp = { max_items = 50 },
           dadbod = { name = "Dadbod", module = "vim_dadbod_completion.blink" },
+          angular_inputs = {
+            name = "Angular",
+            module = "angular.inputs_source",
+            -- Float component inputs above generic LSP/buffer noise when the
+            -- cursor is actually inside a component tag.
+            score_offset = 5,
+          },
         },
       },
       fuzzy = { implementation = "prefer_rust" },

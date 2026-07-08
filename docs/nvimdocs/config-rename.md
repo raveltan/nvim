@@ -38,5 +38,5 @@ Multi-line class attributes, `#{...}` interpolation (harmless phantom blocks in 
 
 - Tag rename backend: [editor-tagmatch](editor-tagmatch.md)
 - LSP fallback + `$` sigil handling: [config-keymaps](config-keymaps.md), [ftplugin-php](ftplugin-php.md)
-- styleUrls convention shared with gaf `gd`: `lua/gaf/angular.lua` (`bem_suffixes`, `stylesheet_paths`)
+- styleUrls convention shared with Angular `gd`: [editor-angular](editor-angular.md) — `lua/angular/init.lua` (`bem_suffixes`, `stylesheet_paths`)
 - Project-wide alternative: [editor-grug-far](editor-grug-far.md)
