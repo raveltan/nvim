@@ -11,7 +11,7 @@
 -- Per project: run :XcodebuildSetup once in the project root — picks scheme /
 -- device / test plan and generates buildServer.json for the LSP.
 --
--- <leader>X* / <leader>t* / <leader>d* maps live in after/ftplugin/swift.lua.
+-- <leader>m* / <leader>t* / <leader>d* maps live in after/ftplugin/swift.lua.
 return {
   {
     "wojciech-kulik/xcodebuild.nvim",

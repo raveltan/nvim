@@ -304,8 +304,8 @@ return {
       }
       -- Redash keys and the global Xdebug <leader>X* maps are registered only
       -- under the GAF profile — keep their which-key groups out otherwise.
-      -- (Non-GAF, swift buffers put a buffer-local "xcode" group on <leader>X
-      -- instead — see after/ftplugin/swift.lua.)
+      -- (Swift buffers put a buffer-local "xcode" group on <leader>m in every
+      -- profile — see after/ftplugin/swift.lua.)
       if vim.g.gaf then
         table.insert(spec, { "<leader>r", group = "redash" })
         table.insert(spec, { "<leader>X", group = "xdebug profile" })

@@ -1,102 +1,45 @@
--- Xcodebuild keymaps — buffer-local so they (and the <leader>X "xcode" group)
+-- Xcodebuild keymaps — buffer-local so they (and the <leader>m "xcode" group)
 -- only surface in swift buffers, never globally in which-key. xcodebuild.nvim
 -- loads via ft=swift, so the :Xcodebuild* commands exist whenever these can
 -- fire.
+--
+-- <leader>m ("make") is used instead of <leader>X: it needs no Shift and,
+-- unlike <leader>X, never collides with GAF's global Xdebug maps
+-- (lua/gaf/xdebug.lua) — so these are set in every swift buffer, GAF or not.
 local function map(lhs, rhs, desc, mode)
   vim.keymap.set(mode or "n", lhs, rhs, { buffer = true, desc = desc })
 end
 
--- <leader>X* is skipped under the GAF profile: GAF registers global Xdebug
--- maps on that prefix (lua/gaf/xdebug.lua setup) and mixing the two groups
--- would make which-key show both. GAF session → xdebug owns <leader>X;
--- xcodebuild actions stay reachable via :XcodebuildPicker. The test/debug
--- maps further down have no such clash and are always set.
-if not vim.g.gaf then
-  map("<leader>XX", "<cmd>XcodebuildPicker<cr>", "All xcodebuild actions")
-  map("<leader>Xb", "<cmd>XcodebuildBuild<cr>", "Build")
-  map("<leader>XB", "<cmd>XcodebuildBuildForTesting<cr>", "Build for testing")
-  map("<leader>Xr", "<cmd>XcodebuildBuildRun<cr>", "Build & run")
-  map("<leader>Xl", "<cmd>XcodebuildToggleLogs<cr>", "Toggle logs")
-  map("<leader>Xe", "<cmd>XcodebuildTestExplorerToggle<cr>", "Test explorer")
-  map("<leader>Xc", "<cmd>XcodebuildToggleCodeCoverage<cr>", "Toggle coverage")
-  map("<leader>XC", "<cmd>XcodebuildShowCodeCoverageReport<cr>", "Coverage report")
-  map("<leader>Xs", "<cmd>XcodebuildSelectScheme<cr>", "Select scheme")
-  map("<leader>Xd", "<cmd>XcodebuildSelectDevice<cr>", "Select device")
-  map("<leader>Xt", "<cmd>XcodebuildSelectTestPlan<cr>", "Select test plan")
-  map("<leader>Xp", "<cmd>XcodebuildPreviewGenerateAndShow<cr>", "SwiftUI preview")
-  map("<leader>XP", "<cmd>XcodebuildPreviewToggle<cr>", "Toggle SwiftUI preview")
-  map("<leader>Xa", "<cmd>XcodebuildCodeActions<cr>", "Code actions")
-  map("<leader>Xf", "<cmd>XcodebuildProjectManager<cr>", "Project manager (files/targets)")
-  map("<leader>Xq", "<cmd>XcodebuildQuickfixLine<cr>", "Quickfix line")
-  map("<leader>Xg", "<cmd>SwiftBuildServer<cr>", "Generate buildServer.json (LSP)")
+map("<leader>mm", "<cmd>XcodebuildPicker<cr>", "All xcodebuild actions")
+map("<leader>mS", "<cmd>XcodebuildSetup<cr>", "Setup project (scheme/device/buildServer)")
+map("<leader>mb", "<cmd>XcodebuildBuild<cr>", "Build")
+map("<leader>mB", "<cmd>XcodebuildBuildForTesting<cr>", "Build for testing")
+map("<leader>mr", "<cmd>XcodebuildBuildRun<cr>", "Build & run")
+map("<leader>ml", "<cmd>XcodebuildToggleLogs<cr>", "Toggle logs")
+map("<leader>me", "<cmd>XcodebuildTestExplorerToggle<cr>", "Test explorer")
+map("<leader>mc", "<cmd>XcodebuildToggleCodeCoverage<cr>", "Toggle coverage")
+map("<leader>mC", "<cmd>XcodebuildShowCodeCoverageReport<cr>", "Coverage report")
+map("<leader>ms", "<cmd>XcodebuildSelectScheme<cr>", "Select scheme")
+map("<leader>md", "<cmd>XcodebuildSelectDevice<cr>", "Select device")
+map("<leader>mt", "<cmd>XcodebuildSelectTestPlan<cr>", "Select test plan")
+map("<leader>mp", "<cmd>XcodebuildPreviewGenerateAndShow<cr>", "SwiftUI preview")
+map("<leader>mP", "<cmd>XcodebuildPreviewToggle<cr>", "Toggle SwiftUI preview")
+map("<leader>mf", "<cmd>XcodebuildProjectManager<cr>", "Project manager (files/targets)")
+-- :XcodebuildCodeActions is just vim.lsp.buf.code_action() — use the global
+-- <leader>ca (actions-preview) instead. :XcodebuildQuickfixLine below is the
+-- same call with apply=true (auto-fix the line's diagnostic); no global equiv.
+map("<leader>mq", "<cmd>XcodebuildQuickfixLine<cr>", "Quickfix (auto-fix line diagnostic)")
 
-  -- Buffer-local "xcode" group label (no-op if which-key isn't loaded yet).
-  pcall(function()
-    require("which-key").add({ { "<leader>X", group = "xcode", buffer = 0 } })
-  end)
-end
+-- Buffer-local "xcode" group label (no-op if which-key isn't loaded yet).
+pcall(function()
+  require("which-key").add({ { "<leader>m", group = "xcode", buffer = 0 } })
+end)
 
--- Regenerate buildServer.json so sourcekit-lsp can resolve symbols in an
--- .xcodeproj / .xcworkspace (plain SPM Package.swift needs none). xcodebuild.nvim
--- only autogenerates this on a build STARTED FROM NVIM — build in Xcode instead
--- and sourcekit reports every cross-file symbol (ContentView, models, framework
--- imports) as unknown until this runs. Detects the container + scheme, writes
--- buildServer.json at the project root, then restarts the LSP so root_dir
--- re-resolves onto the new file. Also exposed as :SwiftBuildServer.
-local function regen_build_server()
-  local fname = vim.api.nvim_buf_get_name(0)
-  local function find_up(pat)
-    return vim.fs.find(function(n) return n:match(pat) end,
-      { path = fname, upward = true, type = "directory", limit = 1 })[1]
-  end
-  -- Workspace wins over bare project (matches sourcekit's own root order).
-  local ws, proj = find_up("%.xcworkspace$"), find_up("%.xcodeproj$")
-  local container = ws or proj
-  if not container then
-    vim.notify("SwiftBuildServer: no .xcworkspace/.xcodeproj found upward", vim.log.levels.ERROR)
-    return
-  end
-  local root = vim.fs.dirname(container)
-  local flag = ws and "-workspace" or "-project"
-
-  local function run(scheme)
-    vim.notify("xcode-build-server: generating buildServer.json (" .. scheme .. ")...")
-    vim.system({ "xcode-build-server", "config", flag, container, "-scheme", scheme },
-      { text = true, cwd = root }, function(r)
-        vim.schedule(function()
-          if r.code == 0 then
-            vim.notify("buildServer.json written at " .. root .. " — restarting sourcekit")
-            pcall(vim.cmd, "LspRestart sourcekit")
-          else
-            vim.notify("xcode-build-server failed:\n" .. ((r.stderr or "") .. (r.stdout or "")),
-              vim.log.levels.ERROR)
-          end
-        end)
-      end)
-  end
-
-  -- Ask xcodebuild for the scheme list; prompt only when there is more than one.
-  vim.system({ "xcodebuild", "-list", "-json", flag, container },
-    { text = true, cwd = root }, function(o)
-      local schemes = {}
-      local ok, parsed = pcall(vim.json.decode, o.stdout or "")
-      if ok then schemes = (parsed.workspace or parsed.project or {}).schemes or {} end
-      vim.schedule(function()
-        if #schemes == 0 then
-          vim.notify("SwiftBuildServer: no schemes (xcodebuild -list failed)", vim.log.levels.ERROR)
-        elseif #schemes == 1 then
-          run(schemes[1])
-        else
-          vim.ui.select(schemes, { prompt = "Scheme for buildServer.json:" }, function(c)
-            if c then run(c) end
-          end)
-        end
-      end)
-    end)
-end
-
-vim.api.nvim_buf_create_user_command(0, "SwiftBuildServer", regen_build_server,
-  { desc = "Generate buildServer.json + restart sourcekit-lsp" })
+-- buildServer.json (what sourcekit-lsp needs to resolve symbols across an
+-- .xcodeproj/.xcworkspace; plain SPM Package.swift needs none) is generated by
+-- xcodebuild.nvim's own xcode-build-server integration — it runs
+-- `xcode-build-server config` + restarts sourcekit on :XcodebuildSetup (<leader>mS)
+-- and on every scheme change. No custom regen command needed.
 
 -- Tests — mirrors the neotest <leader>t* convention (config/autocmds.lua);
 -- swift uses xcodebuild's own runner, there is no neotest adapter.

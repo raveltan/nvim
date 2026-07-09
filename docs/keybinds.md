@@ -368,23 +368,25 @@ PascalCase, UPPER_CASE, kebab-case. Source: `lua/config/keymaps.lua` +
 | `<leader>Fp` / `<leader>FP` | n | Pub get / Pub upgrade |
 | `<leader>Fc` | n | Flutter LSP restart |
 
-## Swift / Xcode — `<leader>X*`
+## Swift / Xcode — `<leader>m*`
 
-> Buffer-local to swift files (`after/ftplugin/swift.lua`) — these and the `<leader>X` "xcode" group only appear when editing swift, not globally. Under `GAF=1` the `<leader>X*` maps are skipped entirely (GAF's global Xdebug maps own that prefix; use `:XcodebuildPicker`) — only the test/debug rows below are set. Build/run/test via xcodebuild.nvim; run `:XcodebuildSetup` once per project root.
+> Buffer-local to swift files (`after/ftplugin/swift.lua`) — these and the `<leader>m` "xcode" group only appear when editing swift, not globally. Set in every profile (`<leader>m` needs no Shift and, unlike `<leader>X`, never clashes with GAF's Xdebug maps). Build/run/test via xcodebuild.nvim; run `:XcodebuildSetup` (`<leader>mS`) once per project root — it also generates `buildServer.json` for the LSP.
 
 | Key | Mode | Description |
 |-----|------|-------------|
-| `<leader>XX` | n | All xcodebuild actions (picker) |
-| `<leader>Xb` / `<leader>XB` | n | Build / build for testing |
-| `<leader>Xr` | n | Build & run |
-| `<leader>Xl` | n | Toggle build/run logs |
-| `<leader>Xe` | n | Test explorer |
-| `<leader>Xc` / `<leader>XC` | n | Toggle coverage / coverage report |
-| `<leader>Xs` / `<leader>Xd` / `<leader>Xt` | n | Select scheme / device / test plan |
-| `<leader>Xp` / `<leader>XP` | n | SwiftUI preview generate+show / toggle |
-| `<leader>Xa` | n | Xcode code actions |
-| `<leader>Xf` | n | Project manager (files/targets) |
-| `<leader>Xq` | n | Quickfix line |
+| `<leader>mm` | n | All xcodebuild actions (picker) |
+| `<leader>mS` | n | Setup project (scheme/device/test plan + buildServer.json) |
+| `<leader>mb` / `<leader>mB` | n | Build / build for testing |
+| `<leader>mr` | n | Build & run |
+| `<leader>ml` | n | Toggle build/run logs |
+| `<leader>me` | n | Test explorer |
+| `<leader>mc` / `<leader>mC` | n | Toggle coverage / coverage report |
+| `<leader>ms` / `<leader>md` / `<leader>mt` | n | Select scheme / device / test plan |
+| `<leader>mp` / `<leader>mP` | n | SwiftUI preview generate+show / toggle |
+| `<leader>mf` | n | Project manager (files/targets) |
+| `<leader>mq` | n | Quickfix — auto-fix current line's diagnostic |
+
+> Xcode code actions dropped — `:XcodebuildCodeActions` is just `vim.lsp.buf.code_action()`; use the global `<leader>ca` (actions-preview) in swift buffers. `<leader>mq` is the same call with `apply=true` (auto-applies the line's fixit).
 | `<leader>tr` / `<leader>tf` / `<leader>tt` | n | Run nearest test / class tests / test plan (xcodebuild, not neotest) |
 | `<leader>ts` | v | Run selected tests |
 | `<leader>t.` / `<leader>tF` | n | Repeat last tests / run failing tests |
@@ -393,7 +395,7 @@ PascalCase, UPPER_CASE, kebab-case. Source: `lua/config/keymaps.lua` +
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` test (neotest) · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile (GAF=1 only) / xcode (swift buffers, non-GAF) · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>m` xcode (swift buffers) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` test (neotest) · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile (GAF=1 only) · `g` goto · `gs` surround
 
 ## Known overlaps
 
