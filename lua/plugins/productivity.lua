@@ -7,6 +7,7 @@ return {
     ft = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
     opts = {
       settings = {
+        tsserver_max_memory = 8192,
         tsserver_file_preferences = {
           -- fl-gaf (GAF=1) bans relative @freelancer imports
           -- (eslint local-rules/validate-freelancer-imports) but still requires
