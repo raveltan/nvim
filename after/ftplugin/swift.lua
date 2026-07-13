@@ -23,6 +23,11 @@ map("<leader>ms", "<cmd>XcodebuildSelectScheme<cr>", "Select scheme")
 map("<leader>md", "<cmd>XcodebuildSelectDevice<cr>", "Select device")
 map("<leader>mt", "<cmd>XcodebuildSelectTestPlan<cr>", "Select test plan")
 map("<leader>mp", "<cmd>XcodebuildPreviewGenerateAndShow<cr>", "SwiftUI preview")
+-- hotReload keeps the app running and re-captures the preview on every save
+-- (~3x faster than regenerating). App side needs the Inject library wired via
+-- observeHotReload() in addition to xcodebuild-nvim-preview — see
+-- docs/nvimdocs/swift-xcodebuild.md.
+map("<leader>mh", "<cmd>XcodebuildPreviewGenerateAndShow hotReload<cr>", "SwiftUI preview (hot reload)")
 map("<leader>mP", "<cmd>XcodebuildPreviewToggle<cr>", "Toggle SwiftUI preview")
 map("<leader>mf", "<cmd>XcodebuildProjectManager<cr>", "Project manager (files/targets)")
 -- :XcodebuildCodeActions is just vim.lsp.buf.code_action() — use the global

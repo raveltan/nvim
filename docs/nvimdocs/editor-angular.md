@@ -22,7 +22,7 @@ Formerly gated behind `GAF=1` at `lua/gaf/angular.lua`; moved to `lua/angular/` 
 | `<leader>cG` | Prompt for a component name (class like `FooComponent`, prefix ok, or selector `app-foo`) → its definition |
 | `<leader>cR` | URL/route string under cursor (`/messages/thread/${id}`) → the `path:` line in the routing module that handles it |
 
-`<leader>cR` shares its key with typescript-tools `TSToolsRemoveUnused` ([prod-typescript-tools](prod-typescript-tools.md)); the Angular FileType autocmd registers after it (init.lua runs after lazy), so the route jump wins on TS buffers — pre-existing behaviour, unchanged by the move.
+`<leader>cR` is owned by this module on typescript buffers; the TS "remove unused" action lives on `<leader>cx` ([lsp-vtsls](lsp-vtsls.md)) precisely to avoid shadowing it.
 
 ### What `gd` resolves
 
@@ -105,4 +105,4 @@ This is driven by the attribute name to the left of the cursor (`value_attr`) �
 - Class rename shares the styleUrls/BEM logic: [config-rename](config-rename.md)
 - Template injection that powers in-template reads: [ts-nvim-treesitter](ts-nvim-treesitter.md)
 - Related-file picker for `.ts` ↔ `.scss`/`.spec` etc.: [workflow-other](workflow-other.md)
-- Key overlap: [prod-typescript-tools](prod-typescript-tools.md)
+- TS source-action keys: [lsp-vtsls](lsp-vtsls.md)

@@ -3,16 +3,8 @@ local paths = require("gaf.paths")
 local M = {}
 
 local function find_root()
-  local start = vim.fn.expand("%:p:h")
-  if start == "" then start = vim.fn.getcwd() end
-  local dir = start
-  while dir ~= "/" and dir ~= "" do
-    if vim.fn.executable(dir .. "/bin/gaf-xdebug") == 1 then
-      return dir
-    end
-    dir = vim.fn.fnamemodify(dir, ":h")
-  end
-  return nil
+  local buf = vim.fn.expand("%:p")
+  return paths.find_root("bin/gaf-xdebug", buf ~= "" and buf or nil)
 end
 
 local function run(subcmd, extra_args, opts)
@@ -244,20 +236,23 @@ function M.profile_open(path)
       vim.cmd("edit " .. vim.fn.fnameescape(p))
       return
     end
-    local out = vim.fn.systemlist({ "callgrind_annotate", p })
-    if vim.v.shell_error ~= 0 then
-      vim.notify("callgrind_annotate failed:\n" .. table.concat(out, "\n"), vim.log.levels.ERROR)
-      return
-    end
-    vim.cmd("vnew")
-    local buf = vim.api.nvim_get_current_buf()
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, out)
-    vim.api.nvim_buf_set_name(buf, "callgrind://" .. vim.fn.fnamemodify(p, ":t"))
-    vim.bo[buf].buftype = "nofile"
-    vim.bo[buf].bufhidden = "wipe"
-    vim.bo[buf].swapfile = false
-    vim.bo[buf].modifiable = false
-    vim.bo[buf].filetype = "cachegrind"
+    -- async: annotating a large snapshot takes seconds; systemlist blocked the UI
+    vim.system({ "callgrind_annotate", p }, { text = true }, vim.schedule_wrap(function(res)
+      if res.code ~= 0 then
+        vim.notify("callgrind_annotate failed:\n" .. (res.stderr or ""), vim.log.levels.ERROR)
+        return
+      end
+      local out = vim.split(res.stdout or "", "\n")
+      vim.cmd("vnew")
+      local buf = vim.api.nvim_get_current_buf()
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, out)
+      vim.api.nvim_buf_set_name(buf, "callgrind://" .. vim.fn.fnamemodify(p, ":t"))
+      vim.bo[buf].buftype = "nofile"
+      vim.bo[buf].bufhidden = "wipe"
+      vim.bo[buf].swapfile = false
+      vim.bo[buf].modifiable = false
+      vim.bo[buf].filetype = "cachegrind"
+    end))
   end
 
   if path and path ~= "" then
@@ -377,21 +372,34 @@ local function newest_trace()
   return cs[1]
 end
 
+-- Read trace lines, then cb(lines) or cb(nil, err). gunzip runs async —
+-- vim.fn.systemlist on a big .gz blocked the UI.
+local function read_trace_lines(path, cb)
+  if path:sub(-3) == ".gz" then
+    vim.system({ "gunzip", "-c", path }, { text = true }, vim.schedule_wrap(function(res)
+      if res.code ~= 0 then
+        cb(nil, "gunzip failed: " .. (res.stderr or ""))
+        return
+      end
+      cb(vim.split(res.stdout or "", "\n"))
+    end))
+    return
+  end
+  local f = io.open(path, "r")
+  if not f then
+    cb(nil, "cannot open " .. path)
+    return
+  end
+  local lines = {}
+  for l in f:lines() do table.insert(lines, l) end
+  f:close()
+  cb(lines)
+end
+
 -- Parse xdebug human-readable trace (default format=0).
 -- Each line: "<time> <memory> <indent>-> Class::method() <file>:<line>"
 -- Matched <- pairs give per-call memory delta. Aggregate by function.
-local function aggregate_trace(path)
-  local lines
-  if path:sub(-3) == ".gz" then
-    lines = vim.fn.systemlist({ "gunzip", "-c", path })
-  else
-    local f = io.open(path, "r")
-    if not f then return nil, "cannot open " .. path end
-    lines = {}
-    for l in f:lines() do table.insert(lines, l) end
-    f:close()
-  end
-
+local function aggregate_trace(lines)
   local stack = {}        -- per-depth: { fn, mem_in }
   local agg = {}          -- fn → { self=, incl=, calls= }
   local self_charge = {}  -- depth → bytes charged from children (subtract from incl)
@@ -456,11 +464,12 @@ function M.trace_aggregate(path, opts)
   end
 
   vim.notify("Aggregating " .. vim.fn.fnamemodify(path, ":t") .. "...", vim.log.levels.INFO)
-  local list, err = aggregate_trace(path)
-  if not list then
+  read_trace_lines(path, function(lines, err)
+  if not lines then
     vim.notify("trace aggregate failed: " .. err, vim.log.levels.ERROR)
     return
   end
+  local list = aggregate_trace(lines)
 
   local by_self = vim.deepcopy(list)
   table.sort(by_self, function(a, b) return a.self > b.self end)
@@ -507,6 +516,7 @@ function M.trace_aggregate(path, opts)
   vim.bo[buf].swapfile = false
   vim.bo[buf].modifiable = false
   vim.bo[buf].filetype = "xdebug-trace-summary"
+  end)
 end
 
 function M.trace_latest()

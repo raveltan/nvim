@@ -47,7 +47,7 @@ Installed servers (the union of GAF-on and GAF-off):
 - `tailwindcss` — Tailwind class IntelliSense (filtered out in GAF profile).
 - `typos_lsp` — Typo finder.
 
-TypeScript is intentionally **not** in the list — `typescript-tools.nvim` owns `ts_ls` (see `lua/plugins/productivity.lua`).
+TypeScript is in the list as `vtsls` (configured in `lua/plugins/lsp.lua`; see [lsp-vtsls](lsp-vtsls.md)).
 
 ## GAF integration
 

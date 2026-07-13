@@ -49,7 +49,6 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 |-----|------|-------------|--------|
 | `<leader>sg` | n | Grep workspace (async rg) | snacks.picker |
 | `<leader>sz` | n | Fuzzy grep (frecency-first, partial on big repos) | fff.nvim |
-| `<leader>/` | n | Seek: progressive file → grep (`<C-e>` toggle, `<Tab>` multi-select) | seeker.nvim |
 | `<leader>sw` | n, x | Grep word/selection | snacks.picker |
 | `<leader>sb` | n | Buffer lines | snacks.picker |
 | `<leader>sh` | n | Help pages | snacks.picker |
@@ -87,13 +86,12 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>ci` | n | Toggle inlay hints | config/keymaps.lua |
 | `<leader>cd` | n | Line diagnostics float | config/keymaps.lua |
 | `<leader>U` | n | Undo tree (undotree) | undotree |
-| `<leader>co` | n | TS: organize imports | typescript-tools |
-| `<leader>cM` | n | TS: add missing imports | typescript-tools |
-| `<leader>cU` | n | TS: remove unused imports | typescript-tools |
-| `<leader>cR` | n | TS: remove unused | typescript-tools |
-| `<leader>cF` | n | TS: fix all | typescript-tools |
-| `<leader>cD` | n | TS: go to source definition | typescript-tools |
-| `:w` (TS/JS) | n | Auto: add missing + remove unused imports on save (`:let g:disable_ts_organize_on_save = 1` to disable) | productivity.lua |
+| `<leader>co` | n | TS: organize imports | vtsls (plugins/lsp.lua) |
+| `<leader>cM` | n | TS: add missing imports | vtsls (plugins/lsp.lua) |
+| `<leader>cU` | n | TS: remove unused imports | vtsls (plugins/lsp.lua) |
+| `<leader>cx` | n | TS: remove unused | vtsls (plugins/lsp.lua) |
+| `<leader>cF` | n | TS: fix all | vtsls (plugins/lsp.lua) |
+| `<leader>cD` | n | TS: go to source definition | vtsls (plugins/lsp.lua) |
 | `<leader>csa` / `<leader>csA` | n | Swap with next/prev arg | treesitter |
 
 ## Git
@@ -101,6 +99,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | Key | Mode | Description | Source |
 |-----|------|-------------|--------|
 | `<leader>gg` | n | Lazygit | snacks |
+| `<leader>/` | n | Toggle bottom-docked terminal (hide/show, session kept) | snacks.terminal |
 | `<leader>gl` | n | Line history — commits touching current line; `<CR>` opens commit read-only (`:Gedit <sha>`, no checkout) | util.line_history |
 | `<leader>gl` | v | Range history — commits touching the selection | util.line_history |
 | `<leader>gf` | n | File history — commits touching current file (`--follow`); `<CR>` opens commit read-only | util.line_history |
@@ -404,21 +403,3 @@ PascalCase, UPPER_CASE, kebab-case. Source: `lua/config/keymaps.lua` +
 - **`q`** — global (no map) vs buffer-local close-window in help/qf/man/grug-far/blame.
 - **`<CR>`** — blink.cmp in insert. Treesitter incremental-select start in normal / expand in visual (if enabled).
 
-## Removed / replaced (history)
-
-- `vim-abolish` removed — `cr*` coercions replaced by the `<leader>cv` text-case picker. `:S` subvert gone (use grug-far).
-- `refjump.nvim` (`]r`/`[r`), `dropbar.nvim` (`<leader>;`), `nvim-bqf`, `better-ts-errors` (`<leader>dd`/`dx`), `markview.nvim` (`<leader>uM`), `checkmate.nvim` (`<leader>t*` markdown todos), `claude-code.nvim` (`<leader>a*`), `diagram.nvim`/`image.nvim`, `gruvbox-baby` all removed.
-- `emmet-vim` (`<C-z>*`) removed — emmet now via `emmet_language_server` completions.
-- `oil.nvim` swapped for the `canola.nvim` fork (same `<leader>e` / `-` keys, `main = "oil"`).
-- `tagmatch.nvim/` local plugin folded into the repo as `lua/tagmatch/` (loaded eagerly from `init.lua`, no lazy spec). Keys unchanged (`%`, `i%`/`a%`); gained tag-pair rename via `<leader>cr`.
-- `<leader>cr` upgraded from LSP-only rename to smart routing: CSS class (cross-file, scss `&`-aware) → tag pair (tagmatch) → LSP symbol.
-- `<leader>cn` was `neogen` annotation. Now `ts-node-action`.
-- `<leader>du` opened `nvim-dap-ui`. Now `nvim-dap-view`.
-- `<leader>de` was DAP eval. Now `DapViewWatch`.
-- `nvim-treesitter-endwise` reverted to `tpope/vim-endwise` (TS plugin broken on TS main branch).
-- `<leader>j*` Chrome DevTools group removed — vendored `webconnect/` Go bridge, `phab-inline.nvim/` plugin, and `web*` util modules deleted.
-- **Git overhaul** — `diffview.nvim` removed: `<leader>gd` is now `:Gdiffsplit`, `<leader>gf` is the line_history file-history picker. `mini.diff` removed: `<leader>gho`/`<leader>go` overlay gone — use `<leader>gp` inline hunk preview. `<leader>gb` blame, `<leader>gB`, `<leader>gt` line-blame toggle, `<leader>gc` git log, `<leader>gs` git status all removed. `<leader>g/`/`<leader>g*` git grep (`util.ggrep`) removed and the util deleted. gitsigns hunk stage/unstage/reset-buffer/blame-line dropped (stage via lazygit / `:Git`); only inline preview (`<leader>gp`) + reset (`<leader>gr`) survive, promoted off the `<leader>gh` prefix (group removed).
-- `<leader>cS` `ssr.nvim` (structural search-replace) removed.
-- `timber.nvim` (log injection, `<leader>l*`) removed.
-- `<leader>ud` toggle-diagnostics removed — tiny-inline-diagnostic ignored `vim.diagnostic.enable`, and it collided with the duck `<leader>ud*` prefix. `<leader>ud` is now purely the duck group.
-- `<leader>wr` resize submode → `<leader>ur` (moved under the `ui` group). `<leader>qq` quit-all and `<leader>zx` recompute-folds removed. `<leader>xQ` (quicker quickfix) merged into `<leader>xq`.

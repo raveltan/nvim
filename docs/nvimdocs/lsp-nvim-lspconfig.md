@@ -40,7 +40,7 @@ Loaded before `mason-lspconfig` fires `vim.lsp.enable()` — same `BufReadPre` e
 | `cssls` | Filetypes restricted to `css`, `scss`, `less`. |
 | `typos_lsp` | `diagnosticSeverity = "Hint"` so it stays quiet. |
 
-TypeScript (`ts_ls`) is owned by `typescript-tools.nvim` (see `lua/plugins/productivity.lua`), not here.
+TypeScript is `vtsls`, configured here with the other servers (see [lsp-vtsls](lsp-vtsls.md)).
 
 ## Diagnostic UI
 

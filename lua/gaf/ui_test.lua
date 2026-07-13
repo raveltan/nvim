@@ -1,21 +1,8 @@
 local M = {}
 
--- Find a webapp/ directory (with package.json) at or above cwd.
+-- Webapp root at or above cwd (shared resolver in gaf.paths).
 function M.resolve_webapp_cwd()
-  local cwd = vim.fn.getcwd()
-  if cwd:match("/webapp$") and vim.fn.filereadable(cwd .. "/package.json") == 1 then
-    return cwd
-  end
-  local dir = cwd
-  while dir ~= "/" and dir ~= "" do
-    local candidate = dir .. "/webapp"
-    if vim.fn.isdirectory(candidate) == 1
-        and vim.fn.filereadable(candidate .. "/package.json") == 1 then
-      return candidate
-    end
-    dir = vim.fn.fnamemodify(dir, ":h")
-  end
-  return nil
+  return require("gaf.paths").webapp_root()
 end
 
 function M.has_webapp()

@@ -40,7 +40,7 @@ None — fully automatic on insert.
 
 ## Links
 - README: https://github.com/axelvc/template-string.nvim
-- Related: [prod-typescript-tools](prod-typescript-tools.md)
+- Related: [lsp-vtsls](lsp-vtsls.md)
 
 ## Notes
 - Triggers on `InsertCharPre`/`TextChangedI` — no perf hit on non-string keystrokes.

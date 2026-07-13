@@ -65,7 +65,7 @@ opt.wrap = true
 opt.textwidth = 150
 opt.colorcolumn = "80,150"
 opt.formatoptions:remove("t")
--- vim.lsp.log.set_level(vim.log.levels.OFF)
+vim.lsp.log.set_level(vim.log.levels.OFF)
 
 -- No remote-plugin hosts in use; disabling skips provider probing and the
 -- perl/ruby/node/python checkhealth warnings.

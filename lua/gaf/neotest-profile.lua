@@ -4,8 +4,6 @@
 
 local M = {}
 
-local last = nil
-
 local function is_php_project(file)
   if vim.bo.filetype == "php" then return true end
   local dir = vim.fs.dirname(file)
@@ -18,7 +16,8 @@ function M.run(file)
     vim.notify("neotest-profile: only PHP projects supported", vim.log.levels.WARN)
     return
   end
-  last = { file = file }
+  -- <leader>tP (config.profile.run_last) replays whichever profiler ran last.
+  require("config.profile").remember(M.run, file)
   local env = { XDEBUG_MODE = "profile", NEOTEST_PROFILE = "1" }
   vim.notify("Running test with xdebug profile mode...", vim.log.levels.INFO)
   require("neotest").run.run({ file, env = env })
@@ -30,14 +29,6 @@ end
 
 function M.run_current()
   M.run(vim.fn.expand("%:p"))
-end
-
-function M.run_last()
-  if not last then
-    vim.notify("No previous profile run to replay", vim.log.levels.WARN)
-    return
-  end
-  M.run(last.file)
 end
 
 return M

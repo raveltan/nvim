@@ -5,12 +5,7 @@
 local M = {}
 
 local function find_root()
-  local dir = vim.fn.getcwd()
-  while dir ~= "/" do
-    if vim.fn.executable(dir .. "/bin/run-tests") == 1 then return dir end
-    dir = vim.fn.fnamemodify(dir, ":h")
-  end
-  return nil
+  return require("gaf.paths").find_root("bin/run-tests")
 end
 
 function M.setup_infra()

@@ -14,15 +14,9 @@ local M = {}
 local infra = require("gaf.test_infra")
 
 function M.extend(opts)
+  -- phpunit_cmd is already GAF-aware in plugins/test.lua; only the UI-test
+  -- adapter needs adding here.
   table.insert(opts.adapters, 1, require("gaf.neotest-ui-tests"))
-  for i, adapter in ipairs(opts.adapters) do
-    if adapter.name == "neotest-phpunit" then
-      opts.adapters[i] = require("neotest-phpunit")({
-        phpunit_cmd = vim.fn.stdpath("config") .. "/scripts/neotest-run-tests.sh",
-      })
-      break
-    end
-  end
 end
 
 function M.attach_keys(buf, filetype)
@@ -35,13 +29,6 @@ function M.attach_keys(buf, filetype)
     vim.keymap.set("n", "<leader>tX", infra.shutdown_infra,
       vim.tbl_extend("force", o, { desc = "Shutdown test infra" }))
   end
-end
-
-function M.global_keys()
-  return {
-    { "<leader>tP", function() require("gaf.neotest-profile").run_last() end,
-      desc = "Profile last test (xdebug)" },
-  }
 end
 
 function M.setup_autocmds()

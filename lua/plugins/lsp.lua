@@ -10,7 +10,7 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     opts = function()
-      local servers = { "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense", "tailwindcss", "typos_lsp", "emmet_language_server" }
+      local servers = { "vtsls", "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense", "tailwindcss", "typos_lsp", "emmet_language_server" }
       if vim.g.gaf then
         servers = require("gaf.lsp").filter_mason_servers(servers)
       end
@@ -52,7 +52,75 @@ return {
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-      -- TypeScript is handled by typescript-tools.nvim (see productivity.lua).
+      -- TypeScript: vtsls (wraps the VS Code TS extension). Migrated from
+      -- typescript-tools.nvim, which is in maintenance drift (its issue #273
+      -- recommends vtsls). Same features, via LSP code actions + workspace
+      -- commands — keymaps below.
+      vim.lsp.config("vtsls", {
+        capabilities = capabilities,
+        settings = {
+          typescript = {
+            tsserver = { maxTsServerMemory = 8192 },
+            preferences = {
+              -- fl-gaf (GAF=1) bans relative @freelancer imports
+              -- (eslint local-rules/validate-freelancer-imports) but still
+              -- requires relative for self-imports within a @freelancer/ui
+              -- package. project-relative satisfies both: alias across
+              -- packages, relative within.
+              importModuleSpecifier = vim.g.gaf and "project-relative" or "relative",
+              includePackageJsonAutoImports = "auto",
+            },
+            updateImportsOnFileMove = { enabled = "always" },
+          },
+          javascript = {
+            updateImportsOnFileMove = { enabled = "always" },
+          },
+        },
+      })
+
+      -- TS source actions + commands (were typescript-tools' TSTools*
+      -- commands; vtsls exposes them as code-action kinds / workspace
+      -- commands).
+      local function ts_action(kind)
+        return function()
+          vim.lsp.buf.code_action({
+            apply = true,
+            context = { only = { kind }, diagnostics = {} },
+          })
+        end
+      end
+      local function ts_goto_source_definition()
+        local client = vim.lsp.get_clients({ bufnr = 0, name = "vtsls" })[1]
+        if not client then return end
+        local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+        client:request("workspace/executeCommand", {
+          command = "typescript.goToSourceDefinition",
+          arguments = { params.textDocument.uri, params.position },
+        }, function(err, locations)
+          if err or not locations or vim.tbl_isempty(locations) then
+            vim.notify("No source definition found", vim.log.levels.WARN)
+            return
+          end
+          vim.lsp.util.show_document(locations[1], client.offset_encoding)
+        end, 0)
+      end
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("ts_source_actions", { clear = true }),
+        pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+        callback = function(ev)
+          local function bmap(lhs, rhs, desc)
+            vim.keymap.set("n", lhs, rhs, { buffer = ev.buf, silent = true, desc = desc })
+          end
+          bmap("<leader>co", ts_action("source.organizeImports"),      "TS: organize imports")
+          bmap("<leader>cM", ts_action("source.addMissingImports.ts"), "TS: add missing imports")
+          bmap("<leader>cU", ts_action("source.removeUnusedImports"),  "TS: remove unused imports")
+          -- <leader>cx, not cR: angular/init.lua owns <leader>cR (goto_route)
+          -- on typescript buffers.
+          bmap("<leader>cx", ts_action("source.removeUnused.ts"),      "TS: remove unused")
+          bmap("<leader>cF", ts_action("source.fixAll.ts"),            "TS: fix all")
+          bmap("<leader>cD", ts_goto_source_definition,                "TS: go to source definition")
+        end,
+      })
 
       -- ESLint
       vim.lsp.config("eslint", {
@@ -93,10 +161,18 @@ return {
       })
 
       -- Intelephense (PHP)
+      -- Premium licence auto-discovered from ~/intelephense/licence.txt — no
+      -- licenceKey init_option needed.
       vim.lsp.config("intelephense", {
         capabilities = capabilities,
         filetypes = { "php" },
-        root_markers = { "composer.json", ".git" },
+        -- Node heap cap, same idea as tsserver_max_memory=8192 for TS: the
+        -- default ~4GB heap can OOM indexing fl-gaf.
+        cmd_env = { NODE_OPTIONS = "--max-old-space-size=8192" },
+        -- Nested = priority order (0.11.3+): prefer .git so the monorepo roots
+        -- once at the repo top instead of at whichever nested composer.json is
+        -- closest, which fragmented the index across sub-package workspaces.
+        root_markers = { { ".git" }, { "composer.json" } },
         settings = {
           intelephense = {
             files = {
@@ -219,6 +295,12 @@ return {
           cmd = { "herb-language-server", "--stdio" },
           filetypes = { "eruby", "html" },
           root_markers = { "Gemfile", ".git" },
+          on_attach = function(client, _)
+            -- conform's erb_format owns ERB formatting (rails.lua); html goes
+            -- through conform's prettier. Keep one formatting owner.
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
+          end,
         })
         vim.lsp.enable("herb_ls")
       end

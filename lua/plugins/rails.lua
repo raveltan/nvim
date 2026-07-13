@@ -16,6 +16,18 @@ return {
     -- giving vim-rails sole ownership of Rails navigation (context-aware :R).
     -- Set in `init` so g:rails_projections exists before the plugin loads.
     init = function()
+      -- One-shot rails debugging: start `bin/rails server` under rdbg and
+      -- attach dap when the socket comes up (util/rails_debug.lua). Registered
+      -- here (startup) so the command works before any ruby buffer is open.
+      vim.api.nvim_create_user_command("RailsDebug",
+        function() require("util.rails_debug").start() end,
+        { desc = "Start rails server under rdbg + attach dap" })
+      vim.api.nvim_create_user_command("RailsDebugStop",
+        function() require("util.rails_debug").stop() end,
+        { desc = "Stop the rdbg rails server" })
+      vim.keymap.set("n", "<leader>dR", function() require("util.rails_debug").start() end,
+        { desc = "Debug rails server (start + attach)" })
+
       vim.g.rails_projections = {
         ["app/policies/*_policy.rb"] = {
           command = "policy",

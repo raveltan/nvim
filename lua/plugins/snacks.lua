@@ -149,6 +149,11 @@ return {
       { "gI", function() Snacks.picker.lsp_implementations() end, desc = "Implementations" },
       { "gy", function() Snacks.picker.lsp_type_definitions() end, desc = "Type definitions" },
       -- History / Registers
+      -- Terminal — docked bottom split, toggles hide/show (same instance each
+      -- time; <esc><esc> for normal mode inside it, then <leader>/ hides).
+      { "<leader>/", function()
+          Snacks.terminal.toggle(nil, { win = { position = "bottom", height = 0.3 } })
+      end, desc = "Toggle terminal (bottom)" },
       { '<leader>s"', function() Snacks.picker.registers() end, desc = "Registers" },
       { "<leader>sm", function() Snacks.picker.marks() end, desc = "Marks" },
       { "<leader>sj", function() Snacks.picker.jumps() end, desc = "Jumplist" },
@@ -159,16 +164,5 @@ return {
       { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
       { "<leader>fR", function() Snacks.rename.rename_file() end, desc = "Rename file" },
     },
-  },
-  {
-    -- Progressive file→grep seeker, built on the snacks.nvim picker.
-    -- <C-e> toggles file/grep mode; each switch refines the result set.
-    "2kabhishek/seeker.nvim",
-    dependencies = { "folke/snacks.nvim" },
-    cmd = { "Seeker" },
-    keys = {
-      { "<leader>/", "<cmd>Seeker<cr>", desc = "Seek (progressive file → grep)" },
-    },
-    opts = {},
   },
 }

@@ -29,18 +29,21 @@ return {
         { "<leader>ts", function() require("neotest").summary.toggle() end, desc = "Toggle summary" },
         { "<leader>tM", function() require("neotest").summary.run_marked() end, desc = "Run marked tests" },
         { "<leader>tC", function() require("config.neotest-coverage").run_last() end, desc = "Run last test with coverage" },
+        -- Re-runs whichever profiler ran last: ruby stackprof or GAF xdebug
+        -- (both register via config.profile.remember).
         { "<leader>tP", function() require("config.profile").run_last() end, desc = "Profile last test" },
       }
-      if vim.g.gaf then
-        vim.list_extend(keys, require("gaf.test").global_keys())
-      end
       return keys
     end,
     opts = function()
       local opts = {
         adapters = {
+          -- GAF: scripts/neotest-run-tests.sh wraps bin/run-tests (Docker infra);
+          -- built once here instead of being rebuilt in gaf.test.extend().
           require("neotest-phpunit")({
-            phpunit_cmd = "vendor/bin/phpunit",
+            phpunit_cmd = vim.g.gaf
+                and (vim.fn.stdpath("config") .. "/scripts/neotest-run-tests.sh")
+              or "vendor/bin/phpunit",
           }),
           require("neotest-vitest")({
             filter_dir = function(name, _, _)

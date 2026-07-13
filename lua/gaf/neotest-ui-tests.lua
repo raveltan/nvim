@@ -10,22 +10,7 @@ local adapter = { name = "neotest-ui-tests" }
 ---@param path string
 ---@return string|nil
 local function find_webapp_root(path)
-  local root = lib.files.match_root_pattern("package.json")(path)
-  while root do
-    local pkg = root .. "/package.json"
-    if vim.fn.filereadable(pkg) == 1 then
-      local content = lib.files.read(pkg)
-      if content:find('"ui:main"') then
-        return root
-      end
-    end
-    local parent = vim.fn.fnamemodify(root, ":h")
-    if parent == root then
-      break
-    end
-    root = lib.files.match_root_pattern("package.json")(parent)
-  end
-  return nil
+  return require("gaf.paths").webapp_root(path)
 end
 
 ---@param file_path string

@@ -118,6 +118,8 @@ return {
   -- Jump navigation
   {
     "folke/flash.nvim",
+    -- event is NOT redundant with keys: char mode hooks f/F/t/T/;/, which
+    -- aren't in the keys list, so the plugin must load before first use.
     event = "VeryLazy",
     opts = {
       modes = {
@@ -184,7 +186,7 @@ return {
   -- Yank history ring
   {
     "gbprod/yanky.nvim",
-    event = "VeryLazy",
+    -- No event: every entry point is in keys, so first y/p lazy-loads it.
     opts = {
       ring = { history_length = 100 },
     },

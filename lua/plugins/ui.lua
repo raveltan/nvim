@@ -118,37 +118,9 @@ return {
     end,
   },
 
-  -- Indent scope (animation disabled — quadratic redraw per cursor move was a CPU sink)
-  {
-    "echasnovski/mini.indentscope",
-    event = { "BufReadPre", "BufNewFile" },
-    opts = function()
-      return {
-        symbol = "│",
-        options = { try_as_border = true },
-        draw = {
-          animation = function() return 0 end,
-        },
-      }
-    end,
-    init = function()
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = {
-          "help", "alpha", "dashboard", "neo-tree", "Trouble", "trouble",
-          "lazy", "mason", "notify", "toggleterm", "lazyterm", "snacks_dashboard",
-          "satellite", "undotree", "diff", "dap-view", "dap-view-term", "dap-repl",
-        },
-        callback = function() vim.b.miniindentscope_disable = true end,
-      })
-      vim.api.nvim_create_autocmd("BufReadPost", {
-        callback = function()
-          if vim.api.nvim_buf_line_count(0) > 1500 then
-            vim.b.miniindentscope_disable = true
-          end
-        end,
-      })
-    end,
-  },
+  -- Indent guides + current-scope line come from snacks.indent/snacks.scope
+  -- (snacks.lua); mini.indentscope was removed — it drew the scope line a
+  -- second time on every buffer.
 
   -- Rainbow brackets via Treesitter
   {
@@ -283,7 +255,7 @@ return {
       lsp = {
         -- silent: noice's hover is a per-client handler (noice/lsp/hover.lua) run
         -- once per client via buf_request. On multi-client buffers (TS attaches
-        -- typos_lsp + tailwindcss alongside typescript-tools) any client with no
+        -- typos_lsp + tailwindcss alongside vtsls) any client with no
         -- hover at the cursor fires `vim.notify("No information available")` even
         -- when another client returns real hover. Suppress that spurious notify.
         hover = { enabled = true, silent = true },

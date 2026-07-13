@@ -42,6 +42,21 @@ pipx install pymobiledevice3   # only for physical-device debugging
 ## SwiftUI previews
 `<leader>mp` (`:XcodebuildPreviewGenerateAndShow`) builds and renders the current view as an image in a split — needs an image-capable terminal (kitty/ghostty/wezterm) and the `xcodebuild-nvim-preview` Swift package added to the project. Generate-on-demand, not Xcode's live canvas.
 
+### Hot reload
+`<leader>mh` (`:XcodebuildPreviewGenerateAndShow hotReload`) keeps the app running and re-captures the preview on every save (~3x faster than Xcode previews). The `hotReload` arg only exists on the `Generate`/`GenerateAndShow` commands — `:XcodebuildPreviewToggle` is show/hide only.
+
+App-side requirements (beyond `xcodebuild-nvim-preview`):
+1. Add the [Inject](https://github.com/krzysztofzablocki/Inject) library to the project.
+2. SwiftUI: `.setupNvimPreview { HomeView() }` on the root view already handles hot reload.
+   UIKit/AppKit: subscribe manually —
+   ```swift
+   observeHotReload()
+       .sink { XcodebuildNvimPreview.setup(view: HomeView()) }
+       .store(in: &cancellables)
+   ```
+3. Inject's build settings (linker flags) are per its README / the xcodebuild.nvim wiki:
+   https://github.com/wojciech-kulik/xcodebuild.nvim/wiki/Tips-&-Tricks#hot-reload
+
 ## Notes / gotchas
 - Treesitter `swift` parser added to the install list (`lua/plugins/treesitter.lua`).
 - No neotest adapter for swift — `<leader>t*` maps in swift buffers call `:XcodebuildTest*` directly (swift is deliberately absent from the neotest FileType pattern in `config/autocmds.lua`).

@@ -1,56 +1,6 @@
 return {
-  -- TypeScript LSP: faster than vtsls/ts_ls, TS-specific commands
-  -- Ports settings from the previous vtsls config in lsp.lua
-  {
-    "pmizio/typescript-tools.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-    ft = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
-    opts = {
-      settings = {
-        tsserver_max_memory = 8192,
-        tsserver_file_preferences = {
-          -- fl-gaf (GAF=1) bans relative @freelancer imports
-          -- (eslint local-rules/validate-freelancer-imports) but still requires
-          -- relative for self-imports within a @freelancer/ui package.
-          -- project-relative satisfies both: alias across packages, relative within.
-          -- vim.g.gaf is set in init.lua before lazy reads this spec.
-          importModuleSpecifierPreference = vim.g.gaf and "project-relative" or "relative",
-          includePackageJsonAutoImports = "auto",
-          includeInlayParameterNameHints = "none",
-          includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-          includeInlayFunctionParameterTypeHints = false,
-          includeInlayVariableTypeHints = false,
-          includeInlayPropertyDeclarationTypeHints = false,
-          includeInlayFunctionLikeReturnTypeHints = false,
-          includeInlayEnumMemberValueHints = false,
-        },
-        tsserver_format_options = {
-          allowIncompleteCompletions = false,
-          allowRenameOfImportPath = false,
-        },
-        expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
-        complete_function_calls = false,
-        include_completions_with_insert_text = true,
-        code_lens = "off",
-        disable_member_code_lens = true,
-      },
-    },
-    init = function()
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
-        callback = function(ev)
-          local opts = { buffer = ev.buf, silent = true }
-          local map = vim.keymap.set
-          map("n", "<leader>co", "<cmd>TSToolsOrganizeImports<cr>",      vim.tbl_extend("force", opts, { desc = "TS: organize imports" }))
-          map("n", "<leader>cM", "<cmd>TSToolsAddMissingImports<cr>",    vim.tbl_extend("force", opts, { desc = "TS: add missing imports" }))
-          map("n", "<leader>cU", "<cmd>TSToolsRemoveUnusedImports<cr>",  vim.tbl_extend("force", opts, { desc = "TS: remove unused imports" }))
-          map("n", "<leader>cR", "<cmd>TSToolsRemoveUnused<cr>",         vim.tbl_extend("force", opts, { desc = "TS: remove unused" }))
-          map("n", "<leader>cF", "<cmd>TSToolsFixAll<cr>",               vim.tbl_extend("force", opts, { desc = "TS: fix all" }))
-          map("n", "<leader>cD", "<cmd>TSToolsGoToSourceDefinition<cr>", vim.tbl_extend("force", opts, { desc = "TS: go to source definition" }))
-        end,
-      })
-    end,
-  },
+  -- TypeScript LSP is vtsls, configured with the other servers in
+  -- lua/plugins/lsp.lua (migrated from typescript-tools.nvim).
 
   -- Auto-convert "..." to `...` when typing ${
   {

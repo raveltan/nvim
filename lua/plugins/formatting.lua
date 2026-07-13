@@ -19,6 +19,8 @@ return {
         -- through to prettier for other repos.
         scss = { "stylelint", "prettierd", "prettier", stop_after_first = true },
         css = { "stylelint", "prettierd", "prettier", stop_after_first = true },
+        -- html LSP has provideFormatter = false (lsp.lua), so conform owns html
+        html = { "prettierd", "prettier", stop_after_first = true },
         python = { "ruff_organize_imports", "ruff_format" },
         dart = { "dart_format" },
         rust = { "rustfmt" },

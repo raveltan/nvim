@@ -144,5 +144,5 @@ Terminal requirement: kitty / ghostty / wezterm (limited) / tmux passthrough. **
 ## Notes
 - `Snacks.rename.rename_file()` fires LSP `workspace/willRenameFiles` so language servers update imports automatically. For symbol renames in PHP we still use native `vim.lsp.buf.rename` (see auto-memory `nvim_php_rename.md`) due to the intelephense `$` sigil bug.
 - The scratch directory is keyed by cwd/branch by default — switching git branches gives you a separate scratchpad per branch.
-- The `terminal` module stays enabled because `Snacks.lazygit()` uses it internally, but it has no direct keybind — `<leader>/` now launches [seeker.nvim](nav-seeker.md) and tmux handles standalone terminals.
+- `<leader>/` toggles a bottom-docked terminal split, 30% height (`Snacks.terminal.toggle`, same instance each press — hide/show, session preserved). `<esc><esc>` drops to normal mode inside it. `Snacks.lazygit()` uses the terminal module internally too.
 - `image` requires ImageMagick on `$PATH` for format conversion (PDF, mermaid, raster→png).
