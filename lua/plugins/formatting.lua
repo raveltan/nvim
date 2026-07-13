@@ -1,7 +1,9 @@
 return {
-  -- Manual formatting via <leader>cf — no format-on-save.
+  -- Format-on-save for every filetype (saved buffer only), plus manual <leader>cf.
+  -- Escape hatch: vim.g.disable_autoformat / vim.b.disable_autoformat.
   {
     "stevearc/conform.nvim",
+    event = { "BufWritePre" },
     cmd = { "ConformInfo" },
     keys = {
       { "<leader>cf", function() require("conform").format({ async = true }) end, mode = { "n", "v" }, desc = "Format file" },
@@ -26,12 +28,31 @@ return {
         rust = { "rustfmt" },
         swift = { "swiftformat" },
       }
-      local formatters = {}
+      local formatters = {
+        -- This config's Lua is hand-formatted (2-space, mixed one-liners) and
+        -- stylua's defaults clobber it. Only run stylua in projects that opt
+        -- in with a stylua config file; elsewhere lua saves are left alone
+        -- (no lua LSP is set up, so the lsp fallback below is a no-op too).
+        stylua = {
+          condition = function(_, ctx)
+            return #vim.fs.find({ ".stylua.toml", "stylua.toml" }, { path = ctx.dirname, upward = true }) > 0
+          end,
+        },
+      }
       if vim.g.gaf then
         formatters_by_ft.php = { "php_cs_fixer" }
         formatters.php_cs_fixer = require("gaf.formatting").php_cs_fixer_formatter()
       end
-      return { formatters_by_ft = formatters_by_ft, formatters = formatters }
+      return {
+        formatters_by_ft = formatters_by_ft,
+        formatters = formatters,
+        format_on_save = function(bufnr)
+          if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then return end
+          -- 3s: rubocop --server cold start and php-cs-fixer overrun the 500ms
+          -- default. lsp fallback covers fts with no conform entry (json/yaml/…).
+          return { timeout_ms = 3000, lsp_format = "fallback" }
+        end,
+      }
     end,
   },
 
