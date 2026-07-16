@@ -53,12 +53,21 @@ return {
     end,
   },
 
-  -- Visual merge-conflict resolution (co/ct/cb/c0, ]x/[x)
+  -- Merge-conflict resolution, promoted to <leader>gc (which-key group)
   {
     "akinsho/git-conflict.nvim",
     version = "*",
     event = "BufReadPre",
-    config = true,
+    opts = { default_mappings = false },
+    keys = {
+      { "<leader>gco", "<cmd>GitConflictChooseOurs<cr>",   desc = "Choose ours" },
+      { "<leader>gct", "<cmd>GitConflictChooseTheirs<cr>", desc = "Choose theirs" },
+      { "<leader>gcb", "<cmd>GitConflictChooseBoth<cr>",   desc = "Choose both" },
+      { "<leader>gc0", "<cmd>GitConflictChooseNone<cr>",   desc = "Choose none" },
+      { "<leader>gcn", "<cmd>GitConflictNextConflict<cr>", desc = "Next conflict" },
+      { "<leader>gcp", "<cmd>GitConflictPrevConflict<cr>", desc = "Prev conflict" },
+      { "<leader>gcq", "<cmd>GitConflictListQf<cr>",       desc = "List conflicts (quickfix)" },
+    },
   },
 
   -- Fugitive: line history, file history, and file diff

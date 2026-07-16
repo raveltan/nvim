@@ -290,6 +290,7 @@ return {
         { "<leader>D",  group = "database" },
         { "<leader>f",  group = "find/files" },
         { "<leader>g",  group = "git" },
+        { "<leader>gc", group = "conflict" },
         { "<leader>h",  group = "harpoon" },
         { "<leader>k",  group = "docs (devdocs/nvimdocs)" },
         { "<leader>n",  group = "obsidian" },

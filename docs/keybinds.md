@@ -108,8 +108,9 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>gr` | n | Reset hunk | gitsigns |
 | `<leader>gr` | v | Reset selected lines | gitsigns |
 | `]c` / `[c` | n | Next/Prev hunk (centers cursor) | gitsigns |
-| `co` / `ct` / `cb` / `c0` | n | Conflict: take ours / theirs / both / none | git-conflict |
-| `]x` / `[x` | n | Next/Prev conflict | git-conflict |
+| `<leader>gco` / `gct` / `gcb` / `gc0` | n | Conflict: take ours / theirs / both / none | git-conflict |
+| `<leader>gcn` / `gcp` | n | Next/Prev conflict | git-conflict |
+| `<leader>gcq` | n | List conflicts (quickfix) | git-conflict |
 
 ## Diagnostics / Quickfix
 
