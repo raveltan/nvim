@@ -450,4 +450,67 @@ return {
     opts = {},
   },
 
+  -- Refactoring (Fowler-style extract/inline). select_refactor() opens a
+  -- vim.ui.select menu (→ snacks picker) of every applicable refactor: extract
+  -- function, inline function, extract variable, inline variable. Treesitter +
+  -- LSP driven; fills the gap where language servers offer no extract action
+  -- (PHP/Ruby). Lives under <leader>c (code), NOT <leader>r — that's the redash
+  -- group under the GAF profile.
+  -- The Oct-2025 interface rewrite needs Neovim 0.12 (have 0.12.x) and a bare
+  -- `async` module from lewis6991/async.nvim; it dropped the old plenary dep.
+  -- setup() is optional (defaults are fine), so no opts here.
+  {
+    "ThePrimeagen/refactoring.nvim",
+    dependencies = { "lewis6991/async.nvim" },
+    keys = {
+      { "<leader>ce", function() require("refactoring").select_refactor() end, mode = { "n", "x" }, desc = "Refactor (extract/inline)" },
+    },
+  },
+
+  -- Multi-cursor editing. The plugin's default <C-n> and every other Ctrl combo
+  -- is taken (C-n/C-p yanky ring, C-h/j/k/l tmux nav, C-d/C-u centered scroll),
+  -- so cursor-add maps live under <leader>c instead. Once cursors exist the
+  -- keymap layer takes over: <left>/<right> cycle cursors, <esc> disables the
+  -- extra cursors (press again to clear them).
+  {
+    "jake-stewart/multicursor.nvim",
+    keys = {
+      { "<leader>cn", function() require("multicursor-nvim").matchAddCursor(1) end,    mode = { "n", "x" }, desc = "Multicursor: add next match" },
+      { "<leader>cN", function() require("multicursor-nvim").matchAddCursor(-1) end,   mode = { "n", "x" }, desc = "Multicursor: add prev match" },
+      { "<leader>cS", function() require("multicursor-nvim").matchSkipCursor(1) end,   mode = { "n", "x" }, desc = "Multicursor: skip → next match" },
+      { "<leader>cm", function() require("multicursor-nvim").matchAllAddCursors() end, mode = { "n", "x" }, desc = "Multicursor: all matches" },
+      -- skipEmpty=false: the default (true) skips every line SHORTER than the
+      -- current virtual column, so starting on a long line makes cj/ck jump past
+      -- (or refuse to add on) shorter lines below. false = always the adjacent
+      -- logical line, column clamped to line end — predictable on wrapped/long lines.
+      { "<leader>cj", function() require("multicursor-nvim").lineAddCursor(1, { skipEmpty = false }) end,  mode = { "n", "x" }, desc = "Multicursor: add cursor below" },
+      { "<leader>ck", function() require("multicursor-nvim").lineAddCursor(-1, { skipEmpty = false }) end, mode = { "n", "x" }, desc = "Multicursor: add cursor above" },
+      -- Freeze the other cursors and roam the main one; press again to drop a
+      -- cursor at the new spot (see the layer comment below).
+      { "<leader>cq", function() require("multicursor-nvim").toggleCursor() end,  mode = { "n", "x" }, desc = "Multicursor: freeze/place cursor here" },
+    },
+    config = function()
+      local mc = require("multicursor-nvim")
+      mc.setup()
+      -- While cursors are ENABLED, ordinary motions (j/k/w/b, /search, f/t) move
+      -- EVERY cursor together and edits apply to all. To reposition just one:
+      -- <leader>cq freezes the rest so plain motions move only the main cursor —
+      -- roam to the right spot, <leader>cq again drops a cursor there, <esc>
+      -- unfreezes. The layer below is active only while multiple cursors exist,
+      -- so it can reuse keys (<leader>x, arrows) without a permanent conflict.
+      mc.addKeymapLayer(function(layer)
+        layer({ "n", "x" }, "<left>",  mc.prevCursor)     -- focus previous cursor
+        layer({ "n", "x" }, "<right>", mc.nextCursor)     -- focus next cursor
+        layer({ "n", "x" }, "<leader>x", mc.deleteCursor) -- drop the focused cursor
+        layer("n", "<esc>", function()
+          if not mc.cursorsEnabled() then
+            mc.enableCursors()   -- frozen → unfreeze, keep the main's new position
+          else
+            mc.clearCursors()    -- enabled → remove all extra cursors (exit)
+          end
+        end)
+      end)
+    end,
+  },
+
 }
