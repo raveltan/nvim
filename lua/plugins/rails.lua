@@ -28,6 +28,19 @@ return {
       vim.keymap.set("n", "<leader>dR", function() require("util.rails_debug").start() end,
         { desc = "Debug rails server (start + attach)" })
 
+      -- Rails console + dbconsole in a Snacks terminal float. Root-anchored on
+      -- bin/rails so it works from any buffer/cwd; falls back to cwd. Registered
+      -- at startup (like RailsDebug) so the commands exist before any ruby buffer.
+      local function rails_root_cwd()
+        return vim.fs.root(0, "bin/rails") or vim.fn.getcwd()
+      end
+      vim.api.nvim_create_user_command("RailsConsole", function()
+        Snacks.terminal("bin/rails console", { cwd = rails_root_cwd() })
+      end, { desc = "Rails console (Snacks terminal)" })
+      vim.api.nvim_create_user_command("RailsDbConsole", function()
+        Snacks.terminal("bin/rails dbconsole", { cwd = rails_root_cwd() })
+      end, { desc = "Rails dbconsole (Snacks terminal)" })
+
       vim.g.rails_projections = {
         ["app/policies/*_policy.rb"] = {
           command = "policy",
