@@ -24,6 +24,12 @@
           "eruby"
         ],
         "path": "./eruby.json"
+      },
+      {
+        "language": [
+          "snacks_dashboard"
+        ],
+        "path": "./snacks_dashboard.json"
       }
     ]
   },

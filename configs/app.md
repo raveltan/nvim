@@ -23,21 +23,11 @@ System Settings tweaks (separate Spaces, hidden menu bar, removed extra desktops
     - **Wrong external?** `\(1\)`/`\(2\)` is AeroSpace's order, not physical left/right — swap the two DELL blocks (one edit) if code/browser land on the wrong screen.
     - **App auto-placement** (`[[on-window-detected]]`): Claude/Rocket/Discord → `C`, Ghostty → `T`, Chrome/Firefox → `B`. New windows route on open; pre-existing windows need one manual move.
     - macOS **menu-bar "main display"** is a separate System Settings thing (Displays → drag white bar), unrelated to this pinning.
-  - **Top gap is per-monitor** (`[gaps] outer.top` array) so SketchyBar clears correctly on both notch and non-notch screens:
-    - `{ monitor.'built-in' = 8 }` — notch screen's tall menu bar is already excluded from `visibleFrame`, so only a small gap is needed; a fixed value here double-gaps.
-    - `44` (default) — external/no-notch monitors: SketchyBar (`position=top height=40`) sits at `y=0`, so the gap must cover the full bar height + pad or the bar gets hidden under the top window.
-    - Last array item **must be a bare Int** (the default); a `monitor.'.*'` object there fails to parse.
-    - Symptom if wrong: single fixed `outer.top` → extra space on notch displays, bar covered on non-notch.
+  - **Top gap** (`[gaps] outer.top = 8`): uniform small gap. The notch screen's tall menu bar is already excluded from `visibleFrame`, so 8 clears both notch and external monitors.
   - Reload: `Hyper-;` then `Esc`, or `aerospace reload-config`.
 
 - **JankyBorders** — colored ring on focused window. Live: `~/.config/borders/bordersrc`. Mirror: `borders/bordersrc`.
   - Started by AeroSpace via `after-startup-command`.
-
-- **SketchyBar** — top bar. Live: `~/.config/sketchybar/`. Mirror: `sketchybar/`.
-  - Workspace chips driven by `aerospace_workspace_change` event.
-  - **devbox item** — remote dev box health. Plugin `sketchybar/plugins/devbox.sh`
-    runs `script/checkdevbox.sh` every 30s; green=up, yellow=provisioning, red=down.
-  - Reload: `sketchybar --reload`.
 
 - **Ice** — tidies the native menu bar (mostly hidden, revealed at top edge).
 
@@ -53,15 +43,6 @@ System Settings tweaks (separate Spaces, hidden menu bar, removed extra desktops
 - **tmux** — `configs/tmux/`. Prefix `Ctrl-Space`. `vim-tmux-navigator` glues panes to nvim splits.
 - **Neovim** — `~/.config/nvim/`.
 
-## Scripts
-
-Helper scripts live in `script/`. Real home is `~/.config/nvim/configs/script/`.
-
-- **`checkdevbox.sh`** — SSHes to the remote dev box, reports `UP` / `PROVISIONING`
-  (muppet running) / `DOWN` (unreachable). Consumed by the SketchyBar devbox item.
-  - Expects an SSH key at `~/.ssh/id_ed25519` (**not** committed here — key stays local).
-  - Edit `REMOTE_HOST` at the top to retarget.
-
 ## Other
 
 - **Capso** — screenshot tool
@@ -71,7 +52,7 @@ Helper scripts live in `script/`. Real home is `~/.config/nvim/configs/script/`.
 ## Install (reminder)
 
 ```
-brew install borders sketchybar
+brew install borders
 brew install --cask aerospace raycast homerow ghostty
 ```
 
@@ -82,16 +63,14 @@ Grant Accessibility to AeroSpace, Raycast, Homerow on first launch.
 ```
 aerospace                          # usually launched at login
 borders                            # auto-started by aerospace
-sketchybar                         # auto-started by aerospace
 ```
 
-Or as background services:
+Or as a background service:
 
 ```
-brew services start sketchybar
 brew services start borders
 ```
 
 ## Backups
 
-Previous configs preserved at `~/.aerospace.toml.bak` and `~/.config/sketchybar.bak`.
+Previous configs preserved at `~/.aerospace.toml.bak`.

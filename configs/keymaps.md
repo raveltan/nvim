@@ -18,7 +18,7 @@ Five things to memorize first. Everything else is sugar.
 | `Hyper-B`       | Browser workspace (no auto-launch) |
 | `Hyper-C`       | Comms workspace (auto-launch Rocket.Chat) |
 | `Hyper-\`       | Tile (side-by-side layout) |
-| `Hyper-A`       | Tab a group (join right + accordion) |
+| `Hyper-A`       | Toggle tiles ↔ accordion (stack) |
 
 That's the loop: jump workspace → focus around with hjkl → tile or tab when crowded.
 
@@ -54,7 +54,7 @@ That's the loop: jump workspace → focus around with hjkl → tile or tab when 
 | `Hyper--` | Tile stacked up/down (v_tiles) |
 | `Hyper-/` | Toggle horizontal/vertical tiling |
 | `Hyper-,` | Accordion layout |
-| `Hyper-A` | Join right + flip to accordion (tab a group) |
+| `Hyper-A` | Toggle focused container: tiles ↔ accordion (stack) |
 | `Hyper-F` | Fullscreen (zoom focused window) |
 | `Hyper-Space` | Toggle float/tile |
 | `Hyper-.` | Move workspace to next monitor |

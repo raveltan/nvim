@@ -4,9 +4,6 @@ Apply these before relying on the stack. Skipping any will cause weird bugs.
 
 ## System Settings → Desktop & Dock
 
-- **Displays have separate Spaces** → ON
-  - Required for SketchyBar on external monitors.
-  - Contradicts AeroSpace default recommendation, but needed for bar to render cleanly.
 - **Group windows by application** → OFF
 - **Trackpad → More Gestures → "Swipe between full-screen applications"** → OFF
   - Disables Mission Control swipe.
@@ -21,7 +18,7 @@ Apply these before relying on the stack. Skipping any will cause weird bugs.
 ## System Settings → Control Center
 
 - **Automatically hide and show the menu bar** → "Always"
-  - SketchyBar owns the top strip. Native bar revealed only on hover at top edge.
+  - Keeps the top strip clean; Ice reveals the native bar on hover at the top edge.
 
 ## Remove extra macOS Spaces
 
@@ -42,7 +39,7 @@ System Settings → Privacy & Security → Accessibility.
 
 ## Service start
 
-If AeroSpace's `after-startup-command` does not auto-start borders + sketchybar:
+If AeroSpace's `after-startup-command` does not auto-start borders:
 
 ```
 # quit + relaunch AeroSpace (re-fires after-startup-command)
@@ -50,10 +47,8 @@ killall AeroSpace 2>/dev/null; open -a AeroSpace
 
 # OR run manually
 /opt/homebrew/bin/borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0 style=round &
-/opt/homebrew/bin/sketchybar &
 
-# OR enable as background services (survive aerospace restart)
-brew services start sketchybar
+# OR enable as background service (survive aerospace restart)
 brew services start borders
 ```
 

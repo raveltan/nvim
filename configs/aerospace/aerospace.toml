@@ -3,15 +3,9 @@
 
 start-at-login = true
 
-# Run JankyBorders and SketchyBar when AeroSpace starts.
+# Run JankyBorders when AeroSpace starts.
 after-startup-command = [
   'exec-and-forget /opt/homebrew/bin/borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0 style=round',
-  'exec-and-forget /opt/homebrew/bin/sketchybar',
-]
-
-# Notify SketchyBar on every workspace change.
-exec-on-workspace-change = ['/bin/bash', '-c',
-  '/opt/homebrew/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE 2>/dev/null || true'
 ]
 
 # Move mouse to the center of newly focused monitor.
@@ -30,13 +24,9 @@ inner.horizontal = 8
 inner.vertical = 8
 outer.left = 8
 outer.right = 8
-# SketchyBar is position=top height=40. Notch built-in already reserves a
-# tall menu bar in visibleFrame, so it needs a small gap; external/no-notch
-# monitors need the full bar height + pad or the bar gets covered.
-outer.top = [
-  { monitor.'built-in' = 8 },   # notch: menu bar already eats ~37px
-  44,                           # external/default: clear 40px bar + 4 pad
-]
+# Notch built-in already reserves its menu bar in visibleFrame, so a small
+# uniform gap clears both notch and external monitors.
+outer.top = 8
 outer.bottom = 8
 
 [key-mapping]
@@ -108,8 +98,8 @@ alt-shift-cmd-ctrl-period = 'move-workspace-to-monitor --wrap-around next'
 alt-shift-cmd-ctrl-minus     = 'layout v_tiles'   # up/down
 alt-shift-cmd-ctrl-backslash = 'layout h_tiles'   # side-by-side
 
-# Join focused window with right neighbor into accordion sub-container
-alt-shift-cmd-ctrl-a = ['join-with right', 'layout accordion horizontal']
+# Toggle focused container: accordion (stacked) <-> tiles
+alt-shift-cmd-ctrl-a = 'layout accordion tiles'
 
 # ============================================================
 # RESIZE MODE
