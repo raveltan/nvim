@@ -22,7 +22,9 @@ return {
       terminal = { enabled = true },
       indent = { enabled = true, animate = { enabled = false } },
       scroll = { enabled = false },
-      statuscolumn = { enabled = true },
+      -- Off: comfy-line-numbers.nvim owns the global 'statuscolumn' (it overwrites
+      -- this on BufReadPre anyway). One owner, no fight over the number column.
+      statuscolumn = { enabled = false },
       input = { enabled = true },
       rename = { enabled = true },
       bigfile = { enabled = true, size = 500 * 1024 },

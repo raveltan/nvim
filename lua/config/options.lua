@@ -44,7 +44,10 @@ opt.fillchars = { eob = " ", fold = " ", foldopen = "", foldclose = "", fo
 opt.foldenable = true       -- folds allowed; za/zc/zo work
 opt.foldlevel = 99          -- all folds open on load; zM closes all, zr/zm adjust level
 opt.foldlevelstart = 99     -- buffers open fully unfolded
-opt.foldcolumn = "1"        -- REQUIRED: snacks statuscolumn only draws fold marks when foldcolumn ~= "0"
+-- comfy-line-numbers owns 'statuscolumn' (snacks statuscolumn is disabled), and
+-- its column string has no %C, so a fold column can't render there -- keep it off.
+-- (Fold state is still visible via foldtext + zM/zR; no gutter marks.)
+opt.foldcolumn = "0"
 -- Custom foldtext (first line + line count). vim.treesitter.foldtext() doesn't exist in 0.12.
 opt.foldtext = "v:lua.require'config.foldtext'.foldtext()"
 opt.diffopt:append("vertical")

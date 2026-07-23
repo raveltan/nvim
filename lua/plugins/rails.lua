@@ -108,7 +108,8 @@ return {
       }
     end,
     config = function()
-      local capabilities = require("blink.cmp").get_lsp_capabilities()
+      -- Capabilities come from the global vim.lsp.config("*", ...) default set in
+      -- lua/plugins/lsp.lua -- no per-server capabilities wiring needed here.
       -- Override nvim-lspconfig's ruby_lsp reuse_client. The shipped version
       -- (lsp/ruby_lsp.lua) compares `client.config.cmd_cwd == config.cmd_cwd`
       -- but only side-effect-sets cmd_cwd on the NEW config — the existing
@@ -116,7 +117,6 @@ return {
       -- always fails the reuse check and spawns a second client. We replace
       -- it with the standard name + root_dir comparison.
       vim.lsp.config("ruby_lsp", {
-        capabilities = capabilities,
         cmd_env = { BUNDLE_QUIET = "1" },
         flags = { debounce_text_changes = 500 },
         reuse_client = function(client, config)
@@ -152,7 +152,6 @@ return {
 
       -- Sorbet. Prefer direct `srb` binary; fall back to bundle exec.
       vim.lsp.config("sorbet", {
-        capabilities = capabilities,
         cmd = vim.fn.executable("srb") == 1
           and { "srb", "tc", "--lsp", "--disable-watchman" }
           or { "bundle", "exec", "srb", "tc", "--lsp", "--disable-watchman" },
@@ -176,7 +175,6 @@ return {
       --   npm i -g stimulus-language-server
       if vim.fn.executable("stimulus-language-server") == 1 then
         vim.lsp.config("stimulus_ls", {
-          capabilities = capabilities,
           cmd = { "stimulus-language-server", "--stdio" },
           filetypes = { "eruby", "html", "ruby" },
           root_markers = { "Gemfile", ".git" },

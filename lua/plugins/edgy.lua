@@ -4,8 +4,7 @@ return {
     "folke/edgy.nvim",
     event = "VeryLazy",
     init = function()
-      -- Required by edgy for clean layouts
-      vim.opt.laststatus = 3 -- already globalstatus via lualine
+      -- laststatus=3 (global statusline) is already set in lua/config/options.lua.
       vim.opt.splitkeep = "screen"
     end,
     opts = {

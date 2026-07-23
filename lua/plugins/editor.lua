@@ -65,8 +65,9 @@ return {
   -- displaces vim-endwise's <Plug>DiscretionaryEnd map. Disabling restores the
   -- endwise chain so blink.cmp's "fallback" finds endwise and inserts `end`
   -- for def/do/if/class/module on Enter in Ruby/Lua/Vim buffers.
-  -- Trade-off: typing <CR> inside `{|}` no longer expands to `{\n|\n}` —
-  -- use `o` or a snippet for that case.
+  -- <CR> inside `()`/`[]`/`{|}` still expands to a new indented line: blink.cmp's
+  -- <CR> handler re-implements the pair expansion (see lua/plugins/lsp.lua), so
+  -- disabling ultimate-autopair's handler here loses nothing.
   {
     "altermo/ultimate-autopair.nvim",
     event = { "InsertEnter", "CmdlineEnter" },
@@ -225,7 +226,7 @@ return {
           augend.date.alias["%Y-%m-%d"],
           augend.date.alias["%Y/%m/%d"],
           augend.semver.alias.semver,
-          augend.constant.new({ elements = { "true", "false" } }),
+          -- lowercase true/false already covered by augend.constant.alias.bool above.
           augend.constant.new({ elements = { "True", "False" } }),
           augend.constant.new({ elements = { "yes", "no" } }),
           augend.constant.new({ elements = { "on", "off" } }),

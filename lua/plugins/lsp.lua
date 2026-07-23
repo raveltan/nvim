@@ -10,7 +10,7 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     opts = function()
-      local servers = { "vtsls", "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense", "tailwindcss", "typos_lsp", "emmet_language_server" }
+      local servers = { "vtsls", "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense", "tailwindcss", "typos_lsp", "emmet_language_server", "lua_ls" }
       if vim.g.gaf then
         servers = require("gaf.lsp").filter_mason_servers(servers)
       end
@@ -50,14 +50,27 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "saghen/blink.cmp" },
     config = function()
+      -- One global default for LSP capabilities (blink.cmp); per-server
+      -- vim.lsp.config() tables below only override what they need.
       local capabilities = require("blink.cmp").get_lsp_capabilities()
+      vim.lsp.config("*", { capabilities = capabilities })
+
+      -- Lua LSP for editing this config. lazydev.nvim feeds it the vim API +
+      -- plugin types. stylua formatting stays opt-in per project (formatting.lua).
+      vim.lsp.config("lua_ls", {
+        settings = {
+          Lua = {
+            workspace = { checkThirdParty = false },
+            telemetry = { enable = false },
+          },
+        },
+      })
 
       -- TypeScript: vtsls (wraps the VS Code TS extension). Migrated from
       -- typescript-tools.nvim, which is in maintenance drift (its issue #273
       -- recommends vtsls). Same features, via LSP code actions + workspace
       -- commands — keymaps below.
       vim.lsp.config("vtsls", {
-        capabilities = capabilities,
         settings = {
           typescript = {
             tsserver = { maxTsServerMemory = 8192 },
@@ -124,7 +137,6 @@ return {
 
       -- ESLint
       vim.lsp.config("eslint", {
-        capabilities = capabilities,
         settings = {
           run = "onSave",
           packageManager = "yarn",
@@ -144,7 +156,6 @@ return {
         basedpyright_analysis.extraPaths = require("gaf.lsp").basedpyright_extra_paths()
       end
       vim.lsp.config("basedpyright", {
-        capabilities = capabilities,
         settings = {
           basedpyright = {
             analysis = basedpyright_analysis,
@@ -154,7 +165,6 @@ return {
 
       -- Ruff (lint + format + organize imports; defer hover to basedpyright)
       vim.lsp.config("ruff", {
-        capabilities = capabilities,
         on_attach = function(client, _)
           client.server_capabilities.hoverProvider = false
         end,
@@ -164,7 +174,6 @@ return {
       -- Premium licence auto-discovered from ~/intelephense/licence.txt — no
       -- licenceKey init_option needed.
       vim.lsp.config("intelephense", {
-        capabilities = capabilities,
         filetypes = { "php" },
         -- Node heap cap, same idea as tsserver_max_memory=8192 for TS: the
         -- default ~4GB heap can OOM indexing fl-gaf.
@@ -204,7 +213,6 @@ return {
 
       -- JSON LSP with SchemaStore catalog (package.json, tsconfig, composer.json, GH Actions, ...)
       vim.lsp.config("jsonls", {
-        capabilities = capabilities,
         settings = {
           json = {
             schemas = require("schemastore").json.schemas(),
@@ -215,7 +223,6 @@ return {
 
       -- YAML LSP with SchemaStore catalog
       vim.lsp.config("yamlls", {
-        capabilities = capabilities,
         settings = {
           yaml = {
             schemaStore = { enable = false, url = "" }, -- disable built-in; use SchemaStore.nvim instead
@@ -226,7 +233,6 @@ return {
 
       -- Tailwind CSS
       vim.lsp.config("tailwindcss", {
-        capabilities = capabilities,
         filetypes = { "html", "css", "javascript", "typescript", "javascriptreact", "typescriptreact" },
         settings = {
           tailwindCSS = {
@@ -243,7 +249,6 @@ return {
       -- autoClosingTags disabled: nvim-ts-autotag already handles close-tag insertion;
       -- leaving this on causes duplicate `</tag>` (one from autotag, one from LSP completion).
       vim.lsp.config("html", {
-        capabilities = capabilities,
         filetypes = { "html" },
         init_options = {
           provideFormatter = false,
@@ -259,7 +264,6 @@ return {
 
       -- CSS LSP — only on pure CSS files.
       vim.lsp.config("cssls", {
-        capabilities = capabilities,
         filetypes = { "css", "scss", "less" },
       })
 
@@ -268,7 +272,6 @@ return {
       -- in the blink completion menu; accept to expand. svelte added to the server's
       -- default filetype set (defaults omit it).
       vim.lsp.config("emmet_language_server", {
-        capabilities = capabilities,
         filetypes = {
           "html", "eruby", "css", "scss", "sass", "less",
           "javascriptreact", "typescriptreact", "vue", "svelte", "htmldjango",
@@ -280,7 +283,6 @@ return {
 
       -- Typos LSP — fast spell/typo checker (Rust). Hint severity to stay quiet.
       vim.lsp.config("typos_lsp", {
-        capabilities = capabilities,
         init_options = {
           diagnosticSeverity = "Hint",
         },
@@ -291,7 +293,6 @@ return {
       -- Docs: https://herb-tools.dev
       if vim.fn.executable("herb-language-server") == 1 then
         vim.lsp.config("herb_ls", {
-          capabilities = capabilities,
           cmd = { "herb-language-server", "--stdio" },
           filetypes = { "eruby", "html" },
           root_markers = { "Gemfile", ".git" },
@@ -312,12 +313,14 @@ return {
       if vim.fn.executable("sourcekit-lsp") == 1 then
         vim.lsp.config("sourcekit", {
           -- sourcekit relies on dynamically-registered file watching to pick up
-          -- cross-file changes; blink's capabilities don't advertise it.
-          capabilities = vim.tbl_deep_extend("force", {}, capabilities, {
+          -- cross-file changes; the blink capabilities from the "*" default don't
+          -- advertise it, so extend just that here -- vim.lsp.config deep-merges
+          -- this onto the global capabilities.
+          capabilities = {
             workspace = {
               didChangeWatchedFiles = { dynamicRegistration = true },
             },
-          }),
+          },
           -- Default filetypes also claim c/cpp/objc — keep it to swift only.
           filetypes = { "swift" },
         })

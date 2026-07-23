@@ -8,7 +8,7 @@ return {
     keys = {
       { "<leader>cf", function() require("conform").format({ async = true }) end, mode = { "n", "v" }, desc = "Format file" },
     },
-    opts = function()
+    opts = function(_, opts)
       local formatters_by_ft = {
         lua = { "stylua" },
         javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -43,16 +43,18 @@ return {
         formatters_by_ft.php = { "php_cs_fixer" }
         formatters.php_cs_fixer = require("gaf.formatting").php_cs_fixer_formatter()
       end
-      return {
-        formatters_by_ft = formatters_by_ft,
-        formatters = formatters,
-        format_on_save = function(bufnr)
-          if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then return end
-          -- 3s: rubocop --server cold start and php-cs-fixer overrun the 500ms
-          -- default. lsp fallback covers fts with no conform entry (json/yaml/…).
-          return { timeout_ms = 3000, lsp_format = "fallback" }
-        end,
-      }
+      -- Merge into the accumulated opts (rails.lua's conform spec adds ruby/eruby);
+      -- returning a fresh table here would drop theirs if lazy ever resolved this
+      -- spec after them.
+      opts.formatters_by_ft = vim.tbl_deep_extend("force", opts.formatters_by_ft or {}, formatters_by_ft)
+      opts.formatters = vim.tbl_deep_extend("force", opts.formatters or {}, formatters)
+      opts.format_on_save = function(bufnr)
+        if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then return end
+        -- 3s: rubocop --server cold start and php-cs-fixer overrun the 500ms
+        -- default. lsp fallback covers fts with no conform entry (json/yaml/…).
+        return { timeout_ms = 3000, lsp_format = "fallback" }
+      end
+      return opts
     end,
   },
 

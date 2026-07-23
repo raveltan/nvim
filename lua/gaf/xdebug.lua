@@ -203,14 +203,23 @@ function M.profile_open_gui(path)
   }, function(choice) open_path(choice) end)
 end
 
+-- Newest path by mtime, nil-safe: a path we can't stat (broken symlink, or a
+-- /tmp file removed between glob and sort) sorts as oldest instead of throwing
+-- inside table.sort's comparator and aborting the whole command.
+local function newest_by_mtime(paths)
+  local best, best_mtime = nil, -1
+  for _, p in ipairs(paths) do
+    local st = (vim.uv or vim.loop).fs_stat(p)
+    local m = st and st.mtime.sec or -1
+    if m > best_mtime then best, best_mtime = p, m end
+  end
+  return best
+end
+
 local function newest_snapshot()
   local candidates = all_local_snapshots()
   if #candidates == 0 then return nil end
-  table.sort(candidates, function(a, b)
-    return (vim.uv or vim.loop).fs_stat(a).mtime.sec >
-           (vim.uv or vim.loop).fs_stat(b).mtime.sec
-  end)
-  return candidates[1]
+  return newest_by_mtime(candidates)
 end
 
 function M.profile_latest()
@@ -365,11 +374,7 @@ end
 local function newest_trace()
   local cs = all_local_traces()
   if #cs == 0 then return nil end
-  table.sort(cs, function(a, b)
-    return (vim.uv or vim.loop).fs_stat(a).mtime.sec >
-           (vim.uv or vim.loop).fs_stat(b).mtime.sec
-  end)
-  return cs[1]
+  return newest_by_mtime(cs)
 end
 
 -- Read trace lines, then cb(lines) or cb(nil, err). gunzip runs async —

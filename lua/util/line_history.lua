@@ -25,7 +25,7 @@ local function pick_commits(opts)
 
   -- Async: `git log -L` traces history with no early exit — synchronous
   -- systemlist froze nvim for seconds on old files. -n 200 bounds the worst case.
-  vim.system(cmd, { text = true }, vim.schedule_wrap(function(res)
+  vim.system(cmd, { text = true, cwd = opts.dir }, vim.schedule_wrap(function(res)
     local lines = vim.split(res.stdout or "", "\n", { trimempty = true })
     if res.code ~= 0 or #lines == 0 then
       vim.notify(opts.empty_msg, vim.log.levels.WARN)
@@ -69,8 +69,8 @@ local function pick_commits(opts)
         ctx.preview:reset()
         ctx.preview:set_lines({ "Loading " .. sha .. " …" })
         vim.system(
-          { "git", "show", "--format=", "--stat", "-p", sha, "--", opts.rel },
-          { text = true },
+          { "git", "show", "--format=", "--stat", "-p", sha, "--", opts.path },
+          { text = true, cwd = opts.dir },
           vim.schedule_wrap(function(show_res)
             local out = vim.split(show_res.stdout or "", "\n")
             if out[#out] == "" then out[#out] = nil end
@@ -98,11 +98,17 @@ function M.pick(s, e)
     return
   end
   local rel = vim.fn.fnamemodify(file, ":.")
+  local dir = vim.fn.fnamemodify(file, ":h")
+  local name = vim.fn.fnamemodify(file, ":t")
   pick_commits({
     source = "line_history",
     title = string.format("Line history %d-%d : %s", s, e, rel),
-    log_args = { string.format("-L%d,%d:%s", s, e, rel) },
+    -- git runs with cwd=dir, so pathspecs are the basename -- works for files
+    -- outside nvim's cwd (e.g. a file in a different repo).
+    log_args = { string.format("-L%d,%d:%s", s, e, name) },
     rel = rel,
+    path = name,
+    dir = dir,
     empty_msg = "No history for lines " .. s .. "-" .. e,
   })
 end
@@ -115,11 +121,15 @@ function M.file()
     return
   end
   local rel = vim.fn.fnamemodify(file, ":.")
+  local dir = vim.fn.fnamemodify(file, ":h")
+  local name = vim.fn.fnamemodify(file, ":t")
   pick_commits({
     source = "file_history",
     title = "File history : " .. rel,
-    log_args = { "--follow", "--", rel },
+    log_args = { "--follow", "--", name },
     rel = rel,
+    path = name,
+    dir = dir,
     empty_msg = "No history for " .. rel,
   })
 end

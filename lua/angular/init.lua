@@ -1550,9 +1550,19 @@ function M.build_import_edit(bufnr, name, spec, deffile)
       if tok == name then return nil end
     end
   end
+  -- Track the end line of the LAST import statement. A statement ends on the
+  -- line carrying its module specifier (`from '...'`) or, for a side-effect
+  -- import, the `import '...'` line itself -- so a multi-line
+  -- `import {\n … \n} from '…'` advances last_import to its closing line, not
+  -- its `import {` opener (inserting after the opener produced broken TS).
   local last_import = -1
+  local in_import = false
   for i, line in ipairs(lines) do
-    if line:match("^%s*import%s") then last_import = i - 1 end
+    if not in_import and line:match("^%s*import[%s{'\"*]") then in_import = true end
+    if in_import then
+      last_import = i - 1
+      if line:match("from%s*['\"]") or line:match("^%s*import%s*['\"]") then in_import = false end
+    end
     if line:match("import%s*{[^}]*}%s*from%s*['\"]" .. spec:gsub("[%-%.]", "%%%1") .. "['\"]") then
       return {
         range = { start = { line = i - 1, character = 0 }, ["end"] = { line = i - 1, character = #line } },

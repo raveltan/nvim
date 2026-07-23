@@ -50,7 +50,11 @@ return {
         end,
       })
 
-      -- Enable matchup treesitter integration
+      -- Enable matchup's treesitter-aware matching, plus deferred matchparen
+      -- highlighting for responsiveness. On nvim-treesitter `main` the old module
+      -- system is gone, so the TS integration is toggled via this global, not
+      -- require("nvim-treesitter.configs").setup({ matchup = { enable = true } }).
+      vim.g.matchup_treesitter = 1
       vim.g.matchup_matchparen_deferred = 1
     end,
   },
