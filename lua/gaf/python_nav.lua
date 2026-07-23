@@ -154,6 +154,56 @@ local function find_impls(word, client, dead_ends, hint)
   end, 0)
 end
 
+-- `conns.gaf.method(...)` is served by the PHP monolith, not a python
+-- service: handlers live in fl-gaf src2/Traits/GafThrift/Thrift*Trait.php as
+-- `public function <method>(`. Opens in a horizontal split so the python
+-- call site stays visible. Zero hits falls back to the normal LSP flow.
+local function goto_gaf_php(word, fallback)
+  local gaf_root = require("gaf.paths").fl_gaf
+  local dirs = {}
+  for _, d in ipairs({ gaf_root .. "/src2", gaf_root .. "/src" }) do
+    if vim.fn.isdirectory(d) == 1 then dirs[#dirs + 1] = d end
+  end
+  local cmd = { "rg", "-n", "--no-heading", "-g", "!vendor",
+    "function\\s+" .. word .. "\\s*\\(" }
+  vim.list_extend(cmd, dirs)
+  vim.system(cmd, { text = true }, function(out)
+    vim.schedule(function()
+      local hits = {}
+      for line in (out.stdout or ""):gmatch("[^\n]+") do
+        local path, lnum, text = line:match("^(.-):(%d+):(.*)$")
+        if path then
+          hits[#hits + 1] = { file = path, lnum = tonumber(lnum), text = text }
+        end
+      end
+      local function split_jump(file, lnum)
+        vim.cmd("split")
+        vim.cmd.edit(vim.fn.fnameescape(file))
+        pcall(vim.api.nvim_win_set_cursor, 0, { lnum, 0 })
+        vim.cmd("normal! zz")
+        vim.cmd("redraw")
+      end
+      if #hits == 0 then
+        fallback()
+      elseif #hits == 1 then
+        split_jump(hits[1].file, hits[1].lnum)
+      else
+        Snacks.picker({
+          title = "GAF implementations of " .. word,
+          items = vim.tbl_map(function(h)
+            return { text = h.file .. " " .. h.text, file = h.file, pos = { h.lnum, 0 } }
+          end, hits),
+          format = "file",
+          confirm = function(picker, item)
+            picker:close()
+            split_jump(item.file, item.pos[1])
+          end,
+        })
+      end
+    end)
+  end)
+end
+
 function M.goto_definition()
   local word = vim.fn.expand("<cword>")
   if word == "" then
@@ -170,6 +220,16 @@ function M.goto_definition()
     return
   end
   local hint = service_hint()
+  if hint == "gaf" then
+    goto_gaf_php(word, function() M.lsp_flow(word, client, nil) end)
+    return
+  end
+  M.lsp_flow(word, client, hint)
+end
+
+-- The plain cross-python-service resolution: LSP definition, then
+-- name-based workspace-symbol fallback.
+function M.lsp_flow(word, client, hint)
   local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
   client:request("textDocument/definition", params, function(err, res)
     res = (not err and res) or {}

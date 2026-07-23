@@ -27,6 +27,12 @@ wired from `gaf/init.lua` → `M.setup()` (GAF-gated).
 - **`gd` on your own `def` line** — reverse direction: grep picker of every
   `.name(` call site across all services (rest endpoints, other midlayers,
   tests).
+- **`gd` on a GAF endpoint** (`conns.gaf.method(...)`) — the implementation
+  is PHP, not python: rg for `function <method>(` in fl-gaf `src2/`+`src/`
+  (vendor excluded; handlers live in `src2/Traits/GafThrift/Thrift*Trait.php`)
+  and opens it in a **horizontal split** so the python call site stays
+  visible. One hit jumps, several pick (picker confirm also splits), zero
+  falls back to the normal LSP flow. fl-gaf root comes from `gaf/paths.lua`.
 
 ## Resolution details
 

@@ -75,7 +75,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 |-----|------|-------------|--------|
 | `K` | n | Hover docs | config/keymaps.lua |
 | `gd` | n | Go to definition | snacks.picker |
-| `gd` | n | (GAF, api-repo python) cross-service thrift definition: call site → midlayer/dao handler; on own `def` → callers picker | gaf/python_nav.lua |
+| `gd` | n | (GAF, api-repo python) cross-service thrift definition: call site → midlayer/dao handler; `conns.gaf.*` → fl-gaf PHP trait in horizontal split; on own `def` → callers picker | gaf/python_nav.lua |
 | `gr` | n | References | snacks.picker |
 | `gI` | n | Implementations | snacks.picker |
 | `gy` | n | Type definitions | snacks.picker |
