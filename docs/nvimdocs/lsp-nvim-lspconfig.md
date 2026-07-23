@@ -30,7 +30,7 @@ Loaded before `mason-lspconfig` fires `vim.lsp.enable()` — same `BufReadPre` e
 | Server | Notes |
 |--------|-------|
 | `eslint` | `run = "onSave"`, `packageManager = "yarn"`. Sync disabled, 1000 ms debounce — large monorepos crash on rapid edits. |
-| `basedpyright` | `analysis.autoSearchPaths`, `useLibraryCodeForTypes`, `autoImportCompletions` all on. Under GAF, `extraPaths = { "libgafthrift", "restutils" }` is appended from `gaf.lsp.basedpyright_extra_paths()`. |
+| `basedpyright` | `analysis.autoSearchPaths`, `useLibraryCodeForTypes`, `autoImportCompletions` all on. Under GAF: absolute `extraPaths` for the `~/freelancer-dev/api` monorepo from `gaf.lsp.basedpyright_extra_paths()`, `typeCheckingMode = "standard"`, `.git`-first priority `root_markers` (per-service `setup.py` would otherwise root one server per service), and `python.pythonPath` → `api311` pyenv venv when it exists — see [[gaf-lsp]]. |
 | `ruff` | Hover provider disabled in `on_attach` so basedpyright owns hover. Ruff stays for lint, format, organize imports. |
 | `intelephense` | `filetypes = { "php" }`, `root_markers = { "composer.json", ".git" }`, `files.maxSize = 5 MB`, excludes vendor/node_modules/storage/cache/coverage. `on_attach` disables `prepareProvider` for rename — see [[ftplugin-php]]. |
 | `jsonls` | `schemas = require("schemastore").json.schemas()` + `validate.enable = true`. |
@@ -84,7 +84,7 @@ Defined in `lua/config/keymaps.lua`, not in this spec. Neovim 0.11+ defaults (`g
 
 ## GAF integration
 
-- Under `vim.g.gaf`, `basedpyright.analysis.extraPaths` is extended with `libgafthrift` and `restutils` so cross-repo Python imports resolve.
+- Under `vim.g.gaf`, basedpyright is wired for the `~/freelancer-dev/api` monorepo: absolute `extraPaths` (repo root + 10 outer service dirs — the importable packages sit one level inside, often renamed: `rest/` → `api`, `users_midlayer/` → `users_mid`), `typeCheckingMode = "standard"`, `.git`-first `root_markers`, and `python.pythonPath` → the `api311` pyenv venv when present. Setup steps in [[gaf-lsp]].
 - `<leader>cr` first routes CSS-class and tag contexts to `config/rename.lua` (see [[config-rename]]); the LSP fallback detects PHP buffers, advances the cursor past `$`, strips `$` from `cword`, then re-adds it to `newName` if the symbol is a variable. Built to dodge intelephense's broken `prepareProvider` range for `$var`. See [[ftplugin-php]].
 - See [[gaf-lsp]] for the full GAF LSP integration layer.
 

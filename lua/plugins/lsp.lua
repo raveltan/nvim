@@ -152,16 +152,57 @@ return {
         useLibraryCodeForTypes = true,
         autoImportCompletions = true,
       }
-      if vim.g.gaf then
-        basedpyright_analysis.extraPaths = require("gaf.lsp").basedpyright_extra_paths()
-      end
-      vim.lsp.config("basedpyright", {
+      local basedpyright_config = {
         settings = {
           basedpyright = {
             analysis = basedpyright_analysis,
           },
         },
-      })
+      }
+      if vim.g.gaf then
+        basedpyright_analysis.extraPaths = require("gaf.lsp").basedpyright_extra_paths()
+        -- basedpyright defaults to "recommended" (its strictest mode), which
+        -- floods legacy api-repo code; mypy-in-docker is the real type gate.
+        basedpyright_analysis.typeCheckingMode = "standard"
+        -- gaf_thrift-stubs use the legacy mypy stub convention (enum members
+        -- annotated `X: int = ...`), which the current typing spec — and so
+        -- pyright — reads as plain int attributes, not enum members. Every
+        -- thrift exception/enum call site then false-errors. The thrift Iface
+        -- multiple-inheritance pattern likewise trips override checks, and
+        -- stub-only packages (six, grpc, gaf_thrift) warn about missing
+        -- source. Silence just those classes; mypy-in-docker stays the gate.
+        basedpyright_analysis.diagnosticSeverityOverrides = {
+          reportArgumentType = "none",
+          reportIncompatibleMethodOverride = "none",
+          reportMissingModuleSource = "none",
+          -- Warning not error: pyright infers unannotated legacy helpers'
+          -- return types as unions (e.g. enterprise_utils' patch_filter_*
+          -- isinstance branches), then flags attrs of the wrong union member.
+          -- Real typos still show as yellow.
+          reportAttributeAccessIssue = "warning",
+          reportOptionalMemberAccess = "warning",
+          reportOptionalOperand = "warning",
+          reportOptionalIterable = "warning",
+          reportOptionalSubscript = "warning",
+        }
+        -- Every api/ service dir has its own setup.py, which outranks .git in
+        -- the default flat marker list and would root one server per service,
+        -- breaking cross-service imports and relative extraPaths.
+        -- Nested tables = priority order (0.11.3+): prefer .git so the
+        -- monorepo roots once at the top.
+        basedpyright_config.root_markers = {
+          { ".git" },
+          { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", "pyrightconfig.json" },
+        }
+        -- Interpreter with the repo's third-party deps; only wired up when
+        -- the venv actually exists so a fresh machine degrades gracefully to
+        -- intra-repo + stub completion.
+        local py = require("gaf.lsp").basedpyright_python_path()
+        if vim.fn.executable(py) == 1 then
+          basedpyright_config.settings.python = { pythonPath = py }
+        end
+      end
+      vim.lsp.config("basedpyright", basedpyright_config)
 
       -- Ruff (lint + format + organize imports; defer hover to basedpyright)
       vim.lsp.config("ruff", {
