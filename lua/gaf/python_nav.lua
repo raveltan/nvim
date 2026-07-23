@@ -156,7 +156,7 @@ end
 
 -- `conns.gaf.method(...)` is served by the PHP monolith, not a python
 -- service: handlers live in fl-gaf src2/Traits/GafThrift/Thrift*Trait.php as
--- `public function <method>(`. Opens in a horizontal split so the python
+-- `public function <method>(`. Opens side by side (vsplit) so the python
 -- call site stays visible. Zero hits falls back to the normal LSP flow.
 local function goto_gaf_php(word, fallback)
   local gaf_root = require("gaf.paths").fl_gaf
@@ -177,7 +177,7 @@ local function goto_gaf_php(word, fallback)
         end
       end
       local function split_jump(file, lnum)
-        vim.cmd("split")
+        vim.cmd("vsplit")
         vim.cmd.edit(vim.fn.fnameescape(file))
         pcall(vim.api.nvim_win_set_cursor, 0, { lnum, 0 })
         vim.cmd("normal! zz")
