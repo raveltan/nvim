@@ -323,6 +323,20 @@ work in any buffer (and lazy-load the plugin); the rest are scoped to
 | `<CR>` | i | Accept completion / newline with pair expand | blink.cmp |
 | `<C-Space>` | i | Show completion & docs | blink.cmp |
 
+### Multicursor — `<leader>c*` (multicursor.nvim)
+
+Add cursors, then edits/motions apply to all at once.
+
+| Key | Mode | Description | Source |
+|-----|------|-------------|--------|
+| `<leader>cn` / `<leader>cN` | n, x | Add cursor at next / prev match of word or selection | multicursor |
+| `<leader>cS` | n, x | Skip current match, move main cursor to next | multicursor |
+| `<leader>cm` | n, x | Add a cursor at every match in buffer | multicursor |
+| `<leader>cj` / `<leader>ck` | n, x | Add cursor on line below / above | multicursor |
+| `<leader>cq` | n, x | Freeze other cursors (roam main) / place cursor here | multicursor |
+
+While ≥2 cursors exist a keymap layer arms: `<left>`/`<right>` focus prev/next cursor, `<leader>x` drops the focused cursor, `<esc>` unfreezes (after `cq`) or clears all extra cursors. See `docs/nvimdocs/editor-multicursor.md`.
+
 ### Case conversion — `<leader>cv` (text-case.nvim)
 
 `<leader>cv` opens a `vim.ui.select` picker over the identifier under the cursor

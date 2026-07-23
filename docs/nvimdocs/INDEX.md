@@ -107,6 +107,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [editor-angular](editor-angular.md) — Angular component nav: `gd` on tags/attrs/classes/routes, `<leader>c{p,G,R}`, blink @Input/@Output completion inside tags (in-repo `lua/angular/`)
 - [editor-mini-bufremove](editor-mini-bufremove.md) — `<leader>bd` close-keep-window
 - [editor-flash](editor-flash.md) — `s`/`S` label jumps
+- [editor-multicursor](editor-multicursor.md) — multiple cursors: `<leader>c{n,N,S,m,j,k,q}` add + in-cursor layer (arrows/`<leader>x`/`<esc>`)
 - [editor-grug-far](editor-grug-far.md) — project-wide find/replace UI
 - [editor-folding](editor-folding.md) — nvim-ufo folding (LSP + treesitter, peek, fold-to-level)
 - [editor-undotree](editor-undotree.md) — undo history
@@ -182,9 +183,6 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 ## Swift
 
 - [swift-xcodebuild](swift-xcodebuild.md) — Xcode build/run/test/debug + SwiftUI previews; sourcekit-lsp via xcode-build-server
-
-## Diagram
-
 
 ## Ftplugin
 
