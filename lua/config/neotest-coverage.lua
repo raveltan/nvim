@@ -10,10 +10,25 @@ end
 
 function M.run(file, ft)
   local run_env, coverage_rel, markers, extra_args
+  -- Set for a Pest project: pest needs its coverage flags threaded through
+  -- `pest_cmd` rather than through neotest, and the target has to be cleared
+  -- again once this run settles. See the pest branch below.
+  local pest = false
   if ft == "php" then
     coverage_rel = "coverage/cobertura.xml"
+    -- NEOTEST_COVERAGE is read only by scripts/neotest-run-tests.sh, the GAF
+    -- phpunit wrapper. neotest-pest's build_spec ignores env, extra_args and cwd
+    -- outright, so for Pest this variable does nothing at all.
     run_env = { NEOTEST_COVERAGE = "1" }
     markers = { "bin/run-tests", "composer.json", ".git" }
+    pest = not vim.g.gaf
+      and require("artisan.test").is_pest_root(require("artisan").root(vim.fs.dirname(file)))
+    if pest then
+      local ok, reason = require("artisan.test").coverage_available()
+      if not ok then
+        return vim.notify(reason, vim.log.levels.WARN)
+      end
+    end
   elseif ft == "ruby" then
     coverage_rel = "coverage/.resultset.json"
     run_env = nil
@@ -64,18 +79,32 @@ function M.run(file, ft)
   end
   local prev_fp = fingerprint(vim.uv.fs_stat(coverage_file))
 
+  if pest then require("artisan.test").set_coverage(coverage_file) end
+  local function done()
+    if pest then require("artisan.test").set_coverage(nil) end
+  end
+
   vim.notify("Running test with coverage...", vim.log.levels.INFO)
-  require("neotest").run.run({ file, env = run_env, extra_args = extra_args })
+  local ok = pcall(require("neotest").run.run, { file, env = run_env, extra_args = extra_args })
+  if not ok then
+    done()
+    return vim.notify("Coverage run failed to start", vim.log.levels.ERROR)
+  end
 
   local elapsed_ms = 0
   local interval_ms = 1000
-  local timeout_ms = 600000
+  -- Pest writes its report as the run finishes, so a short ceiling is enough and
+  -- keeps a missing driver from looking like a hang. Other toolchains here
+  -- include full instrumented rebuilds (cargo-llvm-cov), which genuinely take
+  -- minutes.
+  local timeout_ms = pest and 180000 or 600000
   local timer = vim.uv.new_timer()
   timer:start(interval_ms, interval_ms, vim.schedule_wrap(function()
     elapsed_ms = elapsed_ms + interval_ms
     local s = vim.uv.fs_stat(coverage_file)
     if s and fingerprint(s) ~= prev_fp then
       timer:stop(); timer:close()
+      done()
       pcall(vim.cmd, "CoverageLoad")
       pcall(vim.cmd, "CoverageShow")
       vim.notify("Coverage loaded: " .. coverage_rel, vim.log.levels.INFO)
@@ -83,6 +112,7 @@ function M.run(file, ft)
     end
     if elapsed_ms >= timeout_ms then
       timer:stop(); timer:close()
+      done()
       vim.notify("Coverage poll timed out (" .. coverage_rel .. " not updated)", vim.log.levels.WARN)
     end
   end))

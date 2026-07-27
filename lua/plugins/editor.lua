@@ -241,7 +241,18 @@ return {
   {
     "folke/ts-comments.nvim",
     event = "VeryLazy",
-    opts = {},
+    opts = {
+      lang = {
+        -- Neither is in upstream's table. The base commentstring is set in
+        -- after/ftplugin/blade.lua; `blade` keeps it correct when the cursor
+        -- sits in a blade node.
+        blade = "{{-- %s --}}",
+        -- Blade injects PHP as `php_only`, not `php`, and ts-comments only has
+        -- an entry for `php` — so without this, `gcc` inside an @php block
+        -- wrapped the line in `{{-- --}}` (which PHP does not comment out).
+        php_only = "// %s",
+      },
+    },
   },
 
   -- Enhanced % matching for language constructs (if/else/end, etc.)
@@ -313,6 +324,8 @@ return {
       if vim.g.gaf then
         table.insert(spec, { "<leader>r", group = "redash" })
         table.insert(spec, { "<leader>X", group = "xdebug profile" })
+      else
+        table.insert(spec, { "<leader>l", group = "laravel" })
       end
       return { spec = spec }
     end,

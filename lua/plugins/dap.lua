@@ -145,6 +145,8 @@ return {
       }
       if vim.g.gaf then
         vim.list_extend(keys, require("gaf.dap").keys())
+      else
+        vim.list_extend(keys, require("artisan.dap").keys())
       end
       return keys
     end,
@@ -160,7 +162,14 @@ return {
       vim.fn.sign_define("DapLogPoint",            { text = "◆", texthl = "DiagnosticInfo" })
       vim.fn.sign_define("DapStopped",             { text = "▶", texthl = "DiagnosticOk", linehl = "DapStoppedLine" })
 
-      if vim.g.gaf then require("gaf.dap").setup_php_configuration() end
+      -- GAF and Laravel both own dap.configurations.php outright, so exactly one
+      -- of them may run. GAF's single config has the devbox path mapping baked
+      -- in; the Laravel set covers plain/Herd, Sail/Docker, and launch modes.
+      if vim.g.gaf then
+        require("gaf.dap").setup_php_configuration()
+      else
+        require("artisan.dap").setup()
+      end
 
       local dap = require("dap")
       for _, ft in ipairs({ "typescript", "javascript" }) do

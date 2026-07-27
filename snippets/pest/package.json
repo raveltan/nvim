@@ -1,0 +1,13 @@
+{
+  "name": "rtanjaya-pest-snippets",
+  "contributes": {
+    "snippets": [
+      {
+        "language": [
+          "pest"
+        ],
+        "path": "./php.json"
+      }
+    ]
+  }
+}

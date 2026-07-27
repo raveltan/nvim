@@ -1,0 +1,129 @@
+{
+  "Pest it": {
+    "prefix": "it",
+    "description": "it() test closure",
+    "body": ["it('${1:does something}', function () {", "\t$0", "});"]
+  },
+  "Pest test": {
+    "prefix": "test",
+    "description": "test() closure",
+    "body": ["test('${1:name}', function () {", "\t$0", "});"]
+  },
+  "Pest describe": {
+    "prefix": "describe",
+    "description": "describe() block",
+    "body": ["describe('${1:subject}', function () {", "\t$0", "});"]
+  },
+  "Pest beforeEach": {
+    "prefix": "beforeEach",
+    "description": "beforeEach hook",
+    "body": ["beforeEach(function () {", "\t$0", "});"]
+  },
+  "Pest afterEach": {
+    "prefix": "afterEach",
+    "description": "afterEach hook",
+    "body": ["afterEach(function () {", "\t$0", "});"]
+  },
+  "Pest beforeAll": {
+    "prefix": "beforeAll",
+    "description": "beforeAll hook",
+    "body": ["beforeAll(function () {", "\t$0", "});"]
+  },
+  "Pest uses": {
+    "prefix": "uses",
+    "description": "uses() — bind a TestCase/trait to a directory (tests/Pest.php)",
+    "body": ["uses(${1:Tests\\\\TestCase}::class)->in('${2:Feature}');", "$0"]
+  },
+  "Pest expect": {
+    "prefix": "expect",
+    "description": "expect() assertion",
+    "body": ["expect(${1:value})->${2:toBe}(${3:expected});", "$0"]
+  },
+  "Pest expect chain": {
+    "prefix": "expectc",
+    "description": "Chained expectation",
+    "body": ["expect(${1:value})", "\t->${2:toBeInstanceOf}(${3:Model}::class)", "\t->${4:and}(${5})->${6:toBeTrue}();", "$0"]
+  },
+  "Pest it with dataset": {
+    "prefix": "itwith",
+    "description": "it() driven by an inline dataset",
+    "body": [
+      "it('${1:handles each case}', function (${2:string} \\$${3:input}) {",
+      "\t$0",
+      "})->with([",
+      "\t'${4:case}' => ['${5:value}'],",
+      "]);"
+    ]
+  },
+  "Pest dataset": {
+    "prefix": "dataset",
+    "description": "Named dataset (tests/Datasets)",
+    "body": ["dataset('${1:name}', [", "\t'${2:case}' => ['${3:value}'],", "]);", "$0"]
+  },
+  "Pest throws": {
+    "prefix": "throws",
+    "description": "Expect the test body to throw",
+    "body": ["it('${1:rejects bad input}', function () {", "\t$0", "})->throws(${2:InvalidArgumentException}::class);"]
+  },
+  "Pest todo": {
+    "prefix": "todo",
+    "description": "Pending test",
+    "body": ["it('${1:name}')->todo();", "$0"]
+  },
+  "Pest skip": {
+    "prefix": "skip",
+    "description": "Skip with a reason",
+    "body": ["->skip('${1:reason}');$0"]
+  },
+  "Pest group": {
+    "prefix": "group",
+    "description": "Tag the test into a group",
+    "body": ["->group('${1:name}');$0"]
+  },
+  "Pest covers": {
+    "prefix": "covers",
+    "description": "Restrict coverage to a class",
+    "body": ["covers(${1:App\\\\Models\\\\User}::class);", "$0"]
+  },
+  "Pest Laravel get": {
+    "prefix": "phttp",
+    "description": "HTTP request assertion (pest-plugin-laravel)",
+    "body": ["${1|get,post,put,patch,delete|}('${2:/}')", "\t->assertOk();", "$0"]
+  },
+  "Pest Laravel actingAs": {
+    "prefix": "pacting",
+    "description": "Authenticated request",
+    "body": [
+      "actingAs(\\$${1:user} = ${2:User}::factory()->create())",
+      "\t->get('${3:/dashboard}')",
+      "\t->assertOk();",
+      "$0"
+    ]
+  },
+  "Pest Laravel database assertion": {
+    "prefix": "pdb",
+    "description": "assertDatabaseHas",
+    "body": ["\\$this->assertDatabaseHas('${1:users}', [", "\t'${2:email}' => '${3:value}',", "]);", "$0"]
+  },
+  "Pest Laravel refresh database": {
+    "prefix": "prefresh",
+    "description": "uses(RefreshDatabase::class)",
+    "body": ["uses(Illuminate\\\\Foundation\\\\Testing\\\\RefreshDatabase::class);", "$0"]
+  },
+  "Pest mock": {
+    "prefix": "pmock",
+    "description": "Mock a container binding",
+    "body": [
+      "\\$${1:service} = mock(${2:Service}::class);",
+      "\\$${1:service}->shouldReceive('${3:method}')",
+      "\t->once()",
+      "\t->andReturn(${4:null});",
+      "$0"
+    ]
+  },
+  "Pest spy": {
+    "prefix": "pspy",
+    "description": "Spy on a container binding",
+    "body": ["\\$${1:spy} = spy(${2:Service}::class);", "$0"]
+  }
+}

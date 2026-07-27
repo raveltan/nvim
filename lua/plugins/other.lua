@@ -271,6 +271,238 @@ return {
         { pattern = "/src/(.*)Interface%.php$",  target = "/src/%1.php",  context = "impl" },
 
         -- ============================================================
+        -- Laravel (app/, tests/, database/)
+        -- No path collision with the GAF patterns above (src/, src2/, consumers/,
+        -- test/), so these are registered in every profile.
+        -- Test layout is offered in both common shapes — mirrored
+        -- (tests/Feature/Http/Controllers/FooControllerTest.php) and flat
+        -- (tests/Feature/FooControllerTest.php); missing ones are hidden by
+        -- showMissingFiles=false.
+        --
+        -- Livewire 4 multi-file components: every member of a `⚡name/` directory
+        -- shares the directory's base name, so the pair is expressible here.
+        -- (The ⚡ is a literal in the pattern — other.nvim matches on the path
+        -- string, so the emoji needs no escaping.)
+        --   resources/views/components/billing/⚡invoice/invoice.php
+        --     ↔ invoice.blade.php ↔ invoice.js ↔ invoice.css
+        --
+        -- Livewire class ↔ view for the OTHER shapes is NOT here: the view name
+        -- is the kebab-case of the class name, which other.nvim's `%1`
+        -- substitution cannot express, and single-file components have no
+        -- second file at all. <leader>lw (lua/artisan/livewire.lua) covers all
+        -- four shapes, including these.
+        -- ============================================================
+        {
+          pattern = "(.*/⚡[^/]+)/([^/]+)%.php$",
+          target = {
+            { target = "%1/%2.blade.php", context = "view" },
+            { target = "%1/%2.js",        context = "js" },
+            { target = "%1/%2.css",       context = "css" },
+          },
+        },
+        {
+          pattern = "(.*/⚡[^/]+)/([^/]+)%.blade%.php$",
+          target = {
+            { target = "%1/%2.php", context = "class" },
+            { target = "%1/%2.js",  context = "js" },
+            { target = "%1/%2.css", context = "css" },
+          },
+        },
+        {
+          pattern = "(.*/⚡[^/]+)/([^/]+)%.js$",
+          target = {
+            { target = "%1/%2.php",       context = "class" },
+            { target = "%1/%2.blade.php", context = "view" },
+            { target = "%1/%2.css",       context = "css" },
+          },
+        },
+        {
+          pattern = "(.*/⚡[^/]+)/([^/]+)%.css$",
+          target = {
+            { target = "%1/%2.php",       context = "class" },
+            { target = "%1/%2.blade.php", context = "view" },
+          },
+        },
+        -- Livewire class ↔ view for the legacy class-based shape. The view name
+        -- is the kebab-case of the class path, which plain `%1` cannot express —
+        -- but other.nvim's builtin transformers do exactly this conversion
+        -- per path segment, so `Reports/Sales` ↔ `reports/sales` round-trips.
+        {
+          pattern = "/app/Livewire/(.*)%.php$",
+          target = {
+            { target = "/resources/views/livewire/%1.blade.php", context = "view", transformer = "camelToKebap" },
+          },
+        },
+        {
+          pattern = "/resources/views/livewire/(.*)%.blade%.php$",
+          target = {
+            { target = "/app/Livewire/%1.php",      context = "component", transformer = "kebapToCamel" },
+            { target = "/app/Http/Livewire/%1.php", context = "component (v2)", transformer = "kebapToCamel" },
+          },
+        },
+        -- Livewire tests. `make:livewire --test` writes
+        -- tests/Feature/Livewire/<Path>/<Name>Test.php for class components;
+        -- Livewire 4's single/multi-file components are conventionally tested
+        -- under the same tree.
+        {
+          pattern = "/app/Livewire/(.*)%.php$",
+          target = {
+            { target = "/tests/Feature/Livewire/%1Test.php", context = "feature" },
+            { target = "/tests/Unit/Livewire/%1Test.php",    context = "unit" },
+          },
+        },
+        {
+          pattern = "/tests/Feature/Livewire/(.*)Test%.php$",
+          target = { { target = "/app/Livewire/%1.php", context = "component" } },
+        },
+        {
+          pattern = "/tests/Unit/Livewire/(.*)Test%.php$",
+          target = { { target = "/app/Livewire/%1.php", context = "component" } },
+        },
+        -- ============================================================
+        {
+          pattern = "/app/Models/(.*)%.php$",
+          target = {
+            { target = "/tests/Unit/Models/%1Test.php",        context = "unit" },
+            { target = "/tests/Feature/Models/%1Test.php",     context = "feature" },
+            { target = "/tests/Unit/%1Test.php",               context = "unit-flat" },
+            { target = "/tests/Feature/%1Test.php",            context = "feature-flat" },
+            { target = "/database/factories/%1Factory.php",    context = "factory" },
+            { target = "/app/Policies/%1Policy.php",           context = "policy" },
+            { target = "/app/Observers/%1Observer.php",        context = "observer" },
+            { target = "/app/Http/Resources/%1Resource.php",   context = "resource" },
+          },
+        },
+        {
+          pattern = "/app/Http/Controllers/(.*)Controller%.php$",
+          target = {
+            { target = "/tests/Feature/Http/Controllers/%1ControllerTest.php", context = "feature" },
+            { target = "/tests/Feature/%1ControllerTest.php",                  context = "feature-flat" },
+            { target = "/tests/Unit/Http/Controllers/%1ControllerTest.php",    context = "unit" },
+            -- `make:request` names the class after the ACTION, not the model
+            -- (StorePostRequest / UpdatePostRequest), so the bare %1Request form
+            -- alone never resolves for a generated request.
+            { target = "/app/Http/Requests/Store%1Request.php",                context = "store request" },
+            { target = "/app/Http/Requests/Update%1Request.php",               context = "update request" },
+            { target = "/app/Http/Requests/%1Request.php",                     context = "request" },
+            { target = "/app/Http/Resources/%1Resource.php",                   context = "resource" },
+            { target = "/app/Models/%1.php",                                   context = "model" },
+          },
+        },
+        -- Requests, both directions: strip the Store/Update/Destroy verb to get
+        -- back to the controller and model.
+        {
+          pattern = "/app/Http/Requests/[A-Z][a-z]+(%u.*)Request%.php$",
+          target = {
+            { target = "/app/Http/Controllers/%1Controller.php", context = "controller" },
+            { target = "/app/Models/%1.php",                     context = "model" },
+          },
+        },
+        {
+          pattern = "/app/Http/Requests/(.*)Request%.php$",
+          target = {
+            { target = "/app/Http/Controllers/%1Controller.php", context = "controller" },
+            { target = "/tests/Feature/Http/Requests/%1RequestTest.php", context = "feature" },
+          },
+        },
+        {
+          pattern = "/app/Http/Middleware/(.*)%.php$",
+          target = {
+            { target = "/tests/Feature/Http/Middleware/%1Test.php", context = "feature" },
+            { target = "/tests/Unit/Http/Middleware/%1Test.php",    context = "unit" },
+          },
+        },
+        {
+          pattern = "/app/Http/Resources/(.*)Resource%.php$",
+          target = {
+            { target = "/app/Models/%1.php",                     context = "model" },
+            { target = "/app/Http/Controllers/%1Controller.php", context = "controller" },
+          },
+        },
+        {
+          pattern = "/app/Policies/(.*)Policy%.php$",
+          target = {
+            { target = "/app/Models/%1.php",                     context = "model" },
+            { target = "/tests/Feature/Policies/%1PolicyTest.php", context = "feature" },
+            { target = "/tests/Unit/Policies/%1PolicyTest.php",    context = "unit" },
+          },
+        },
+        {
+          pattern = "/app/Observers/(.*)Observer%.php$",
+          target = { { target = "/app/Models/%1.php", context = "model" } },
+        },
+        {
+          pattern = "/app/Jobs/(.*)%.php$",
+          target = {
+            { target = "/tests/Feature/Jobs/%1Test.php", context = "feature" },
+            { target = "/tests/Unit/Jobs/%1Test.php",    context = "unit" },
+          },
+        },
+        -- Event ↔ listener: Laravel's generator names the listener after the
+        -- event it handles, which is the only reliable bridge between the two.
+        {
+          pattern = "/app/Events/(.*)%.php$",
+          target = {
+            { target = "/app/Listeners/%1Listener.php",    context = "listener" },
+            { target = "/tests/Feature/Events/%1Test.php", context = "feature" },
+            { target = "/tests/Unit/Events/%1Test.php",    context = "unit" },
+          },
+        },
+        {
+          pattern = "/app/Listeners/(.*)Listener%.php$",
+          target = {
+            { target = "/app/Events/%1.php",                          context = "event" },
+            { target = "/tests/Feature/Listeners/%1ListenerTest.php", context = "feature" },
+          },
+        },
+        {
+          pattern = "/app/Console/Commands/(.*)%.php$",
+          target = {
+            { target = "/tests/Feature/Console/Commands/%1Test.php", context = "feature" },
+            { target = "/tests/Unit/Console/Commands/%1Test.php",    context = "unit" },
+          },
+        },
+        {
+          pattern = "/app/Notifications/(.*)%.php$",
+          target = {
+            { target = "/tests/Feature/Notifications/%1Test.php", context = "feature" },
+            { target = "/tests/Unit/Notifications/%1Test.php",    context = "unit" },
+          },
+        },
+        {
+          pattern = "/app/Mail/(.*)%.php$",
+          target = {
+            { target = "/tests/Feature/Mail/%1Test.php", context = "feature" },
+            { target = "/tests/Unit/Mail/%1Test.php",    context = "unit" },
+          },
+        },
+        {
+          pattern = "/database/factories/(.*)Factory%.php$",
+          target = { { target = "/app/Models/%1.php", context = "model" } },
+        },
+        -- Test → source. The mirrored layout resolves via /app/%1.php directly;
+        -- the flat layout needs the app/ subdirectory guessed, so every plausible
+        -- home is offered.
+        {
+          pattern = "/tests/Unit/(.*)Test%.php$",
+          target = {
+            { target = "/app/%1.php",                     context = "source" },
+            { target = "/app/Models/%1.php",              context = "model" },
+            { target = "/app/Jobs/%1.php",                context = "job" },
+            { target = "/app/Events/%1.php",              context = "event" },
+          },
+        },
+        {
+          pattern = "/tests/Feature/(.*)Test%.php$",
+          target = {
+            { target = "/app/%1.php",                     context = "source" },
+            { target = "/app/Http/Controllers/%1.php",    context = "controller" },
+            { target = "/app/Models/%1.php",              context = "model" },
+            { target = "/app/Livewire/%1.php",            context = "livewire" },
+          },
+        },
+
+        -- ============================================================
         -- Angular webapp (inline templates — no .component.html)
         -- Targets beyond the obvious are candidates — missing ones hidden by
         -- showMissingFiles=false. Each target's pattern below lists component.ts

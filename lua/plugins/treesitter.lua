@@ -176,6 +176,9 @@ return {
     -- Alias `typescript` to the `html` config instead: it matches the angular
     -- tag nodes, and only triggers when a start_tag actually exists (injected
     -- templates), so plain `.ts` (generics `Foo<T>`, `=>`) is unaffected.
+    -- `blade` is already aliased to html upstream (and `setup()` deep-merges the
+    -- user table over the 24 built-in aliases rather than replacing them), so
+    -- only the typescript override belongs here.
     opts = {
       aliases = { ["typescript"] = "html" },
     },

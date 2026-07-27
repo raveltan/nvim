@@ -6,6 +6,8 @@ return {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
       "olimorris/neotest-phpunit",
+      -- Fork of theutz/neotest-pest: Pest 2+, Sail, parallel runs.
+      "V13Axel/neotest-pest",
       "marilari88/neotest-vitest",
       "nvim-neotest/neotest-python",
       "olimorris/neotest-rspec",
@@ -36,15 +38,26 @@ return {
       return keys
     end,
     opts = function()
+      -- PHP adapters. Under GAF there is exactly one, wired to the Docker test
+      -- infra. Otherwise BOTH pest and phpunit are registered and gated per file
+      -- (lua/artisan/test.lua) — deciding once at setup would bake in whatever
+      -- directory nvim happened to start in, and picking wrong fails the run
+      -- outright rather than degrading.
+      local php_adapters
+      if vim.g.gaf then
+        -- scripts/neotest-run-tests.sh wraps bin/run-tests (Docker infra); built
+        -- once here instead of being rebuilt in gaf.test.extend().
+        php_adapters = {
+          require("neotest-phpunit")({
+            phpunit_cmd = vim.fn.stdpath("config") .. "/scripts/neotest-run-tests.sh",
+          }),
+        }
+      else
+        php_adapters = require("artisan.test").php_adapters()
+      end
+
       local opts = {
         adapters = {
-          -- GAF: scripts/neotest-run-tests.sh wraps bin/run-tests (Docker infra);
-          -- built once here instead of being rebuilt in gaf.test.extend().
-          require("neotest-phpunit")({
-            phpunit_cmd = vim.g.gaf
-                and (vim.fn.stdpath("config") .. "/scripts/neotest-run-tests.sh")
-              or "vendor/bin/phpunit",
-          }),
           require("neotest-vitest")({
             filter_dir = function(name, _, _)
               return name ~= "node_modules" and name ~= "ui-tests"
@@ -88,6 +101,11 @@ return {
         status = { virtual_text = true, signs = true },
         output = { open_on_run = "short" },
       }
+      -- Front of the list: PHP is the most-used adapter here, and neotest picks
+      -- the first adapter that claims a file.
+      for i, adapter in ipairs(php_adapters) do
+        table.insert(opts.adapters, i, adapter)
+      end
       -- Flutter/Dart: only register neotest-dart on actual Flutter projects
       -- (pubspec.yaml in cwd or a parent), not in every session.
       if vim.fn.findfile("pubspec.yaml", ".;") ~= "" then

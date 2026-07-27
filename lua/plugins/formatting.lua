@@ -42,6 +42,15 @@ return {
       if vim.g.gaf then
         formatters_by_ft.php = { "php_cs_fixer" }
         formatters.php_cs_fixer = require("gaf.formatting").php_cs_fixer_formatter()
+      else
+        -- Laravel: pint for php, blade-formatter for views. Both are
+        -- condition-guarded on the project shipping the tool (see
+        -- lua/artisan/formatting.lua), so a plain PHP repo is left to the
+        -- lsp_format fallback below rather than being restyled to Laravel's
+        -- ruleset by a globally-installed pint.
+        local laravel_fmt = require("artisan.formatting")
+        formatters_by_ft = vim.tbl_deep_extend("force", formatters_by_ft, laravel_fmt.formatters_by_ft())
+        formatters = vim.tbl_deep_extend("force", formatters, laravel_fmt.formatters())
       end
       -- Merge into the accumulated opts (rails.lua's conform spec adds ruby/eruby);
       -- returning a fresh table here would drop theirs if lazy ever resolved this
@@ -73,6 +82,11 @@ return {
         lint.linters_by_ft = { php = { "phpcs" } }
       else
         lint.linters_by_ft = {}
+        -- phpstan/larastan is dispatched per buffer in the autocmd below rather
+        -- than declared here: eligibility depends on the buffer's own project
+        -- (artisan root + vendor/bin/phpstan + phpstan.neon), and
+        -- linters_by_ft is global.
+        require("artisan.lint").configure(lint)
       end
 
       -- Guarded: try_lint on every save would spam spawn errors if the
@@ -83,7 +97,17 @@ return {
 
       vim.api.nvim_create_autocmd({ "BufWritePost" }, {
         group = vim.api.nvim_create_augroup("lint", { clear = true }),
-        callback = function() lint.try_lint() end,
+        callback = function(args)
+          -- php outside GAF is project-dependent: run phpstan only where the
+          -- buffer's own project can actually support it. try_lint(nil) would
+          -- fall back to linters_by_ft, which has no php entry here.
+          if not vim.g.gaf and vim.bo[args.buf].filetype == "php" then
+            local names = require("artisan.lint").php_linters(args.buf)
+            if #names > 0 then lint.try_lint(names) end
+            return
+          end
+          lint.try_lint()
+        end,
       })
     end,
   },

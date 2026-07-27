@@ -15,6 +15,12 @@
       },
       {
         "language": [
+          "blade"
+        ],
+        "path": "./blade.json"
+      },
+      {
+        "language": [
           "ruby"
         ],
         "path": "./ruby.json"

@@ -192,6 +192,45 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>dv` | n | GAF xdebug: validate IDE setup |
 | `<leader>dD` | n | Toggle `GAF_DEBUG=1` (neotest passes `--debug`) |
 
+### Laravel profile (no `GAF=1`)
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>dp` | n | Xdebug: start the listener matching this project's env (skips the picker) |
+| `<leader>dP` | n | Xdebug: pick a php configuration |
+
+Four configs are registered: plain listener (no `pathMappings`), Sail/Docker
+listener (`/var/www/html` → `${workspaceFolder}`), launch current file, launch
+artisan command. See [[laravel-tooling]].
+
+## Laravel — `<leader>l*` (no `GAF=1`)
+
+laravel.nvim + blade-nav.nvim, loaded on `php`/`blade` buffers. Both no-op
+outside a project with an `artisan` file.
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>ll` | n | Laravel master picker |
+| `<leader>la` | n | Artisan command picker |
+| `<leader>lr` | n | Routes picker |
+| `<leader>lm` | n | `make:*` picker |
+| `<leader>lc` | n | Custom commands picker |
+| `<leader>lo` | n | Resources picker |
+| `<leader>lt` | n | Code actions (`$fillable`, relations, go-to-migration, Livewire ops) |
+| `<leader>lu` | n | Artisan Hub (tabbed terminals: serve, queue, pail, vite) |
+| `<leader>lp` | n | Command Center |
+| `<leader>lh` | n | `artisan docs` popup |
+| `<leader>lk` | n | Configure this project's environment |
+| `<leader>lw` | n | Livewire: move to another file of this component — class/view/js/css, all three Livewire 4 shapes (`:LivewireToggle`) |
+| `<leader>lv` | n | BladeNav: toggle `config()`/`env()`/translation annotations |
+| `<leader>lC` | n | BladeNav: clear cache |
+| `<leader>lf` | n | Laravel view finder |
+| `gd` | n | **Go to definition** — component behind a tag, property/action behind `{{ $x }}` or `$this->`, `route()`, `__()`, then LSP (lua/artisan/gd.lua) |
+| `gf` | n | Go to file — same resolvers, but ends at plain `gf` on a path (lua/artisan/gf.lua) |
+
+Commands: `:LaravelIdeHelper [models|meta|facades]`, `:LaravelPhpstan [level]`,
+`:LaravelArtisan <cmd>`, `:LaravelRoot`, `:LivewireToggle`.
+
 ## Database (`<leader>D` — vim-dadbod-ui)
 
 | Key | Mode | Description |
@@ -410,7 +449,7 @@ PascalCase, UPPER_CASE, kebab-case. Source: `lua/config/keymaps.lua` +
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>m` xcode (swift buffers) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` test (neotest) · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile (GAF=1 only) · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>l` laravel (no GAF=1) · `<leader>m` xcode (swift buffers) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` test (neotest) · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile (GAF=1 only) · `g` goto · `gs` surround
 
 ## Known overlaps
 
@@ -418,4 +457,5 @@ PascalCase, UPPER_CASE, kebab-case. Source: `lua/config/keymaps.lua` +
 - **`<C-p>` / `<C-n>`** — yanky yank-ring cycling (n). Blink.cmp uses its own keys in insert.
 - **`q`** — global (no map) vs buffer-local close-window in help/qf/man/grug-far/blame.
 - **`<CR>`** — blink.cmp in insert. Treesitter incremental-select start in normal / expand in visual (if enabled).
+- **`gf`** — owned by lua/artisan/gf.lua (buffer-local on php/blade), which calls blade-nav and laravel.nvim as steps of an explicit chain; both plugins' own `gf` registrations are disabled. devdocs/nvimdocs buffers have their own buffer-local `gf`.
 

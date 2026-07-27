@@ -11,3 +11,7 @@ require("config.autocmds")
 require("tagmatch").setup()
 require("angular").setup()
 require("gaf").setup()
+-- Laravel is detected per buffer from an `artisan` file, not from an env flag,
+-- so this is loaded for everyone and no-ops outside a Laravel checkout (and
+-- returns immediately under GAF=1). See lua/artisan/init.lua.
+require("artisan").setup()

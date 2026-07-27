@@ -35,6 +35,13 @@ return {
         "stylua",
         "prettierd",
         "prettier",
+        -- Laravel fallbacks. A project's own vendor/bin or node_modules/.bin
+        -- always wins (lua/artisan/init.lua resolves in that order); these only
+        -- make a freshly cloned project format and analyse before its
+        -- dependencies are installed.
+        "pint",
+        "blade-formatter",
+        "phpstan",
       },
       auto_update = false,
       -- Don't probe the registry on load; run :MasonToolsUpdate manually.
@@ -214,6 +221,33 @@ return {
       -- Intelephense (PHP)
       -- Premium licence auto-discovered from ~/intelephense/licence.txt — no
       -- licenceKey init_option needed.
+      --
+      -- Blade is deliberately absent from `filetypes`: intelephense cannot parse
+      -- @directives, so attaching it would trade a little completion inside
+      -- {{ }} for a syntax error on every @if. Blade's intelligence comes from
+      -- laravel.nvim + blade-nav + the html/emmet/tailwind servers below.
+      local php_excludes = {
+        -- Do NOT blanket-exclude vendor/ — that kills third-party symbol
+        -- resolution (Symfony AbstractController, Route, Request, etc).
+        -- Only trim vendor test dirs + nested vendor, matching intelephense defaults.
+        "**/vendor/**/{Tests,tests}/**",
+        "**/vendor/**/vendor/**",
+        "**/node_modules/**",
+        "**/.git/**",
+        "**/storage/**",
+        "**/.cache/**",
+        "**/coverage/**",
+      }
+      local php_stubs = nil
+      if not vim.g.gaf then
+        -- Laravel deltas: extension stubs the framework actually calls into, and
+        -- the generated/compiled trees that would otherwise be indexed as source.
+        -- Kept out of the GAF profile so its index shape is untouched.
+        local laravel_lsp = require("artisan.lsp")
+        php_stubs = laravel_lsp.stubs()
+        vim.list_extend(php_excludes, laravel_lsp.excludes())
+      end
+
       vim.lsp.config("intelephense", {
         filetypes = { "php" },
         -- Node heap cap, same idea as tsserver_max_memory=8192 for TS: the
@@ -225,21 +259,12 @@ return {
         root_markers = { { ".git" }, { "composer.json" } },
         settings = {
           intelephense = {
+            -- nil under GAF=1, which leaves intelephense on its default stub set.
+            stubs = php_stubs,
             files = {
               maxSize = 5000000,
               associations = { "*.php" },
-              exclude = {
-                -- Do NOT blanket-exclude vendor/ — that kills third-party symbol
-                -- resolution (Symfony AbstractController, Route, Request, etc).
-                -- Only trim vendor test dirs + nested vendor, matching intelephense defaults.
-                "**/vendor/**/{Tests,tests}/**",
-                "**/vendor/**/vendor/**",
-                "**/node_modules/**",
-                "**/.git/**",
-                "**/storage/**",
-                "**/.cache/**",
-                "**/coverage/**",
-              },
+              exclude = php_excludes,
             },
           },
         },
@@ -273,14 +298,19 @@ return {
       })
 
       -- Tailwind CSS
+      -- blade is included so Laravel views get class completion/hover/lint; the
+      -- server only starts where a tailwind config exists, so non-Tailwind
+      -- projects pay nothing for it being listed.
+      local tailwind_class_regex = { { "@apply\\s+([^;]*)", "" } }
+      if not vim.g.gaf then
+        vim.list_extend(tailwind_class_regex, require("artisan.lsp").tailwind_class_regex)
+      end
       vim.lsp.config("tailwindcss", {
-        filetypes = { "html", "css", "javascript", "typescript", "javascriptreact", "typescriptreact" },
+        filetypes = { "html", "css", "javascript", "typescript", "javascriptreact", "typescriptreact", "blade" },
         settings = {
           tailwindCSS = {
             experimental = {
-              classRegex = {
-                { "@apply\\s+([^;]*)", "" },
-              },
+              classRegex = tailwind_class_regex,
             },
           },
         },
@@ -289,8 +319,12 @@ return {
       -- HTML LSP.
       -- autoClosingTags disabled: nvim-ts-autotag already handles close-tag insertion;
       -- leaving this on causes duplicate `</tag>` (one from autotag, one from LSP completion).
+      -- blade is included so Laravel views still get tag/attribute completion
+      -- and auto-closing hints. It parses @directives as text, which is
+      -- harmless for completion — unlike intelephense, it emits no diagnostics
+      -- we'd have to suppress.
       vim.lsp.config("html", {
-        filetypes = { "html" },
+        filetypes = { "html", "blade" },
         init_options = {
           provideFormatter = false,
           configurationSection = { "html", "css", "javascript" },
@@ -314,7 +348,7 @@ return {
       -- default filetype set (defaults omit it).
       vim.lsp.config("emmet_language_server", {
         filetypes = {
-          "html", "eruby", "css", "scss", "sass", "less",
+          "html", "eruby", "blade", "css", "scss", "sass", "less",
           "javascriptreact", "typescriptreact", "vue", "svelte", "htmldjango",
         },
         init_options = {
@@ -471,10 +505,38 @@ return {
         delete_check_events = "TextChanged,InsertLeave",
         enable_autosnippets = false,
       })
+      -- Pest snippets are registered under a synthetic `pest` filetype rather
+      -- than `php`, and ft_func below adds that filetype only in buffers that
+      -- belong to a Pest project. Registering them as `php` would put
+      -- `it`/`test`/`describe` in the completion menu of every PHP buffer in
+      -- every project for the rest of the session — LuaSnip's registry is
+      -- global, so a load-once-on-demand approach leaks the same way.
+      if not vim.g.gaf then
+        local ft_from_filetype = require("luasnip.extras.filetype_functions").from_filetype
+        require("luasnip").config.setup({
+          ft_func = function()
+            local filetypes = ft_from_filetype()
+            if vim.bo.filetype == "php" and require("artisan.test").uses_pest() then
+              filetypes[#filetypes + 1] = "pest"
+            end
+            return filetypes
+          end,
+        })
+      end
+
       require("luasnip.loaders.from_vscode").lazy_load()
       require("luasnip.loaders.from_vscode").lazy_load({
         paths = { vim.fn.stdpath("config") .. "/snippets" },
       })
+      -- load(), not lazy_load(): lazy_load defers until a FileType event names
+      -- the filetype, and `pest` is synthetic — no buffer ever has it, so the
+      -- snippets would never arrive. Eager is fine here, it is 22 entries and
+      -- LuaSnip itself only loads on InsertEnter.
+      if not vim.g.gaf then
+        require("luasnip.loaders.from_vscode").load({
+          paths = { vim.fn.stdpath("config") .. "/snippets/pest" },
+        })
+      end
     end,
   },
 
@@ -558,30 +620,69 @@ return {
         list = { selection = { preselect = true, auto_insert = false } },
       },
       signature = { enabled = true, window = { border = "rounded" } },
-      sources = {
-        default = { "lsp", "path", "snippets", "buffer" },
-        -- blink does not consult omnifunc, so dadbod-completion must be
-        -- registered as a native source for SQL filetypes.
-        per_filetype = {
-          sql   = { "dadbod", "snippets", "buffer" },
-          mysql = { "dadbod", "snippets", "buffer" },
-          plsql = { "dadbod", "snippets", "buffer" },
-          -- Angular inline-template @Input/@Output completion (see
-          -- lua/angular/inputs_source.lua) on top of the normal TS sources.
-          typescript = { "angular_inputs", "lsp", "path", "snippets", "buffer" },
-        },
-        providers = {
-          lsp = { max_items = 50 },
-          dadbod = { name = "Dadbod", module = "vim_dadbod_completion.blink" },
-          angular_inputs = {
-            name = "Angular",
-            module = "angular.inputs_source",
-            -- Float component inputs above generic LSP/buffer noise when the
-            -- cursor is actually inside a component tag.
-            score_offset = 5,
+      sources = (function()
+        local sources = {
+          default = { "lsp", "path", "snippets", "buffer" },
+          -- blink does not consult omnifunc, so dadbod-completion must be
+          -- registered as a native source for SQL filetypes.
+          per_filetype = {
+            sql   = { "dadbod", "snippets", "buffer" },
+            mysql = { "dadbod", "snippets", "buffer" },
+            plsql = { "dadbod", "snippets", "buffer" },
+            -- Angular inline-template @Input/@Output completion (see
+            -- lua/angular/inputs_source.lua) on top of the normal TS sources.
+            typescript = { "angular_inputs", "lsp", "path", "snippets", "buffer" },
           },
-        },
-      },
+          providers = {
+            lsp = { max_items = 50 },
+            dadbod = { name = "Dadbod", module = "vim_dadbod_completion.blink" },
+            angular_inputs = {
+              name = "Angular",
+              module = "angular.inputs_source",
+              -- Float component inputs above generic LSP/buffer noise when the
+              -- cursor is actually inside a component tag.
+              score_offset = 5,
+            },
+          },
+        }
+
+        -- Laravel/Blade sources. Both plugins ship native blink sources but
+        -- neither registers itself: laravel.nvim's boot only calls
+        -- cmp.register_source, and blade-nav's blink module documents manual
+        -- wiring. Each source self-disables outside a Laravel project, so
+        -- listing them costs nothing elsewhere.
+        if not vim.g.gaf then
+          sources.providers.laravel = {
+            name = "Laravel",
+            module = "laravel.extensions.completion.blink",
+            -- view()/route()/config()/env() strings and Eloquent columns are
+            -- always more specific than the LSP's guesses at the same position.
+            score_offset = 5,
+          }
+          sources.providers.blade_nav = {
+            name = "BladeNav",
+            module = "blade-nav.integrations.blink",
+            score_offset = 5,
+          }
+          sources.providers.livewire = {
+            name = "Livewire",
+            module = "artisan.livewire_source",
+            score_offset = 5,
+          }
+          -- `lsp` on blade means html/emmet/tailwind, not intelephense — it is
+          -- not attached to blade by design (see its filetypes above). The
+          -- Laravel sources come first so a half-typed `wire:` or `<x-` isn't
+          -- buried under generic HTML attribute suggestions.
+          sources.per_filetype.blade = {
+            "livewire", "blade_nav", "laravel", "lsp", "snippets", "path", "buffer",
+          }
+          sources.per_filetype.php = {
+            "laravel", "blade_nav", "lsp", "snippets", "path", "buffer",
+          }
+        end
+
+        return sources
+      end)(),
       fuzzy = { implementation = "prefer_rust" },
       }
     end,
