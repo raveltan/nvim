@@ -360,7 +360,7 @@ local function wire_value_items(line, col, row)
 end
 
 --- `$title`, `$perPage`, … inside a component's OWN template, plus
---- `$this->method()`. intelephense is not attached to blade (it cannot parse
+--- `$this->method()`. The PHP server is not attached to blade (it cannot parse
 --- @directives), so without this nothing at all completes after `$` in a view —
 --- the blade equivalent of losing template member completion in Angular.
 ---@return table[]|nil

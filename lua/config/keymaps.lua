@@ -61,7 +61,7 @@ map("n", "<leader>cr", function()
   end
   local client = clients[1]
 
-  -- PHP/intelephense: rename range starts after `$` sigil. If cursor sits on `$`,
+  -- PHP: the server's rename range starts after the `$` sigil. If cursor sits on `$`,
   -- advance one column (restored below if the rename is cancelled).
   local orig_cursor = nil
   if vim.bo[bufnr].filetype == "php" then

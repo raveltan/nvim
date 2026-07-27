@@ -4,7 +4,7 @@
 --
 -- `gd` is the key that matters here. Most of what you chase in a Blade view is
 -- a *definition* — the component behind a tag, the property behind `{{ $x }}`,
--- the route behind `route('…')` — not a file path, and intelephense is not
+-- the route behind `route('…')` — not a file path, and the PHP server is not
 -- attached to blade at all, so plain `gd` did nothing there. `gf` still works
 -- and shares the same resolvers (lua/artisan/gf.lua); it just is not the key
 -- you should have to reach for.
@@ -71,7 +71,7 @@ function M.goto_definition()
   if refs.route() then return true end
   if refs.lang() then return true end
 
-  -- Blade-only from here: in a php buffer intelephense is authoritative for
+  -- Blade-only from here: in a php buffer phpantom_lsp is authoritative for
   -- everything else, and these resolvers would shadow it.
   if vim.bo.filetype ~= "blade" then return false end
   return require("artisan.gf").blade_nav() or require("artisan.gf").laravel_nvim()

@@ -5,7 +5,8 @@
 -- tool, for two reasons: a global `pint` on $PATH must never reformat an
 -- unrelated PHP repo to Laravel's style, and blade only ever exists in a Laravel
 -- checkout anyway. When no condition matches, conform falls through to
--- `lsp_format = "fallback"` (plugins/formatting.lua) and intelephense formats.
+-- `lsp_format = "fallback"` (plugins/formatting.lua) and phpantom_lsp formats
+-- (it shells out to pint/php-cs-fixer/phpcbf when the project ships one).
 local laravel = require("artisan")
 
 local M = {}

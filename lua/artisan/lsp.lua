@@ -3,53 +3,15 @@
 -- there is still exactly one place where each server is configured.
 local M = {}
 
--- intelephense's `stubs` setting REPLACES its default list rather than adding
--- to it, so the defaults have to be repeated verbatim. Everything after the
--- blank-line comment is the Laravel-specific addition: these extensions are
--- what a real app talks to (queues, cache, image processing) and without their
--- stubs intelephense reports every Redis:: / Imagick call as undefined.
--- Unknown stub names are ignored by the server, so listing an extension the
--- installed PHP doesn't have is harmless.
-local STUBS = {
-  "apache", "bcmath", "bz2", "calendar", "com_dotnet", "Core", "ctype", "curl",
-  "date", "dba", "dom", "enchant", "exif", "FFI", "fileinfo", "filter", "fpm",
-  "ftp", "gd", "gettext", "gmp", "hash", "iconv", "imap", "intl", "json",
-  "ldap", "libxml", "mbstring", "meta", "mysqli", "oci8", "odbc", "openssl",
-  "pcntl", "pcre", "PDO", "pdo_ibm", "pdo_mysql", "pdo_pgsql", "pdo_sqlite",
-  "pgsql", "Phar", "posix", "pspell", "readline", "Reflection", "session",
-  "shmop", "SimpleXML", "snmp", "soap", "sockets", "sodium", "SPL", "sqlite3",
-  "standard", "superglobals", "sysvmsg", "sysvsem", "sysvshm", "tidy",
-  "tokenizer", "xml", "xmlreader", "xmlrpc", "xmlwriter", "xsl",
-  "Zend OPcache", "zip", "zlib",
-
-  "redis", "memcached", "imagick", "pcov", "xdebug", "swoole", "mongodb",
-  "amqp", "yaml", "ds", "igbinary",
-}
-
--- Generated/compiled trees that would otherwise be indexed as real source.
--- storage/ is already excluded by the base config in plugins/lsp.lua; these are
--- the Laravel-shaped additions. NOT excluded on purpose: _ide_helper*.php and
--- .phpstorm.meta.php in the project root — those files exist precisely so
--- intelephense can resolve facades and container bindings.
-local EXCLUDES = {
-  "**/bootstrap/cache/**",
-  "**/public/build/**",
-  "**/public/hot",
-  "**/.phpunit.cache/**",
-}
-
----@return string[]
-function M.stubs()
-  return vim.deepcopy(STUBS)
-end
-
----@return string[]
-function M.excludes()
-  return vim.deepcopy(EXCLUDES)
-end
+-- No stub or exclude lists here anymore. They existed for intelephense, which
+-- needed the whole phpstorm-stubs set repeated verbatim to add `redis`/`imagick`
+-- to it, plus a glob list to keep bootstrap/cache and public/build out of the
+-- index. phpantom_lsp compiles the stubs into the binary and honours .gitignore,
+-- so both are the server's problem now; anything left to tune goes in the
+-- project's `.phpantom.toml` (see lua/plugins/lsp.lua).
 
 -- Filetypes that need to be added to the html/emmet/tailwind servers so blade
--- buffers get tag, abbreviation and class completion. intelephense is
+-- buffers get tag, abbreviation and class completion. The PHP server is
 -- intentionally NOT in this list: it cannot parse @directives, so attaching it
 -- to blade trades a little completion inside {{ }} for a syntax error on every
 -- @if. Blade's PHP intelligence comes from laravel.nvim and blade-nav instead.

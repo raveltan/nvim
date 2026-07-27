@@ -10,7 +10,9 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     opts = function()
-      local servers = { "vtsls", "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "intelephense", "tailwindcss", "typos_lsp", "emmet_language_server", "lua_ls" }
+      -- PHP is deliberately absent: phpantom_lsp has no mason package, it comes
+      -- from `brew install phpantom-lsp` and is enabled by hand below.
+      local servers = { "vtsls", "eslint", "basedpyright", "ruff", "jsonls", "yamlls", "html", "cssls", "tailwindcss", "typos_lsp", "emmet_language_server", "lua_ls" }
       if vim.g.gaf then
         servers = require("gaf.lsp").filter_mason_servers(servers)
       end
@@ -218,64 +220,37 @@ return {
         end,
       })
 
-      -- Intelephense (PHP)
-      -- Premium licence auto-discovered from ~/intelephense/licence.txt — no
-      -- licenceKey init_option needed.
+      -- PHPantom (PHP) — Rust server, replaces intelephense. Installed with
+      -- `brew install phpantom-lsp` (no mason package), hence the executable
+      -- guard and the manual vim.lsp.enable.
       --
-      -- Blade is deliberately absent from `filetypes`: intelephense cannot parse
-      -- @directives, so attaching it would trade a little completion inside
-      -- {{ }} for a syntax error on every @if. Blade's intelligence comes from
-      -- laravel.nvim + blade-nav + the html/emmet/tailwind servers below.
-      local php_excludes = {
-        -- Do NOT blanket-exclude vendor/ — that kills third-party symbol
-        -- resolution (Symfony AbstractController, Route, Request, etc).
-        -- Only trim vendor test dirs + nested vendor, matching intelephense defaults.
-        "**/vendor/**/{Tests,tests}/**",
-        "**/vendor/**/vendor/**",
-        "**/node_modules/**",
-        "**/.git/**",
-        "**/storage/**",
-        "**/.cache/**",
-        "**/coverage/**",
-      }
-      local php_stubs = nil
-      if not vim.g.gaf then
-        -- Laravel deltas: extension stubs the framework actually calls into, and
-        -- the generated/compiled trees that would otherwise be indexed as source.
-        -- Kept out of the GAF profile so its index shape is untouched.
-        local laravel_lsp = require("artisan.lsp")
-        php_stubs = laravel_lsp.stubs()
-        vim.list_extend(php_excludes, laravel_lsp.excludes())
+      -- Nothing is passed as LSP `settings` on purpose: the server answers
+      -- workspace/didChangeConfiguration with "not implemented" and reads
+      -- `.phpantom.toml` instead — project root first, then
+      -- ~/.config/phpantom_lsp/.phpantom.toml, project wins outright on any key
+      -- it sets. `phpantom_lsp init` writes a commented default. So the old
+      -- intelephense knobs have no counterpart here, and mostly no need for one:
+      -- phpstorm-stubs are compiled into the binary (no `stubs` list to repeat),
+      -- Laravel Eloquent/relations resolve natively (no ide-helper dependency),
+      -- and indexing follows .gitignore rather than a glob exclude list. What
+      -- remains tunable per repo is `[indexing] strategy` and the external-tool
+      -- runners (`[phpstan]`, `[phpcs]`, `[mago]`).
+      --
+      -- Blade is deliberately absent from `filetypes` for the same reason as
+      -- before: the parser is PHP-only, so every @directive would be a syntax
+      -- error. Blade's intelligence comes from laravel.nvim + blade-nav + the
+      -- html/emmet/tailwind servers below.
+      if vim.fn.executable("phpantom_lsp") == 1 then
+        vim.lsp.config("phpantom_lsp", {
+          filetypes = { "php" },
+          -- Nested = priority order (0.11.3+): an explicit .phpantom.toml marks
+          -- the intended root, then .git so the monorepo roots once at the repo
+          -- top instead of at whichever nested composer.json is closest, which
+          -- fragmented intelephense's index across sub-package workspaces.
+          root_markers = { { ".phpantom.toml" }, { ".git" }, { "composer.json" } },
+        })
+        vim.lsp.enable("phpantom_lsp")
       end
-
-      vim.lsp.config("intelephense", {
-        filetypes = { "php" },
-        -- Node heap cap, same idea as tsserver_max_memory=8192 for TS: the
-        -- default ~4GB heap can OOM indexing fl-gaf.
-        cmd_env = { NODE_OPTIONS = "--max-old-space-size=8192" },
-        -- Nested = priority order (0.11.3+): prefer .git so the monorepo roots
-        -- once at the repo top instead of at whichever nested composer.json is
-        -- closest, which fragmented the index across sub-package workspaces.
-        root_markers = { { ".git" }, { "composer.json" } },
-        settings = {
-          intelephense = {
-            -- nil under GAF=1, which leaves intelephense on its default stub set.
-            stubs = php_stubs,
-            files = {
-              maxSize = 5000000,
-              associations = { "*.php" },
-              exclude = php_excludes,
-            },
-          },
-        },
-        on_attach = function(client, _)
-          -- Disable prepareRename: intelephense's prepare range is unreliable on `$var`.
-          -- Raw rename request (see <leader>cr in keymaps.lua) handles position correctly.
-          if client.server_capabilities.renameProvider then
-            client.server_capabilities.renameProvider = { prepareProvider = false }
-          end
-        end,
-      })
 
       -- JSON LSP with SchemaStore catalog (package.json, tsconfig, composer.json, GH Actions, ...)
       vim.lsp.config("jsonls", {
@@ -321,7 +296,7 @@ return {
       -- leaving this on causes duplicate `</tag>` (one from autotag, one from LSP completion).
       -- blade is included so Laravel views still get tag/attribute completion
       -- and auto-closing hints. It parses @directives as text, which is
-      -- harmless for completion — unlike intelephense, it emits no diagnostics
+      -- harmless for completion — unlike a PHP server, it emits no diagnostics
       -- we'd have to suppress.
       vim.lsp.config("html", {
         filetypes = { "html", "blade" },
@@ -669,7 +644,7 @@ return {
             module = "artisan.livewire_source",
             score_offset = 5,
           }
-          -- `lsp` on blade means html/emmet/tailwind, not intelephense — it is
+          -- `lsp` on blade means html/emmet/tailwind, not phpantom_lsp — it is
           -- not attached to blade by design (see its filetypes above). The
           -- Laravel sources come first so a half-typed `wire:` or `<x-` isn't
           -- buried under generic HTML attribute suggestions.
