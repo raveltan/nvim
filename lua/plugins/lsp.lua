@@ -592,6 +592,15 @@ return {
 			require("luasnip.loaders.from_vscode").lazy_load({
 				paths = { vim.fn.stdpath("config") .. "/snippets" },
 			})
+			-- Laravel 13 / Livewire 4 / Filament v5, kept in their own pack and out of
+			-- the GAF profile: LuaSnip's registry is global and these register under
+			-- plain `php`, so loading them in the monolith would put `lmodel`,
+			-- `filres` and friends in the completion menu of every PHP buffer there.
+			if not vim.g.gaf then
+				require("luasnip.loaders.from_vscode").lazy_load({
+					paths = { vim.fn.stdpath("config") .. "/snippets/laravel" },
+				})
+			end
 			-- load(), not lazy_load(): lazy_load defers until a FileType event names
 			-- the filetype, and `pest` is synthetic — no buffer ever has it, so the
 			-- snippets would never arrive. Eager is fine here, it is 22 entries and

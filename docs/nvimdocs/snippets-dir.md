@@ -2,7 +2,7 @@
 > Local VS Code-format snippet pack consumed by LuaSnip and edited by scissors.
 
 **Local spec:** snippets/
-**Tags:** snippets, gaf, php, ruby, typescript
+**Tags:** snippets, gaf, php, ruby, typescript, laravel, livewire, filament, pest
 
 ## Scope
 
@@ -14,10 +14,18 @@
 snippets/
 ├── package.json   manifest mapping language -> json file
 ├── php.json       PHP + GAF Phoenix (Controller/Handler/Repo/DTO/Enum/Test) + PHPDoc
+├── blade.json     Blade directives, components, Livewire tags/directives
 ├── ruby.json      Rails controllers, models, ERB form helpers, RSpec, etc.
 ├── eruby.json     ERB tag wrappers and form helpers
-└── typescript.json GAF Angular components, RxJS, signals, etc.
+├── typescript.json GAF Angular components, RxJS, signals, etc.
+├── laravel/       Laravel 13 + Livewire 4 + Filament v5 (php + blade), non-GAF only
+└── pest/          Pest 5 (registered under the synthetic `pest` filetype), non-GAF only
 ```
+
+`laravel/` and `pest/` are separate packs with their own `package.json` because LuaSnip's
+registry is global: loading them in the GAF profile would put `lmodel`, `filres` and `it`
+in the completion menu of every PHP buffer in the monolith. Both are loaded from
+[[cmp-luasnip]] behind `if not vim.g.gaf`.
 
 ### package.json
 
@@ -81,10 +89,51 @@ Each snippet is a key whose value is `{ prefix, description, body }`:
 
 `typescript.json` mirrors the GAF Angular conventions (non-standalone OnPush component, `inject()` DI).
 
+## Laravel pack (`snippets/laravel/`)
+
+Tracks Laravel 13 (released 2026-03-17, PHP 8.3+), Livewire 4 and Filament v5. Prefixes are
+namespaced so nothing collides with the GAF `fl-*` set or the stock Blade set.
+
+`php.json` — `l*` Laravel, `lw*` Livewire, `fil*` Filament:
+
+- `lmodel` `lcasts` `lscope` `lattr` `lbelongsto` `lhasmany` `lhasone` `lbelongstomany` `lmorphmany`
+  — model with the `casts()` method (not the removed `$casts` property) and the `#[Scope]` attribute.
+- `lmig` `lmigtable` — anonymous-class migrations.
+- `lctl` `lctli` `lauthz` `lreq` `lres` `ljsonapi` `lmw` — controllers using Laravel 13's
+  `#[Middleware]` / `#[Authorize]` attributes, plus the new `JsonApiResource`.
+- `lroute` `lrouteres` `lroutegroup` `lroutelw` — routes, including Livewire 4's `Route::livewire()`.
+- `ljob` `lqroute` `levent` `llistener` `lnotif` `lmail` — jobs carry `#[Tries]` / `#[Timeout]`
+  (`Illuminate\Queue\Attributes\*`); `lqroute` is Laravel 13's `Queue::route()`.
+- `lpolicy` `lobserver` `lprovider` `lcmd` `lfactory` `lseeder` `lrule` `lcast` `lenum`.
+- `lvalidate` `ltx` `lcache` `lcachetouch` `lquery` — `lcachetouch` is Laravel 13's `Cache::touch()`.
+- `laiprompt` `laiimage` `laiaudio` `laiembed` `lvector` — Laravel AI SDK + `whereVectorSimilarTo()`.
+- `lwclass` `lwcomputed` `lwvalidate` `lwon` `lwdispatch` `lwurl` `lwlocked` `lwform` `lwpaginate`
+  `lwupload` `lwlayout` — class-based Livewire components and their attributes.
+- `filres` `filform` `filtable` `filinfolist` `filfields` `filsection` `filcol` `filfilter`
+  `filaction` `filwidget` `filpage` `filrel` — Filament v5's unified schema API
+  (`Filament\Schemas\Schema`, `Filament\Actions\*`, `recordActions()` / `toolbarActions()`).
+
+`blade.json` — Livewire 4 markup:
+
+- `lwsfc` — single-file component (`resources/views/components/⚡name.blade.php`).
+- `island` `islandname` `islandlazy` `islanddefer` `placeholder` `wisland` — islands.
+- `wmodel` `wclick` `wsubmit` `wloading` `wnavigate` `wpoll` `wconfirm` `wkey` `wignore` `wdirty`
+  `wtransition` `wshow` `wtext` `wbind` `wref` `wsort` `wstream` `lwslot` `lwattrs`.
+
+Volt is deliberately not covered — normal Livewire only.
+
+The Pest pack additionally carries Pest 5: `pvisit` `pbrowser` `psmoke` `pa11y` `pdevice` `pshot`
+(browser plugin), `peval` (evals plugin), `plw` `pjson` `pinvalid` `pqueue` `pmail` `pevent`
+`pstorage` `ptravel`.
+
 ## Links
 
 - VS Code snippet syntax: https://code.visualstudio.com/docs/editor/userdefinedsnippets
 - scissors.nvim: https://github.com/chrisgrieser/nvim-scissors
+- Laravel 13 release notes: https://laravel.com/docs/13.x/releases
+- Livewire 4 components / islands: https://livewire.laravel.com/docs/4.x/components
+- Filament v5 resources: https://filamentphp.com/docs/5.x/resources/overview
+- Pest browser testing: https://pestphp.com/docs/browser-testing
 
 ## Notes
 

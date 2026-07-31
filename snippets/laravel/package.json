@@ -1,0 +1,19 @@
+{
+  "name": "rtanjaya-laravel-snippets",
+  "contributes": {
+    "snippets": [
+      {
+        "language": [
+          "php"
+        ],
+        "path": "./php.json"
+      },
+      {
+        "language": [
+          "blade"
+        ],
+        "path": "./blade.json"
+      }
+    ]
+  }
+}

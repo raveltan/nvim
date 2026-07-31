@@ -56,7 +56,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 - [cmp-blink](cmp-blink.md) — blink.cmp completion engine
 - [cmp-luasnip](cmp-luasnip.md) — LuaSnip snippet engine + paths
-- [snippets-dir](snippets-dir.md) — `~/.config/nvim/snippets/` JSON snippet pack
+- [snippets-dir](snippets-dir.md) — `~/.config/nvim/snippets/` JSON snippet pack (+ Laravel 13 / Livewire 4 / Filament v5 / Pest 5)
 
 ## Treesitter
 
