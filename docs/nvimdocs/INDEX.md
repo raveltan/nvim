@@ -38,12 +38,19 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [lsp-mason](lsp-mason.md) — Mason tool installer / `:Mason` UI
 - [lsp-mason-lspconfig](lsp-mason-lspconfig.md) — server ensure_installed bridge
 - [lsp-mason-tool-installer](lsp-mason-tool-installer.md) — non-LSP tool install via `:MasonTools*`
-- [lsp-nvim-lspconfig](lsp-nvim-lspconfig.md) — server configs (basedpyright, intelephense, ...)
+- [lsp-nvim-lspconfig](lsp-nvim-lspconfig.md) — server configs (basedpyright, phpantom_lsp, ...)
 - [lsp-vtsls](lsp-vtsls.md) — TypeScript LSP + source-action keymaps (`<leader>co/cM/cU/cx/cF/cD`)
 - [lsp-actions-preview](lsp-actions-preview.md) — diff preview for code actions
 - [lsp-fidget](lsp-fidget.md) — LSP progress notifier
 - [lsp-lazydev](lsp-lazydev.md) — Lua LSP awareness for `vim.*` API
 - [lsp-trouble](lsp-trouble.md) — diagnostics panel
+
+## Laravel
+
+- [laravel-lsp](laravel-lsp.md) — first-party `laravel/lsp`: framework strings, component tags, `@directives`
+- [laravel-blade](laravel-blade.md) — `.blade.php` highlighting, completion sources, comments, formatting
+- [laravel-nvim](laravel-nvim.md) — artisan, Tinker, pickers, Eloquent code actions (`<leader>l*`)
+- [laravel-tooling](laravel-tooling.md) — Pint, phpstan/larastan, Pest, Xdebug, Livewire navigation
 
 ## Completion
 

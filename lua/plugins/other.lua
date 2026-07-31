@@ -289,8 +289,7 @@ return {
         -- Livewire class ↔ view for the OTHER shapes is NOT here: the view name
         -- is the kebab-case of the class name, which other.nvim's `%1`
         -- substitution cannot express, and single-file components have no
-        -- second file at all. <leader>lw (lua/artisan/livewire.lua) covers all
-        -- four shapes, including these.
+        -- second file at all. `gd` on the tag reaches them through laravel_lsp.
         -- ============================================================
         {
           pattern = "(.*/⚡[^/]+)/([^/]+)%.php$",

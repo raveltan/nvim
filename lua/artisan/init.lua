@@ -136,11 +136,7 @@ function M.setup()
   -- every individual root() call to come back nil.
   if vim.g.gaf then return end
 
-  require("artisan.ide_helper").setup()
   require("artisan.lint").setup()
-  require("artisan.livewire").setup()
-  require("artisan.gf").setup()
-  require("artisan.gd").setup()
 
   vim.api.nvim_create_user_command("LaravelArtisan", function(opts)
     M.artisan(opts.args)

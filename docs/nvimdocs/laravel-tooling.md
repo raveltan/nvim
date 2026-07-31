@@ -1,8 +1,8 @@
 # laravel-tooling
-> Pint, phpstan/larastan, Pest, Xdebug, IDE helper, Livewire navigation.
+> Pint, phpstan/larastan, Pest, Xdebug, and the two language servers.
 
-**Local spec:** lua/artisan/ (init, formatting, lint, dap, test, ide_helper, livewire)
-**Tags:** laravel pint phpstan larastan pest xdebug ide-helper livewire volt neotest
+**Local spec:** lua/artisan/ (init, formatting, lint, dap, test, lsp)
+**Tags:** laravel pint phpstan larastan pest xdebug livewire neotest
 
 ## Detection model
 `lua/gaf/` is one checkout behind an env flag, so it decides everything at startup. Laravel is *whatever project this buffer belongs to* — several can be open at once, or none — so `lua/artisan/init.lua` resolves the project from the **buffer's** path on every call and returns `nil` when there isn't one. That `nil` is also what keeps all of this inert inside fl-gaf (no `artisan` file).
@@ -27,7 +27,7 @@ Formatters and static analysers deliberately run on the **host** even under sail
 ## Formatting — Pint
 `php` → `{ "pint", "php_cs_fixer", stop_after_first = true }`, `blade` → `blade-formatter` (lua/artisan/formatting.lua).
 
-Every entry is condition-guarded on the project shipping the tool. Pint *is* php-cs-fixer with Laravel's ruleset baked in, so a globally-installed `pint` must never restyle an unrelated PHP repo; `php_cs_fixer` additionally requires a `.php-cs-fixer*` config, since with none it rewrites to its own defaults. When nothing matches, conform's `lsp_format = "fallback"` lets intelephense format.
+Every entry is condition-guarded on the project shipping the tool. Pint *is* php-cs-fixer with Laravel's ruleset baked in, so a globally-installed `pint` must never restyle an unrelated PHP repo; `php_cs_fixer` additionally requires a `.php-cs-fixer*` config, since with none it rewrites to its own defaults. When nothing matches, conform's `lsp_format = "fallback"` lets phpantom_lsp format.
 
 `pint`, `blade-formatter` and `phpstan` are in mason's `ensure_installed` as global fallbacks for a project whose dependencies aren't installed yet; project binaries always win. Mason's `pint` needs PHP ≥ 8.2.
 
@@ -82,22 +82,19 @@ All four set `ignore = { "**/vendor/**/*.php" }` (keeps the debugger out of Illu
 
 GAF and Laravel both own `dap.configurations.php` outright, so exactly one of them runs.
 
-## intelephense + IDE helper
-Without generated helper files intelephense sees `Route::get()` as an undefined static method — the real signature only exists at runtime via `__callStatic`. `:LaravelIdeHelper [facades|models|meta]` runs the generators in order and restarts intelephense (it has no reindex request):
+## Language servers
+Two attach to a Laravel PHP buffer, and they split cleanly:
 
-| Step | Writes |
+| Server | Answers |
 |---|---|
-| `ide-helper:generate` | `_ide_helper.php` — facade signatures |
-| `ide-helper:models -M -n` | `_ide_helper_models.php` + one `@mixin` line per model |
-| `ide-helper:meta` | `.phpstorm.meta.php` — container binding return types |
+| `phpantom_lsp` | general PHP — completion, definition, references, rename, symbols. `php` only |
+| `laravel_lsp` | framework strings, component tags, `@directives`. `php` **and** `blade` |
 
-`-M` writes only the mixin docblock, so model files aren't rewritten; `-n` is required or the command blocks on a prompt forever. If `barryvdh/laravel-ide-helper` is missing it offers to `composer require --dev` it first (it edits composer.json, so it asks).
+See [[laravel-lsp]] for what the framework server does and does not cover, and [[laravel-blade]] for how Blade buffers get the rest.
 
-lua/artisan/lsp.lua adds Laravel deltas to intelephense: the framework's extension `stubs` (redis, memcached, imagick, pcov, xdebug, swoole, mongodb, …, on top of the full default list, which the setting *replaces* rather than extends) and excludes for `bootstrap/cache`, `public/build`, `public/hot`, `.phpunit.cache`. The generated helper files are pointedly **not** excluded. `vendor/` is never blanket-excluded — that would kill third-party symbol resolution.
+lua/artisan/lsp.lua now carries one thing: extra `classRegex` entries for tailwindcss-language-server, since Laravel hides classes in `@class([...])`, `wire:loading.class` and `x-bind:class`.
 
 ## Livewire
-`<leader>lw` (or `:LivewireToggle`) moves between the files that make up one component — the move neither plugin covers.
-
 Livewire 4 ships **three** component shapes and `make:livewire` defaults to the one that didn't exist before, so the naive class↔view assumption from every Livewire 3 guide is wrong. Verified against livewire/livewire v4.3.3:
 
 | Shape | Files |
@@ -106,40 +103,31 @@ Livewire 4 ships **three** component shapes and `make:livewire` defaults to the 
 | `--mfc` | directory `resources/views/components/billing/⚡invoice/` holding `invoice.php` + `invoice.blade.php` (+ optional `.js` / `.css`) |
 | `--class` (v3 legacy) | `app/Livewire/Reports/Sales.php` + `resources/views/livewire/reports/sales.blade.php` — Livewire 2 used `app/Http/Livewire` |
 
-`require("laravel.livewire").related(root, file)` returns every sibling of whichever shape the current file belongs to, plus a `kind` (`class` / `view` / `mfc` / `sfc` / `none`), so one keymap covers all of them:
+`<livewire:` / `<x-` tag names, hover and goto on a component tag all come from `laravel_lsp` ([[laravel-lsp]]), which enumerates components from the booted application and so covers every shape. Moving between the files of an mfc component is an other.nvim pattern — see [Related-file navigation](#related-file-navigation).
 
-- **class** → its view; a `view('…')` inside the class wins over the naming convention, so custom views navigate correctly
-- **view** → every class candidate that exists (a project can be mid-migration from `app/Http/Livewire`)
-- **mfc** → the sibling `.php` / `.blade.php` / `.js` / `.css`, picked via `vim.ui.select`
-- **sfc** → nothing to move to, and it says which shape it found rather than no-op'ing. The emoji-less variant is identified by content (`Livewire\Component`, `new class extends Component`, `Livewire\Volt`) since the path can't tell.
-
-Kebab conversion matches Laravel's `Str::kebab` exactly, including runs of capitals (`APIToken` → `a-p-i-token`).
-
-`wire:*` / `x-*` attribute completion and `<livewire:` / `<x-` **tag-name** completion are a separate blink source — see [[laravel-blade]]. `gf` on a component tag resolves through the same shape logic (lua/artisan/gf.lua).
+`wire:*` and Alpine `x-*` attributes have **no** completion source. `laravel_lsp` returns nothing for attribute names, their dot-modifiers, a tag's own props, `wire:model=`/`wire:click=` values, or `$prop` inside a component's own template.
 
 ## Coverage
 `<leader>tc` in a Pest project needs its flags threaded through `pest_cmd`: neotest-pest's `build_spec` ignores `extra_args`, `env` **and** `cwd`, so the `NEOTEST_COVERAGE` variable the GAF phpunit wrapper reads never reaches pest. lua/config/neotest-coverage.lua sets an absolute cobertura target on lua/artisan/test.lua for the duration of the run, and checks up front that xdebug or pcov is actually loaded — without a driver pest writes no report and the poll would just sit there until it timed out.
 
 ## Related-file navigation
-`gd` is the key to reach for, not `gf`. Following the shape `lua/angular/init.lua` uses, a buffer-local `gd` on php/blade tries the Laravel-aware resolvers and falls through to `Snacks.picker.lsp_definitions()` when none of them claims the cursor:
+`gd` is the key to reach for, and it is the stock global mapping — no php/blade override exists.
 
-| Cursor on | Goes to |
-|---|---|
-| `<x-badge`, `<livewire:admin.user-table`, `@livewire('…')` | the component file, all four Livewire 4 shapes |
-| `{{ $days }}`, `@if ($showArchived)`, `$this->save()` in a component's own template | the declaration line in its class — `app/Livewire/Reports/Sales.php:10`, on `public int $days = 30;` |
-| `route('posts.show')`, `__('posts.empty')` | the `->name()` line / the translation key |
-| `@include`, `view()`, `config()`, Inertia pages | via blade-nav's resolver |
-| anything else | the language server |
+| Cursor on | Goes to | Answered by |
+|---|---|---|
+| `<x-badge`, `<livewire:admin.user-table`, `@include`, `@extends` | the component / view file | laravel_lsp |
+| `route('posts.show')`, `__('posts.empty')`, `config('app.name')`, `view()`, Inertia pages | the `->name()` line, the lang file, `config/*.php` | laravel_lsp |
+| anything else | wherever the language server says | phpantom_lsp |
 
-Most of what you chase in a Blade view is a definition rather than a path, and intelephense is not attached to blade at all — so plain `gd` did nothing there before. `gf` still works and shares the same resolvers; it just ends at `normal! gf` instead of the LSP.
+`gf` is the builtin too. Most of what you chase in a Blade view is a definition rather than a path, so `gd` is the one that matters. There is **no** goto for the property behind `{{ $x }}` inside a component's own template — neither server resolves it.
 
 Livewire 4 **multi-file** components navigate with `<leader>oo` too — every member of a `⚡name/` directory shares the directory's base name, so `invoice.php` ↔ `invoice.blade.php` ↔ `invoice.js` ↔ `invoice.css` is expressible as an other.nvim pattern (the ⚡ is a literal). Livewire class ↔ **test** is wired both ways (`app/Livewire/X.php` ↔ `tests/{Feature,Unit}/Livewire/XTest.php`).
 
-Class ↔ view for the legacy shape **is** wired: the view name is the kebab-case of the class path, and other.nvim's builtin `camelToKebap`/`kebapToCamel` transformers do exactly that conversion per path segment, so `app/Livewire/Reports/Sales.php` ↔ `resources/views/livewire/reports/sales.blade.php` round-trips. Single-file components have no second file, so `<leader>lw` (which reports the shape) remains the right key there.
+Class ↔ view for the legacy shape **is** wired: the view name is the kebab-case of the class path, and other.nvim's builtin `camelToKebap`/`kebapToCamel` transformers do exactly that conversion per path segment, so `app/Livewire/Reports/Sales.php` ↔ `resources/views/livewire/reports/sales.blade.php` round-trips. Single-file components have no second file, so there is nothing to toggle to.
 
 Laravel projections were added to other.nvim (lua/plugins/other.lua) — `<leader>oo` / `<leader>os` / `<leader>oV`. Models ↔ tests/factory/policy/observer/resource, controllers ↔ tests/request/resource/model, events ↔ listeners, plus jobs/middleware/notifications/mail/commands → tests and both test layouts back to source. No path collision with the GAF `src/`, `src2/`, `consumers/` patterns, so they are registered in every profile.
 
 Livewire class ↔ view is *not* a projection: the view name is the kebab-case of the class name, which other.nvim's `%1` substitution cannot express.
 
 ## See also
-[[laravel-nvim]] · [[laravel-blade]] · [[laravel-blade-nav]] · [[format-conform]] · [[format-nvim-lint]] · [[dap-nvim-dap]]
+[[laravel-lsp]] · [[laravel-nvim]] · [[laravel-blade]] · [[format-conform]] · [[format-nvim-lint]] · [[dap-nvim-dap]]

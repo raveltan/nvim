@@ -24,11 +24,12 @@ Neovim ships no `ftplugin/blade.*`, so `commentstring` was empty and `gcc` silen
 ## Language servers attached to blade
 | Server | Why |
 |---|---|
+| `laravel_lsp` | `<x-` / `<livewire:` tag names, `@directives`, view/route/config/env/translation strings, plus hover, goto and diagnostics on all of them. See [[laravel-lsp]]. |
 | `html` | tag + attribute completion. Treats `@directives` as text and emits no diagnostics. |
 | `emmet_language_server` | `div>ul>li`, `.foo`, `!` abbreviations. |
 | `tailwindcss` | class completion/hover/lint. Only starts where a tailwind config exists. |
 
-**`intelephense` is deliberately NOT attached** (`filetypes = { "php" }`). It cannot parse `@if`/`@foreach`, so attaching it trades a little completion inside `{{ }}` for a syntax error on every directive. PHP-level intelligence in blade comes from the completion sources below instead.
+**`phpantom_lsp` is deliberately NOT attached** (`filetypes = { "php" }`). It cannot parse `@if`/`@foreach`, so attaching it trades a little completion inside `{{ }}` for a syntax error on every directive. Blade's framework intelligence comes from `laravel_lsp`, which parses Blade properly; what neither covers is filled by the `livewire` source below.
 
 ### Tailwind in Blade/Livewire
 `experimental.classRegex` is extended (lua/artisan/lsp.lua) beyond the default `class="…"` matcher, since Laravel hides classes in places Tailwind's own matcher never looks:
@@ -40,50 +41,26 @@ Neovim ships no `ftplugin/blade.*`, so `commentstring` was empty and `gcc` silen
 These are **JavaScript** regexes run inside the server, not Lua patterns.
 
 ## Completion sources (blink.cmp)
-`sources.per_filetype.blade` (lua/plugins/lsp.lua):
+Neither `php` nor `blade` has a `sources.per_filetype` entry — both use `default`:
 
 ```
-livewire → blade_nav → laravel → lsp → snippets → path → buffer
+lsp → path → snippets → buffer
 ```
 
-| Provider | Module | Offers |
-|---|---|---|
-| `livewire` | `artisan.livewire_source` | Six contexts, see below |
-| `blade_nav` | `blade-nav.integrations.blink` | `@include('`, `<x-`, `<livewire:`, `route('`, `config('`, `env('`, `__('`, Inertia pages |
-| `laravel` | `laravel.extensions.completion.blink` | `view()`, `route()`, `config()`, `env()`, `Inertia::render()` strings and Eloquent column names |
+`lsp` on blade means `laravel_lsp` plus html/emmet/tailwind; on php it means `laravel_lsp` plus `phpantom_lsp`. There is **no custom provider**, by design — see [[laravel-lsp]] for what that costs.
 
-`sources.per_filetype.php` is the same minus `livewire`.
+A hand-written `livewire` source used to sit in front of `lsp` here, offering `wire:*` attributes, a tag's own props and `$prop` inside a component's template. It declared `: - . < > $ "` as trigger characters and carried `score_offset = 5`, so it competed with `laravel_lsp` at the same cursor positions and won — which made the server's own tag and string completion unreliable. Custom sources that overlap a server's trigger characters degrade it rather than supplement it.
 
-### What the `livewire` source completes
-This is the Livewire counterpart of the Angular `@Input` source (`lua/angular/inputs_source.lua`) — same idea, same treesitter-backed approach. It resolves, in priority order:
-
-| Context | Offers |
-|---|---|
-| `wire:model="▏"` / `wire:text` / `wire:show` | the **enclosing component's** public properties, typed |
-| `wire:click="▏"` / `wire:submit` / `wire:target` / … | its public **actions** (methods, minus Livewire's lifecycle hooks) |
-| `{{ $▏ }}`, `@if ($▏)`, `$this->▏` | the component's own props and actions **inside its own template** — intelephense is not attached to blade, so without this nothing completes after `$` in a view |
-| `<livewire:▏` / `<x-▏` | component tag names, all four Livewire 4 shapes |
-| `<livewire:user-table ▏` / `<x-badge ▏` | that component's **props**, with type, default and docblock. A leading `:` is absorbed, so `:ti<Tab>` yields `:title="…"` |
-| `wire:model.▏` | that directive's dot-modifiers |
-| anywhere else in a tag | the generic `wire:*` / Alpine `x-*` attribute list (46 entries) |
-
-Props come from `lua/artisan/props.lua`, which parses with treesitter rather than patterns:
-
-- **Livewire class / sfc / mfc** — `property_declaration` nodes with `public` visibility (handles `public ?int $teamId = null`), plus `mount()` parameters, which Livewire binds from the tag exactly like properties. Docblocks come from the preceding `comment` sibling.
-- **Anonymous Blade components** — the `@props([...])` argument list is re-parsed as PHP so it walks a real `array_element_initializer` tree. Splitting on commas would break on `'label' => 'a, b'` and on nested arrays; both are covered.
-
-Results are cached per file, keyed on mtime+size, and carry the declaration's line number so `gd` can land on it.
+The practical consequence: `wire:` and Alpine `x-` attribute names, their dot-modifiers, `wire:model=`/`wire:click=` values, a component's props as attributes, and `$prop` in its own template do not complete at all.
 
 ### Known limit: generic return types
-`Livewire::test(Sales::class)->` completes nothing. The facade documents `@return Testable<TComponent>`, and intelephense does not implement generics — confirmed both with and without `_ide_helper.php`, so `:LaravelIdeHelper facades` does not help. Everything either side of it works (`$component->` gives 94 items, `expect(1)->` gives 100). The workaround is a local type hint:
+`Livewire::test(Sales::class)->` may complete nothing. The facade documents `@return Testable<TComponent>`, and a PHP server that does not implement docblock generics cannot follow it. The workaround is a local type hint:
 
 ```php
 /** @var \Livewire\Features\SupportTesting\Testable $c */
 $c = Livewire::test(Sales::class);
 $c->assertOk();   // completes
 ```
-
-> Neither plugin registers its own blink source — laravel.nvim's boot only calls `cmp.register_source`, and blade-nav's blink module documents manual wiring. Both are registered by hand in lua/plugins/lsp.lua. Each source self-disables outside a Laravel project.
 
 ## Snippets
 `snippets/blade.json` (~70), loaded by the existing LuaSnip vscode loader via snippets/package.json.
@@ -96,4 +73,4 @@ Pest snippets are **not** here — see [[laravel-tooling]].
 `blade` → `blade-formatter`, resolved project-first (`node_modules/.bin` → mason → `$PATH`) and condition-guarded on the project shipping it (lua/artisan/formatting.lua). Format-on-save applies as it does everywhere else.
 
 ## See also
-[[laravel-nvim]] · [[laravel-blade-nav]] · [[laravel-tooling]] · [[format-conform]] · [[cmp-blink]]
+[[laravel-lsp]] · [[laravel-nvim]] · [[laravel-tooling]] · [[format-conform]] · [[cmp-blink]]

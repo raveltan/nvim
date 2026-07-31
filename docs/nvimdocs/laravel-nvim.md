@@ -49,8 +49,10 @@ Generate `$fillable`, add an Eloquent relation, jump to a model's migration, sca
 
 `environments.ask_on_boot = false` because lua/artisan/init.lua already derives the environment from disk (a compose file → `sail`/`docker`, otherwise `local`) for formatting, linting and Xdebug path mappings. Override it per project with `<leader>lk`; the choice is stored under `stdpath('data')/laravel/config.json`.
 
-## `gf` ownership
-Neither plugin maps `gf` any more — lua/artisan/gf.lua does, and calls them as steps of an explicit chain. Letting blade-nav own the key was actively broken: on a miss it replays whatever global `gf` existed at setup time, and laravel.nvim's is a callback-only `expr` map whose `rhs` is nil, so **every** unresolved `gf` in a php/blade buffer — plain file paths included — raised `E5108`. See [[laravel-blade-nav]].
+## Scope
+Only what has to *drive* the application: artisan, `make:*`, Tinker, the pickers, the code actions, the virtual text. Describing the application — completion and navigation for `view()`/`route()`/`config()`/`env()`/`__()` strings, component tags, Eloquent columns — is `laravel_lsp`'s job ([[laravel-lsp]]), so this plugin's blink source is not registered.
+
+Nothing maps `gf` on php or blade; it is the builtin. `gd` is the key to reach for ([[laravel-tooling]]).
 
 ## Module name
 This config's own Laravel code lives in `lua/artisan/`, **not** `lua/laravel/`. The config's `lua/` sits at the head of the runtimepath, so a `lua/laravel/init.lua` here shadows laravel.nvim's own entry point: the plugin silently never boots, the `Laravel` global is never created, and every keymap above errors with `attempt to index global 'Laravel' (a nil value)`. Do not rename it back.
@@ -59,9 +61,8 @@ This config's own Laravel code lives in `lua/artisan/`, **not** `lua/laravel/`. 
 Load triggers (`ft`, `event`, `keys`) are emptied under `GAF=1` rather than using `cond`/`enabled`: lazy.nvim files a `cond = false` plugin under `spec.disabled`, so `GAF=1 :Lazy clean` would **uninstall** it — the mirror image of the trap that prunes GAF-only plugins when cleaning without the flag. Empty triggers keep the spec installed and simply never fire.
 
 ## Gotchas
-- blink completion is **not** auto-registered by this plugin (its boot only calls `cmp.register_source`). The provider is wired by hand in lua/plugins/lsp.lua — see [[laravel-blade]].
 - No user commands or keymaps ship with the plugin; the table above is entirely ours.
 - `ripgrep` is required for `view:finder` and go-to-migration.
 
 ## See also
-[[laravel-blade]] · [[laravel-blade-nav]] · [[laravel-tooling]]
+[[laravel-lsp]] · [[laravel-blade]] · [[laravel-tooling]]

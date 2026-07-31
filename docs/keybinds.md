@@ -205,8 +205,8 @@ artisan command. See [[laravel-tooling]].
 
 ## Laravel — `<leader>l*` (no `GAF=1`)
 
-laravel.nvim + blade-nav.nvim, loaded on `php`/`blade` buffers. Both no-op
-outside a project with an `artisan` file.
+laravel.nvim, loaded on `php`/`blade` buffers. No-ops outside a project with an
+`artisan` file.
 
 | Key | Mode | Description |
 |-----|------|-------------|
@@ -221,15 +221,12 @@ outside a project with an `artisan` file.
 | `<leader>lp` | n | Command Center |
 | `<leader>lh` | n | `artisan docs` popup |
 | `<leader>lk` | n | Configure this project's environment |
-| `<leader>lw` | n | Livewire: move to another file of this component — class/view/js/css, all three Livewire 4 shapes (`:LivewireToggle`) |
-| `<leader>lv` | n | BladeNav: toggle `config()`/`env()`/translation annotations |
-| `<leader>lC` | n | BladeNav: clear cache |
 | `<leader>lf` | n | Laravel view finder |
-| `gd` | n | **Go to definition** — component behind a tag, property/action behind `{{ $x }}` or `$this->`, `route()`, `__()`, then LSP (lua/artisan/gd.lua) |
-| `gf` | n | Go to file — same resolvers, but ends at plain `gf` on a path (lua/artisan/gf.lua) |
+| `gd` | n | **Go to definition** — the stock mapping. `laravel_lsp` answers component tags, `@include`, `route()`, `__()`, `config()`; `phpantom_lsp` answers ordinary PHP |
 
-Commands: `:LaravelIdeHelper [models|meta|facades]`, `:LaravelPhpstan [level]`,
-`:LaravelArtisan <cmd>`, `:LaravelRoot`, `:LivewireToggle`.
+`gf` is the builtin on php and blade; nothing maps it.
+
+Commands: `:LaravelPhpstan [level]`, `:LaravelArtisan <cmd>`, `:LaravelRoot`.
 
 ## Database (`<leader>D` — vim-dadbod-ui)
 
@@ -457,5 +454,5 @@ PascalCase, UPPER_CASE, kebab-case. Source: `lua/config/keymaps.lua` +
 - **`<C-p>` / `<C-n>`** — yanky yank-ring cycling (n). Blink.cmp uses its own keys in insert.
 - **`q`** — global (no map) vs buffer-local close-window in help/qf/man/grug-far/blame.
 - **`<CR>`** — blink.cmp in insert. Treesitter incremental-select start in normal / expand in visual (if enabled).
-- **`gf`** — owned by lua/artisan/gf.lua (buffer-local on php/blade), which calls blade-nav and laravel.nvim as steps of an explicit chain; both plugins' own `gf` registrations are disabled. devdocs/nvimdocs buffers have their own buffer-local `gf`.
+- **`gf`** — the builtin everywhere except devdocs/nvimdocs buffers, which have their own buffer-local `gf`. On php/blade, `gd` is the key to reach for: `laravel_lsp` resolves component tags, `@include` and helper strings as *definitions*, not paths.
 

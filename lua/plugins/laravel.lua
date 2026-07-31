@@ -1,21 +1,16 @@
 -- Laravel plugins. Everything that decides *behaviour* (formatters, linters, dap
 -- configs, LSP settings, blade completion sources) lives in lua/artisan/ and is
 -- wired from the file that owns that concern, exactly like lua/gaf/ — this file
--- is only the two third-party plugins.
+-- is only the third-party plugin.
 --
--- Division of labour between them:
---   laravel.nvim  — pickers, artisan, tinker, model/route virtual text, code
---                   actions, and completion for the *strings* inside view(),
---                   route(), config(), env(), Inertia::render() and Eloquent
---                   column names.
---   blade-nav     — `gf` and completion for Blade *references*: @include,
---                   <x-component>, <livewire:…>, @livewire('…'), Inertia pages.
---
--- Both ship a `gf`, and letting either one own the key is broken: blade-nav
--- replays the previous global mapping on a miss, which for laravel.nvim's
--- callback-only `expr` map meant every unresolved `gf` in a php/blade buffer —
--- plain file paths included — raised `E5108`. Both registrations are therefore
--- switched off here and the chain is made explicit in lua/artisan/gf.lua.
+-- The plugin is here strictly for what has to *drive* the application rather
+-- than describe it: artisan, the make:* generators, Tinker, the route/model
+-- pickers, the Eloquent code actions and the model/controller/composer virtual
+-- text. Describing the application — completion and navigation for
+-- view()/route()/config()/env()/__() strings, `<x-` and `<livewire:` tags,
+-- @include targets — is laravel_lsp's job (lua/plugins/lsp.lua), which answers
+-- from the booted app rather than a filesystem scan. Its blink source is
+-- therefore not registered.
 --
 -- IMPORTANT: this config's own Laravel module lives in `lua/artisan/`, NOT
 -- `lua/laravel/`. The config's `lua/` sits at the head of the runtimepath, so a
@@ -25,9 +20,9 @@
 --
 -- GAF gating is done by emptying the load triggers, NOT with `cond`/`enabled`.
 -- lazy.nvim puts a cond=false plugin in `spec.disabled`, which means
--- `GAF=1 :Lazy clean` (or sync) would uninstall both of these — the same trap
--- documented for the GAF-only plugins in the other direction. With empty
--- ft/keys the specs stay installed and simply never fire.
+-- `GAF=1 :Lazy clean` (or sync) would uninstall it — the same trap documented
+-- for the GAF-only plugins in the other direction. With empty ft/keys the spec
+-- stays installed and simply never fires.
 local triggers = not vim.g.gaf
 
 return {
@@ -76,50 +71,5 @@ return {
         ask_on_boot = false,
       },
     },
-  },
-
-  {
-    "RicardoRamirezR/blade-nav.nvim",
-    ft = triggers and { "blade", "php" } or {},
-    keys = triggers and {
-      { "<leader>lv", "<cmd>BladeNavToggleShowValues<cr>", desc = "BladeNav: toggle config/env annotations" },
-      { "<leader>lC", "<cmd>BladeNavClearCache<cr>",       desc = "BladeNav: clear cache" },
-    } or {},
-    opts = {
-      annotations = {
-        -- Off by default upstream, but its keymaps are NOT: create_keymaps
-        -- claims a global `K` (clobbering LSP hover everywhere, not just in
-        -- blade) plus <leader>bv / <leader>bcc, which collide with the buffer
-        -- group. The two commands are mapped under <leader>l above instead.
-        create_keymaps = false,
-      },
-      integrations = {
-        -- lua/artisan/gf.lua owns the key and calls blade-nav's resolver as one
-        -- step of an explicit chain; see the note at the top of this file.
-        gf = false,
-        -- This config uses blink.cmp. Left on, blade-nav's cmp integration
-        -- warns "[BladeNav Warn] nvim-cmp not found, skipping BladeNav cmp
-        -- source setup." on every load, and its coq integration is dead weight.
-        -- The blink source is registered by hand in lua/plugins/lsp.lua.
-        cmp = false,
-        coq = false,
-      },
-      handlers = {
-        -- All three verified broken against Laravel 13 / Livewire 4 and
-        -- answered by lua/artisan/ instead:
-        --   livewire  — scans only resources/views/livewire, so it found 1 of
-        --               the 4 components in a stock Livewire 4 app
-        --   component — scans ALL of resources/views/components, so it offered
-        --               `<x-admin.⚡user-table />`, not a valid tag
-        --   route     — shells out `artisan route:list --columns=…`, an option
-        --               Laravel 13 removed; returns nothing. laravel.nvim's own
-        --               route completion works and stays.
-        livewire = false,
-        component = false,
-        route = false,
-      },
-    },
-    -- setup() itself bails when the project has no artisan/composer.json, so
-    -- nothing else needs gating here.
   },
 }
