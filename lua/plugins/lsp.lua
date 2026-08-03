@@ -52,18 +52,17 @@ return {
 			"MasonToolsClean",
 		},
 		opts = {
-			ensure_installed = {
+			-- The Laravel fallbacks are appended, not listed: GAF formats php with
+			-- php_cs_fixer and lints with the monolith's own vendor/bin/phpcs, so pint,
+			-- blade-formatter and phpstan are dead weight there. A Laravel project's
+			-- own vendor/bin or node_modules/.bin always wins (lua/artisan/init.lua
+			-- resolves in that order); these only make a freshly cloned project format
+			-- and analyse before its dependencies are installed.
+			ensure_installed = vim.list_extend({
 				"stylua",
 				"prettierd",
 				"prettier",
-				-- Laravel fallbacks. A project's own vendor/bin or node_modules/.bin
-				-- always wins (lua/artisan/init.lua resolves in that order); these only
-				-- make a freshly cloned project format and analyse before its
-				-- dependencies are installed.
-				"pint",
-				"blade-formatter",
-				"phpstan",
-			},
+			}, vim.g.gaf and {} or { "pint", "blade-formatter", "phpstan" }),
 			auto_update = false,
 			-- Don't probe the registry on load; run :MasonToolsUpdate manually.
 			run_on_start = false,
@@ -289,15 +288,35 @@ return {
 			-- Unlike phpantom it *is* attached to blade, which is the whole point:
 			-- `<x-`, `<livewire:`, `@directive`, `@include` and every helper string
 			-- now answer inside a view.
-			if vim.fn.executable("laravel-lsp") == 1 then
+			-- GAF-gated as well as executable-gated: fl-gaf is PHP but not Laravel, so
+			-- there is nothing here for this server to answer. The root resolver below
+			-- would already decline (no artisan file), but not registering the config
+			-- keeps it out of :LspInfo and out of the php/blade attach path entirely.
+			-- The interpreter is explicit: launched through the `php` on PATH (8.1 on
+			-- this machine) the PHAR fails its own ^8.2.0 requirement check and exits 1
+			-- before the handshake, which surfaces only as "laravel_lsp quit with exit
+			-- code 1". No php >= 8.2 installed at all means no working server, so the
+			-- config is not registered rather than registered and dead.
+			local laravel_php = not vim.g.gaf and vim.fn.executable("laravel-lsp") == 1
+				and require("artisan.lsp").php_82()
+			if laravel_php then
 				vim.lsp.config("laravel_lsp", {
-					cmd = { "laravel-lsp" },
+					cmd = { laravel_php, vim.fn.exepath("laravel-lsp") },
 					filetypes = { "php", "blade" },
 					-- `artisan` only. The README also lists composer.json and .git, but
 					-- the server hard-errors ("root URI must be a Laravel project") when
 					-- the root it is handed has no artisan file — so the wider markers
 					-- can only pick a root it will then refuse.
-					root_markers = { "artisan" },
+					--
+					-- A resolver rather than root_markers: with markers, a php/blade buffer
+					-- outside any artisan root still starts the server in single-file mode,
+					-- and it rejects the handshake outright ("Initialize request must include
+					-- a workspace root URI") — one error notification per such file. Leaving
+					-- on_dir uncalled is how 0.12 says "no root, do not start".
+					root_dir = function(bufnr, on_dir)
+						local root = require("artisan").root(bufnr)
+						if root then on_dir(root) end
+					end,
 					init_options = {
 						-- Defaults to true and writes storage/framework/testing/_pest.php
 						-- into the project. Pest completion here comes from LuaSnip.
@@ -316,7 +335,16 @@ return {
 					-- the server has no such mode, and naming one it doesn't know would
 					-- be worse than letting it probe, so that case falls back to "auto".
 					before_init = function(params, config)
-						local env = require("artisan").env(config.root_dir or params.rootPath)
+						-- rootPath/rootUri are vim.NIL — userdata, NOT nil — when the server
+						-- starts with no workspace folder (a php/blade file opened outside any
+						-- artisan root). `root_dir or params.rootPath` therefore handed userdata
+						-- to artisan.env(), which threw BEFORE_INIT_CALLBACK_ERROR out of
+						-- BufReadPost. Keep only real strings; env(nil) re-resolves the root from
+						-- the buffer's own dir.
+						local root = type(config.root_dir) == "string" and config.root_dir
+							or type(params.rootPath) == "string" and params.rootPath
+							or nil
+						local env = require("artisan").env(root)
 						config.init_options = vim.tbl_extend("force", config.init_options or {}, {
 							phpEnvironment = (env == "docker") and "auto" or env,
 						})
@@ -628,6 +656,22 @@ return {
 				keymap = {
 					preset = "default",
 					["<C-Space>"] = { "show", "hide", "show_documentation", "hide_documentation" },
+					-- The default preset maps <Tab> to snippet_forward+fallback; neocursor
+					-- wants the same key. Order matters: snippet_forward first so a live
+					-- placeholder jump is never stolen by a Cursor Tab ghost, then neocursor
+					-- (accept edit / jump to next edit / follow prediction — it returns false
+					-- when nothing is pending), then a literal tab.
+					["<Tab>"] = {
+						"snippet_forward",
+						function()
+							-- package.loaded, not require: lazy.nvim resolves a require of an
+							-- unloaded plugin's module by loading that plugin, which would boot
+							-- neocursor (and its sidecar) outside the GAF profile that gates it.
+							local neocursor = package.loaded["neocursor"]
+							return neocursor ~= nil and neocursor.accept()
+						end,
+						"fallback",
+					},
 					["<CR>"] = {
 						function(cmp)
 							if cmp.is_visible() then

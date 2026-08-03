@@ -1,19 +1,22 @@
 return {
   {
     "nvim-neotest/neotest",
-    dependencies = {
+    -- Pest (Laravel-only) is appended rather than listed: a dependency loads
+    -- with its parent, so under GAF neotest would pull in an adapter that
+    -- opts() never registers there. It stays installed via the inert spec at
+    -- the bottom of this file, so `:Lazy clean` can't prune it either way.
+    dependencies = vim.list_extend({
       "nvim-neotest/nvim-nio",
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
       "olimorris/neotest-phpunit",
-      -- Fork of theutz/neotest-pest: Pest 2+, Sail, parallel runs.
-      "V13Axel/neotest-pest",
       "marilari88/neotest-vitest",
       "nvim-neotest/neotest-python",
       "olimorris/neotest-rspec",
       "zidhuss/neotest-minitest",
       "sidlatau/neotest-dart",
-    },
+      -- Fork of theutz/neotest-pest: Pest 2+, Sail, parallel runs.
+    }, vim.g.gaf and {} or { "V13Axel/neotest-pest" }),
     -- No ft trigger: loading neotest + 7 adapters cost ~68ms on the FIRST buffer
     -- of any daily filetype, every session. The buffer-local keymaps that needed
     -- it live in config/autocmds.lua now; pressing one lazy-loads neotest via
@@ -132,4 +135,8 @@ return {
       require("neotest").setup(opts)
     end,
   },
+  -- GAF only: keep neotest-pest installed (an unregistered spec is what
+  -- `:Lazy clean` prunes) with no trigger, so it never actually loads. Outside
+  -- GAF it is a neotest dependency instead — see the note at the top.
+  vim.g.gaf and { "V13Axel/neotest-pest", event = {} } or nil,
 }
