@@ -56,8 +56,9 @@ That's the loop: jump workspace → focus around with hjkl → tile or tab when 
 | `Hyper-,` | Accordion layout |
 | `Hyper-A` | Toggle focused container: tiles ↔ accordion (stack) |
 | `Hyper-F` | Fullscreen (zoom focused window) |
-| `Hyper-Space` | Toggle float/tile |
 | `Hyper-.` | Move workspace to next monitor |
+
+> `Hyper-Space` (float/tile toggle) is **disabled** — commented out in `~/.aerospace.toml`. Use service mode `Hyper-;` then `f` instead.
 
 ### Resize mode
 
@@ -79,7 +80,7 @@ That's the loop: jump workspace → focus around with hjkl → tile or tab when 
 |---|---|
 | `Esc` | Reload config |
 | `R` | Flatten / reset workspace tree |
-| `F` | Toggle floating/tiling layout |
+| `F` | Toggle floating/tiling layout (only float/tile toggle — `Hyper-Space` is disabled) |
 | `Backspace` | Close all windows but current |
 | `Meh-h/j/k/l` | Join focused window with neighbor |
 

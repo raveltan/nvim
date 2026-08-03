@@ -85,7 +85,8 @@ alt-shift-ctrl-leftSquareBracket  = ['move-node-to-workspace prev', 'workspace p
 alt-shift-cmd-ctrl-slash = 'layout tiles horizontal vertical'
 alt-shift-cmd-ctrl-comma = 'layout accordion horizontal vertical'
 alt-shift-cmd-ctrl-f     = 'fullscreen'
-alt-shift-cmd-ctrl-space = 'layout floating tiling'
+# Hyper-Space disabled — float/tile toggle lives in service mode (`Hyper-;` then `f`).
+# alt-shift-cmd-ctrl-space = 'layout floating tiling'
 
 # Modes
 alt-shift-cmd-ctrl-r         = 'mode resize'
