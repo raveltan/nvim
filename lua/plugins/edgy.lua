@@ -55,6 +55,21 @@ return {
           title = "Search/Replace",
           size = { height = 0.4 },
         },
+        -- Snacks.terminal (<leader>/) opened as a plain split outside edgy, so it had
+        -- no title bar and ignored exit_when_last / close_when_all_hidden. The filter
+        -- is snacks' own documented one: match only editor-relative snacks windows
+        -- docked bottom, and never trouble's preview window.
+        {
+          ft = "snacks_terminal",
+          size = { height = 0.3 },
+          title = "%{b:snacks_terminal.id}: %{b:term_title}",
+          filter = function(_buf, win)
+            return vim.w[win].snacks_win
+              and vim.w[win].snacks_win.position == "bottom"
+              and vim.w[win].snacks_win.relative == "editor"
+              and not vim.w[win].trouble_preview
+          end,
+        },
       },
 
       left = {

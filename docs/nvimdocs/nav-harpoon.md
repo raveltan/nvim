@@ -36,6 +36,9 @@ Maintains a small per-project list of pinned files (a "harpoon list"). Hop direc
 
 ## Our config
 - Vanilla `require("harpoon"):setup()` — no option overrides.
+- Marks are rendered in the statusline by `letieu/harpoon-lualine` as `1 2 [3] 4` (brackets = the
+  current file), hidden entirely when the list is empty. With `showtabline = 0` and no bufferline,
+  the statusline is the only place marks are visible — see [ui-lualine](ui-lualine.md).
 - Slots 1-8 bound (upstream examples usually show 1-4).
 - No `delete` or `prev/next` mappings — the quick menu (`<leader>hh`) is the editing surface.
 

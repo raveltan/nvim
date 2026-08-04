@@ -84,7 +84,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>cA` | n | Source action | config/keymaps.lua |
 | `<leader>cr` | n | Smart rename: CSS class (cross-file, scss `&`-aware) → tag pair → LSP symbol (PHP `$` sigil aware) | config/rename.lua + keymaps.lua |
 | `<leader>cf` | n, v | Format file/selection (conform) | plugins/formatting.lua |
-| `<leader>ci` | n | Toggle inlay hints | config/keymaps.lua |
+| `<leader>uh` | n | Toggle inlay hints (moved from `<leader>ci`) | snacks.toggle |
 | `<leader>cd` | n | Line diagnostics float | config/keymaps.lua |
 | `<leader>U` | n | Undo tree (undotree) | undotree |
 | `<leader>co` | n | TS: organize imports | vtsls (plugins/lsp.lua) |
@@ -390,8 +390,25 @@ PascalCase, UPPER_CASE, kebab-case. Source: `lua/config/keymaps.lua` +
 
 ## UI Toggles — `<leader>u`
 
+Most of these come from the `Snacks.toggle` registry, so which-key shows each one's current
+state (green = on, yellow = off) and flipping it notifies.
+
 | Key | Mode | Description |
 |-----|------|-------------|
+| `<leader>us` | n | Spelling |
+| `<leader>uw` | n | Wrap |
+| `<leader>uc` | n | Conceal (`conceallevel` 0 ↔ 2) |
+| `<leader>ul` | n | Line numbers |
+| `<leader>uL` | n | Relative line numbers |
+| `<leader>uT` | n | Treesitter highlight |
+| `<leader>ug` | n | Indent guides |
+| `<leader>uh` | n | Inlay hints (replaces the old `<leader>ci`) |
+| `<leader>ux` | n | Diagnostics (`<leader>ud` is the duck group) |
+| `<leader>uD` | n | Dim inactive scopes |
+| `<leader>uz` | n | Zen mode |
+| `<leader>uZ` | n | Zoom current window (works with edgy panels open) |
+| `<leader>up` | n | Snacks profiler |
+| `<leader>uN` | n | Notification history |
 | `<leader>ur` | n | Resize submode (see Buffers / Windows) |
 | `<leader>udd` / `<leader>uda` | n | Hatch duck (slow / fast) |
 | `<leader>udk` / `<leader>udK` | n | Cook one duck / cook all |

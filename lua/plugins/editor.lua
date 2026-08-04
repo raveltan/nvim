@@ -327,11 +327,16 @@ return {
       else
         table.insert(spec, { "<leader>l", group = "laravel" })
       end
-      return { spec = spec }
+      -- "modern": floating rounded box at the bottom instead of the legacy
+      -- full-width bar glued to the cmdline. ("helix" is the same content in a
+      -- right-hand column if you prefer it vertical.)
+      return { preset = "modern", spec = spec }
     end,
   },
   -- Obsidian vault integration (community-maintained fork; epwalsh's repo is abandoned).
-  -- ui.enable = false: checkmate.nvim owns checkbox rendering, prevents extmark collision.
+  -- ui.enable = false because markdown is read RAW here by choice — no renderer is
+  -- installed (checkmate.nvim and markview both removed), so nothing conceals the
+  -- source text. Treesitter still colors headings/code fences.
   {
     "obsidian-nvim/obsidian.nvim",
     version = "*",

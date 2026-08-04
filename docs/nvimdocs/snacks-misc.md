@@ -122,17 +122,31 @@ Terminal requirement: kitty / ghostty / wezterm (limited) / tmux passthrough. **
 ## Our config
 - `bigfile.size = 500 * 1024` — disable heavy features at 500KB, well below the 1.5MB default; matches our typical generated-code / minified-JS threshold.
 - `indent.animate.enabled = false` — animation conflicts with our relative-number redraws and feels janky on long jumps.
-- `image.enabled = true` — kitty graphics protocol; works because primary terminal is kitty.
-- All other enabled modules use upstream defaults.
-- `scroll`, `words` are explicitly **off**: scroll smooth-animation is distracting; words LSP-reference highlights duplicate treesitter.
+- `image.enabled = true` — Kitty graphics protocol. The primary terminal is **Ghostty** (which
+  implements the same protocol), reached through tmux `allow-passthrough on`. `magick` and `mmdc`
+  are installed; `pdflatex`/`tectonic` are **not**, so LaTeX/math in markdown silently doesn't
+  render. See [terminal-ghostty-tmux](terminal-ghostty-tmux.md).
+- `notifier.style = "fancy"` + `top_down = true` — bordered box with icon/title row, pinned to the
+  top so it never lands on fidget's bottom-right progress window. History on `<leader>uN`.
+- `terminal` — `<leader>/` toggles one bottom-docked instance (same instance each time;
+  `<esc><esc>` for normal mode inside it). Adopted by edgy for the title bar and close semantics
+  ([ui-edgy](ui-edgy.md)).
+- `zen` / `dim` on, driven through the `Snacks.toggle` registry ([snacks-core](snacks-core.md)).
+- `styles.notification.wo.winblend = 0` — `fancy` ships `winblend = 5`, which muddies over a
+  transparent `Normal`.
+- `scroll`, `words`, `statuscolumn`, `scratch` are explicitly **off** — reasons in
+  [snacks-core](snacks-core.md).
 
 ## Keymaps
 | Key | Mode | Action | Desc |
 |---|---|---|---|
 | `<leader>gg` | n | `Snacks.lazygit()` | Lazygit |
 | `<leader>fR` | n | `Snacks.rename.rename_file()` | Rename current file |
-| `<leader>.` | n | `Snacks.scratch()` | Toggle scratch buffer |
-| `<leader>fs` | n | `Snacks.scratch.select()` | Select scratch buffer |
+| `<leader>/` | n | `Snacks.terminal.toggle()` | Toggle bottom terminal |
+| `<leader>uN` | n | `Snacks.notifier.show_history()` | Notification history |
+
+`scratch` is disabled, so `<leader>.` / `<leader>fs` are **not** bound (the `scratch` option
+reference below is kept for when it's wanted again).
 
 `notifier`, `statuscolumn`, `indent`, `bigfile`, `image`, `input`, `quickfile`, `scope` have no keymaps — they augment editor behaviour passively.
 

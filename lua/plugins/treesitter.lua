@@ -65,6 +65,12 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     opts = {
       max_lines = 3,
+      -- Underline the sticky header so it reads as a pinned bar, not as buffer
+      -- text that failed to scroll.
+      separator = "─",
+      mode = "cursor",           -- context of the cursor's node, not the topmost visible one
+      trim_scope = "outer",      -- when over max_lines, drop outer scopes first
+      multiline_threshold = 1,   -- collapse a multi-line signature to its first line
     },
   },
 

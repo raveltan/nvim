@@ -44,6 +44,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [lsp-fidget](lsp-fidget.md) — LSP progress notifier
 - [lsp-lazydev](lsp-lazydev.md) — Lua LSP awareness for `vim.*` API
 - [lsp-trouble](lsp-trouble.md) — diagnostics panel
+- [lsp-lightbulb](lsp-lightbulb.md) — sign-column bulb when a code action is available (owns the `signcolumn=yes:2` budget)
 
 ## Laravel
 
@@ -149,7 +150,8 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 ## UI
 
-- [ui-lualine](ui-lualine.md) — statusline
+- [ui-moonfly](ui-moonfly.md) — colorscheme + the transparency/contrast contract (transparent editor, solid overlays)
+- [ui-lualine](ui-lualine.md) — statusline (mode/git/diagnostics + harpoon marks + lazy updates)
 - [ui-noice](ui-noice.md) — cmdline + LSP hover/messages
 - [ui-mini-icons](ui-mini-icons.md) — icon provider
 - [ui-colorizer](ui-colorizer.md) — inline color preview
@@ -195,6 +197,10 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 ## Ftplugin
 
 - [ftplugin-php](ftplugin-php.md) — PHP `$$` → `$this->` + native LSP rename
+
+## Terminal
+
+- [terminal-ghostty-tmux](terminal-ghostty-tmux.md) — Ghostty transparency/contrast, tmux capability overrides, fonts, image-protocol chain (files live OUTSIDE this repo)
 
 ## Util
 

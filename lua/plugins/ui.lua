@@ -15,20 +15,37 @@ return {
       vim.cmd.colorscheme("moonfly")
 
       -- Belt-and-suspenders: force-clear backgrounds on groups the theme's own
-      -- transparency may leave opaque (statusline, separators, float borders).
+      -- transparency may leave opaque (statusline, separators).
+      -- NormalFloat/FloatBorder are deliberately NOT here: moonfly gives floats a
+      -- grey13 (#212121) surface even in transparent mode (see its
+      -- g:moonflyNormalFloat branch), and clearing it made hover docs, the blink
+      -- menu and pickers render on top of live buffer text. Transparent editor,
+      -- solid floats.
       local transparent_groups = {
         "Normal",
         "NormalNC",
-        "NormalFloat",
         "SignColumn",
         "StatusLine",
         "StatusLineNC",
-        "FloatBorder",
         "WinSeparator",
       }
       for _, group in ipairs(transparent_groups) do
         vim.api.nvim_set_hl(0, group, vim.tbl_extend("force", vim.api.nvim_get_hl(0, { name = group }), { bg = "NONE" }))
       end
+
+      -- Contrast fixes measured against the actual terminal background (Ghostty is
+      -- #000000): moonfly ships ColorColumn and TreesitterContext at #121212, which
+      -- is 18/255 away from black — effectively invisible once Normal is bg=NONE.
+      -- ColorColumn must also clear CursorLine (#1c1c1c) or the rule disappears on
+      -- the cursor's own line, which is the line you are usually measuring.
+      vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#262626" })
+      -- Give the sticky context the same surface as floats, so it reads as a pinned
+      -- panel rather than as buffer text that failed to scroll.
+      vim.api.nvim_set_hl(0, "TreesitterContext", { bg = "#212121" })
+      vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { bg = "#212121", fg = "#6d6d6d" })
+      -- Inlay hints inherited bg #1c1c1c, i.e. a grey box floating in transparent
+      -- code. Italic + dim fg on no background is the readable form.
+      vim.api.nvim_set_hl(0, "LspInlayHint", { bg = "NONE", fg = "#6d6d6d", italic = true })
     end,
   },
 
@@ -49,7 +66,12 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    dependencies = { "echasnovski/mini.icons" },
+    dependencies = {
+      "echasnovski/mini.icons",
+      -- showtabline=0 + harpoon meant the marks were invisible everywhere; this
+      -- renders them in the statusline instead of reintroducing a tabline.
+      { "letieu/harpoon-lualine", dependencies = { "ThePrimeagen/harpoon" } },
+    },
     opts = function()
       local macro = {
         function()
@@ -68,6 +90,13 @@ return {
           for _, c in ipairs(cs) do table.insert(names, c.name) end
           return " " .. table.concat(names, ",")
         end,
+      }
+
+      -- Pending plugin updates, hidden when there are none.
+      local lazy_updates = {
+        function() return "󰚰 " .. require("lazy.status").updates() end,
+        cond = function() return require("lazy.status").has_updates() end,
+        color = { fg = "#e3c78a" }, -- moonfly yellow
       }
 
       -- Show encoding/fileformat only when non-default
@@ -106,10 +135,23 @@ return {
           },
           lualine_c = {
             { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
-            { "filename", path = 0, symbols = { modified = "  ", readonly = " ", unnamed = " " } },
+            -- path=1 (relative dir + name): with globalstatus there is exactly one
+            -- statusline, so a bare filename left "which of these three
+            -- component.ts is focused?" unanswerable.
+            { "filename", path = 1, symbols = { modified = "  ", readonly = " ", unnamed = " " } },
             macro,
+            -- Harpoon marks: 1 2 [3] 4 — brackets mark the current file. Renders
+            -- nothing when the list is empty (no_harpoon = "").
+            {
+              "harpoon2",
+              indicators = { "1", "2", "3", "4", "5" },
+              active_indicators = { "[1]", "[2]", "[3]", "[4]", "[5]" },
+              _separator = " ",
+              no_harpoon = "",
+              color = { fg = "#74b2ff" }, -- moonfly sky
+            },
           },
-          lualine_x = { lsp, encoding, fileformat },
+          lualine_x = { lazy_updates, lsp, encoding, fileformat },
           lualine_y = { "progress" },
           lualine_z = { { "location", icon = "" } },
         },
@@ -157,7 +199,15 @@ return {
     priority = 1000,
     config = function()
       require("tiny-inline-diagnostic").setup({
-        preset = "powerline",
+        preset = "modern",
+        options = {
+          -- Name the server when several are attached (php = phpantom + laravel,
+          -- ts = vtsls + typos_lsp + tailwind), so a message is attributable.
+          show_source = { enabled = true, if_many = true },
+          -- Diagnostics on lines other than the cursor line stay visible instead
+          -- of vanishing until you land on them.
+          multilines = { enabled = true, always_show = false },
+        },
       })
     end,
   },
@@ -178,7 +228,7 @@ return {
         "dap-view", "dap-view-term", "dap-repl",
         "noice", "checkhealth", "qf", "grug-far",
         "fugitive", "fugitiveblame", "git",
-        "markview", "Avante",
+        "Avante",
       },
       handlers = {
         cursor      = { enable = true, overlap = true, priority = 1000 },
@@ -278,6 +328,13 @@ return {
       },
       presets = {
         long_message_to_split = true,
+        -- Borders + FloatBorder:DiagnosticInfo on the hover/signature doc views,
+        -- so LSP docs read as a distinct surface against the transparent bg.
+        -- (views.hover above still wins on size — presets merge first.)
+        lsp_doc_border = true,
+        -- inc_rename is deliberately NOT enabled: that preset only styles the
+        -- :IncRename cmdline, and inc-rename.nvim is not installed (rename goes
+        -- through lua/config/rename.lua + snacks.rename).
       },
     },
   },

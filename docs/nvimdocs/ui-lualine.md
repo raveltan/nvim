@@ -1,19 +1,24 @@
 # ui-lualine
-> Statusline with global mode/git/diagnostics, conditional encoding/fileformat, macro-recording indicator, and active LSP clients.
+> Statusline with global mode/git/diagnostics, harpoon marks, pending-plugin-updates counter, conditional encoding/fileformat, macro-recording indicator, and active LSP clients.
 
 **Repo:** https://github.com/nvim-lualine/lualine.nvim
 **Local spec:** lua/plugins/ui.lua:50
 **Tags:** statusline, ui, lsp, git
 
 ## Scope
-Configures a single global statusline (one bar across all splits) themed to `gruvbox-baby`. Adds two custom components — a red `REC @x` macro indicator and an LSP-clients list — plus conditional `encoding`/`fileformat` components that only render when non-default. Disabled on dashboard-like buffers.
+Configures a single global statusline (one bar across all splits) themed to `moonfly`. Adds custom components — a red `REC @x` macro indicator, an LSP-clients list, a pending-plugin-updates counter — plus harpoon marks and conditional `encoding`/`fileformat` components that only render when non-default. Disabled on dashboard-like buffers.
+
+With `showtabline = 0` and no bufferline, this bar is the **only** persistent UI chrome, which is why the harpoon component lives here rather than in a tabline.
 
 ## Install spec
 ```lua
 {
   "nvim-lualine/lualine.nvim",
   event = "VeryLazy",
-  dependencies = { "echasnovski/mini.icons" },
+  dependencies = {
+    "echasnovski/mini.icons",
+    { "letieu/harpoon-lualine", dependencies = { "ThePrimeagen/harpoon" } },
+  },
   opts = function() ... end,
 }
 ```
@@ -36,23 +41,35 @@ Section keys: `lualine_a`/`b`/`c`/`x`/`y`/`z` for sections, `tabline`/`winbar`/`
 Standard components: `mode`, `branch`, `diff`, `diagnostics`, `filename`, `filetype`, `filesize`, `encoding`, `fileformat`, `progress`, `location`, `searchcount`, `selectioncount`, `tabs`, `buffers`, `windows`, `hostname`, `lsp_status`. Each accepts `{ <name>, icon = ..., separator = ..., padding = ..., cond = fn, color = {...}, symbols = {...} }`.
 
 ## Our config
-- `theme = "gruvbox-baby"`, `globalstatus = true`, ASCII separators only (`|`).
+- `theme = "moonfly"`, `globalstatus = true`.
+- **Flat separators** — both `section_separators` and `component_separators` are empty strings.
+  This is deliberate and is the correct choice for a transparent theme: powerline slant glyphs
+  need solid background fills on both sides, which clash with terminal transparency.
 - `disabled_filetypes.statusline = { "dashboard", "alpha", "snacks_dashboard", "starter" }` — no bar on splash screens.
 - `extensions = { "lazy", "mason", "neo-tree", "trouble", "quickfix" }` — plugin-specific lualine modules.
 
 Sections:
 - **a** — `mode` with empty icon.
 - **b** — `branch` (), `diff` with nf-fa add/mod/del glyphs, `diagnostics` with nf-fa severity glyphs.
-- **c** — `filetype` icon-only (no label, no right padding) + `filename` (path=0 → just basename) with modified/readonly/unnamed symbols, then **macro** component.
-- **x** — **lsp** component, then conditional `encoding`/`fileformat`, then `filetype` (text).
+- **c** — `filetype` icon-only (no label, no right padding) + `filename` with `path = 1`
+  (relative dir + name) and modified/readonly/unnamed symbols, then **macro**, then **harpoon2**.
+- **x** — **lazy_updates**, then **lsp**, then conditional `encoding`/`fileformat`.
 - **y** — `progress`.
 - **z** — `location` with empty icon.
 
 Custom components:
 - **macro** — reads `vim.fn.reg_recording()`, prints `REC @<reg>` in `#ff5555` bold. `cond` hides it when not recording.
 - **lsp** — iterates `vim.lsp.get_clients({ bufnr = 0 })`, joins names with comma, prefixed by . Empty string → component hides.
+- **lazy_updates** — `require("lazy.status").updates()` behind a `has_updates()` `cond`, in moonfly
+  yellow `#e3c78a`. Renders nothing when everything is up to date.
+- **harpoon2** — from `letieu/harpoon-lualine`. Renders `1 2 [3] 4`; brackets mark the current
+  file, `no_harpoon = ""` hides it entirely when the list is empty, coloured moonfly sky
+  `#74b2ff`. Added because `showtabline = 0` left harpoon marks invisible everywhere.
 - **encoding** — `cond` only renders if `fileencoding` is set and non-`utf-8`.
 - **fileformat** — `cond` only renders if `fileformat ~= "unix"`.
+
+`path = 1` matters *because* of `globalstatus`: with one bar for every split, a bare basename
+could not answer "which of these three `component.ts` is focused?".
 
 Autocmd: `RecordingEnter`/`RecordingLeave` → `require("lualine").refresh()` so the REC indicator appears/disappears instantly. We intentionally **dropped `ModeChanged`** — lualine already redraws on mode change internally and the extra refresh doubled work on every n↔i↔v↔c transition.
 
@@ -62,8 +79,14 @@ None.
 ## Links
 - README: https://github.com/nvim-lualine/lualine.nvim/blob/master/README.md
 - Component docs: https://github.com/nvim-lualine/lualine.nvim/blob/master/doc/lualine.txt
+- harpoon-lualine: https://github.com/letieu/harpoon-lualine
+- Related: [nav-harpoon](nav-harpoon.md), [ui-moonfly](ui-moonfly.md), [ui-edgy](ui-edgy.md)
 
 ## Notes
 - `globalstatus = true` requires Neovim ≥ 0.7 and effectively forces `laststatus=3`; per-window statuslines are gone.
-- `filetype` appears twice: once as icon-only in section **c** (left of filename) and once as text in section **x**. Intentional — icon next to name, text label on the right.
 - The duplicate-refresh prevention comment in the spec is load-bearing: don't re-add `ModeChanged` to the autocmd list.
+- lualine was re-checked against alternatives in Aug 2026 and kept: heirline.nvim is ~14 months
+  feature-frozen, mini.statusline is a strictly smaller feature set. No migration warranted.
+- Don't "modernise" this bar by adding powerline separators — see the flat-separator note above.
+- There is no winbar component here. The winbar is set by edgy.nvim on its own panels only
+  ([ui-edgy](ui-edgy.md)); no breadcrumb plugin (dropbar/incline) is installed.

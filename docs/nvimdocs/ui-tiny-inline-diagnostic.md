@@ -1,12 +1,14 @@
 # ui-tiny-inline-diagnostic
-> Pretty inline LSP diagnostic display with a powerline-style decoration; replaces vim.diagnostic's default virtual-text.
+> Pretty inline LSP diagnostic display using the `modern` preset; replaces vim.diagnostic's default virtual-text.
 
 **Repo:** https://github.com/rachartier/tiny-inline-diagnostic.nvim
 **Local spec:** lua/plugins/ui.lua:183
 **Tags:** lsp, diagnostics, ui, virtualtext
 
 ## Scope
-Renders the current-line diagnostic as an arrow + colored chunk to the right of the code, instead of trailing one-line text. Loads only after `LspAttach` (no cost in non-LSP buffers). Uses the `"powerline"` preset for the chunk shape.
+Renders the current-line diagnostic as an arrow + colored chunk to the right of the code, instead of trailing one-line text. Loads only after `LspAttach` (no cost in non-LSP buffers). Uses the `"modern"` preset for the chunk shape.
+
+It also owns end-of-line virtual text outright: nvim-lightbulb is configured sign-only precisely so the two don't stack on the same line (see [lsp-lightbulb](lsp-lightbulb.md)). Native `vim.diagnostic` `virtual_lines` was evaluated as a replacement and rejected — it inserts real lines and shifts code down.
 
 ## Install spec
 ```lua
@@ -16,7 +18,11 @@ Renders the current-line diagnostic as an arrow + colored chunk to the right of 
   priority = 1000,
   config = function()
     require("tiny-inline-diagnostic").setup({
-      preset = "powerline",
+      preset = "modern",
+      options = {
+        show_source = { enabled = true, if_many = true },
+        multilines = { enabled = true, always_show = false },
+      },
     })
   end,
 }
@@ -43,7 +49,13 @@ Passed to `setup()`:
 - `options.virt_texts.priority` *(int, `2048`)* — extmark priority.
 
 ## Our config
-- `preset = "powerline"` — angular powerline-style chunks. All other options default.
+- `preset = "modern"` — sleeker chunk shape than the previous `"powerline"` (which drew angular
+  powerline arrows that fought the flat, separator-less lualine).
+- `options.show_source = { enabled = true, if_many = true }` — names the server only when several
+  are attached, which is the normal case here: php = phpantom_lsp + laravel_lsp, ts = vtsls +
+  typos_lsp + tailwindcss. Without it a message was unattributable.
+- `options.multilines = { enabled = true, always_show = false }` — diagnostics on lines other than
+  the cursor line stay visible instead of vanishing until you land on them.
 - `event = "LspAttach"` — first activation when any LSP client attaches.
 - `priority = 1000` — load early relative to other LspAttach handlers, so the plugin's own `vim.diagnostic.config` patch (disabling default virtual_text) runs first.
 

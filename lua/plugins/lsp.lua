@@ -510,14 +510,60 @@ return {
 				severity_sort = true,
 			})
 
-			-- Ensure diagnostic underlines work even when terminal lacks undercurl support
-			for _, level in ipairs({ "Error", "Warn", "Info", "Hint", "Ok" }) do
-				local hl = vim.api.nvim_get_hl(0, { name = "DiagnosticUnderline" .. level, link = false })
-				if hl.undercurl and not hl.underline then
-					hl.underline = true
-					vim.api.nvim_set_hl(0, "DiagnosticUnderline" .. level, hl)
+			-- Severity by underline STYLE, not only by color: on a transparent background a
+			-- hue difference between four dim underlines is hard to read at a glance, and
+			-- these four styles are all carried by Ghostty + the tmux Smulx/Setulc
+			-- overrides. A terminal that does not understand the extended SGR renders any
+			-- of them as a plain underline, which is the same fallback the previous
+			-- undercurl-to-underline loop provided.
+			local underline_styles = {
+				Error = { undercurl = true },
+				Warn = { underdouble = true },
+				Info = { underdotted = true },
+				Hint = { underdashed = true },
+				Ok = { underline = true },
+			}
+			local function style_diagnostic_underlines()
+				for level, style in pairs(underline_styles) do
+					local name = "DiagnosticUnderline" .. level
+					local hl = vim.api.nvim_get_hl(0, { name = name, link = false })
+					-- Keep the theme's underline color (sp), replace only the style bits.
+					hl.undercurl, hl.underline = nil, nil
+					hl.underdouble, hl.underdotted, hl.underdashed = nil, nil, nil
+					vim.api.nvim_set_hl(0, name, vim.tbl_extend("force", hl, style))
 				end
 			end
+			style_diagnostic_underlines()
+			-- A colorscheme reload resets these back to the theme's definitions.
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				group = vim.api.nvim_create_augroup("diagnostic_underline_styles", { clear = true }),
+				callback = style_diagnostic_underlines,
+			})
+
+			-- Inlay hints ship with 0.12 but stay off until enabled. vtsls, basedpyright,
+			-- rust-analyzer and dartls all produce them; LspInlayHint is restyled in
+			-- lua/plugins/ui.lua so they read as annotations, not as boxed text.
+			-- Toggle per buffer with <leader>uh (snacks toggle registry).
+			vim.lsp.inlay_hint.enable(true)
+		end,
+	},
+
+	-- Code-action availability indicator: actions-preview.nvim only shows actions
+	-- once invoked, so nothing signalled that any existed. 'signcolumn' is widened
+	-- to yes:2 in lua/config/options.lua so the bulb never displaces a git or
+	-- diagnostic sign in the single-column gutter.
+	{
+		"kosayoda/nvim-lightbulb",
+		event = "LspAttach",
+		opts = {
+			autocmd = { enabled = true },
+			sign = { enabled = true, text = "󰌵", hl = "LightBulbSign" },
+			virtual_text = { enabled = false }, -- tiny-inline-diagnostic owns end-of-line
+			ignore = { ft = { "markdown", "text", "gitcommit" } },
+		},
+		config = function(_, opts)
+			require("nvim-lightbulb").setup(opts)
+			vim.api.nvim_set_hl(0, "LightBulbSign", { fg = "#e3c78a" }) -- moonfly yellow
 		end,
 	},
 
@@ -534,8 +580,10 @@ return {
 			},
 			notification = {
 				window = {
-					winblend = 0, -- solid background for catppuccin
+					winblend = 0, -- no blend: moonfly's float surface is already readable
+					border = "rounded", -- match 'winborder' / 'pumborder'
 				},
+				x_padding = 1, -- breathing room inside the rounded border
 			},
 		},
 	},
@@ -563,7 +611,10 @@ return {
 		keys = {
 			{ "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics" },
 		},
-		config = true,
+		-- focus: jump into the list on open (it's a bottom edgy panel, so the cursor
+		-- would otherwise stay in the buffer and the panel is read-only decoration).
+		-- Placement stays edgy's (lua/plugins/edgy.lua).
+		opts = { focus = true },
 	},
 
 	-- Lua LSP for Neovim config development

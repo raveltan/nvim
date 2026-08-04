@@ -53,7 +53,17 @@ Top-level picker options (per `docs/picker.md`):
 ## Our config
 - `projects.dev` includes `~/repo` and `~/rails` always; **`~/freelancer-dev` is prepended only when `vim.g.gaf == true`** (i.e. nvim was started with `GAF=1`).
 - `projects.patterns` adds Ruby/PHP/Python/Node markers on top of the default `.git`, so polyglot monorepos resolve correctly.
-- No `layout` override — uses the default split preset.
+- `layout = { preset = "telescope", cycle = true }` globally, then per-source overrides. `cycle`
+  wraps `j`/`k` at the ends of the result list.
+  - `ivy` (bottom dock, full-width preview) for `grep`, `grep_word`, `grep_buffers`, `lines` —
+    a match is only meaningful with its surrounding lines.
+  - `vscode` (centred, previewless) for `buffers`, `commands`, `command_history`, `keymaps`,
+    `registers`, `marks` — flat lists where a preview pane is wasted space.
+  - everything else stays `telescope`.
+- Available presets: `default`, `telescope`, `ivy`, `ivy_split`, `vscode`, `vertical`, `dropdown`,
+  `select`, `sidebar`, `bottom`/`top`/`left`/`right`.
+- File icons come from mini.icons automatically (auto-detected); `formatters` and
+  `previewers.diff.style` are left at their defaults.
 - `vim.ui.select` integration is on by default (we don't disable it).
 
 ## Keymaps

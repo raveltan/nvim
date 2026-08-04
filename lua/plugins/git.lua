@@ -5,12 +5,26 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       require("gitsigns").setup({
+        -- Block-element bars instead of ASCII +//-: they read as a continuous
+        -- gutter edge next to satellite's `│` hunk marks, and severity comes from
+        -- the sign colour rather than from decoding a punctuation character.
+        -- (Block elements, not Nerd Font glyphs — these render in any font.)
         signs = {
-          add = { text = "+" },
-          change = { text = "/" },
-          delete = { text = "-" },
-          topdelete = { text = "‾" },
-          changedelete = { text = "~" },
+          add = { text = "▎" },
+          change = { text = "▎" },
+          delete = { text = "▁" },
+          topdelete = { text = "▔" },
+          changedelete = { text = "▎" },
+          untracked = { text = "▏" },
+        },
+        -- Staged hunks get a hollow bar, so `git add -p` progress is visible in
+        -- the gutter (gitsigns >= 0.9).
+        signs_staged = {
+          add = { text = "▍" },
+          change = { text = "▍" },
+          delete = { text = "▁" },
+          topdelete = { text = "▔" },
+          changedelete = { text = "▍" },
         },
         on_attach = function(bufnr)
           local gs = require("gitsigns")

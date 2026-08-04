@@ -15,6 +15,10 @@ Pins the line(s) introducing the current scope (function, class, if-block, etc.)
   event = { "BufReadPost", "BufNewFile" },
   opts = {
     max_lines = 3,
+    separator = "─",
+    mode = "cursor",
+    trim_scope = "outer",
+    multiline_threshold = 1,
   },
 }
 ```
@@ -34,7 +38,12 @@ Pins the line(s) introducing the current scope (function, class, if-block, etc.)
 
 ## Our config
 - `max_lines = 3` — keeps the sticky header to at most 3 lines so it never dominates a tall function signature.
-- Everything else left at defaults: `mode = 'cursor'`, `line_numbers = true`, `separator = nil`.
+- `separator = "─"` — underlines the header so it reads as a pinned bar rather than as buffer text that failed to scroll.
+- `mode = "cursor"` — context of the cursor's node, not the topmost visible one (also the upstream default; pinned explicitly).
+- `trim_scope = "outer"` — when the context exceeds `max_lines`, drop outer scopes first and keep the innermost one you're actually editing.
+- `multiline_threshold = 1` — collapse a multi-line signature to its first line instead of spending the whole 3-line budget on one declaration.
+- `line_numbers` left at its `true` default.
+- `TreesitterContext` is re-coloured from moonfly's near-black `#121212` to `#212121` (the float surface) in [ui-moonfly](ui-moonfly.md) — the default is invisible against a transparent editor over a black terminal.
 
 ## Keymaps
 | Key | Mode | Action | Desc |

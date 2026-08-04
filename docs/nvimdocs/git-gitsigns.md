@@ -33,7 +33,15 @@ Decorates the sign column with add/change/delete marks per hunk and exposes hunk
 - `preview_config` *(table)* — floating preview window style.
 
 ## Our config
-- Custom `signs` glyphs (thick bars for add/change, underscore/overline for delete variants).
+- Custom `signs` — block-element bars, not ASCII and not Nerd Font glyphs (block elements render
+  in any font): `add`/`change`/`changedelete` `▎`, `delete` `▁`, `topdelete` `▔`, `untracked` `▏`.
+  They read as a continuous gutter edge next to satellite's `│` hunk marks, and severity comes
+  from the sign colour rather than from decoding a punctuation character.
+- `signs_staged` (gitsigns ≥ 0.9) — heavier bar `▍` for staged hunks, so `git add -p` progress is
+  visible in the gutter without opening lazygit.
+- Signs render through comfy-line-numbers' `'statuscolumn'` (`%=%s%=%{...}`); the `%s` is the sign
+  column, and `'signcolumn'` is `yes:2` so the bulb/marks/diagnostics/hunk signs don't evict each
+  other — see [config-options](config-options.md) and [lsp-lightbulb](lsp-lightbulb.md).
 - Current-line blame is **not** enabled (no `current_line_blame`) — for per-line history use `<leader>gl` (line_history util).
 - `on_attach` defines the buffer-local keymaps below.
 

@@ -119,8 +119,8 @@ map("n", "<leader>cr", function()
 end, { desc = "Rename symbol" })
 -- Wrap in a closure: keymaps.lua runs at startup (init.lua), but noice swaps
 -- `vim.lsp.buf.hover` for its styled view later on VeryLazy. Binding the bare
--- reference here captures the native float (plain markdown, ugly since markview
--- skips `nofile`). The closure dereferences at call-time, so K hits noice.
+-- reference here captures the native float, which renders hover as unstyled
+-- markdown. The closure dereferences at call-time, so K hits noice's styled view.
 map("n", "K", function() vim.lsp.buf.hover() end, { desc = "Hover docs" })
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })
 map("n", "[d", function() vim.diagnostic.jump({ count = -1 }) end, { desc = "Prev diagnostic" })
@@ -156,10 +156,9 @@ map("n", "<leader>xd", function() vim.diagnostic.setqflist() end, { desc = "Diag
 -- All TODO/FIX/HACK comments → quickfix (todo-comments.nvim registers the command on VeryLazy).
 map("n", "<leader>xt", "<cmd>TodoQuickFix<cr>", { desc = "TODOs → quickfix" })
 
--- Inlay hints toggle
-map("n", "<leader>ci", function()
-  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-end, { desc = "Toggle inlay hints" })
+-- Inlay hints toggle lives on <leader>uh via the Snacks.toggle registry
+-- (lua/plugins/snacks.lua) — the registry version reports state to which-key and
+-- notifies on flip, so this raw duplicate was removed rather than kept in parallel.
 
 -- Case conversion
 map("n", "<leader>cv", function()

@@ -39,17 +39,42 @@ WebFetch https://raw.githubusercontent.com/folke/which-key.nvim/HEAD/README.md i
 
 ## Our config
 
-All customisation is in `opts.spec`. Registered group prefixes:
+`preset = "modern"` — a floating rounded panel instead of the legacy full-width bar glued to the
+cmdline. (`"helix"` is the same content in a right-hand column if you prefer it vertical;
+`"classic"` is the old look.)
+
+The rest is `opts.spec`. Registered group prefixes:
 
 | Prefix | Label |
 |--------|-------|
-| `<leader>f` | find/files |
-| `<leader>s` | search |
-| `<leader>g` | git |
-| `<leader>gh` | hunks |
 | `<leader>b` | buffer |
-| `<leader>q` | quit |
+| `<leader>c` | code |
+| `<leader>cs` | swap |
+| `<leader>d` | debug |
+| `<leader>D` | database |
+| `<leader>f` | find/files |
+| `<leader>g` | git |
+| `<leader>gc` | conflict |
+| `<leader>h` | harpoon |
+| `<leader>k` | docs (devdocs/nvimdocs) |
+| `<leader>n` | obsidian |
+| `<leader>o` | overseer/other |
+| `<leader>R` | rest (kulala) |
+| `<leader>s` | search |
+| `<leader>S` | snippets |
 | `<leader>t` | todo/test |
+| `<leader>u` | ui |
+| `<leader>ud` | duck |
+| `<leader>x` | diagnostics/quickfix |
+| `g` | goto |
+| `gs` | surround |
+
+Profile-gated additions: with `GAF=1`, `<leader>r` (redash) and `<leader>X` (xdebug profile);
+without it, `<leader>l` (laravel).
+
+Because `<leader>ud` is a **group prefix** (duck), it can't also be a toggle — which is why the
+snacks diagnostics toggle sits on `<leader>ux`. Same reason `<leader>ur` is unavailable: it is the
+resize submode in `lua/config/keymaps.lua`.
 | `<leader>u` | ui |
 | `<leader>ud` | duck |
 | `<leader>x` | diagnostics |

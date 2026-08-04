@@ -66,6 +66,11 @@ WebFetch https://raw.githubusercontent.com/folke/edgy.nvim/HEAD/README.md for th
 - `dap-view-term` — dap-view terminal, 30%.
 - `help` — `:h` windows, 40%, with a `filter` guarding `vim.bo[buf].buftype == "help"` so non-help `ft=help` buffers don't get captured.
 - `grug-far` — search/replace UI, 40%.
+- `snacks_terminal` — the `<leader>/` terminal, 30%, titled `%{b:snacks_terminal.id}: %{b:term_title}`.
+  Uses snacks' own documented `filter`: match only editor-relative snacks windows whose
+  `snacks_win.position == "bottom"`, and never trouble's preview window. Before this, the terminal
+  opened as a plain split outside edgy — no title bar, and ignored `exit_when_last` /
+  `close_when_all_hidden`.
 
 ### left panels
 - `undotree` — 30 cols wide, `pinned=false`, `open = "UndotreeToggle"` so the slot lazy-spawns the plugin.

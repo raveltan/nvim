@@ -36,7 +36,9 @@ Lazy-loaded on `:Trouble` or the keymap.
 
 ## Our config
 
-- `config = true` — accept defaults. Only `<leader>xx` is mapped.
+- `opts = { focus = true }` — jump into the list on open. Trouble is a bottom edgy panel, so
+  without this the cursor stays in the buffer and the panel is read-only decoration. Window
+  placement and size stay edgy's ([ui-edgy](ui-edgy.md)); only `<leader>xx` is mapped.
 - Other trouble modes (`symbols`, `lsp`, `loclist`, `qflist`) are reachable via `:Trouble <mode>` on demand.
 
 ## Keymaps

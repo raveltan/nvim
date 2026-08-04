@@ -57,7 +57,27 @@ vim.diagnostic.config({
 })
 ```
 
-A post-config loop forces `underline = true` on `DiagnosticUnderline*` highlights when the terminal lacks undercurl support.
+A post-config loop assigns a **distinct underline style per severity**, not just a distinct colour — four dim underlines are hard to tell apart by hue alone on a transparent background:
+
+| Severity | Style |
+|---|---|
+| Error | `undercurl` |
+| Warn | `underdouble` |
+| Info | `underdotted` |
+| Hint | `underdashed` |
+| Ok | `underline` |
+
+The theme's underline colour (`sp`) is preserved; only the style bits are replaced. Re-applied on
+`ColorScheme`, since a colorscheme reload resets them to the theme's definitions. All four styles
+require the tmux `Smulx`/`Setulc` overrides — see
+[terminal-ghostty-tmux](terminal-ghostty-tmux.md). A terminal that doesn't understand the extended
+SGR renders any of them as a plain underline, which is the same fallback the previous
+undercurl→underline loop provided.
+
+**Inlay hints** are enabled here with `vim.lsp.inlay_hint.enable(true)` — they ship with 0.12 but
+stay off until asked for, and vtsls / basedpyright / rust-analyzer / dartls all produce them.
+`LspInlayHint` is restyled (italic, no background) in [ui-moonfly](ui-moonfly.md); toggle per
+buffer with `<leader>uh`.
 
 ## Keymaps
 
@@ -77,8 +97,8 @@ Defined in `lua/config/keymaps.lua`, not in this spec. Neovim 0.11+ defaults (`g
 | `<leader>cr` | n | Smart rename: class → tag → LSP (PHP `$` sigil aware) | Rename class/tag/symbol |
 | `<leader>cf` | n | `conform.format({ async = true })` | Format file |
 | `<leader>cd` | n | `vim.diagnostic.open_float` | Line diagnostics |
-| `<leader>ci` | n | toggle `vim.lsp.inlay_hint` | Toggle inlay hints |
-| `<leader>ud` | n | toggle `vim.diagnostic` | Toggle diagnostics |
+| `<leader>uh` | n | `Snacks.toggle.inlay_hints()` | Toggle inlay hints (was `<leader>ci`) |
+| `<leader>ux` | n | `Snacks.toggle.diagnostics()` | Toggle diagnostics (`<leader>ud*` is the duck group) |
 | `[d` / `]d` | n | `vim.diagnostic.jump({ count = ±1 })` | Prev / next diagnostic |
 | `[e` / `]e` | n | jump with `severity = ERROR` | Prev / next error |
 | `[w` / `]w` | n | jump with `severity = WARN` | Prev / next warning |

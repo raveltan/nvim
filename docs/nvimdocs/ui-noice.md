@@ -65,6 +65,14 @@ WebFetch https://raw.githubusercontent.com/folke/noice.nvim/HEAD/README.md for t
 - `lsp.override` — three keys flipped to `true` so cmp's docs popup and any plugin calling `vim.lsp.util.stylize_markdown` use noice's markdown renderer.
 - `views.hover` — `max_height = 40`, `max_width = 180`, rounded border with `padding = {0, 1}`. The upstream default (`max_height = 20`, no border) truncates long TypeScript type signatures and shows `@@@` at the tail; the override fixes that.
 - `presets.long_message_to_split = true` — overflow messages go to a split, not a giant float.
+- `presets.lsp_doc_border = true` — borders (and `FloatBorder:DiagnosticInfo`) on the hover /
+  signature doc views, so LSP docs read as a distinct surface. Presets merge *first*, so the
+  `views.hover` sizing above still wins.
+- `presets.inc_rename` is deliberately **not** enabled: that preset only styles the `:IncRename`
+  cmdline and inc-rename.nvim is not installed — rename goes through `lua/config/rename.lua` +
+  `Snacks.rename`. Enabling it would be dead config.
+- `presets.command_palette` is deliberately **not** enabled: it requires the popup cmdline, which
+  re-arms the `E11` bug that `cmdline.view = "cmdline"` exists to avoid.
 
 ## Keymaps
 None defined here. Commands: `:Noice` (history), `:Noice last`, `:Noice dismiss`, `:Noice errors`, `:Noice telescope`.
