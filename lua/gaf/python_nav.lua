@@ -27,6 +27,11 @@ local DEAD_END_FILES = {
   "dummy_wrapper%.py$",
   "libgafthrift/__init__%.py$", -- class thrift_wrapper
   "gRPC/grpc_wrapper%.py$",
+  -- Generated thrift Iface/Client, either the installed gaf_thrift package or
+  -- the thrift repo's gen-py output. It declares every method name but
+  -- implements none of them, so it looks like a real definition while being
+  -- the same dead end as the proxies above.
+  "/gaf_thrift/.*%.py$",
 }
 
 local function is_dead_end(uri)
@@ -66,15 +71,25 @@ local function service_hint()
 end
 
 -- Handlers first: the midlayer/dao class implementing the Iface is almost
--- always the jump the user wants; test doubles come last. A service-name
--- match from the call site outranks everything within its tier.
+-- always the jump the user wants; test doubles come last.
+--
+-- A service name read off the call site (`conns.projects_dao.x` -> "projects_dao")
+-- outranks the tier guess entirely, because it is direct evidence rather than a
+-- heuristic. With a within-tier bonus instead, `conns.projects_dao.reviews_get`
+-- from inside a midlayer jumped to that midlayer's own reviews_get -- tier 1
+-- beat the dao's tier 2 even though the call names the dao.
+local HINT_BONUS = 2
+
 local function rank(path, hint)
   local r
   if path:find("/tests/") or path:find("/test_") then r = 4
+  -- Dao before mid: a midlayer's in-process dao modules (projects_mid/dao/*.py)
+  -- also sit under a `*_mid/` path, so testing mid first made them tie with the
+  -- thrift handler and turned every jump into a two-item picker.
+  elseif path:find("_dao/") or path:find("/dao/") then r = 2
   elseif path:find("_mid/") then r = 1
-  elseif path:find("_dao/") then r = 2
   else r = 3 end
-  if hint and path:find(hint, 1, true) then r = r - 0.5 end
+  if hint and path:find(hint, 1, true) then r = r - HINT_BONUS end
   return r
 end
 
@@ -108,6 +123,34 @@ local function jump(file, pos)
   end)
 end
 
+-- Forward declaration: find_impls falls back to the PHP monolith, which is
+-- defined below it.
+local goto_gaf_php
+
+-- Definition on a thrift method resolves to the generated runtime package in
+-- site-packages, which is unreadable machinery. The repo ships hand-typed stubs
+-- for the same modules, so map
+--   <anywhere>/gaf_thrift/<rel>.py  ->  API_ROOT/gaf_thrift-stubs/<rel>.pyi
+-- and show that instead: same contract, real annotations, and inside the repo.
+local function contract_stub(path)
+  local rel = path:match("/gaf_thrift/(.+)%.py$")
+  if not rel then return nil end
+  local stub = API_ROOT .. "/gaf_thrift-stubs/" .. rel .. ".pyi"
+  return vim.uv.fs_stat(stub) and stub or nil
+end
+
+-- Open `file` at its `def <word>(`. Used when the line number from one file
+-- (the generated .py) cannot be carried over to another (the .pyi).
+local function jump_to_def(file, word)
+  vim.schedule(function()
+    vim.cmd.edit(vim.fn.fnameescape(file))
+    vim.fn.cursor(1, 1)
+    vim.fn.search("\\<def\\s\\+" .. word .. "\\>", "cW")
+    vim.cmd("normal! zz")
+    vim.cmd("redraw")
+  end)
+end
+
 -- Name-based resolution via workspace symbols: exact-name function/method
 -- defs in real .py files under the api repo.
 local function find_impls(word, client, dead_ends, hint)
@@ -132,13 +175,31 @@ local function find_impls(word, client, dead_ends, hint)
     end
     table.sort(items, function(a, b) return a.rank < b.rank end)
     if #items == 0 then
-      -- Nothing real found; a stub def beats staying put.
-      if dead_ends[1] then
-        jump(vim.uri_to_fname(dead_ends[1].uri),
-          { dead_ends[1].range.start.line + 1, dead_ends[1].range.start.character })
-      else
-        vim.notify("No implementation found for " .. word, vim.log.levels.WARN)
-      end
+      -- No python handler in the api repo. Plenty of thrift services are
+      -- implemented by the PHP monolith rather than by a python midlayer
+      -- (memberships, groups, feed, external_credentials, canvas...), and the
+      -- call site cannot tell them apart -- `conns.memberships.x` looks exactly
+      -- like `conns.users_mid.x`. So try fl-gaf before settling for the stub.
+      goto_gaf_php(word, function()
+        if dead_ends[1] then
+          -- Some services (memberships being one) live in neither tree; the
+          -- thrift contract is then the only local record, so show it, but say
+          -- why rather than pretending it is the handler.
+          vim.notify(
+            word .. ": no handler in the api repo or fl-gaf -- showing the thrift contract",
+            vim.log.levels.INFO)
+          local target = vim.uri_to_fname(dead_ends[1].uri)
+          local stub = contract_stub(target)
+          if stub then
+            jump_to_def(stub, word)
+          else
+            jump(target, { dead_ends[1].range.start.line + 1,
+              dead_ends[1].range.start.character })
+          end
+        else
+          vim.notify("No implementation found for " .. word, vim.log.levels.WARN)
+        end
+      end)
     elseif #items == 1 or items[1].rank < (items[2] and items[2].rank or 5) then
       -- Single hit, or a unique best-ranked hit (the handler): jump straight.
       jump(items[1].file, items[1].pos)
@@ -154,17 +215,27 @@ local function find_impls(word, client, dead_ends, hint)
   end, 0)
 end
 
--- `conns.gaf.method(...)` is served by the PHP monolith, not a python
--- service: handlers live in fl-gaf src2/Traits/GafThrift/Thrift*Trait.php as
--- `public function <method>(`. Opens side by side (vsplit) so the python
--- call site stays visible. Zero hits falls back to the normal LSP flow.
-local function goto_gaf_php(word, fallback)
+-- Resolve a thrift method against the PHP monolith: handlers live in fl-gaf
+-- src2/Traits/GafThrift/Thrift*Trait.php as `public function <method>(`.
+-- Opens side by side (vsplit) so the python call site stays visible. Zero hits
+-- calls `fallback`.
+--
+-- Reached two ways. `conns.gaf.*` goes straight here, since that name always
+-- means the monolith. Everything else arrives via find_impls after the api repo
+-- turns up nothing, because the call site cannot distinguish a PHP-backed
+-- service from a python one -- `conns.memberships.x` and `conns.users_mid.x`
+-- are written identically.
+function goto_gaf_php(word, fallback)
   local gaf_root = require("gaf.paths").fl_gaf
   local dirs = {}
   for _, d in ipairs({ gaf_root .. "/src2", gaf_root .. "/src" }) do
     if vim.fn.isdirectory(d) == 1 then dirs[#dirs + 1] = d end
   end
+  -- Skip PHP test doubles. They declare the same `public function <method>(`
+  -- as the handler, so an unfiltered search happily lands on an ApiClient test
+  -- stub for a method the monolith does not actually implement.
   local cmd = { "rg", "-n", "--no-heading", "-g", "!vendor",
+    "-g", "!*Test*.php", "-g", "!*/Test/*", "-g", "!*/Tests/*",
     "function\\s+" .. word .. "\\s*\\(" }
   vim.list_extend(cmd, dirs)
   vim.system(cmd, { text = true }, function(out)
@@ -215,13 +286,30 @@ function M.goto_definition()
     return
   end
   local client = vim.lsp.get_clients({ bufnr = 0, name = "basedpyright" })[1]
-  if not client then
-    Snacks.picker.lsp_definitions()
-    return
-  end
+  -- The gaf branch is a ripgrep into the PHP monolith, so it needs no language
+  -- server. Check it before requiring one -- otherwise `gd` on a conns.gaf.*
+  -- call silently degrades to the plain LSP picker whenever basedpyright has
+  -- not attached yet, which reads as the split having stopped working.
   local hint = service_hint()
   if hint == "gaf" then
-    goto_gaf_php(word, function() M.lsp_flow(word, client, nil) end)
+    goto_gaf_php(word, function()
+      if client then
+        M.lsp_flow(word, client, nil)
+      else
+        Snacks.picker.lsp_definitions()
+      end
+    end)
+    return
+  end
+  if not client then
+    -- No language server yet (still starting, or this buffer is outside a
+    -- pyright root). A service hint still tells us this is a thrift call, so
+    -- the monolith is worth a look before giving up to the plain picker.
+    if hint then
+      goto_gaf_php(word, function() Snacks.picker.lsp_definitions() end)
+    else
+      Snacks.picker.lsp_definitions()
+    end
     return
   end
   M.lsp_flow(word, client, hint)
