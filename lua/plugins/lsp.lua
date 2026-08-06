@@ -809,22 +809,28 @@ return {
 							sql = { "dadbod", "snippets", "buffer" },
 							mysql = { "dadbod", "snippets", "buffer" },
 							plsql = { "dadbod", "snippets", "buffer" },
-							-- Angular inline-template @Input/@Output completion (see
-							-- lua/angular/inputs_source.lua) on top of the normal TS sources.
-							typescript = { "angular_inputs", "lsp", "path", "snippets", "buffer" },
 						},
 						providers = {
 							lsp = { max_items = 50 },
 							dadbod = { name = "Dadbod", module = "vim_dadbod_completion.blink" },
-							angular_inputs = {
-								name = "Angular",
-								module = "angular.inputs_source",
-								-- Float component inputs above generic LSP/buffer noise when the
-								-- cursor is actually inside a component tag.
-								score_offset = 5,
-							},
 						},
 					}
+
+					-- Angular inline-template completion -- component tags, @Input/@Output,
+					-- enum values (lua/gaf/angular/inputs_source.lua) -- on top of the normal
+					-- TS sources. GAF-only: the source indexes every `selector:` under the
+					-- search root, wasted work in a non-Angular project, so any other session
+					-- leaves `typescript` on `default`.
+					if vim.g.gaf then
+						sources.per_filetype.typescript = { "angular_inputs", "lsp", "path", "snippets", "buffer" }
+						sources.providers.angular_inputs = {
+							name = "Angular",
+							module = "gaf.angular.inputs_source",
+							-- Float component inputs above generic LSP/buffer noise when the cursor
+							-- is actually inside a component tag.
+							score_offset = 5,
+						}
+					end
 
 					-- php and blade have no entry here and use `default`, where `lsp` means
 					-- laravel_lsp plus phpantom_lsp (php) or html/emmet/tailwind (blade).

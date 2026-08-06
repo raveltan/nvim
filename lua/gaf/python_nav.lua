@@ -9,7 +9,7 @@
 -- the implementation.
 --
 -- Buffer-local `gd` (api-repo python buffers only, same idiom as the Angular
--- template gd in lua/angular/):
+-- template gd in lua/gaf/angular/):
 --   gd on a call site  -> LSP definition; if every target is a stub/.pyi or
 --                         DummyWrapper, resolve by workspace-symbol name
 --                         lookup instead: handler `def`s ranked midlayer >

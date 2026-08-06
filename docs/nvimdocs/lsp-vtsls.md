@@ -28,7 +28,7 @@ Full VS Code TS feature set over LSP: completions, diagnostics, source actions (
 `<leader>cx` not `cR` — angular/init.lua owns `<leader>cR` (`goto_route`) on typescript buffers.
 
 ## Links
-- Related: [editor-angular](editor-angular.md) — Angular nav layered on top; blink `angular_inputs` source prepends to the typescript source list.
+- Related: [gaf-angular](gaf-angular.md) — Angular nav layered on top; blink `angular_inputs` source prepends to the typescript source list.
 - Related: [lsp-nvim-lspconfig](lsp-nvim-lspconfig.md), [lsp-mason-lspconfig](lsp-mason-lspconfig.md)
 
 ## Notes

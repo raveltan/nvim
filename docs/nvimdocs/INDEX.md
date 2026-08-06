@@ -31,6 +31,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [gaf-neotest-profile](gaf-neotest-profile.md) — `XDEBUG_MODE=profile` runner
 - [gaf-neotest-ui-tests](gaf-neotest-ui-tests.md) — `yarn ui:<project>` neotest adapter
 - [gaf-ui-test](gaf-ui-test.md) — overseer template helper for UI tests
+- [gaf-angular](gaf-angular.md) — Angular component nav: `gd` on tags/attrs/classes/routes, `<leader>c{p,G,R}`, blink completion of component tags (auto-import + `@NgModule` wiring, `:AngularReindex`) and @Input/@Output inside them (in-repo `lua/gaf/angular/`)
 - [gaf-formatting](gaf-formatting.md) — php-cs-fixer + phpcs against fl-gaf rulesets
 
 ## LSP
@@ -113,7 +114,6 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [editor-mini-ai](editor-mini-ai.md) — extended textobjects
 - [editor-mini-surround](editor-mini-surround.md) — `gs*` surround ops
 - [editor-tagmatch](editor-tagmatch.md) — treesitter `%` tag jump, `i%`/`a%` objects, tag rename (in-repo `lua/tagmatch/`)
-- [editor-angular](editor-angular.md) — Angular component nav: `gd` on tags/attrs/classes/routes, `<leader>c{p,G,R}`, blink @Input/@Output completion inside tags (in-repo `lua/angular/`)
 - [editor-mini-bufremove](editor-mini-bufremove.md) — `<leader>bd` close-keep-window
 - [editor-flash](editor-flash.md) — `s`/`S` label jumps
 - [editor-multicursor](editor-multicursor.md) — multiple cursors: `<leader>c{n,N,S,m,j,k,q}` add + in-cursor layer (arrows/`<leader>x`/`<esc>`)

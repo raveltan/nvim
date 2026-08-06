@@ -15,7 +15,7 @@ generated `gaf_thrift-stubs/*.pyi` Client and never reaches the midlayer/dao
 handler. Names bridge the gap: every handler implements the generated `Iface`
 with the exact thrift method name.
 
-Same idiom as the Angular template `gd` in `lua/angular/`: buffer-local `gd`
+Same idiom as the Angular template `gd` in `lua/gaf/angular/`: buffer-local `gd`
 shadows the global snacks `gd`, only on python buffers under the api repo,
 wired from `gaf/init.lua` → `M.setup()` (GAF-gated).
 
@@ -78,7 +78,7 @@ wired from `gaf/init.lua` → `M.setup()` (GAF-gated).
 ## Links
 
 - [gaf-lsp](gaf-lsp.md) — basedpyright monorepo wiring this rides on
-- [editor-angular](editor-angular.md) — the template-aware `gd` this mirrors
+- [gaf-angular](gaf-angular.md) — the template-aware `gd` this mirrors
 - [gaf-overview](gaf-overview.md) — GAF profile bootstrap
 
 ## Notes

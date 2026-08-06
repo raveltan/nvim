@@ -5,9 +5,12 @@ function M.setup()
   require("gaf.xdebug").setup()
   require("gaf.python_nav").setup()
   require("gaf.typing").setup()
-  -- Tag matching (`%`, `i%`/`a%`) lives in the in-repo lua/tagmatch/ module, and
-  -- Angular selector navigation (`gd`, `<leader>c{p,G,R}`) in lua/angular/ -- both
-  -- set up for everyone in init.lua, since neither is GAF-specific.
+  -- Angular selector navigation (`gd`, `<leader>c{p,G,R}`) plus the template
+  -- completion source: GAF-only, so it starts here rather than in init.lua. Its
+  -- blink provider is registered under the same flag in lua/plugins/lsp.lua.
+  require("gaf.angular").setup()
+  -- Tag matching (`%`, `i%`/`a%`) lives in the in-repo lua/tagmatch/ module and is
+  -- set up for everyone in init.lua, since it is not GAF-specific.
 end
 
 return M
