@@ -65,9 +65,10 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     opts = {
       max_lines = 3,
-      -- Underline the sticky header so it reads as a pinned bar, not as buffer
-      -- text that failed to scroll.
-      separator = "─",
+      -- No separator: the rule is drawn in TreesitterContextSeparator, which
+      -- moonfly never defines, so it fell back to Normal's #c6c6c6 — a near-white
+      -- line across the full window width. The grey13 surface set on
+      -- TreesitterContext (lua/plugins/ui.lua) is the pinned-bar cue instead.
       mode = "cursor",           -- context of the cursor's node, not the topmost visible one
       trim_scope = "outer",      -- when over max_lines, drop outer scopes first
       multiline_threshold = 1,   -- collapse a multi-line signature to its first line

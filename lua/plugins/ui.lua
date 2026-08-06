@@ -12,40 +12,96 @@ return {
       -- opaque (some branches test `== true`). moonfly sets termguicolors +
       -- background=dark itself.
       vim.g.moonflyTransparent = true
-      vim.cmd.colorscheme("moonfly")
+      -- 1 (default) draws BLOCK separators: VertSplit gets bg=fg=grey16, i.e. a
+      -- solid bar that survives transparency. 2 is the line style moonfly itself
+      -- renders as bg=NONE, which is what the transparent setup wants.
+      vim.g.moonflyWinSeparator = 2
 
-      -- Belt-and-suspenders: force-clear backgrounds on groups the theme's own
-      -- transparency may leave opaque (statusline, separators).
-      -- NormalFloat/FloatBorder are deliberately NOT here: moonfly gives floats a
-      -- grey13 (#212121) surface even in transparent mode (see its
-      -- g:moonflyNormalFloat branch), and clearing it made hover docs, the blink
-      -- menu and pickers render on top of live buffer text. Transparent editor,
-      -- solid floats.
-      local transparent_groups = {
-        "Normal",
-        "NormalNC",
-        "SignColumn",
-        "StatusLine",
-        "StatusLineNC",
-        "WinSeparator",
-      }
-      for _, group in ipairs(transparent_groups) do
-        vim.api.nvim_set_hl(0, group, vim.tbl_extend("force", vim.api.nvim_get_hl(0, { name = group }), { bg = "NONE" }))
+      -- The float surface every override below blends against (moonfly grey13),
+      -- and grey15 for chrome that sits flush against buffer text.
+      local float_bg = "#212121"
+      local context_bg = "#262626"
+
+      local function overrides()
+        -- Belt-and-suspenders: force-clear backgrounds on groups the theme's own
+        -- transparency may leave opaque (statusline, separators).
+        -- NormalFloat is deliberately NOT here: moonfly gives floats a grey13
+        -- (#212121) surface even in transparent mode (see its g:moonflyNormalFloat
+        -- branch), and clearing it made hover docs, the blink menu and pickers
+        -- render on top of live buffer text. Transparent editor, solid floats —
+        -- which is also why the float chrome below blends INTO grey13 rather than
+        -- being cleared.
+        local transparent_groups = {
+          "Normal",
+          "NormalNC",
+          "SignColumn",
+          "StatusLine",
+          "StatusLineNC",
+          "WinSeparator",
+        }
+        -- link=false is load-bearing: nvim_get_hl on a linked group returns
+        -- { link = "Target" }, and nvim_set_hl ignores every other attribute when a
+        -- link is present, so bg="NONE" was silently dropped. Resolving the link
+        -- first returns the target's real attributes and breaks the link on write.
+        for _, group in ipairs(transparent_groups) do
+          local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
+          hl.bg = "NONE"
+          vim.api.nvim_set_hl(0, group, hl)
+        end
+
+        -- WinSeparator's line char inherits grey16 (#292929), which is 41/255 from
+        -- Ghostty's black — the split boundary vanished. grey27 is what moonfly
+        -- already uses for FloatBorder, so borders and splits now read alike.
+        vim.api.nvim_set_hl(0, "WinSeparator", { bg = "NONE", fg = "#444444" })
+
+        -- Contrast fixes measured against the actual terminal background (Ghostty is
+        -- #000000): moonfly ships ColorColumn and TreesitterContext at #121212, which
+        -- is 18/255 away from black — effectively invisible once Normal is bg=NONE.
+        -- ColorColumn must also clear CursorLine (#1c1c1c) or the rule disappears on
+        -- the cursor's own line, which is the line you are usually measuring.
+        vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#262626" })
+        -- The sticky context reads as a pinned panel on surface alone — one step
+        -- above the float surface, since it sits directly against buffer text with
+        -- no border or gap to separate it (nvim-treesitter-context renders into a
+        -- plain float and has no padding option).
+        vim.api.nvim_set_hl(0, "TreesitterContext", { bg = context_bg })
+        vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { bg = context_bg, fg = "#6d6d6d" })
+        -- render.lua:528 underlines the last context row via
+        -- TreesitterContextBottom unconditionally — dropping `separator` did not
+        -- remove it. moonfly asks for sp=#2e2e2e, but the underline color is not
+        -- being honoured, so it drew in Normal's #c6c6c6: a near-white rule welded
+        -- to the code below. Surface only, no underline.
+        vim.api.nvim_set_hl(0, "TreesitterContextBottom", { bg = context_bg })
+        vim.api.nvim_set_hl(0, "TreesitterContextLineNumberBottom", { bg = context_bg, fg = "#6d6d6d" })
+        -- Inlay hints inherited bg #1c1c1c, i.e. a grey box floating in transparent
+        -- code. Italic + dim fg on no background is the readable form.
+        vim.api.nvim_set_hl(0, "LspInlayHint", { bg = "NONE", fg = "#6d6d6d", italic = true })
+
+        -- Flush float chrome. Borders keep their cell (the padding is what makes a
+        -- float readable over code) but are painted in the surface color, so no
+        -- frame is drawn. Three groups, because moonfly splits them:
+        --   FloatBorder            grey13/grey27 — LSP hover, blink, fff, which-key
+        --   FloatBorderTransparent NONE/grey18   — snacks, telescope, fzf, notify,
+        --                                          dap-ui, mini; a see-through ring
+        --                                          around an opaque grey13 body,
+        --                                          which is the mismatch that read
+        --                                          as a "weird" double edge
+        --   FloatTitle             grey23/white  — a lighter chip welded onto the
+        --                                          top border ("Files", "+goto")
+        vim.api.nvim_set_hl(0, "FloatBorder", { bg = float_bg, fg = float_bg })
+        vim.api.nvim_set_hl(0, "FloatBorderTransparent", { bg = float_bg, fg = float_bg })
+        vim.api.nvim_set_hl(0, "FloatTitle", { bg = float_bg, fg = "#9e9e9e" })
       end
 
-      -- Contrast fixes measured against the actual terminal background (Ghostty is
-      -- #000000): moonfly ships ColorColumn and TreesitterContext at #121212, which
-      -- is 18/255 away from black — effectively invisible once Normal is bg=NONE.
-      -- ColorColumn must also clear CursorLine (#1c1c1c) or the rule disappears on
-      -- the cursor's own line, which is the line you are usually measuring.
-      vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#262626" })
-      -- Give the sticky context the same surface as floats, so it reads as a pinned
-      -- panel rather than as buffer text that failed to scroll.
-      vim.api.nvim_set_hl(0, "TreesitterContext", { bg = "#212121" })
-      vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { bg = "#212121", fg = "#6d6d6d" })
-      -- Inlay hints inherited bg #1c1c1c, i.e. a grey box floating in transparent
-      -- code. Italic + dim fg on no background is the readable form.
-      vim.api.nvim_set_hl(0, "LspInlayHint", { bg = "NONE", fg = "#6d6d6d", italic = true })
+      vim.cmd.colorscheme("moonfly")
+      overrides()
+      -- Anything that re-runs the colorscheme (a :colorscheme moonfly, a plugin
+      -- reload) restores moonfly's own definitions and drops all of the above.
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("moonfly_overrides", { clear = true }),
+        pattern = "moonfly",
+        callback = overrides,
+      })
     end,
   },
 
