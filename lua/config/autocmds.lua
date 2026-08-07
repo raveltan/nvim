@@ -81,6 +81,32 @@ autocmd("FileType", {
   end,
 })
 
+-- One highlighted row on screen, not one per split. 'cursorline' is global, so
+-- every window drew its own "current line" — on a transparent background that
+-- left nothing marking which one the cursor is actually in.
+--
+-- The w: flag is only ever SET on leave, so a window that had no cursorline to
+-- begin with (pickers, terminals, dashboard) never gets handed one on entry.
+local auto_cursorline = augroup("auto_cursorline", { clear = true })
+autocmd("WinLeave", {
+  group = auto_cursorline,
+  callback = function()
+    if vim.wo.cursorline then
+      vim.w.auto_cursorline = true
+      vim.wo.cursorline = false
+    end
+  end,
+})
+autocmd("WinEnter", {
+  group = auto_cursorline,
+  callback = function()
+    if vim.w.auto_cursorline then
+      vim.wo.cursorline = true
+      vim.w.auto_cursorline = nil
+    end
+  end,
+})
+
 -- Close specific filetypes with q
 autocmd("FileType", {
   group = augroup("close_with_q", { clear = true }),

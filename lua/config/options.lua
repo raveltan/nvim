@@ -8,7 +8,7 @@ opt.relativenumber = true
 opt.termguicolors = true
 opt.showtabline = 0
 -- yes:2, not yes: the gutter now hosts gitsigns hunk bars, marks.nvim marks,
--- diagnostic icons AND nvim-lightbulb's code-action bulb. At width 1 the
+-- and nvim-lightbulb's code-action bulb (diagnostics no longer sign). At width 1 the
 -- highest-priority sign silently hides the rest.
 opt.signcolumn = "yes:2"
 opt.shiftwidth = 2
@@ -55,6 +55,12 @@ opt.winborder = "rounded"
 -- buffer text through the menu.)
 opt.pumborder = "rounded"
 opt.laststatus = 3
+-- Pending keys ("d2f", "\"a3y") render via 'showcmd', whose default home is the
+-- last line of the cmdline — which noice owns. They were going nowhere. Route
+-- them into the statusline instead, where lualine renders them via a %S
+-- component (lua/plugins/ui.lua).
+opt.showcmd = true
+opt.showcmdloc = "statusline"
 opt.smoothscroll = true
 -- diff:╱ replaces the default '-' filler rows in :Gdiffsplit / vimdiff with a
 -- diagonal hatch, so deleted-block filler reads as absence, not content.

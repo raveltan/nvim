@@ -77,6 +77,16 @@ return {
         -- code. Italic + dim fg on no background is the readable form.
         vim.api.nvim_set_hl(0, "LspInlayHint", { bg = "NONE", fg = "#6d6d6d", italic = true })
 
+        -- Per-window winbar (lualine `winbar`, below). No surface: a filled
+        -- strip was tried at both grey15 and grey11 and read as a bar welded
+        -- across every window — grey15 also merged into the sticky context that
+        -- renders immediately below it. Transparent, like the editor; the label
+        -- separates from code by being dimmer than Normal (#c6c6c6) instead of
+        -- by sitting on a box. The components below clear their own bg too,
+        -- since lualine paints grey07 behind every section by default.
+        vim.api.nvim_set_hl(0, "WinBar", { bg = "NONE", fg = "#9e9e9e" })
+        vim.api.nvim_set_hl(0, "WinBarNC", { bg = "NONE", fg = "#6d6d6d" })
+
         -- Flush float chrome. Borders keep their cell (the padding is what makes a
         -- float readable over code) but are painted in the surface color, so no
         -- frame is drawn. Three groups, because moonfly splits them:
@@ -91,6 +101,27 @@ return {
         vim.api.nvim_set_hl(0, "FloatBorder", { bg = float_bg, fg = float_bg })
         vim.api.nvim_set_hl(0, "FloatBorderTransparent", { bg = float_bg, fg = float_bg })
         vim.api.nvim_set_hl(0, "FloatTitle", { bg = float_bg, fg = "#9e9e9e" })
+
+        -- Snacks picker chrome. The flush-border trick above assumes the float
+        -- BODY is grey13; that holds for anything using NormalFloat (hover,
+        -- blink, which-key) but every snacks picker window resolves its body
+        -- through SnacksPicker -> Normal, whose bg the transparency loop at the
+        -- top of this function clears. So the picker drew an opaque grey ring
+        -- around a see-through body — the frame the flush borders exist to
+        -- avoid, inverted. Three links fix the whole surface, because snacks
+        -- routes list/preview/input/box through these:
+        --   SnacksPicker       body for all four windows
+        --   *InputBorder       the one border that did NOT go through
+        --                      SnacksPickerBorder — it linked to MoonflyBlue,
+        --                      so the prompt alone wore a bright blue frame
+        --   SnacksPickerTitle  linked to Dimmed (bg NONE) while the matching
+        --                      footer was already grey13; titles now sit on the
+        --                      same surface as everything else
+        -- All snacks hl groups are registered with default=true, so these
+        -- explicit definitions win regardless of load order.
+        vim.api.nvim_set_hl(0, "SnacksPicker", { link = "NormalFloat" })
+        vim.api.nvim_set_hl(0, "SnacksPickerInputBorder", { link = "SnacksPickerBorder" })
+        vim.api.nvim_set_hl(0, "SnacksPickerTitle", { link = "FloatTitle" })
       end
 
       vim.cmd.colorscheme("moonfly")
@@ -234,6 +265,32 @@ return {
         }
       end
 
+      -- bg=NONE on both components is load-bearing, not decoration: lualine
+      -- paints its section background (grey07) behind everything it renders, so
+      -- clearing WinBar/WinBarNC alone would still leave the label in a dark
+      -- notch. These have to match the two groups set in the moonfly block.
+      -- The icon keeps its language colour now that there is no surface for it
+      -- to clash with.
+      local function winbar_section(fg)
+        return {
+          lualine_c = {
+            {
+              "filetype",
+              icon_only = true,
+              separator = "",
+              padding = { left = 1, right = 0 },
+              color = { bg = "NONE" },
+            },
+            {
+              "filename",
+              path = 0,
+              symbols = { modified = "  ", readonly = " ", unnamed = " " },
+              color = { bg = "NONE", fg = fg },
+            },
+          },
+        }
+      end
+
       -- Refresh on macro start/stop. ModeChanged dropped: lualine already
       -- redraws on mode change internally, the extra refresh just doubled work
       -- on every n↔i↔v↔c transition.
@@ -324,32 +381,17 @@ return {
             encoding,
             fileformat,
           },
-          lualine_y = { "progress" },
+          -- 'showcmdloc' is "statusline" (lua/config/options.lua); a component
+          -- whose string starts with % is loaded as a raw statusline expression,
+          -- so this is where the pending-key display lands.
+          lualine_y = { { "%S" }, "progress" },
           lualine_z = { { "location", icon = "" } },
         },
         -- One bar per window, carrying only what identifies that window: type
         -- icon, bare filename, modified/readonly marker. Everything positional
         -- or global stays in the single statusline below it.
-        winbar = {
-          lualine_c = {
-            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
-            {
-              "filename",
-              path = 0,
-              symbols = { modified = "  ", readonly = " ", unnamed = " " },
-            },
-          },
-        },
-        inactive_winbar = {
-          lualine_c = {
-            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
-            {
-              "filename",
-              path = 0,
-              symbols = { modified = "  ", readonly = " ", unnamed = " " },
-            },
-          },
-        },
+        winbar = winbar_section("#9e9e9e"),
+        inactive_winbar = winbar_section("#6d6d6d"),
         extensions = { "lazy", "mason", "neo-tree", "trouble", "quickfix" },
       }
     end,
@@ -385,26 +427,6 @@ return {
         mode = "virtualtext",
       },
     },
-  },
-
-  -- Pretty inline diagnostics
-  {
-    "rachartier/tiny-inline-diagnostic.nvim",
-    event = "LspAttach",
-    priority = 1000,
-    config = function()
-      require("tiny-inline-diagnostic").setup({
-        preset = "modern",
-        options = {
-          -- Name the server when several are attached (php = phpantom + laravel,
-          -- ts = vtsls + typos_lsp + tailwind), so a message is attributable.
-          show_source = { enabled = true, if_many = true },
-          -- Diagnostics on lines other than the cursor line stay visible instead
-          -- of vanishing until you land on them.
-          multilines = { enabled = true, always_show = false },
-        },
-      })
-    end,
   },
 
   -- Decorated scrollbar (diagnostics, git hunks, marks, search, cursor)

@@ -491,37 +491,35 @@ return {
 			-- mason-lspconfig 2.x `automatic_enable=true` (default) enables every
 			-- server in `ensure_installed` automatically — no manual vim.lsp.enable.
 
+			-- Diagnostics are silent by design: the underline is the whole in-buffer
+			-- signal, and the message text only appears when it is asked for with
+			-- <leader>cd (vim.diagnostic.open_float). Nothing renders a float or
+			-- virtual text on its own — no inline plugin, no jump float, no hold.
 			vim.diagnostic.config({
-				virtual_text = false, -- tiny-inline-diagnostic handles this
-				signs = {
-					text = {
-						[vim.diagnostic.severity.ERROR] = " ",
-						[vim.diagnostic.severity.WARN] = " ",
-						[vim.diagnostic.severity.INFO] = " ",
-						[vim.diagnostic.severity.HINT] = " ",
-					},
-				},
+				virtual_text = false,
+				virtual_lines = false,
+				signs = false,
 				underline = {
 					severity = { min = vim.diagnostic.severity.HINT },
 				},
 				update_in_insert = false,
-				float = { border = "rounded" },
-				jump = { float = true },
+				float = { border = "rounded", source = true },
+				jump = { float = false },
 				severity_sort = true,
 			})
 
-			-- Severity by underline STYLE, not only by color: on a transparent background a
-			-- hue difference between four dim underlines is hard to read at a glance, and
-			-- these four styles are all carried by Ghostty + the tmux Smulx/Setulc
-			-- overrides. A terminal that does not understand the extended SGR renders any
-			-- of them as a plain underline, which is the same fallback the previous
-			-- undercurl-to-underline loop provided.
+			-- The underline is the only in-buffer signal left — no signs, no virtual
+			-- text — so every severity gets underdouble, the heaviest style the extended
+			-- SGR set offers (two stacked rules, carried by Ghostty + the tmux Smulx/Setulc
+			-- overrides). Severity still reads through the theme's underline color, and a
+			-- terminal that does not understand the extended SGR falls back to a plain
+			-- single underline.
 			local underline_styles = {
-				Error = { undercurl = true },
+				Error = { underdouble = true },
 				Warn = { underdouble = true },
-				Info = { underdotted = true },
-				Hint = { underdashed = true },
-				Ok = { underline = true },
+				Info = { underdouble = true },
+				Hint = { underdouble = true },
+				Ok = { underdouble = true },
 			}
 			local function style_diagnostic_underlines()
 				for level, style in pairs(underline_styles) do
@@ -530,6 +528,9 @@ return {
 					-- Keep the theme's underline color (sp), replace only the style bits.
 					hl.undercurl, hl.underline = nil, nil
 					hl.underdouble, hl.underdotted, hl.underdashed = nil, nil, nil
+					-- cterm carries its own copy of the theme's style bits; match it so a
+					-- 256-color terminal draws the same underline.
+					hl.cterm = vim.deepcopy(style)
 					vim.api.nvim_set_hl(0, name, vim.tbl_extend("force", hl, style))
 				end
 			end
@@ -558,7 +559,7 @@ return {
 		opts = {
 			autocmd = { enabled = true },
 			sign = { enabled = true, text = "󰌵", hl = "LightBulbSign" },
-			virtual_text = { enabled = false }, -- tiny-inline-diagnostic owns end-of-line
+			virtual_text = { enabled = false }, -- sign only; nothing writes end-of-line text
 			ignore = { ft = { "markdown", "text", "gitcommit" } },
 		},
 		config = function(_, opts)
