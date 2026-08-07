@@ -165,11 +165,90 @@ return {
         cond = function() return vim.bo.fileformat ~= "unix" end,
       }
 
+      -- Directory of the current file, dimmed. The winbar carries the bare
+      -- filename per window, so the only thing left worth showing globally is
+      -- "which tree am I in" when several repos are open across tabs.
+      local dirname = {
+        function()
+          local d = vim.fn.fnamemodify(vim.fn.expand("%:p:h"), ":~:.")
+          return (d == "" or d == ".") and "" or d
+        end,
+        cond = function() return vim.bo.buftype == "" and vim.fn.expand("%") ~= "" end,
+        color = { fg = "#8b8b8b" }, -- moonfly grey
+      }
+
+      -- Live debug session state ("Running", "Stopped at ..."). package.loaded
+      -- guard keeps a statusline redraw from force-loading nvim-dap.
+      local dap_status = {
+        function()
+          local s = require("dap").status()
+          return "  " .. (#s > 30 and (s:sub(1, 29) .. "…") or s)
+        end,
+        cond = function()
+          return package.loaded["dap"] ~= nil and require("dap").status() ~= ""
+        end,
+        color = { fg = "#e3c78a" }, -- moonfly yellow
+      }
+
+      -- Neotest results for the *current buffer* only, so the counts always
+      -- refer to the file under the cursor rather than the whole session.
+      -- status_counts walks the adapter's position tree, and the three
+      -- components below each hit it twice (cond + render). Memoised for 250ms
+      -- so one redraw costs one walk instead of six.
+      local nt_cache, nt_at, nt_buf = nil, 0, -1
+      local function neotest_counts()
+        if not package.loaded["neotest"] then return nil end
+        local buf, now = vim.api.nvim_get_current_buf(), vim.uv.hrtime()
+        if buf == nt_buf and nt_at ~= 0 and now - nt_at < 250e6 then return nt_cache end
+        nt_buf, nt_at = buf, now
+        nt_cache = nil
+        local ok, acc = pcall(function()
+          local state = require("neotest").state
+          local a = { passed = 0, failed = 0, running = 0 }
+          for _, id in ipairs(state.adapter_ids()) do
+            local c = state.status_counts(id, { buffer = 0 })
+            if c then
+              a.passed, a.failed, a.running = a.passed + c.passed, a.failed + c.failed, a.running + c.running
+            end
+          end
+          return a
+        end)
+        nt_cache = ok and acc or nil
+        return nt_cache
+      end
+
+      -- Split into three components so each keeps its own colour; a single
+      -- component would need inline %#hl# escapes that bleed into the next one.
+      local function neotest_part(key, icon, fg)
+        return {
+          function()
+            local c = neotest_counts()
+            return icon .. " " .. (c and c[key] or 0)
+          end,
+          cond = function()
+            local c = neotest_counts()
+            return c ~= nil and c[key] > 0
+          end,
+          color = { fg = fg },
+          padding = { left = 1, right = 0 },
+        }
+      end
+
       -- Refresh on macro start/stop. ModeChanged dropped: lualine already
       -- redraws on mode change internally, the extra refresh just doubled work
       -- on every n↔i↔v↔c transition.
       vim.api.nvim_create_autocmd({ "RecordingEnter", "RecordingLeave" }, {
         callback = function() require("lualine").refresh() end,
+      })
+
+      -- disabled_filetypes.winbar can only match a filetype, and a bare
+      -- :terminal buffer has none — it was getting a winbar reading "zsh".
+      -- Snacks terminals already carry snacks_terminal, so this only names the
+      -- ones nothing else claimed.
+      vim.api.nvim_create_autocmd("TermOpen", {
+        callback = function(ev)
+          if vim.bo[ev.buf].filetype == "" then vim.bo[ev.buf].filetype = "terminal" end
+        end,
       })
 
       return {
@@ -180,6 +259,35 @@ return {
           component_separators = { left = "", right = "" },
           disabled_filetypes = {
             statusline = { "dashboard", "alpha", "snacks_dashboard", "starter" },
+            -- Every filetype edgy docks (see edgy.lua) already draws its own
+            -- titled winbar; letting lualine write one there would replace the
+            -- panel title with a filename. Dashboards/pickers have no file at
+            -- all, so a winbar is pure noise there.
+            winbar = {
+              "dashboard",
+              "alpha",
+              "snacks_dashboard",
+              "starter",
+              "snacks_terminal",
+              "snacks_picker_list",
+              "snacks_picker_preview",
+              "trouble",
+              "qf",
+              "dap-repl",
+              "dap-view",
+              "dap-view-term",
+              "grug-far",
+              "undotree",
+              "diff",
+              "help",
+              "man",
+              "checkhealth",
+              "neo-tree",
+              "lazy",
+              "mason",
+              "terminal",
+              "toggleterm",
+            },
           },
         },
         sections = {
@@ -190,11 +298,10 @@ return {
             { "diagnostics", symbols = { error = " ", warn = " ", info = " ", hint = " " } },
           },
           lualine_c = {
-            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
-            -- path=1 (relative dir + name): with globalstatus there is exactly one
-            -- statusline, so a bare filename left "which of these three
-            -- component.ts is focused?" unanswerable.
-            { "filename", path = 1, symbols = { modified = "  ", readonly = " ", unnamed = " " } },
+            -- The filename lives in the per-window winbar now (see `winbar`
+            -- below), which is what makes "which of these three component.ts is
+            -- focused?" answerable without repeating it down here.
+            dirname,
             macro,
             -- Harpoon marks: 1 2 [3] 4 — brackets mark the current file. Renders
             -- nothing when the list is empty (no_harpoon = "").
@@ -207,9 +314,41 @@ return {
               color = { fg = "#74b2ff" }, -- moonfly sky
             },
           },
-          lualine_x = { lazy_updates, lsp, encoding, fileformat },
+          lualine_x = {
+            dap_status,
+            neotest_part("failed", "", "#ff5454"), -- moonfly red
+            neotest_part("passed", "", "#8cc85f"), -- moonfly green
+            neotest_part("running", "", "#74b2ff"), -- moonfly sky
+            lazy_updates,
+            lsp,
+            encoding,
+            fileformat,
+          },
           lualine_y = { "progress" },
           lualine_z = { { "location", icon = "" } },
+        },
+        -- One bar per window, carrying only what identifies that window: type
+        -- icon, bare filename, modified/readonly marker. Everything positional
+        -- or global stays in the single statusline below it.
+        winbar = {
+          lualine_c = {
+            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+            {
+              "filename",
+              path = 0,
+              symbols = { modified = "  ", readonly = " ", unnamed = " " },
+            },
+          },
+        },
+        inactive_winbar = {
+          lualine_c = {
+            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+            {
+              "filename",
+              path = 0,
+              symbols = { modified = "  ", readonly = " ", unnamed = " " },
+            },
+          },
         },
         extensions = { "lazy", "mason", "neo-tree", "trouble", "quickfix" },
       }

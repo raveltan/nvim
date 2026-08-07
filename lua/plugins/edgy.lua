@@ -5,6 +5,8 @@ return {
     event = "VeryLazy",
     init = function()
       -- laststatus=3 (global statusline) is already set in lua/config/options.lua.
+      -- Per-window identity comes from lualine's winbar instead; every ft docked
+      -- below is in its disabled_filetypes.winbar list so these titles survive.
       vim.opt.splitkeep = "screen"
     end,
     opts = {
