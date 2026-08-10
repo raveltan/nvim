@@ -78,7 +78,16 @@ return {
         -- Absolute path: a cwd-relative "./vendor/bin/phpcs" broke lint (spawn
         -- error on every save) whenever nvim wasn't started from the fl-gaf root.
         phpcs.cmd = require("gaf.paths").fl_gaf .. "/vendor/bin/phpcs"
+        -- Both rulesets set `installed_paths` to *cwd-relative* vendor paths, so
+        -- phpcs run from anywhere else exits with `Referenced sniff
+        -- "GAFCodingStandard.Functions.TranslationUsage" does not exist` — plain
+        -- text on stdout, which then blows up the JSON parser. Pinning cwd also
+        -- makes the repo-relative --stdin-path below resolve.
+        phpcs.cwd = require("gaf.paths").fl_gaf
         phpcs.args = require("gaf.formatting").phpcs_args()
+        -- Re-grade phpcs output through .arclint's per-sniff severity map, so
+        -- the buffer agrees with `arc lint` about what actually blocks.
+        phpcs.parser = require("gaf.formatting").phpcs_parser(phpcs.parser)
         lint.linters_by_ft = { php = { "phpcs" } }
       else
         lint.linters_by_ft = {}
@@ -105,6 +114,14 @@ return {
             local names = require("artisan.lint").php_linters(args.buf)
             if #names > 0 then lint.try_lint(names) end
             return
+          end
+          -- .arclint excludes some PHP from phpcs entirely (support/flarc is
+          -- PHP 7.4 and would fail the 8.1 PHPCompatibility sniffs; the phpstan
+          -- baselines are excluded repo-wide). nvim-lint has no per-linter
+          -- condition, so the exclusion belongs here.
+          if vim.g.gaf and vim.bo[args.buf].filetype == "php" then
+            local paths = require("gaf.paths")
+            if not require("gaf.arclint").phpcs_applies(paths.gaf_relpath(args.buf)) then return end
           end
           lint.try_lint()
         end,

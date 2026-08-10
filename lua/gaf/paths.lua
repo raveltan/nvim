@@ -18,6 +18,20 @@ function M.find_root(rel, from)
   return nil
 end
 
+-- Path of `bufnr` relative to the fl-gaf root, or nil when the buffer lives
+-- outside the monolith (or has no file). Deliberately not `expand("%:p:.")`,
+-- which is relative to *cwd* — every consumer here compares against paths that
+-- .arclint expresses from the repo root, so a nvim started anywhere but fl-gaf
+-- would silently route src2 files to the wrong ruleset.
+function M.gaf_relpath(bufnr)
+  local name = vim.api.nvim_buf_get_name(bufnr or 0)
+  if name == "" then return nil end
+  local abs = vim.fn.fnamemodify(name, ":p")
+  local root = M.fl_gaf .. "/"
+  if abs:sub(1, #root) ~= root then return nil end
+  return abs:sub(#root + 1)
+end
+
 -- Webapp root = directory whose package.json defines the "ui:main" script.
 -- Handles both shapes: `start` is inside the webapp itself (UI-test spec
 -- buffers) or the webapp/ is a child of an ancestor (monorepo cwd).
