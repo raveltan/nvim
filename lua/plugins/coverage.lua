@@ -2,7 +2,7 @@
 --   PHP:    coverage/cobertura.xml       (PHPUnit --coverage-cobertura)
 --   Ruby:   coverage/.resultset.json     (SimpleCov default)
 --   Python: coverage.xml                 (pytest-cov --cov-report=xml)
---   Rust:   coverage/lcov.info           (cargo llvm-cov --lcov --output-path coverage/lcov.info)
+--   Rust:   coverage/lcov.info           (cargo llvm-cov, loaded via :CoverageLoadLcov)
 return {
   {
     "andythigpen/nvim-coverage",
@@ -48,9 +48,12 @@ return {
         python = {
           coverage_file = "coverage.xml",
         },
-        rust = {
-          coverage_file = "coverage/lcov.info",
-        },
+        -- rust: deliberately unset. nvim-coverage's rust loader ignores
+        -- coverage_file — it always shells out to lang.rust.coverage_command
+        -- (grcov) and parses coveralls JSON, so an lcov path here is dead
+        -- config. lua/config/neotest-coverage.lua generates lcov with
+        -- `cargo llvm-cov` and loads it through :CoverageLoadLcov, which is
+        -- language-agnostic.
         dart = {
           coverage_file = "coverage/lcov.info",
         },

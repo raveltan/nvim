@@ -8,6 +8,40 @@ local function find_project_root(path, markers)
   return vim.fn.getcwd()
 end
 
+-- Rust does not go through neotest. rustaceanvim's neotest adapter builds its
+-- spec as `{ command = ... }` with no env field and never reads args.env, so
+-- the instrumentation vars neotest.run.run would carry are dropped on the
+-- floor — and cargo-llvm-cov needs more than a flag anyway (RUSTFLAGS
+-- -C instrument-coverage, LLVM_PROFILE_FILE, a separate report step). Driving
+-- `cargo llvm-cov` directly does the build, the run and the lcov report in one
+-- command.
+local function run_rust(file)
+  if vim.fn.executable("cargo-llvm-cov") == 0 then
+    return vim.notify("cargo-llvm-cov not installed (cargo install cargo-llvm-cov)", vim.log.levels.WARN)
+  end
+  local root = find_project_root(file, { "Cargo.toml", ".git" })
+  local coverage_rel = "coverage/lcov.info"
+  local coverage_file = root .. "/" .. coverage_rel
+
+  vim.notify("Running cargo llvm-cov (instrumented rebuild, this is slow)...", vim.log.levels.INFO)
+  vim.system(
+    { "cargo", "llvm-cov", "--all-features", "--workspace", "--lcov", "--output-path", coverage_rel },
+    { cwd = root, text = true },
+    vim.schedule_wrap(function(res)
+      if res.code ~= 0 then
+        local err = (res.stderr or ""):gsub("%s+$", "")
+        return vim.notify("cargo llvm-cov failed:\n" .. err, vim.log.levels.ERROR)
+      end
+      if not vim.uv.fs_stat(coverage_file) then
+        return vim.notify("cargo llvm-cov wrote no " .. coverage_rel, vim.log.levels.WARN)
+      end
+      pcall(vim.cmd, "CoverageLoadLcov " .. vim.fn.fnameescape(coverage_file))
+      pcall(vim.cmd, "CoverageShow")
+      vim.notify("Coverage loaded: " .. coverage_rel, vim.log.levels.INFO)
+    end)
+  )
+end
+
 function M.run(file, ft)
   local run_env, coverage_rel, markers, extra_args
   -- Set for a Pest project: pest needs its coverage flags threaded through
@@ -49,17 +83,8 @@ function M.run(file, ft)
     markers = { "pubspec.yaml", ".git" }
     extra_args = { "--coverage" }
   elseif ft == "rust" then
-    -- Requires cargo-llvm-cov installed. rustaceanvim's neotest adapter shells
-    -- out to `cargo test`; neotest merges this run_env into the spawn env, so
-    -- the CARGO vars make llvm-cov instrument the build and dump lcov to
-    -- coverage/lcov.info on test exit.
-    coverage_rel = "coverage/lcov.info"
-    run_env = {
-      CARGO_LLVM_COV = "1",
-      CARGO_LLVM_COV_TARGET_DIR = "target/llvm-cov-target",
-      LLVM_COV_FLAGS = "--lcov --output-path=coverage/lcov.info",
-    }
-    markers = { "Cargo.toml", ".git" }
+    last = { file = file, ft = ft }
+    return run_rust(file)
   else
     vim.notify("Coverage not configured for filetype: " .. ft, vim.log.levels.WARN)
     return
@@ -94,9 +119,8 @@ function M.run(file, ft)
   local elapsed_ms = 0
   local interval_ms = 1000
   -- Pest writes its report as the run finishes, so a short ceiling is enough and
-  -- keeps a missing driver from looking like a hang. Other toolchains here
-  -- include full instrumented rebuilds (cargo-llvm-cov), which genuinely take
-  -- minutes.
+  -- keeps a missing driver from looking like a hang. The other toolchains here
+  -- can genuinely take minutes on a cold cache.
   local timeout_ms = pest and 180000 or 600000
   local timer = vim.uv.new_timer()
   timer:start(interval_ms, interval_ms, vim.schedule_wrap(function()
