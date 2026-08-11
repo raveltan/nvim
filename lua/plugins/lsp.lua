@@ -720,7 +720,13 @@ return {
 							-- unloaded plugin's module by loading that plugin, which would boot
 							-- neocursor (and its sidecar) outside the GAF profile that gates it.
 							local neocursor = package.loaded["neocursor"]
-							return neocursor ~= nil and neocursor.accept()
+							if neocursor == nil then
+								return false
+							end
+							-- Toggled off (<leader>ua) leaves the module in memory, so ask the
+							-- switch rather than the plugin — a disabled Cursor Tab must not
+							-- swallow <Tab> on any leftover state.
+							return require("gaf.neocursor").enabled() and neocursor.accept()
 						end,
 						"fallback",
 					},
