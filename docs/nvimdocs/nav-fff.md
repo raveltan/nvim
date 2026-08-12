@@ -54,23 +54,16 @@ A single-purpose picker focused on the two most-common motions: "find a file" an
 - `flex.size = 130` — switch to wrap layout under 130 cols.
 - `<C-l>` focuses the result list, `<C-p>` focuses the preview (note: `<C-l>` here only applies inside the picker, so vim-tmux-navigator is unaffected globally).
 - `preview_scroll_up` remapped to `<M-u>` so the picker's input prompt `<C-u>` falls through to the native prompt-buftype "delete to prompt boundary" — i.e. clear the query.
-- `<leader><leader>` and `<leader>sg` remember their last query across closes: the picker's `close` is wrapped once to snapshot `state.query` into a module-level table keyed by mode (`files`/`grep`), and those two keymaps reopen with `query = last_query[mode]`. All other keys are unwrapped and behave like a fresh launch.
-- Frecency + per-call history on, grep is smart-case with a 200ms budget.
+- **Workspace grep (`<leader>sg`/`<leader>sw`/`<leader>s.`) moved to [snacks-picker](snacks-picker.md).** fff's grep is synchronous per keystroke with a 200 ms budget, so on a large repo it only ever reaches the highest-frecency files — which reads as "grep only searches the current file's dir". fff keeps `<leader>sz` (fuzzy grep) as the deliberate frecency-first, partial-coverage option.
+- Frecency + per-call history on (`history.enabled` restores the last query per call site), grep is smart-case with a 200ms budget.
 - `build` runs `fff.download.download_or_build_binary` — pulls a prebuilt binary or compiles locally on install/update.
 
 ## Keymaps
 | Key | Mode | Action | Desc |
 |---|---|---|---|
-| `<leader><leader>` | n | `fff.find_files({ query = last_query.files })` | Find files, resumes last query |
-| `<leader>ff` | n | `fff.find_files()` | Find files (fresh, no resume) |
-| `<leader>fd` | n | `fff.find_files_in_dir(%:p:h)` | Files in current buffer's dir |
-| `<leader>fc` | n | indexes `stdpath("config")` then restores cwd on close | Files in nvim config |
+| `<leader><leader>` | n | `fff.find_files()` | Find files |
 | `<leader>fo` | n | `vim.ui.open(%:p:h or cwd)` | Open current file's dir in Finder |
-| `<leader>sg` | n | `fff.live_grep({ query = last_query.grep })` | Live grep cwd, resumes last query |
-| `<leader>sw` | n / x | `fff.live_grep({ query = <cword> })` | Grep word under cursor / selection |
-| `<leader>sz` | n | `fff.live_grep({ grep.modes = {"fuzzy","plain"} })` | Fuzzy grep |
-| `<leader>s.` | n | `fff.live_grep({ cwd = %:p:h })` | Grep in current file's dir |
-| `<leader>gs` | n | open picker, feed `git:modified ` | Filter to git-modified files |
+| `<leader>sz` | n | `fff.live_grep({ grep.modes = {"fuzzy","plain"} })` | Fuzzy grep (frecency-first, **partial** on big repos) |
 | `<C-l>` | i (picker) | focus list | Move focus to result list |
 | `<C-p>` | i (picker) | focus preview | Move focus to preview pane |
 | `<C-u>` | i (picker) | clear query | Native prompt-buftype "delete to prompt boundary" |
@@ -82,7 +75,6 @@ A single-purpose picker focused on the two most-common motions: "find a file" an
 - `:FFFHealth` — verifies the Rust binary and git index are healthy.
 
 ## Notes
-- `<leader>fc` is non-trivial: it swaps the indexing dir to `~/.config/nvim`, then a one-shot `WinClosed` autocmd restores the original cwd via `change_indexing_directory`. Without this the picker would keep indexing the nvim config after closing.
-- `<leader>gs` opens the picker and asynchronously injects the `git:modified ` filter via `nvim_feedkeys` on the next tick — leverages the picker's query DSL.
-- Picker query supports prefix filters like `git:modified`, `git:staged`, `path:foo/` — see README "query syntax".
+- Picker query supports prefix filters like `git:modified`, `git:staged`, `path:foo/` — see README "query syntax". Type them in the prompt; no keymap wraps them any more.
+- Use `<leader>sz` to *re-find* something you touched recently, never to prove a string is absent — see [workflow-search](workflow-search.md).
 - Build step is required on first install and after updates; `:FFFHealth` reports binary version.

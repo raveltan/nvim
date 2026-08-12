@@ -41,16 +41,42 @@ Defaults via `config = true`. Three launcher keymaps (below).
 | `<leader>sR` | n | open with `prefills.search = <cword>` | Search word under cursor |
 | `<leader>sR` | x | `require("grug-far").with_visual_selection()` | Search visual selection |
 
-Inside the grug-far buffer (defaults):
-- `<localleader>r` — replace all
-- `<localleader>s` — sync line into file
-- `<localleader>x` — open result in editor
-- `q` or `<localleader>c` — close
+Inside the grug-far buffer (upstream defaults; localleader is `\`):
+
+| Key | Action |
+|---|---|
+| `<tab>` / `<s-tab>` | Next / prev input field |
+| `\r` | Replace all (the real write) |
+| `\s` | Sync all shown result lines back into the files |
+| `\l` / `\v` | Sync just this line / this file |
+| `\q` | **Send results to the quickfix list** |
+| `\o` / `\i` / `<enter>` | Open / preview / jump to the match under cursor |
+| `<down>` / `<up>` | Open next / prev location |
+| `\e` | Swap engine: ripgrep ↔ ast-grep |
+| `\x` | Swap replacement interpreter (Lua / Vimscript function body, `match` in scope) |
+| `\w` | Toggle "show the rg command being run" |
+| `\t` / `\a` | Open history / add current search to history |
+| `\b` | Abort a running search |
+| `\c` | Close |
+| `g?` | Help |
+
+### Fields
+| Field | Takes |
+|---|---|
+| Search | rg regex (Rust syntax) — `fun\(([a-z0-9]*)\)` |
+| Replace | `$1` / `${1}` captures, `$$` for a literal `$` |
+| Files Filter | rg globs, **one per line** — `*.php`, `**/docs/*.md`, `*.{css,js}` |
+| Flags | raw rg flags — `-i`, `--multiline` (`-U`), `--fixed-strings`, `-P` |
+| Paths | dirs/files to limit the run |
 
 ## Links
 - README: https://github.com/MagicDuck/grug-far.nvim/blob/main/README.md
 - Options: https://github.com/MagicDuck/grug-far.nvim/blob/main/lua/grug-far/opts.lua
+- Related: [workflow-replace](workflow-replace.md) (all four replace backends compared), [workflow-quickfix](workflow-quickfix.md) (`\q` hand-off)
 
 ## Notes
 - `<leader>sR` is mapped in both `n` and `x`; lazy.nvim picks the right one by mode.
 - Supports `--multiline` rg flag for multiline search/replace when set in the `Flags:` field.
+- rg has **no lookaround or backreferences** unless you add `-P` (PCRE2) to Flags.
+- `\r` writes files directly, with no undo point in your open buffers. `\q` → quickfix →
+  `<leader>xr` is the slower path that stays reviewable and undoable per file.

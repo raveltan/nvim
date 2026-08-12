@@ -27,12 +27,10 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 |-----|------|-------------|--------|
 | `<leader>e` | n | Explorer (Oil) | canola.nvim (oil fork) |
 | `-` | n | Open parent directory (Oil) | canola.nvim (oil fork) |
-| `<leader>fn` | n | New file | config/keymaps.lua |
-| `<leader>ff` | n | Find files | snacks.picker |
-| `<leader><leader>` | n | Find files (resumes last query) | fff.nvim |
+| `<leader><leader>` | n | Find files | fff.nvim |
 | `<leader>,` | n | Buffers | snacks.picker |
 | `<leader>fr` | n | Recent files | snacks.picker |
-| `<leader>fc` | n | Find config file | snacks.picker |
+| `<leader>fp` | n | Projects | snacks.picker |
 | `<leader>fR` | n | Rename file | snacks.rename |
 | `<leader>fo` | n | Open current file's dir in Finder | fff.nvim |
 | `<leader>ha` | n | Harpoon add | harpoon |
@@ -47,27 +45,30 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 
 | Key | Mode | Description | Source |
 |-----|------|-------------|--------|
-| `<leader>sg` | n | Grep workspace (async rg) | snacks.picker |
+| `<leader>sg` | n | Grep workspace (async rg, live regex) | snacks.picker |
 | `<leader>sz` | n | Fuzzy grep (frecency-first, partial on big repos) | fff.nvim |
-| `<leader>sw` | n, x | Grep word/selection | snacks.picker |
-| `<leader>sb` | n | Buffer lines | snacks.picker |
+| `<leader>sw` | n, x | Grep word/selection (literal, `--word-regexp`) | snacks.picker |
+| `<leader>s.` | n | Grep in current file dir | snacks.picker |
 | `<leader>sh` | n | Help pages | snacks.picker |
 | `<leader>sk` | n | Keymaps | snacks.picker |
 | `<leader>sc` | n | Commands | snacks.picker |
 | `<leader>sd` | n | Diagnostics | snacks.picker |
-| `<leader>sR` | n | Resume last picker / Grug-far word under cursor (last-load wins) | snacks.picker / grug-far |
 | `<leader>ss` | n | Document symbols | snacks.picker |
 | `<leader>sS` | n | Workspace symbols | snacks.picker |
 | `<leader>sj` | n | Jumplist | snacks.picker |
 | `<leader>sm` | n | Marks | snacks.picker |
+| `<leader>s"` | n | Registers | snacks.picker |
 | `<leader>s/` | n | Search history | snacks.picker |
 | `<leader>s:` | n | Command history | snacks.picker |
-| `<leader>s.` | n | Grep in current file dir | snacks.picker |
 | `<leader>st` | n | Todo comments | snacks.picker |
 | `<leader>sr` | n | Search / replace (grug-far) | grug-far |
+| `<leader>sR` | n | Grug-far: word under cursor | grug-far |
 | `<leader>sR` | x | Grug-far: visual selection | grug-far |
-| `<leader>su` | n | Undo history picker | telescope-undo |
-| `gw` | n | Grep word under cursor | config/keymaps.lua |
+| `]]` / `[[` | n | Next/prev occurrence of word under cursor (text search) | util.wordsearch |
+
+> Inside a picker: `<C-q>` → quickfix, `<Tab>` select, `<C-g>` live↔fuzzy, `<a-h>`/`<a-i>` hidden/ignored, `<a-r>` regex↔literal, `?` help.
+> Scope a grep to certain files by appending rg args: `pattern -- -t php -g '!*Test.php'`.
+> Full guide: `docs/nvimdocs/workflow-search.md` (finding), `workflow-quickfix.md`, `workflow-replace.md`.
 
 ## LSP
 
@@ -124,8 +125,15 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<leader>xx` | n | Trouble: diagnostics toggle | trouble |
 | `<leader>xq` | n | Toggle quickfix (quicker.nvim, editable) | quicker.nvim |
 | `<leader>xl` | n | Toggle loclist | config/keymaps.lua |
+| `<leader>xd` | n | Project diagnostics → quickfix | config/keymaps.lua |
+| `<leader>xt` | n | TODO/FIX/HACK → quickfix | todo-comments |
+| `<leader>xr` | n | Replace across quickfix (prompts `cdo s/`) | config/keymaps.lua |
+| `]q` / `[q` | n | Next / prev quickfix entry (wraps, centres) | config/keymaps.lua |
+| `]Q` / `[Q` | n | Last / first quickfix entry | config/keymaps.lua |
 
-> Inside qf buffer (quicker.nvim): `>` expand context, `<` collapse, edit lines + `:w` to apply to source files.
+> Inside qf buffer (quicker.nvim): `>` expand context, `<` collapse, edit lines + `:w` to apply to source files, delete a row to drop the entry.
+> Whole-list commands: `:packadd cfilter` then `:Cfilter!/Test/` to prune, `:cdo`/`:cfdo … | update` to rewrite, `:colder`/`:cnewer` to reach the 10 previous lists.
+> Full guide: `docs/nvimdocs/workflow-quickfix.md`.
 
 ## Tasks (Overseer)
 

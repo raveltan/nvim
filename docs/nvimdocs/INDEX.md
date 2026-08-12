@@ -171,6 +171,9 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 ## Workflow
 
+- [workflow-search](workflow-search.md) — **finding**: which picker owns what, fuzzy vs rg query syntax, scoping to filetypes/globs/dirs, in-buffer search, vim↔rg regex table
+- [workflow-quickfix](workflow-quickfix.md) — **quickfix as a work queue**: fill (`<C-q>`, `:grep`, diagnostics) → walk (`]q`) → `:Cfilter` → edit in place → `:cdo`/`:cfdo`
+- [workflow-replace](workflow-replace.md) — **find & replace**: `:s` regex tricks, grug-far fields/keys, `:cdo` across a curated list, `<leader>cr` semantic rename
 - [workflow-overseer](workflow-overseer.md) — task runner + auto-discovered templates
 - [workflow-other](workflow-other.md) — related-file picker for PHP + Angular (`<leader>o{o,s,v}`); Rails nav delegated to vim-rails
 - [workflow-scripts](workflow-scripts.md) — `scripts/` helper shell scripts

@@ -72,12 +72,14 @@ Top-level picker options (per `docs/picker.md`):
 | `<leader>fr` | n | `Snacks.picker.recent()` | Recent files |
 | `<leader>fp` | n | `Snacks.picker.projects()` | Projects |
 | `<leader>,` | n | `Snacks.picker.buffers()` | Buffers |
-| `<leader>sb` | n | `Snacks.picker.lines()` | Buffer lines |
+| `<leader>sg` | n | `Snacks.picker.grep()` | Grep workspace (live rg) |
+| `<leader>sw` | n / x | `Snacks.picker.grep_word()` | Grep word / selection (literal, `--word-regexp`) |
+| `<leader>s.` | n | `Snacks.picker.grep({ dirs = { %:p:h } })` | Grep current file's dir |
 | `<leader>sh` | n | `Snacks.picker.help()` | Help pages |
 | `<leader>sk` | n | `Snacks.picker.keymaps()` | Keymaps |
 | `<leader>sc` | n | `Snacks.picker.commands()` | Commands |
 | `<leader>sd` | n | `Snacks.picker.diagnostics()` | Diagnostics |
-| `<leader>sR` | n | `Snacks.picker.resume()` | Resume last picker |
+| `<leader>st` | n | `Snacks.picker.todo_comments()` | TODO/FIX/HACK comments (bound in the todo-comments spec) |
 | `<leader>ss` | n | `Snacks.picker.lsp_symbols()` | Document symbols |
 | `<leader>sS` | n | `Snacks.picker.lsp_workspace_symbols()` | Workspace symbols |
 | `gd` | n | `Snacks.picker.lsp_definitions()` | Go to definition |
@@ -88,7 +90,24 @@ Top-level picker options (per `docs/picker.md`):
 | `<leader>sm` | n | `Snacks.picker.marks()` | Marks |
 | `<leader>sj` | n | `Snacks.picker.jumps()` | Jumplist |
 | `<leader>s/` | n | `Snacks.picker.search_history()` | Search history |
-| `<leader>s::` | n | `Snacks.picker.command_history()` | Command history |
+| `<leader>s:` | n | `Snacks.picker.command_history()` | Command history |
+
+### Inside any picker (upstream defaults, not overridden here)
+| Key | Action |
+|---|---|
+| `<C-q>` | Send results (or the `<Tab>`-selected subset) to the **quickfix list** |
+| `<Tab>` / `<S-Tab>` | Select + next / prev; `<C-a>` selects all |
+| `<C-g>` | Toggle live-search ↔ fuzzy-filter over the fetched results |
+| `<a-h>` / `<a-i>` / `<a-f>` | Toggle hidden / gitignored / follow-symlinks |
+| `<a-r>` | Toggle regex ↔ literal (`--fixed-strings`) |
+| `<C-s>` / `<C-v>` / `<C-t>` | Open in split / vsplit / tab |
+| `<C-r><C-w>` / `<C-r>%` | Insert word under cursor / current filename into the query |
+| `?` | Show the full keymap help for this picker |
+
+Query syntax (matcher): `'exact`, `'word'`, `^prefix`, `suffix$`, `!negate`, and field
+searches like `file:lua$ 'function`. In a **live** grep the text goes to ripgrep instead, and
+everything after a bare ` -- ` is passed to rg verbatim: `handleRequest -- -t php -g '!*Test.php'`.
+Full treatment in [workflow-search](workflow-search.md).
 
 ## GAF integration
 `projects.dev` is built with `vim.list_extend(vim.g.gaf and { "~/freelancer-dev" } or {}, { "~/repo", "~/rails" })` — so the Freelancer monorepo only appears in `<leader>fp` when running under the GAF profile (`GAF=1 nvim`). See auto-memory `nvim_gaf_profile.md`.
@@ -96,9 +115,10 @@ Top-level picker options (per `docs/picker.md`):
 ## Links
 - README: https://github.com/folke/snacks.nvim
 - Picker docs: https://github.com/folke/snacks.nvim/blob/main/docs/picker.md
-- Related: [snacks-core](snacks-core.md), [snacks-dashboard](snacks-dashboard.md) (projects section reuses this source), [git-fugitive](git-fugitive.md), [editor-which-key](editor-which-key.md)
+- Related: [workflow-search](workflow-search.md) (full grep/regex/file-scoping guide), [workflow-quickfix](workflow-quickfix.md) (what `<C-q>` feeds), [snacks-core](snacks-core.md), [snacks-dashboard](snacks-dashboard.md) (projects section reuses this source), [git-fugitive](git-fugitive.md), [editor-which-key](editor-which-key.md)
 
 ## Notes
-- `Snacks.picker.files` is **not** bound — file search is handled by another plugin in our setup; this picker spec deliberately omits `<leader>ff`.
+- `Snacks.picker.files` is **not** bound — file search is handled by [nav-fff](nav-fff.md) (`<leader><leader>`); this picker spec deliberately omits `<leader>ff`.
+- Workspace grep **is** bound here: fff's grep is synchronous per keystroke with a time budget, so on big repos it silently covers only the highest-frecency files. snacks streams the full async rg result set.
 - `lsp_*` pickers replace nvim's default `vim.lsp.buf.*` handlers because they're bound to `gd`/`gr`/etc. directly here.
-- Buffer-lines (`<leader>sb`) is the in-buffer equivalent of `:%s` preview — not a project grep.
+- `Snacks.picker.lines()` (in-buffer line search) and `Snacks.picker.resume()` are **not** bound — call them directly if you want them.

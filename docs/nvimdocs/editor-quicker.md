@@ -20,7 +20,7 @@ Replaces the default quickfix rendering with a column-aligned, icon-decorated vi
     },
   },
   keys = {
-    { "<leader>xQ", function() require("quicker").toggle() end, desc = "Toggle quickfix (quicker)" },
+    { "<leader>xq", function() require("quicker").toggle() end, desc = "Toggle quickfix (quicker)" },
   },
 }
 ```
@@ -40,21 +40,24 @@ Replaces the default quickfix rendering with a column-aligned, icon-decorated vi
 
 ## Our config
 - Buffer-local `>` and `<` for context expand/collapse (2 lines each side, additive).
-- Global `<leader>xQ` to toggle the quickfix window.
+- Global `<leader>xq` to toggle the quickfix window.
 - All other opts default.
 
 ## Keymaps
 | Key | Mode | Action | Desc |
 |---|---|---|---|
-| `<leader>xQ` | n | `require("quicker").toggle()` | Toggle quickfix window |
+| `<leader>xq` | n | `require("quicker").toggle()` | Toggle quickfix window |
 | `>` | n (in qf) | `expand({ before=2, after=2, add_to_existing=true })` | Show 2 more lines context around each entry |
 | `<` | n (in qf) | `collapse()` | Remove context lines |
 
 ## Links
 - README: https://github.com/stevearc/quicker.nvim/blob/master/README.md
 - Default opts: https://github.com/stevearc/quicker.nvim/blob/master/lua/quicker/config.lua
+- Related: [workflow-quickfix](workflow-quickfix.md) — the full fill → walk → filter → edit → `:cdo` pipeline this plugin sits in.
 
 ## Notes
 - `nvim-bqf` (preview + fzf filter) has been removed — quicker is the sole quickfix enhancer now.
-- Which-key labels `<leader>x` as the `diagnostics` group (editor.lua:298).
-- Save (`:w`) inside the qf buffer to apply edits to all referenced files at once.
+- Which-key labels `<leader>x` as the `diagnostics/quickfix` group (editor.lua:316).
+- Save (`:w`) inside the qf buffer to apply edits to all referenced files at once. Deleting a row removes that entry from the list (the file is untouched).
+- `require("quicker").refresh()` re-reads the current buffer text into the list — useful after editing sources under a stale list.
+- The write goes straight to disk with no confirmation, and `:colder` does **not** undo it — plain `u` in each affected file does.
