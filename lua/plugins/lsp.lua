@@ -818,7 +818,30 @@ return {
 							plsql = { "dadbod", "snippets", "buffer" },
 						},
 						providers = {
-							lsp = { max_items = 50 },
+							lsp = {
+								max_items = 50,
+								-- blink pools trigger characters across every attached client and
+								-- forwards the typed one to all of them. tailwindcss claims `(` and `[`
+								-- on typescript, so tsserver is asked to complete on a character it
+								-- never advertised and answers `{isIncomplete=false, items=[]}` -- which
+								-- blink's per-client cache (sources/lsp/cache.lua) then replays for
+								-- every later keystroke of the same context, a complete response being
+								-- assumed still valid as the keyword grows. One `(` therefore kills
+								-- tsserver completion for the whole call: no rxjs operators inside
+								-- `.pipe(`, menu left to buffer words. Drop those empty verdicts so the
+								-- next keystroke asks again.
+								override = {
+									get_completions = function(module, ctx, callback)
+										local cache = require("blink.cmp.sources.lsp.cache")
+										for client_id, entry in pairs(cache.entries) do
+											if not entry.response.is_incomplete_forward and #entry.response.items == 0 then
+												cache.entries[client_id] = nil
+											end
+										end
+										return module:get_completions(ctx, callback)
+									end,
+								},
+							},
 							dadbod = { name = "Dadbod", module = "vim_dadbod_completion.blink" },
 						},
 					}

@@ -1,7 +1,7 @@
 # gaf-angular
 > Angular component navigation with treesitter + ripgrep, no LSP: `gd` on tags/attrs/classes/expressions/routes, `<leader>cp` callers, `<leader>cG` component-by-name, `<leader>cR` URL → route module, plus a blink.cmp source that completes component **tags** (`<fl-bu` → the whole element, auto-imported and wired into `imports:`/the owning `@NgModule`) and, inside a tag, that component's `@Input`/`@Output`s — with types, doc comments, and enum value-seeding + auto-import.
 
-**Local module:** lua/gaf/angular/init.lua (in-repo, not a plugin) + lua/gaf/angular/inputs_source.lua (blink source) + lua/gaf/angular/selector_index.lua and lua/gaf/angular/module_index.lua (the two repo-wide indexes tag completion reads)
+**Local module:** lua/gaf/angular/ (in-repo, not a plugin), one file per concern — `init.lua` (setup, keymaps, `:AngularReindex`), `search.lua` (rg + jump/picker), `patterns.lua` (the rg patterns), `ts.lua` (treesitter helpers), `context.lua` (what the cursor is on), `nav.lua` (`gd`, parents, by-name), `routes.lua` (URL → route module), `component.lua` (reading a component file), `completion.lua` (completion data), `edits.lua` (the text edits an accepted item needs), `inputs_source.lua` (the blink source), `selector_index.lua` + `module_index.lua` + `root_cache.lua` (the two repo-wide indexes and their shared caching)
 **Setup:** `require("gaf").setup()` calls `require("gaf.angular").setup()` under `GAF=1` only (cost: one FileType autocmd on `typescript`, one `BufWritePost *.ts` autocmd that patches the indexes, and the `:AngularReindex` command); the completion source is wired in lua/plugins/lsp.lua (blink provider `angular_inputs`)
 **Tags:** angular, typescript, treesitter, ripgrep, navigation, gd, completion, blink, input, output, tag, auto-import, ngmodule, index
 
@@ -12,6 +12,8 @@
 All lookups are treesitter (to classify what's under the cursor) + `rg --vimgrep` (to find the definition) — no language server. Single hit jumps straight; multiple hits open a Snacks picker.
 
 Lived at `lua/gaf/angular.lua`, then briefly ungated at `lua/angular/`; now back under `lua/gaf/angular/` with the profile gate, since a repo-wide selector index only pays for itself in the webapp.
+
+**Also ported to `~/.config/nvim-vanilla`** (the `gn` profile), where every file below is the same except two: that config has no completion engine, so the blink source is replaced by an in-process language server (`lsp_source.lua`) that `vim.lsp.completion` treats like any other server, and it has no Snacks, so `search.lua`'s picker is fzf-lua. Fixes to the data layer belong in both copies.
 
 ## Keymaps (buffer-local, on `typescript` buffers)
 
@@ -143,33 +145,48 @@ This is driven by the attribute name to the left of the cursor (`value_attr`) �
 
 **Why a text scan, not treesitter, to find the enclosing tag:** while an attribute is being typed the tag is unclosed, and treesitter's error recovery misattributes the cursor to the nearest *well-formed enclosing* element (cursor in `<app-foo [` resolves to the surrounding `<div>`). `enclosing_tag_name` instead takes the last `<tag` before the cursor with no intervening `>` — exactly the "inside an open start tag" state. False hits (a `<` in a binding expression, a TS generic like `Array<`) are discarded by the caller's `-`-in-name gate, since component selectors always contain a dash.
 
-**Speed (the "relatively quickly" requirement):** two caches. `selector → component file` (never invalidated — selectors rarely move) and `file → member list` (keyed on mtime). Only the first completion on a fresh tag pays one async `rg` for the selector's file; every keystroke after is a table read, so the menu stays responsive.
+**Speed (the "relatively quickly" requirement):** three caches. `selector → component file` (never invalidated — selectors rarely move), `file → { member list, component facts }` (keyed on mtime, one read + one parse serving both), and the cursor's tag segment (keyed on buffer+changedtick+cursor, so the three text scans one completion round performs — tag name, quote state, attribute being valued — share a single 30-line join). Only the first completion on a fresh tag pays one async `rg` for the selector's file; every keystroke after is a table read, so the menu stays responsive.
 
-**Extraction** (`parse_inputs`) reads the component file off disk and treesitter-queries every `class_body`: decorated fields/setters (`@Input`/`@Output`, honoring string aliases and setter param types), and signal fields whose initializer calls `input`/`model`/`output` (type from the `<T>` generic, alias from an options object). `notInput = 42` and other plain fields are excluded. Results dedupe by binding name.
+**Extraction** (`component.lua`'s `scan_inputs`) reads the component file off disk and treesitter-queries every `class_body`: decorated fields/setters (`@Input`/`@Output`, honoring string aliases and setter param types), and signal fields whose initializer calls `input`/`model`/`output` (type from the `<T>` generic, alias from an options object). `notInput = 42` and other plain fields are excluded. Results dedupe by binding name.
 
 **Limits:** no type-checking (not a language server); value completion covers `enum` types (incl. nullable) and string/number-literal unions — other named types (interfaces, non-literal unions) insert a bare `""`; a file with multiple component classes merges their members; `>` inside an attribute value (`[x]="a > b"`) can break the backward scan on that tag.
 
-## Public API (`require("angular")`)
+## Public API
 
+Each module is required directly; there is no facade. `require("gaf.angular")` holds only the wiring.
+
+**`gaf.angular`** — `.setup()` registers the FileType autocmd, the keymaps, the `BufWritePost` index patcher and `:AngularReindex` (called once from lua/gaf/init.lua). `.reindex()` (also `:AngularReindex`) drops both indexes for the current file's root and rebuilds the selector one.
+
+**`gaf.angular.nav`**
 - `.goto_definition()` → `true` when the cursor was on an Angular template target and it claimed the jump (even if unresolved); `false` only on plain TS, so the caller can fall through to LSP.
-- `.goto_parents()`, `.goto_component_prompt()`, `.goto_route()` — the `<leader>c{p,G,R}` actions.
-- `.setup()` — registers the FileType autocmd + keymaps (called once from init.lua).
-- `.component_inputs(cb)` → resolves the component tag under the cursor to its member list and calls `cb(inputs, { tag, file })`, or `cb(nil)` when the cursor isn't inside a component tag. Async only on a selector cache miss (one `rg`). Consumed by the blink source in lua/gaf/angular/inputs_source.lua.
-- `.resolve_type(type, cb)` → `cb({ kind="enum", name, file, spec, members })` or `cb({ kind="union", name, file, spec, values })` for an exported enum or string/number-literal `type` alias; else `cb(nil)`. Cached per normalized name (handles nullable). Drives value completion.
-- `.resolve_enum(type, cb)` → the enum-only view of `resolve_type` (for `Enum.` member completion + attr seeding).
-- `.template_enum_members(cb)` → `cb(members, enumName, enumInfo)` when the cursor is inside a template right after `Enum.` and `Enum` resolves to an exported enum; else `cb(nil)`. Drives enum-member completion.
-- `.template_value_completions(cb)` → `cb(spec, meta)` when the cursor is inside a component input's value and its type is completable: `spec = { kind = "enum", enum, en }` or `{ kind = "union", values, is_binding }`; else `cb(nil)`. Handles nullable enums (`Enum | null`) and string/number-literal unions.
-- `.build_import_edit(bufnr, name, spec, deffile)` → an LSP TextEdit importing `name` from `spec` into `bufnr`, or `nil` if already imported / defined there / spec unknown.
-- `.build_enum_field_edit(bufnr, name)` → an LSP TextEdit adding `name = name;` as the first field of the component class enclosing the cursor, or `nil` if already present / no class found.
-- `.template_tag_completions(cb)` → `cb(items, { lt_col, prefix })` with `items = { { selector, file, dir }, … }` for every element selector under the search root; `cb({}, meta)` — no index build — when `prefix` is empty; `cb(nil)` when the cursor isn't in tag-name position. `lt_col` is the 0-indexed column of the `<`.
-- `.component_info(file)` → `{ class, standalone, spec, selector, inputs }` (`inputs` is a count, `standalone` the tri-state) for the first `@Component` in `file`, or `nil`. Cached per file+mtime, misses included.
-- `.consumer_info(bufnr)` → `{ class, standalone, decorator, imports_range }` for the component whose inline template holds the cursor, or `nil`. `decorator`/`imports_range` are LSP ranges; `styles:` is correctly not a template.
-- `.build_imports_array_edit(bufnr, name)` → an LSP TextEdit adding `name` to the enclosing `@Component`'s `imports` array (creating the key above `template:` when absent), or `nil` when the consumer is NgModule-declared / `name` is already listed / `imports` isn't an array literal / no component at the cursor.
-- `.build_component_edits(bufnr, target_file)` → `edits, info` — the `additionalTextEdits` that make `target_file`'s selector resolve here, and `component_info(target_file)` plus a `reason` string when `edits` is empty.
-- `.modules_exporting(class, cb)` → `cb({ { module_class, file, spec }, … })`, every NgModule directly exporting `class`.
-- `.module_for_component(class, cb)` → `cb({ module_class, file })` for the NgModule declaring `class`, else `cb(nil)`.
+- `.goto_parents()`, `.goto_component_prompt()` — the `<leader>cp` / `<leader>cG` actions.
+
+**`gaf.angular.routes`** — `.goto_route()`, the `<leader>cR` action.
+
+**`gaf.angular.completion`** (all async-on-miss, all `cb(nil)` when the cursor isn't in their context)
+- `.tag_completions(cb)` → `cb(items, { lt_col, prefix })` with `items = { { selector, file, dir }, … }` for every element selector under the search root; `cb({}, meta)` — no index build — when `prefix` is empty. `lt_col` is the 0-indexed column of the `<`.
+- `.enum_members(cb)` → `cb(members, enumName, enumInfo)` when the cursor is inside a template right after `Enum.` and `Enum` resolves to an exported enum.
+- `.value_completions(cb)` → `cb(spec, meta)` when the cursor is inside a component input's value and its type is completable: `spec = { kind = "enum", enum, en }` or `{ kind = "union", values, is_binding }`. Handles nullable enums (`Enum | null`) and string/number-literal unions.
+- `.inputs(cb)` → resolves the component tag under the cursor to its member list and calls `cb(inputs, { tag, file })`. Async only on a selector cache miss (one `rg`).
+
+**`gaf.angular.component`** (reads files off disk, cached per file+mtime — one read and one parse answers both questions)
+- `.inputs(file)` → the `@Input`/`@Output`/signal member list, `{}` when there is none.
+- `.info(file)` → `{ class, standalone, spec, selector, inputs }` (`inputs` a count, `standalone` the tri-state) for the first `@Component`, or `nil`. Misses are cached too.
+- `.resolve_type(type, cb)` → `cb({ kind="enum", name, file, spec, members })` or `cb({ kind="union", name, file, spec, values })` for an exported enum or string/number-literal `type` alias; else `cb(nil)`. Cached per normalized name.
+- `.resolve_enum(type, cb)` → the enum-only view of `resolve_type`.
+- `.import_spec(file, name)` → the public specifier to import `name` from, preferring the nearest barrel. Memoized per file+name.
+- `.classify_type(t)`, `.enum_name_of(t)`, `.dir_label(file)` — the small type/label readers the above are built from.
+
+**`gaf.angular.edits`** (build only; nothing is applied here)
+- `.build_import_edit(bufnr, name, spec, deffile)` → an LSP TextEdit importing `name` from `spec`, or `nil` if already imported / defined there / spec unknown.
+- `.build_enum_field_edit(bufnr, name)` → an LSP TextEdit adding `name = name;` as the first field of the component class enclosing the cursor, or `nil`.
+- `.consumer_info(bufnr)` → `{ class, standalone, decorator, imports_range }` for the component whose inline template holds the cursor, or `nil`. `styles:` is correctly not a template.
+- `.build_component_edits(bufnr, target_file)` → `edits, info` — the `additionalTextEdits` that make `target_file`'s selector resolve here, and `component.info(target_file)` plus a `reason` string when `edits` is empty.
 - `.build_ngmodule_plan(bufnr, target_file, cb)` → `cb({ kind = "none", reason })` or `cb({ kind = "module", file, module_class, name, spec, edits, summary })`. `edits` are TextEdits against `file`, **not** `bufnr`, built against a loaded-and-unmodified buffer for it; applying and saving is the caller's call.
-- `.reindex()` (also `:AngularReindex`) — drop both indexes for the current file's root and rebuild the selector one.
+
+**`gaf.angular.context`** — `.tag_segment(buf)` (the text from the last unclosed `<` to the cursor, computed once per buffer+changedtick+cursor and shared by every reader below), `.enclosing_tag_name`, `.in_attr_value`, `.value_attr`, `.tag_prefix`, `.enum_prefix`, `.in_template`, `.target_under_cursor`, `.symbol_under_cursor`.
+
+**`gaf.angular.search`** — `.rg_run(patterns, paths, cb, opts)`, `.rg_search`, `.show`, `.jump_to`, `.jump_item`, `.search_root(fname)` / `.buf_root(bufnr)` / `.src_root(file)`, `.notify`, `.rx`.
 
 ## Notes
 

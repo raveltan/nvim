@@ -1,54 +1,34 @@
--- Repo-wide index of `@NgModule` declarations, answering the two questions the
--- NgModule half of tag completion has to ask: which module DECLARES a component
--- (that's the module whose `imports:` has to grow for a tag to resolve), and
--- which modules EXPORT it (that's the symbol to add there). 3837 of the GAF
--- webapp's components are `standalone: false`, so this is the majority path.
+-- Repo-wide index of `@NgModule` declarations: which module DECLARES a component
+-- (whose `imports:` has to grow for a tag to resolve) and which modules EXPORT
+-- it (the symbol to add there). 3837 of the GAF webapp's components are
+-- `standalone: false`, so this is the majority path.
 --
--- Only DIRECT exports are recorded -- no walk of the module graph. It costs
--- nothing in practice: the aggregate modules a consumer actually reaches for
--- re-export their contents directly (`@freelancer/ui/ui.module` lists all 147 of
--- its components in `exports`), so a direct index already names them.
+-- Only DIRECT exports are recorded, no module-graph walk. The aggregates a
+-- consumer reaches for re-export their contents directly
+-- (`@freelancer/ui/ui.module` lists all 147 of its components), so a direct
+-- index already names them.
 --
--- The scan is a bracket-balanced Lua pass over the file text, not treesitter.
--- Measured over the webapp's 1976 `@NgModule` files (2.3 MB): treesitter parse +
--- traversal 350 ms, this 26 ms, with the two agreeing on the arrays of all 1982
--- modules they find. Treesitter would have fit the budget too, but a repo-wide
--- index is exactly the thing a user waits on, and nothing here needs a real
--- parse: the three arrays hold bare identifiers, and comments/strings are the
--- only structure that can hide a bracket (ui.module.ts keeps a JSDoc block
--- carrying `[attr.disabled]` inside its `imports`), which the lexer below steps
--- over. What we give up is the type system's view of an `imports:` that isn't an
--- array literal -- a spread or a shared const reads as "no imports" here, the
--- same as it does to the edit builder, which refuses to rewrite one.
+-- The scan is a bracket-balanced Lua pass over the file text, not treesitter:
+-- over the webapp's 1976 `@NgModule` files (2.3 MB) treesitter parse + traversal
+-- takes 350 ms against 26 ms here, agreeing on all 1982 modules. Nothing here
+-- needs a real parse -- the arrays hold bare identifiers, and only comments and
+-- strings can hide a bracket (ui.module.ts keeps a JSDoc carrying
+-- `[attr.disabled]` inside its `imports`), which the lexer below steps over. The
+-- cost is that a non-literal `imports:` reads as empty -- the same view the edit
+-- builder takes, since it refuses to rewrite one.
 --
--- `rg_run` is injected by lua/gaf/angular/init.lua instead of required back out of
--- it, so the rg invocation (type filters, async plumbing) lives in one place.
-local M = {}
-
--- root -> index. Per root because the user moves between git worktrees; two
--- roots can be live in one session.
+-- The index is:
 --   modules   = file -> { <record>, ... }
 --   declarer  = ComponentClass -> <record>
 --   exporters = ComponentClass -> { <record>, ... }
--- A record is { module_class, file, declarations, exports, imports } -- the last
--- three being identifier lists. Records are shared by all three tables, so a
--- consumer may memoize derived data (init.lua caches `spec`) on them.
-local index = {}
+-- A record is { module_class, file, declarations, exports, imports }, the last
+-- three identifier lists. Records are shared by all three tables, so consumers
+-- may memoize derived data on them (edits.lua caches `spec`).
+--
+-- `rg_run` is injected so the rg invocation lives in one place.
+local root_cache = require("gaf.angular.root_cache")
 
--- root -> callbacks waiting on the in-flight build, so the completions racing
--- the first lookup don't each spawn their own rg.
-local pending = {}
-
--- root -> counter bumped on every change, for consumers memoizing derived views.
-local revision = {}
-
-function M.revision(root)
-  return revision[root] or 0
-end
-
-local function bump(root)
-  revision[root] = (revision[root] or 0) + 1
-end
+local M = {}
 
 -- The `@NgModule` keys that decide whether a tag resolves. `providers`,
 -- `bootstrap`, `schemas` and `entryComponents` never do, so they're skipped.
@@ -57,11 +37,10 @@ local KEYS = { declarations = true, exports = true, imports = true }
 -- ── text lexer ─────────────────────────────────────────────────────────────
 
 -- Index just past the string or comment starting at `i`, or nil when `i` isn't
--- the start of one. Both scanners below step over these spans so that a `,`,
--- `]` or `(` living inside a comment or a quoted string can't be mistaken for
--- structure. A template literal is skipped whole, `${}` and all -- module option
--- arrays don't hold interpolations, and treating one as opaque only ever makes
--- us miss an entry, never invent one.
+-- the start of one, so a `,`, `]` or `(` inside one is never read as structure.
+-- Template literals are skipped whole, `${}` included: module option arrays hold
+-- no interpolations, and treating one as opaque can only miss an entry, never
+-- invent one.
 local function skip_span(s, i)
   local c = s:sub(i, i)
   if c == "'" or c == '"' or c == "`" then
@@ -109,10 +88,9 @@ local function find_close(s, i, close)
   end
 end
 
--- Drop the leading whitespace and comments an entry may carry, so the head
--- identifier is what the pattern below sees. ui.module.ts writes a FIXME block
--- above `ReactiveFormsModule.withConfig(...)`; app.server.module.ts a `//` note
--- above `AppModule`.
+-- Drop leading whitespace and comments so the head identifier is what the
+-- pattern below sees: ui.module.ts writes a FIXME block above
+-- `ReactiveFormsModule.withConfig(...)`, app.server.module.ts a `//` note.
 local function strip_lead(piece)
   piece = piece:gsub("^%s+", "")
   while piece:sub(1, 1) == "/" do
@@ -265,42 +243,19 @@ function M.build(root, rg_run, cb)
   end)
 end
 
--- Cached accessor: synchronous `cb` when the root is already indexed, otherwise
--- one build that every concurrent caller waits on. Nothing builds this at
--- startup -- the first NgModule lookup pays for it.
-function M.get(root, rg_run, cb)
-  local idx = index[root]
-  if idx then return cb(idx) end
-  local queue = pending[root]
-  if queue then
-    queue[#queue + 1] = cb
-    return
-  end
-  pending[root] = { cb }
-  M.build(root, rg_run, function(built)
-    index[root] = built
-    bump(root)
-    local queued = pending[root] or {}
-    pending[root] = nil
-    for _, f in ipairs(queued) do
-      f(built)
-    end
-  end)
-end
+local cache = root_cache.new(M.build)
 
-function M.invalidate(root)
-  index[root] = nil
-end
+M.revision = cache.revision
+M.get = cache.get
+M.invalidate = cache.invalidate
 
--- Re-scan one file after a write and patch it in. Never builds: an unindexed
--- root stays unindexed until a lookup asks for it, and files outside the root
--- are ignored so a stray write can't smuggle entries in. Dropping the file's
--- `declarer` entries can't restore a duplicate declaration that this file had
--- shadowed -- pathological, and :AngularReindex settles it.
+-- Re-scan one file after a write and patch it in. Never builds -- an unindexed
+-- root stays unindexed until a lookup asks. Dropping this file's `declarer`
+-- entries can't restore a duplicate declaration it had shadowed; pathological,
+-- and :AngularReindex settles it.
 function M.update_file(root, file)
-  local idx = index[root]
-  if not idx then return end
-  if file:sub(1, #root) ~= root or file:match("%.spec%.ts$") then return end
+  local idx = cache.peek(root)
+  if not idx or not root_cache.tracks(root, file) then return end
 
   local had = idx.modules[file] ~= nil
   idx.modules[file] = nil
@@ -317,7 +272,7 @@ function M.update_file(root, file)
   local has = add_file(idx, file)
   -- Most saved `.ts` files hold no `@NgModule` at all; leaving the revision
   -- alone then keeps any derived view valid across those saves.
-  if had or has then bump(root) end
+  if had or has then cache.bump(root) end
 end
 
 return M

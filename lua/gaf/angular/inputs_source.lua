@@ -1,24 +1,27 @@
--- blink.cmp source: completion inside Angular inline templates. It offers the
+-- blink.cmp source: completion inside Angular inline templates. Offers the
 -- component tags in scope (`<fl-bu` -> the whole `<fl-button>…</fl-button>`
 -- element), a component's @Input/@Output names once the cursor is inside a
--- `<app-foo …>` start tag, and the values those inputs accept. All resolution
--- and caching lives in require("gaf.angular"); this file only shapes the results
--- into blink completion items.
---
--- Wired in lua/plugins/lsp.lua as provider `angular_inputs`, prepended to the
--- typescript source list. See lua/gaf/angular/init.lua for the data side.
+-- `<app-foo …>` start tag, and the values those inputs accept. Resolution and
+-- caching live in gaf.angular.completion / .edits; this file only shapes the
+-- results into blink items. Wired in lua/plugins/lsp.lua as provider
+-- `angular_inputs`, prepended to the typescript source list.
 --
 -- Accepting a tag also makes it resolve. A standalone consumer takes an import
--- statement and an `imports: [ ]` entry in its own file, which resolve attaches as
--- additionalTextEdits; an NgModule-declared one needs that in the module DECLARING
--- it -- another file, which additionalTextEdits cannot reach (LSP defines them as
--- same-buffer) and so only M:execute can. `vim.g.angular_auto_wire`, read at accept
--- time so it can be flipped mid-session, says how far to go:
+-- statement and an `imports: [ ]` entry in its own file, attached by resolve as
+-- additionalTextEdits; an NgModule-declared one needs the entry in the module
+-- DECLARING it -- another file, which additionalTextEdits cannot reach (LSP
+-- defines them as same-buffer) and only M:execute can. `vim.g.angular_auto_wire`
+-- is read at accept time, so it can be flipped mid-session:
 --   "all" (default) -- edit the owning @NgModule too, saving it if it was clean
 --   "standalone"    -- this buffer's edits only, no second file
 --   false           -- same as "standalone"
--- Anything else reads as "all": the NgModule case is 3837 of the webapp's 5209
--- components, so the useful default is the one that covers them.
+-- Anything unrecognised reads as "all", which covers 3837 of the webapp's 5209
+-- components.
+local completion = require("gaf.angular.completion")
+local component = require("gaf.angular.component")
+local edits = require("gaf.angular.edits")
+local search = require("gaf.angular.search")
+
 local kinds = vim.lsp.protocol.CompletionItemKind
 local Snippet = vim.lsp.protocol.InsertTextFormat.Snippet
 
@@ -32,11 +35,11 @@ function M:enabled()
   return vim.bo.filetype == "typescript"
 end
 
--- `[` / `(` are the Angular binding brackets and `<` opens a tag -- the natural
--- triggers. `<` also starts a TS generic, which is harmless: the data layer only
--- answers inside an inline template. Letters are covered by blink's
--- show_on_keyword, so we deliberately omit space (it would pop the menu after
--- every space in a TS file).
+-- `[` / `(` are the Angular binding brackets, `<` opens a tag, `.` an enum
+-- member. `<` also starts a TS generic, which is harmless -- the data layer only
+-- answers inside an inline template. Letters come free from blink's
+-- show_on_keyword; space is deliberately omitted, since it would pop the menu
+-- after every space in a TS file.
 function M:get_trigger_characters()
   return { "[", "(", ".", "<" }
 end
@@ -64,9 +67,8 @@ local function signature(it)
   return "@Input() " .. it.prop .. ty .. alias
 end
 
--- Docs popup body: the signature, then the member's own doc comment (the JSDoc
--- or `//` note above it), then where it comes from. `extra` (enum info) is
--- appended by resolve.
+-- Docs popup body: the signature, then the member's own doc comment, then where
+-- it comes from. `extra` (enum info) is appended by resolve.
 local function doc_value(it, meta, extra)
   local parts = { "```typescript", signature(it), "```" }
   if it.doc and it.doc ~= "" then
@@ -93,8 +95,8 @@ local function tag_snippet(sel)
   return "<" .. sel .. "$1>$0</" .. sel .. ">"
 end
 
--- Is the cross-file NgModule wiring in M:execute switched on? See the toggle at
--- the top of the file; anything unrecognised means the default.
+-- Is the cross-file NgModule wiring in M:execute switched on? (See the toggle at
+-- the top of the file.)
 local function wires_modules()
   local v = vim.g.angular_auto_wire
   return v ~= false and v ~= "standalone"
@@ -104,16 +106,16 @@ end
 -- than by the in-buffer edits? Both "…is NgModule-declared" refusals end up there,
 -- provided it is the CONSUMER that is module-declared -- build_component_edits
 -- reports the target first, so that half has to be read off the buffer.
--- The other half of the answer -- whether the owning module can already see the
--- target -- needs the repo-wide module index, far more than the 500ms budget
--- resolve gets during accept (blink drops the resolved item, and with it the
--- standalone edits, when that runs out). So the popup promises the attempt and the
--- notification on accept reports what actually came of it.
+--
+-- Whether the owning module can already see the target needs the repo-wide module
+-- index, far more than the 500ms resolve gets during accept (blink drops the
+-- resolved item, and with it the standalone edits, when that runs out). So the
+-- popup promises the attempt and the accept notification reports the outcome.
 local function wires_via_module(reason)
   if not wires_modules() then return false end
   if reason == "consumer is NgModule-declared" then return true end
   if reason ~= "target is NgModule-declared" then return false end
-  local c = require("gaf.angular").consumer_info(0)
+  local c = edits.consumer_info(0)
   return c ~= nil and c.standalone == false
 end
 
@@ -128,18 +130,16 @@ local unwired = {
 }
 
 -- Is this edit the `import { X } from '…'` statement rather than the decorator
--- entry? build_component_edits emits them in that order but either can be absent
--- (the buffer already has it), so a lone edit is told apart by its text: the
--- statement edit writes a new import line or rewrites an existing one, so its
--- newText always opens an import, while the decorator entry writes a bare class
--- name or an `imports: [` key -- neither of which does.
+-- entry? Either can be absent (the buffer already has it), so a lone edit is told
+-- apart by its text: the statement edit's newText always opens an import, while
+-- the decorator entry writes a bare class name or an `imports: [` key.
 local function is_import_stmt(e)
   return e.newText:match("^%s*import%s") ~= nil
 end
 
 -- One line saying what accepting this tag does to the buffer, so an item that
 -- silently wires nothing says so instead of inserting a tag that won't render.
-local function wiring_line(info, edits)
+local function wiring_line(info, item_edits)
   local cls = "`" .. ((info and info.class) or "?") .. "`"
   local reason = info and info.reason
   if reason then
@@ -150,7 +150,7 @@ local function wiring_line(info, edits)
     return "→ " .. string.format(unwired[reason] or (reason .. " — import not wired"), cls)
   end
   local stmt, entry = false, false
-  for _, e in ipairs(edits) do
+  for _, e in ipairs(item_edits) do
     if is_import_stmt(e) then stmt = true else entry = true end
   end
   local from = (info and info.spec) and (" from `" .. info.spec .. "`") or ""
@@ -159,8 +159,7 @@ local function wiring_line(info, edits)
   elseif stmt then
     return "→ imports " .. cls .. from .. " (already in `imports: [ ]`)"
   elseif entry then
-    -- No statement edit with a known spec means the name is already imported;
-    -- without one, build_import_edit had nowhere to import from and stayed out.
+    -- Without a known spec, build_import_edit had nowhere to import from.
     if not (info and info.spec) then
       return "→ lists " .. cls .. " in `imports: [ ]` — no import path found, import it by hand"
     end
@@ -172,7 +171,7 @@ end
 -- Docs popup for a tag item: the class the selector resolves to, how to get hold
 -- of it, and what accepting will wire up. `info` is nil when the defining file no
 -- longer parses.
-local function tag_doc(sel, file, info, edits)
+local function tag_doc(sel, file, info, item_edits)
   local cls = (info and info.class) or "?"
   local parts = { "```typescript", "class " .. cls, "selector: '" .. sel .. "'", "```" }
   if info and info.spec then
@@ -190,138 +189,157 @@ local function tag_doc(sel, file, info, edits)
   parts[#parts + 1] = ""
   parts[#parts + 1] = table.concat(facts, " · ")
   parts[#parts + 1] = ""
-  parts[#parts + 1] = wiring_line(info, edits)
+  parts[#parts + 1] = wiring_line(info, item_edits)
   return table.concat(parts, "\n")
 end
 
--- Modes 1-3 (enum member -> attribute value -> attribute name), tried in order.
--- Split out of get_completions so the tag mode can go in front of them without
--- adding a fourth level of nesting to this callback chain.
-local function attr_completions(ctx, callback)
-  local empty = { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
+-- Always incomplete. What this source answers depends on the cursor's position in
+-- the template, not on the typed keyword: a complete response would be cached for
+-- the rest of the insert session, so the empty answer given before `<` is typed
+-- would still be the answer at `<fl-bu`. Re-querying costs a treesitter node check
+-- per keystroke; outside a template that is the whole cost.
+local function response(items)
+  return { is_incomplete_forward = true, is_incomplete_backward = true, items = items }
+end
+
+-- The import + `Enum = Enum;` edits that make a seeded enum value resolve.
+local function enum_edits(name, en)
+  local out = {}
+  local imp = edits.build_import_edit(0, name, en.spec, en.file)
+  if imp then out[#out + 1] = imp end
+  local fld = edits.build_enum_field_edit(0, name)
+  if fld then out[#out + 1] = fld end
+  return out
+end
+
+-- ── the three attribute modes ──────────────────────────────────────────────
+
+-- 1. Enum-member completion: cursor after `SomeEnum.` inside a template.
+local function enum_member_items(ctx, members, enum, en)
   local row = ctx.cursor[1] - 1
-  local ng = require("gaf.angular")
-
-  -- 1. Enum-member completion: cursor after `SomeEnum.` inside a template.
-  ng.template_enum_members(function(members, enum, en)
-    if members then
-      -- Replace the partial member typed after the dot.
-      local dot = ctx.line:sub(1, ctx.cursor[2]):match(".*()%.")
-      local edits = {}
-      local imp = ng.build_import_edit(0, enum, en.spec, en.file)
-      if imp then edits[#edits + 1] = imp end
-      local fld = ng.build_enum_field_edit(0, enum)
-      if fld then edits[#edits + 1] = fld end
-      local items = {}
-      for i, m in ipairs(members) do
-        items[i] = {
-          label = m,
-          filterText = m,
-          sortText = string.format("%03d", i),
-          kind = kinds.EnumMember,
-          labelDetails = { description = enum },
-          insertText = m,
-          textEdit = {
-            newText = m,
-            range = {
-              start = { line = row, character = dot }, -- 0-indexed col just after `.`
-              ["end"] = { line = row, character = ctx.cursor[2] },
-            },
-          },
-          documentation = { kind = "markdown", value = "`" .. enum .. "." .. m .. "`" },
-          additionalTextEdits = #edits > 0 and edits or nil,
-        }
-      end
-      return callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
-    end
-
-    -- 2. Attribute-VALUE completion: by the input's declared type — enum members
-    -- (`ButtonSize.SMALL`, incl. nullable `Enum | null`) or string/number-literal
-    -- union values (`'abc'`), when the cursor is inside `[attr]="▏"`.
-    ng.template_value_completions(function(spec)
-      if spec then
-        local items = {}
-        if spec.kind == "enum" then
-          local edits = {}
-          local imp = ng.build_import_edit(0, spec.enum, spec.en.spec, spec.en.file)
-          if imp then edits[#edits + 1] = imp end
-          local fld = ng.build_enum_field_edit(0, spec.enum)
-          if fld then edits[#edits + 1] = fld end
-          for i, m in ipairs(spec.en.members) do
-            local full = spec.enum .. "." .. m
-            items[i] = {
-              label = full,
-              filterText = full,
-              sortText = string.format("%03d", i),
-              kind = kinds.EnumMember,
-              labelDetails = { description = spec.enum },
-              insertText = full,
-              additionalTextEdits = #edits > 0 and edits or nil,
-              documentation = { kind = "markdown", value = "`" .. full .. "`" },
-            }
-          end
-        else -- string/number literal union
-          local ks = ctx.bounds.start_col
-          local before1 = ks > 1 and ctx.line:sub(ks - 1, ks - 1) or ""
-          for i, v in ipairs(spec.values) do
-            local inner = v:gsub("^['\"]", ""):gsub("['\"]$", "")
-            local shown = spec.is_binding and v or inner
-            -- Binding value uses `'literal'`; if the user already typed the inner
-            -- quote, don't repeat it.
-            if spec.is_binding and before1 == "'" then shown = shown:sub(2) end
-            items[i] = {
-              label = spec.is_binding and v or inner,
-              filterText = inner,
-              sortText = string.format("%03d", i),
-              kind = kinds.Value,
-              insertText = shown,
-            }
-          end
-        end
-        return callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
-      end
-
-      -- 3. Attribute-name completion: the component's @Input/@Output list.
-      ng.component_inputs(function(inputs, meta)
-        if not inputs or #inputs == 0 then return callback(empty) end
-
-    -- Replace the typed keyword, extended left to swallow an already-typed
-    -- binding bracket so the snippet's own brackets never double up.
-    local line, ks = ctx.line, ctx.bounds.start_col -- ks: 1-indexed keyword start
-    local before1 = ks > 1 and line:sub(ks - 1, ks - 1) or ""
-    local before2 = ks > 2 and line:sub(ks - 2, ks - 2) or ""
-    local extend = 0
-    if before1 == "[" or before1 == "(" or before1 == "*" or before1 == "#" then
-      extend = (before1 == "(" and before2 == "[") and 2 or 1 -- banana `[(`
-    end
-    local start_char = (ks - 1) - extend -- 0-indexed
-    local end_char = ctx.cursor[2]       -- 0-indexed
-
-    local items = {}
-    for _, it in ipairs(inputs) do
-      local text = binding(it.kind, it.name, "$1")
-      local docbase = doc_value(it, meta)
-      items[#items + 1] = {
-        label = it.name,
-        filterText = it.name,
-        sortText = it.name,
-        kind = kind_icon(it),
-        labelDetails = { description = it.type or it.kind },
-        insertText = text,
-        insertTextFormat = Snippet,
-        textEdit = {
-          newText = text,
-          range = {
-            start = { line = row, character = start_char },
-            ["end"] = { line = row, character = end_char },
-          },
+  local dot = ctx.line:sub(1, ctx.cursor[2]):match(".*()%.") -- 0-indexed col just after `.`
+  local extra = enum_edits(enum, en)
+  local items = {}
+  for i, m in ipairs(members) do
+    items[i] = {
+      label = m,
+      filterText = m,
+      sortText = string.format("%03d", i),
+      kind = kinds.EnumMember,
+      labelDetails = { description = enum },
+      insertText = m,
+      textEdit = {
+        newText = m,
+        range = {
+          start = { line = row, character = dot },
+          ["end"] = { line = row, character = ctx.cursor[2] },
         },
-        documentation = { kind = "markdown", value = docbase },
-        -- Round-tripped to resolve() to seed enum values + auto-import.
-        data = { name = it.name, prop = it.prop, kind = it.kind, type = it.type, doc = it.doc, docbase = docbase },
+      },
+      documentation = { kind = "markdown", value = "`" .. enum .. "." .. m .. "`" },
+      additionalTextEdits = #extra > 0 and extra or nil,
+    }
+  end
+  return items
+end
+
+-- 2. Attribute-VALUE completion: by the input's declared type -- enum members
+-- (`ButtonSize.SMALL`, incl. nullable `Enum | null`) or string/number-literal
+-- union values (`'abc'`), when the cursor is inside `[attr]="▏"`.
+local function value_items(ctx, spec)
+  local items = {}
+  if spec.kind == "enum" then
+    local extra = enum_edits(spec.enum, spec.en)
+    for i, m in ipairs(spec.en.members) do
+      local full = spec.enum .. "." .. m
+      items[i] = {
+        label = full,
+        filterText = full,
+        sortText = string.format("%03d", i),
+        kind = kinds.EnumMember,
+        labelDetails = { description = spec.enum },
+        insertText = full,
+        additionalTextEdits = #extra > 0 and extra or nil,
+        documentation = { kind = "markdown", value = "`" .. full .. "`" },
       }
     end
-      callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
+    return items
+  end
+
+  local ks = ctx.bounds.start_col
+  local before1 = ks > 1 and ctx.line:sub(ks - 1, ks - 1) or ""
+  for i, v in ipairs(spec.values) do
+    local inner = v:gsub("^['\"]", ""):gsub("['\"]$", "")
+    local shown = spec.is_binding and v or inner
+    -- Binding value uses `'literal'`; if the user already typed the inner quote,
+    -- don't repeat it.
+    if spec.is_binding and before1 == "'" then shown = shown:sub(2) end
+    items[i] = {
+      label = spec.is_binding and v or inner,
+      filterText = inner,
+      sortText = string.format("%03d", i),
+      kind = kinds.Value,
+      insertText = shown,
+    }
+  end
+  return items
+end
+
+-- 3. Attribute-NAME completion: the component's @Input/@Output list.
+local function input_items(ctx, inputs, meta)
+  local row = ctx.cursor[1] - 1
+  -- Replace the typed keyword, extended left to swallow an already-typed binding
+  -- bracket so the snippet's own brackets never double up.
+  local line, ks = ctx.line, ctx.bounds.start_col -- ks: 1-indexed keyword start
+  local before1 = ks > 1 and line:sub(ks - 1, ks - 1) or ""
+  local before2 = ks > 2 and line:sub(ks - 2, ks - 2) or ""
+  local extend = 0
+  if before1 == "[" or before1 == "(" or before1 == "*" or before1 == "#" then
+    extend = (before1 == "(" and before2 == "[") and 2 or 1 -- banana `[(`
+  end
+  local start_char = (ks - 1) - extend -- 0-indexed
+  local end_char = ctx.cursor[2]       -- 0-indexed
+
+  local items = {}
+  for i, it in ipairs(inputs) do
+    local text = binding(it.kind, it.name, "$1")
+    local docbase = doc_value(it, meta)
+    items[i] = {
+      label = it.name,
+      filterText = it.name,
+      sortText = it.name,
+      kind = kind_icon(it),
+      labelDetails = { description = it.type or it.kind },
+      insertText = text,
+      insertTextFormat = Snippet,
+      textEdit = {
+        newText = text,
+        range = {
+          start = { line = row, character = start_char },
+          ["end"] = { line = row, character = end_char },
+        },
+      },
+      documentation = { kind = "markdown", value = docbase },
+      -- Round-tripped to resolve() to seed enum values + auto-import.
+      data = { name = it.name, prop = it.prop, kind = it.kind, type = it.type, doc = it.doc, docbase = docbase },
+    }
+  end
+  return items
+end
+
+-- Modes 1-3, tried in order. Split out of get_completions so the tag mode can go
+-- in front of them without adding a fourth level of nesting to this chain.
+local function attr_completions(ctx, callback)
+  completion.enum_members(function(members, enum, en)
+    if members then
+      return callback(response(enum_member_items(ctx, members, enum, en)))
+    end
+    completion.value_completions(function(spec)
+      if spec then
+        return callback(response(value_items(ctx, spec)))
+      end
+      completion.inputs(function(inputs, meta)
+        if not inputs or #inputs == 0 then return callback(response({})) end
+        callback(response(input_items(ctx, inputs, meta)))
       end)
     end)
   end)
@@ -333,13 +351,12 @@ function M:get_completions(ctx, callback)
   -- 0. Component-TAG completion: cursor in `<fl-bu▏` inside an inline template.
   -- Tried first because at that point there is no attribute or value context for
   -- the later modes to read.
-  require("gaf.angular").template_tag_completions(function(tags, meta)
+  completion.tag_completions(function(tags, meta)
     if not tags then return attr_completions(ctx, callback) end
 
-    -- A bare `<` matches the whole ~4.8k-selector index: ~2ms to build the items
-    -- and ~2ms for blink to score them, on every `<` in a template — including
-    -- `<div`, which will never want this menu. Say "incomplete" instead and let
-    -- blink come back the moment a letter narrows it.
+    -- A bare `<` matches the whole ~4.8k-selector index, on every `<` in a
+    -- template -- `<div` included, which will never want this menu. Answer empty
+    -- and let blink come back the moment a letter narrows it.
     if (meta.prefix or "") == "" then
       return callback({ is_incomplete_forward = true, is_incomplete_backward = false, items = {} })
     end
@@ -370,38 +387,35 @@ function M:get_completions(ctx, callback)
         data = { file = t.file, selector = t.selector },
       }
     end
-    callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
+    callback(response(items))
   end)
 end
 
 -- Enrich the focused item: a tag gets its component's class, its auto-import
--- edits and a line saying whether they will fire, an
--- input whose type is an exported enum gets its binding value seeded with `Enum.`
--- and, on accept, the enum imported into this buffer. Outputs are event handlers,
--- not enum values, so they're left untouched.
+-- edits and a line saying whether they will fire; an input typed as an exported
+-- enum gets its binding value seeded with `Enum.` and, on accept, the enum
+-- imported. Outputs are event handlers, not enum values, so they're untouched.
 function M:resolve(item, callback)
   callback = vim.schedule_wrap(callback)
   local d = item.data
   if not d then return callback(item) end
 
-  -- Tag items are the only ones carrying a file. On accept the component also has
-  -- to become reachable from this consumer -- an `import` statement and an entry
-  -- in its `@Component({ imports: [...] })` -- which build_component_edits works
-  -- out (and refuses for the NgModule and self-reference cases). Only the focused
-  -- item gets here, so the per-resolve parse it costs is paid ~once per keystroke,
-  -- not 4.8k times per menu.
+  -- Tag items are the only ones carrying a file. build_component_edits works out
+  -- what makes the component reachable from this consumer, and refuses for the
+  -- NgModule and self-reference cases. Only the focused item gets here, so its
+  -- parse is paid ~once per keystroke, not 4.8k times per menu.
   if d.file and not d.type then
-    local edits, info = require("gaf.angular").build_component_edits(0, d.file)
+    local item_edits, info = edits.build_component_edits(0, d.file)
     return callback({
       -- The snippet textEdit is left untouched, so blink's deep-merge keeps it.
-      documentation = { kind = "markdown", value = tag_doc(d.selector, d.file, info, edits) },
-      additionalTextEdits = #edits > 0 and edits or nil,
+      documentation = { kind = "markdown", value = tag_doc(d.selector, d.file, info, item_edits) },
+      additionalTextEdits = #item_edits > 0 and item_edits or nil,
     })
   end
 
   if not d.type or d.kind == "output" then return callback(item) end
 
-  require("gaf.angular").resolve_enum(d.type, function(en)
+  component.resolve_enum(d.type, function(en)
     if not en then return callback(item) end
     local name = en.name -- normalized enum name (d.type may be `Enum | null`)
 
@@ -415,42 +429,33 @@ function M:resolve(item, callback)
       extra[#extra + 1] = table.concat(shown, " · ") .. (#en.members > 12 and " …" or "")
     end
 
-    local resolved = {
+    local applied = enum_edits(name, en)
+    callback({
       -- range is preserved from the original item by blink's deep-merge.
       textEdit = { newText = binding(d.kind, d.name, name .. ".$1") },
       documentation = { kind = "markdown", value = d.docbase .. "\n" .. table.concat(extra, "\n") },
-    }
-    -- On accept: import the enum AND expose it on the class (`Enum = Enum;`), so
-    -- the seeded `Enum.MEMBER` actually resolves in the template.
-    local ng = require("gaf.angular")
-    local edits = {}
-    local imp = ng.build_import_edit(0, name, en.spec, en.file)
-    if imp then edits[#edits + 1] = imp end
-    local fld = ng.build_enum_field_edit(0, name)
-    if fld then edits[#edits + 1] = fld end
-    if #edits > 0 then resolved.additionalTextEdits = edits end
-    callback(resolved)
+      -- On accept: import the enum AND expose it on the class (`Enum = Enum;`), so
+      -- the seeded `Enum.MEMBER` actually resolves in the template.
+      additionalTextEdits = #applied > 0 and applied or nil,
+    })
   end)
 end
 
 -- ── accepting a tag: the file the user isn't looking at ────────────────────
 
--- Where to say the edit landed. Relative to the source root the data layer indexes
--- under; that root is private to lua/gaf/angular/init.lua and this is display only, so
--- the patterns are mirrored rather than plumbed out -- a mismatch costs a longer
--- path and nothing else.
+-- Where to say the edit landed, relative to the source root the data layer
+-- indexes under.
 local function rel_path(file)
-  local root = file:match("(.*/webapp/src)/") or file:match("(.*/webapp)/") or file:match("(.*/src)/")
+  local root = search.src_root(file) or file:match("(.*/webapp)/")
   return root and file:sub(#root + 2) or vim.fn.fnamemodify(file, ":t")
 end
 
 -- Apply a `kind = "module"` plan to the file it names, and say so. Saving is
--- conditional: a buffer that was already modified holds the user's own unsaved
--- work and writing it would commit changes they never asked to commit, so it is
--- edited and handed back to them; a clean one is written because nothing else will
--- -- the file is off screen, and the change would be lost to the next :bd or
--- checkout. noautocmd keeps format-on-save off it: reformatting a file the user
--- never opened would bury a two-line wiring change in a whole-file diff.
+-- conditional: an already-modified buffer holds the user's own unsaved work, so
+-- it is edited and handed back; a clean one is written because nothing else will
+-- -- the file is off screen and the change would be lost to the next :bd or
+-- checkout. noautocmd keeps format-on-save off it, which would otherwise bury a
+-- two-line wiring change in a whole-file diff.
 local function apply_plan(plan)
   local bufnr = vim.fn.bufadd(plan.file)
   vim.fn.bufload(bufnr)
@@ -470,9 +475,9 @@ local function apply_plan(plan)
 end
 
 -- Accepting an item. blink's `default_implementation` applies the item itself --
--- textEdit, snippet and the additionalTextEdits resolve attached -- and everything
--- after it is the second file. `callback` completes blink's accept task, so it has
--- to fire exactly once down every path, thrown errors included.
+-- textEdit, snippet and the additionalTextEdits resolve attached -- and
+-- everything after it is the second file. `callback` completes blink's accept
+-- task, so it must fire exactly once down every path, thrown errors included.
 function M:execute(ctx, item, callback, default_implementation)
   -- First, always: the tag and its snippet are what the user is waiting on, and
   -- the cross-file work below must never be in front of them.
@@ -490,12 +495,11 @@ function M:execute(ctx, item, callback, default_implementation)
     done = true
     callback()
   end
-  -- The plan reads a repo-wide index and parses another file; anything that throws
-  -- in there -- synchronously here, or later from the index callback, where the
-  -- error has no caller left to catch it -- would otherwise strand the accept task
-  -- unresolved. The plan is asked for after the insert: it is derived from the
-  -- enclosing component, which the inserted tag doesn't change.
-  local ok = pcall(require("gaf.angular").build_ngmodule_plan, 0, d.file, function(plan)
+  -- The plan reads a repo-wide index and parses another file. A throw there --
+  -- synchronously, or later from the index callback where no caller is left to
+  -- catch it -- would strand the accept task unresolved. Asked for after the
+  -- insert, which is safe: the plan derives from the enclosing component.
+  local ok = pcall(edits.build_ngmodule_plan, 0, d.file, function(plan)
     if plan and plan.kind == "module" then pcall(apply_plan, plan) end
     finish() -- a "none" plan says nothing: the docs popup already explained it
   end)
