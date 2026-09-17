@@ -295,7 +295,6 @@ return {
     event = "VeryLazy",
     opts = function()
       local spec = {
-        { "<leader>a",  group = "agent review" },
         { "<leader>b",  group = "buffer" },
         { "<leader>c",  group = "code" },
         { "<leader>cs", group = "swap" },
@@ -318,11 +317,12 @@ return {
         { "g",          group = "goto" },
         { "gs",         group = "surround" },
       }
-      -- Redash keys and the global Xdebug <leader>X* maps are registered only
+      -- Phabricator, Redash and the global Xdebug <leader>X* maps are registered only
       -- under the GAF profile — keep their which-key groups out otherwise.
       -- (Swift buffers put a buffer-local "xcode" group on <leader>m in every
       -- profile — see after/ftplugin/swift.lua.)
       if vim.g.gaf then
+        table.insert(spec, { "<leader>p", group = "phabricator" })
         table.insert(spec, { "<leader>r", group = "redash" })
         table.insert(spec, { "<leader>X", group = "xdebug profile" })
       else

@@ -77,7 +77,6 @@
   "quicker.nvim": { "branch": "master", "commit": "4a6883cb13fe097a20a046eb55f6dffd239276e3" },
   "rainbow-delimiters.nvim": { "branch": "master", "commit": "012f1480cd9a5fc99fce7678e0a536421a53fc46" },
   "refactoring.nvim": { "branch": "master", "commit": "64e10d782ae5b9653558482910213b8946651456" },
-  "review.nvim": { "branch": "main", "commit": "17908cbdb498b3a1023c0689461a85bc6b3e165b" },
   "rustaceanvim": { "branch": "main", "commit": "e9c5aaba16fead831379d5f44617547a90b913c7" },
   "satellite.nvim": { "branch": "main", "commit": "87843c9c8f28b54332497302de380a6d94c9e82b" },
   "snacks.nvim": { "branch": "main", "commit": "882c996cf28183f4d63640de0b4c02ec886d01f2" },

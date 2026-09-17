@@ -21,6 +21,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [gaf-readme](gaf-readme.md) — workflow cheatsheet (PHPUnit, xdebug, UI tests)
 - [gaf-paths](gaf-paths.md) — devbox name + fl-gaf root + `/mnt/gaf` constants
 - [gaf-keymaps](gaf-keymaps.md) — `gx` on `D####`/`T####` Phabricator opener
+- [gaf-phab](gaf-phab.md) — Phabricator inline review comments in the buffer (`<leader>p*`, `:Phab*`) for `D<id>` worktrees, plus description/test-plan editing
 - [gaf-lsp](gaf-lsp.md) — basedpyright api-monorepo wiring (extraPaths, root markers, api311 venv) + tailwindcss filter
 - [gaf-python-nav](gaf-python-nav.md) — cross-service `gd` for api repo (rest ↔ midlayer ↔ dao, thrift proxy-aware)
 - [gaf-dap](gaf-dap.md) — PHP xdebug DAP config + path mappings

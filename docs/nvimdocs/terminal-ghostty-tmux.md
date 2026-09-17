@@ -65,6 +65,39 @@ Each override below re-adds one thing Neovim depends on:
 | `escape-time 0` | laggy `<Esc>` in nvim |
 | `focus-events on` | `FocusGained`/`FocusLost` autocmds, checktime-on-focus |
 
+## tmux window naming (manual only)
+
+Window names are **frozen** — tmux never renames a window on its own. Before Sep 2026 this
+config had `automatic-rename on` with `automatic-rename-format '#{b:pane_current_path}'`, so
+every window silently retitled itself to the cwd basename as you moved around; a name you set
+by hand survived only until the next `cd`.
+
+```
+set -g automatic-rename off   # no retitle to cwd basename
+set -g allow-rename off       # ignore OSC 0/2 title escapes from the shell or programs
+```
+
+Both are needed. `automatic-rename` is tmux's own cwd/command-based renaming; `allow-rename`
+is the separate path where a program (a shell prompt writing `\033]2;...\007`, or nvim's
+`'title'`) pushes a name in. Turning off only one leaves the other still overwriting the name.
+
+The name is rendered bottom-left, appended to rose-pine's `status-left` **after** the
+`run '.../tpm'` line — the plugin sets `status-left` itself at load, so an earlier `set -ga`
+is discarded:
+
+```
+set -ga status-left '#[fg=#9ccfd8,bold] #W#[default] '
+```
+
+Rename with prefix + `,` (tmux default, kept explicit with the current name prefilled):
+
+```
+bind , command-prompt -I "#{window_name}" -p "window name:" "rename-window '%%'"
+```
+
+Note the window list itself (`window-status-format`) still shows only `#I`, the window index —
+the name appears once, on the left, for the active window only.
+
 ## Fonts — nothing to patch
 
 Ghostty ≥ 1.2.0 ships its own standalone Symbols-Nerd-Font fallback and **auto-scales Nerd Font

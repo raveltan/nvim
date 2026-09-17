@@ -246,6 +246,38 @@ Commands: `:LaravelPhpstan [level]`, `:LaravelArtisan <cmd>`, `:LaravelRoot`.
 | `<leader>Dr` | n | DB: rename buffer |
 | `<leader>Dq` | n | DB: last query info |
 
+## Phabricator — `<leader>p*` (GAF=1 only)
+
+In-repo module `lua/gaf/phab/` (ported from `phab-inline.nvim`). Renders a
+revision's inline review comments in the buffers they were left on: a `>>`
+gutter sign, an end-of-line preview and the full body in virtual lines. The
+revision is resolved per worktree — an id you set, a `D<id>` ancestor
+directory, an `arcpatch-D<id>` branch, the `Differential Revision:` trailer of
+a recent commit, and failing all that it asks once per worktree. Needs `curl`,
+`jq` and Phabricator credentials (`$PHABRICATOR_URL`/`$PHABRICATOR_API_TOKEN`
+or `~/.arcrc`).
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>pi` | n | Pick among the files with inline comments |
+| `<leader>pv` | n | Set / ask for this worktree's revision, then load it |
+| `<leader>po` | n | Open the revision in the browser |
+| `<leader>pl` | n | Pick among the individual inline comments |
+| `<leader>pr` | n | Refetch the active status set |
+| `<leader>pc` | n | Clear decorations in this buffer |
+| `<leader>pt` | n | Toggle inline comment visibility (cache kept) |
+| `<leader>pm` | n | General (non-inline) revision comments |
+| `<leader>pd` | n | Description float: summary + test plan |
+| `<leader>pS` | n | Edit diff summary (`:w` saves to Phabricator) |
+| `<leader>pP` | n | Edit diff test plan (`:w` saves to Phabricator) |
+| `]p` / `[p` | n | Next / previous inline comment (wraps; shadows put-with-indent) |
+
+**In the description float:** `s` edit summary · `t` edit test plan · `q`/`<Esc>` close.
+
+**Status sets:** `incomplete` (default), `done`, `all` — `:PhabRefresh done`, `:PhabFiles all`, … The last one asked for stays active for that revision.
+
+**Commands:** `:PhabRevision` · `:PhabOpen` · `:PhabRefresh` · `:PhabFiles` · `:PhabList` · `:PhabClear` · `:PhabToggle` · `:PhabNext` · `:PhabPrev` · `:PhabComments[!]` · `:PhabDescription[!]` · `:PhabEditSummary` · `:PhabEditTestPlan`. Most take an optional status and/or revision id in any order (`:PhabFiles done D229985`). See [nvimdocs/gaf-phab](nvimdocs/gaf-phab.md).
+
 ## Redash — `<leader>r*` (GAF=1 only)
 
 `redash.nvim` (local: `~/redash.nvim`) runs ad-hoc SQL through Redash's HTTP API
@@ -471,7 +503,7 @@ state (green = on, yellow = off) and flipping it notifies.
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>l` laravel (no GAF=1) · `<leader>m` xcode (swift buffers) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` test (neotest) · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile (GAF=1 only) · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>l` laravel (no GAF=1) · `<leader>m` xcode (swift buffers) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>p` phabricator (GAF=1) · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` test (neotest) · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile (GAF=1 only) · `g` goto · `gs` surround
 
 ## Known overlaps
 
