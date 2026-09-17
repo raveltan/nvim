@@ -81,13 +81,26 @@ Both are needed. `automatic-rename` is tmux's own cwd/command-based renaming; `a
 is the separate path where a program (a shell prompt writing `\033]2;...\007`, or nvim's
 `'title'`) pushes a name in. Turning off only one leaves the other still overwriting the name.
 
-The name is rendered bottom-left, appended to rose-pine's `status-left` **after** the
-`run '.../tpm'` line — the plugin sets `status-left` itself at load, so an earlier `set -ga`
-is discarded:
+The name is rendered at the **start of `status-right`**, immediately to the right of the window
+numbers. Both lines sit **after** the `run '.../tpm'` line — the plugin sets `status-right`
+itself at load, so an earlier `set` is discarded:
 
 ```
-set -ga status-left '#[fg=#9ccfd8,bold] #W#[default] '
+run-shell 'tmux show -gv @status_right_base >/dev/null 2>&1 || tmux set -g @status_right_base "$(tmux show -gv status-right)"'
+run-shell 'tmux set -g status-right "#[fg=#9ccfd8,bold] ##W#[default]  $(tmux show -gv @status_right_base)"'
 ```
+
+Why two `run-shell` lines instead of one `set -ga`:
+
+- `status-right` has to be *prepended*, and tmux has no prepend. The first line caches
+  rose-pine's own value in `@status_right_base` once; the second rebuilds `status-right` from
+  that cache. Re-sourcing the config is therefore idempotent — without the cache, every
+  `source-file` would stack another copy of `#W` on the bar.
+- `$(tmux show -gv …)` runs in the shell, *after* format expansion, so the base string's
+  `#{b:pane_current_path}` stays a live format instead of freezing to the current path.
+- `##W` is doubled because `run-shell` expands formats in its command line; `##W` collapses to
+  a literal `#W` that tmux then evaluates per-redraw. Style markers `#[…]` pass through
+  `run-shell` untouched and must **not** be doubled.
 
 Rename with prefix + `,` (tmux default, kept explicit with the current name prefilled):
 
@@ -96,7 +109,8 @@ bind , command-prompt -I "#{window_name}" -p "window name:" "rename-window '%%'"
 ```
 
 Note the window list itself (`window-status-format`) still shows only `#I`, the window index —
-the name appears once, on the left, for the active window only.
+the name appears once, on the right of the numbers, for the active window only. Bar layout:
+`session │ 1 2 3 │ window-name  time  path`.
 
 ## Fonts — nothing to patch
 
