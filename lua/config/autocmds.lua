@@ -127,8 +127,27 @@ autocmd("FileType", {
   callback = function(ev)
     local buf, ft = ev.buf, ev.match
     local o = { buffer = buf, silent = true }
-    vim.keymap.set("n", "<leader>tr", function() require("neotest").run.run() end, vim.tbl_extend("force", o, { desc = "Run nearest test" }))
-    vim.keymap.set("n", "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end, vim.tbl_extend("force", o, { desc = "Run file tests" }))
+    -- neotest-python shells out to a bare host pytest, which cannot work in
+    -- api-mono: every service's deps live only inside its own test image. Route
+    -- those buffers through ./run.sh (gaf/py_test.lua) instead, keeping the
+    -- same two keys.
+    local function api_mono()
+      return vim.g.gaf and select(2, require("gaf.py_test").context()) ~= nil
+    end
+    local function run_sh(target)
+      return function()
+        local py = require("gaf.py_test")
+        require("overseer").new_task(py.build_task(target)({})):start()
+      end
+    end
+    vim.keymap.set("n", "<leader>tr", function()
+      if api_mono() then return run_sh("nearest")() end
+      require("neotest").run.run()
+    end, vim.tbl_extend("force", o, { desc = "Run nearest test" }))
+    vim.keymap.set("n", "<leader>tf", function()
+      if api_mono() then return run_sh("file")() end
+      require("neotest").run.run(vim.fn.expand("%"))
+    end, vim.tbl_extend("force", o, { desc = "Run file tests" }))
     vim.keymap.set("n", "<leader>tc", function() require("config.neotest-coverage").run_current() end, vim.tbl_extend("force", o, { desc = "Run file tests with coverage" }))
     vim.keymap.set("n", "<leader>td", function()
       require("dap") -- force-load so per-filetype dap.configurations are populated

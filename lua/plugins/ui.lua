@@ -1,36 +1,30 @@
 return {
   -- Colorscheme
   {
-    "bluz71/vim-moonfly-colors",
-    name = "moonfly",
+    "WTFox/luna.nvim",
+    name = "luna",
     priority = 1000,
     lazy = false,
     config = function()
-      -- No setup() — moonfly is a VimScript colorscheme configured via g:moonfly*
-      -- globals read at load time, so set them BEFORE the colorscheme command.
-      -- Transparency MUST be boolean true (not 1), else statusline/tabline stay
-      -- opaque (some branches test `== true`). moonfly sets termguicolors +
-      -- background=dark itself.
-      vim.g.moonflyTransparent = true
-      -- 1 (default) draws BLOCK separators: VertSplit gets bg=fg=grey16, i.e. a
-      -- solid bar that survives transparency. 2 is the line style moonfly itself
-      -- renders as bg=NONE, which is what the transparent setup wants.
-      vim.g.moonflyWinSeparator = 2
+      -- Transparent mode clears every background luna would paint, including
+      -- NormalFloat — so unlike moonfly (which kept a grey13 float surface of its
+      -- own) the float surface below has to be put back explicitly. Transparent
+      -- editor, solid floats: a see-through hover/picker renders on top of live
+      -- buffer text and is unreadable.
+      require("luna").setup({ transparent = true })
 
-      -- The float surface every override below blends against (moonfly grey13),
-      -- and grey15 for chrome that sits flush against buffer text.
-      local float_bg = "#212121"
+      -- luna's own palette (lua/luna/palette.lua): bg_soft for the float surface,
+      -- one step up for chrome that sits flush against buffer text, border for
+      -- separators, comment for dimmed text.
+      local float_bg = "#1f1f1f"
       local context_bg = "#262626"
+      local border = "#404040"
+      local dim = "#7c7c7c"
 
       local function overrides()
         -- Belt-and-suspenders: force-clear backgrounds on groups the theme's own
-        -- transparency may leave opaque (statusline, separators).
-        -- NormalFloat is deliberately NOT here: moonfly gives floats a grey13
-        -- (#212121) surface even in transparent mode (see its g:moonflyNormalFloat
-        -- branch), and clearing it made hover docs, the blink menu and pickers
-        -- render on top of live buffer text. Transparent editor, solid floats —
-        -- which is also why the float chrome below blends INTO grey13 rather than
-        -- being cleared.
+        -- transparency may leave opaque (statusline, separators). NormalFloat is
+        -- deliberately NOT here — see the surface note above.
         local transparent_groups = {
           "Normal",
           "NormalNC",
@@ -49,74 +43,65 @@ return {
           vim.api.nvim_set_hl(0, group, hl)
         end
 
-        -- WinSeparator's line char inherits grey16 (#292929), which is 41/255 from
-        -- Ghostty's black — the split boundary vanished. grey27 is what moonfly
-        -- already uses for FloatBorder, so borders and splits now read alike.
-        vim.api.nvim_set_hl(0, "WinSeparator", { bg = "NONE", fg = "#444444" })
+        -- luna leaves WinSeparator's line char at #1c1c1c, 28/255 from Ghostty's
+        -- black — the split boundary vanished. The theme's own border color is
+        -- what FloatBorder uses, so borders and splits now read alike.
+        vim.api.nvim_set_hl(0, "WinSeparator", { bg = "NONE", fg = border })
 
-        -- Contrast fixes measured against the actual terminal background (Ghostty is
-        -- #000000): moonfly ships ColorColumn and TreesitterContext at #121212, which
-        -- is 18/255 away from black — effectively invisible once Normal is bg=NONE.
-        -- ColorColumn must also clear CursorLine (#1c1c1c) or the rule disappears on
-        -- the cursor's own line, which is the line you are usually measuring.
-        vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#262626" })
+        -- Contrast fixes measured against the actual terminal background (Ghostty
+        -- is #000000): luna ships ColorColumn at #000000, i.e. invisible once
+        -- Normal is bg=NONE. It must also clear CursorLine (#212121) or the rule
+        -- disappears on the cursor's own line, which is the line you are usually
+        -- measuring.
+        vim.api.nvim_set_hl(0, "ColorColumn", { bg = context_bg })
         -- The sticky context reads as a pinned panel on surface alone — one step
         -- above the float surface, since it sits directly against buffer text with
         -- no border or gap to separate it (nvim-treesitter-context renders into a
         -- plain float and has no padding option).
         vim.api.nvim_set_hl(0, "TreesitterContext", { bg = context_bg })
-        vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { bg = context_bg, fg = "#6d6d6d" })
+        vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", { bg = context_bg, fg = dim })
         -- render.lua:528 underlines the last context row via
         -- TreesitterContextBottom unconditionally — dropping `separator` did not
-        -- remove it. moonfly asks for sp=#2e2e2e, but the underline color is not
-        -- being honoured, so it drew in Normal's #c6c6c6: a near-white rule welded
-        -- to the code below. Surface only, no underline.
+        -- remove it, and an unhonoured sp drew it in Normal's near-white. Surface
+        -- only, no underline.
         vim.api.nvim_set_hl(0, "TreesitterContextBottom", { bg = context_bg })
-        vim.api.nvim_set_hl(0, "TreesitterContextLineNumberBottom", { bg = context_bg, fg = "#6d6d6d" })
-        -- Inlay hints inherited bg #1c1c1c, i.e. a grey box floating in transparent
-        -- code. Italic + dim fg on no background is the readable form.
-        vim.api.nvim_set_hl(0, "LspInlayHint", { bg = "NONE", fg = "#6d6d6d", italic = true })
+        vim.api.nvim_set_hl(0, "TreesitterContextLineNumberBottom", { bg = context_bg, fg = dim })
+        -- Inlay hints read as annotations, not boxed text.
+        vim.api.nvim_set_hl(0, "LspInlayHint", { bg = "NONE", fg = dim, italic = true })
 
-        -- Per-window winbar (lualine `winbar`, below). No surface: a filled
-        -- strip was tried at both grey15 and grey11 and read as a bar welded
-        -- across every window — grey15 also merged into the sticky context that
-        -- renders immediately below it. Transparent, like the editor; the label
-        -- separates from code by being dimmer than Normal (#c6c6c6) instead of
-        -- by sitting on a box. The components below clear their own bg too,
-        -- since lualine paints grey07 behind every section by default.
-        vim.api.nvim_set_hl(0, "WinBar", { bg = "NONE", fg = "#9e9e9e" })
-        vim.api.nvim_set_hl(0, "WinBarNC", { bg = "NONE", fg = "#6d6d6d" })
+        -- Per-window winbar (lualine `winbar`, below). No surface: a filled strip
+        -- read as a bar welded across every window and merged into the sticky
+        -- context rendering immediately below it. Transparent, like the editor;
+        -- the label separates from code by being dimmer than Normal instead of by
+        -- sitting on a box. The components below clear their own bg too, since
+        -- lualine paints a section background by default.
+        vim.api.nvim_set_hl(0, "WinBar", { bg = "NONE", fg = "#c7c7c7" })
+        vim.api.nvim_set_hl(0, "WinBarNC", { bg = "NONE", fg = dim })
 
-        -- Flush float chrome. Borders keep their cell (the padding is what makes a
-        -- float readable over code) but are painted in the surface color, so no
-        -- frame is drawn. Three groups, because moonfly splits them:
-        --   FloatBorder            grey13/grey27 — LSP hover, blink, fff, which-key
-        --   FloatBorderTransparent NONE/grey18   — snacks, telescope, fzf, notify,
-        --                                          dap-ui, mini; a see-through ring
-        --                                          around an opaque grey13 body,
-        --                                          which is the mismatch that read
-        --                                          as a "weird" double edge
-        --   FloatTitle             grey23/white  — a lighter chip welded onto the
-        --                                          top border ("Files", "+goto")
+        -- The float surface, plus flush chrome. Borders keep their cell (the
+        -- padding is what makes a float readable over code) but are painted in the
+        -- surface color, so no frame is drawn. FloatBorderTransparent is the group
+        -- snacks/telescope/fzf/notify/dap-ui/mini resolve through; without it they
+        -- wear a see-through ring around a solid body.
+        vim.api.nvim_set_hl(0, "NormalFloat", { bg = float_bg, fg = "#e4e4e8" })
         vim.api.nvim_set_hl(0, "FloatBorder", { bg = float_bg, fg = float_bg })
         vim.api.nvim_set_hl(0, "FloatBorderTransparent", { bg = float_bg, fg = float_bg })
-        vim.api.nvim_set_hl(0, "FloatTitle", { bg = float_bg, fg = "#9e9e9e" })
+        vim.api.nvim_set_hl(0, "FloatTitle", { bg = float_bg, fg = "#c7c7c7" })
 
         -- Snacks picker chrome. The flush-border trick above assumes the float
-        -- BODY is grey13; that holds for anything using NormalFloat (hover,
+        -- BODY is float_bg; that holds for anything using NormalFloat (hover,
         -- blink, which-key) but every snacks picker window resolves its body
         -- through SnacksPicker -> Normal, whose bg the transparency loop at the
-        -- top of this function clears. So the picker drew an opaque grey ring
-        -- around a see-through body — the frame the flush borders exist to
-        -- avoid, inverted. Three links fix the whole surface, because snacks
-        -- routes list/preview/input/box through these:
+        -- top of this function clears. So the picker drew an opaque ring around a
+        -- see-through body — the frame the flush borders exist to avoid,
+        -- inverted. Three links fix the whole surface, because snacks routes
+        -- list/preview/input/box through these:
         --   SnacksPicker       body for all four windows
-        --   *InputBorder       the one border that did NOT go through
-        --                      SnacksPickerBorder — it linked to MoonflyBlue,
-        --                      so the prompt alone wore a bright blue frame
-        --   SnacksPickerTitle  linked to Dimmed (bg NONE) while the matching
-        --                      footer was already grey13; titles now sit on the
-        --                      same surface as everything else
+        --   *InputBorder       the one border that does NOT go through
+        --                      SnacksPickerBorder, so the prompt alone wore a
+        --                      differently-colored frame
+        --   SnacksPickerTitle  links to Dimmed (bg NONE) while the matching
+        --                      footer already sits on the float surface
         -- All snacks hl groups are registered with default=true, so these
         -- explicit definitions win regardless of load order.
         vim.api.nvim_set_hl(0, "SnacksPicker", { link = "NormalFloat" })
@@ -124,13 +109,13 @@ return {
         vim.api.nvim_set_hl(0, "SnacksPickerTitle", { link = "FloatTitle" })
       end
 
-      vim.cmd.colorscheme("moonfly")
+      vim.cmd.colorscheme("luna")
       overrides()
-      -- Anything that re-runs the colorscheme (a :colorscheme moonfly, a plugin
-      -- reload) restores moonfly's own definitions and drops all of the above.
+      -- Anything that re-runs the colorscheme (a :colorscheme luna, a plugin
+      -- reload) restores luna's own definitions and drops all of the above.
       vim.api.nvim_create_autocmd("ColorScheme", {
-        group = vim.api.nvim_create_augroup("moonfly_overrides", { clear = true }),
-        pattern = "moonfly",
+        group = vim.api.nvim_create_augroup("luna_overrides", { clear = true }),
+        pattern = "luna",
         callback = overrides,
       })
     end,
@@ -183,7 +168,7 @@ return {
       local lazy_updates = {
         function() return "󰚰 " .. require("lazy.status").updates() end,
         cond = function() return require("lazy.status").has_updates() end,
-        color = { fg = "#e3c78a" }, -- moonfly yellow
+        color = { fg = "#d9a35a" }, -- luna warning
       }
 
       -- Show encoding/fileformat only when non-default
@@ -205,7 +190,7 @@ return {
           return (d == "" or d == ".") and "" or d
         end,
         cond = function() return vim.bo.buftype == "" and vim.fn.expand("%") ~= "" end,
-        color = { fg = "#8b8b8b" }, -- moonfly grey
+        color = { fg = "#888888" }, -- luna grey
       }
 
       -- Live debug session state ("Running", "Stopped at ..."). package.loaded
@@ -218,7 +203,7 @@ return {
         cond = function()
           return package.loaded["dap"] ~= nil and require("dap").status() ~= ""
         end,
-        color = { fg = "#e3c78a" }, -- moonfly yellow
+        color = { fg = "#d9a35a" }, -- luna warning
       }
 
       -- Neotest results for the *current buffer* only, so the counts always
@@ -268,7 +253,7 @@ return {
       -- bg=NONE on both components is load-bearing, not decoration: lualine
       -- paints its section background (grey07) behind everything it renders, so
       -- clearing WinBar/WinBarNC alone would still leave the label in a dark
-      -- notch. These have to match the two groups set in the moonfly block.
+      -- notch. These have to match the two groups set in the luna block.
       -- The icon keeps its language colour now that there is no surface for it
       -- to clash with.
       local function winbar_section(fg)
@@ -310,7 +295,9 @@ return {
 
       return {
         options = {
-          theme = "moonfly",
+          -- "auto" derives the bar from the active colorscheme's highlights;
+          -- lualine ships no luna theme, and the bar is transparent anyway.
+          theme = "auto",
           globalstatus = true,
           section_separators = { left = "", right = "" },
           component_separators = { left = "", right = "" },
@@ -368,14 +355,14 @@ return {
               active_indicators = { "[1]", "[2]", "[3]", "[4]", "[5]" },
               _separator = " ",
               no_harpoon = "",
-              color = { fg = "#74b2ff" }, -- moonfly sky
+              color = { fg = "#75a1c7" }, -- luna blue
             },
           },
           lualine_x = {
             dap_status,
-            neotest_part("failed", "", "#ff5454"), -- moonfly red
-            neotest_part("passed", "", "#8cc85f"), -- moonfly green
-            neotest_part("running", "", "#74b2ff"), -- moonfly sky
+            neotest_part("failed", "", "#e08585"), -- luna error
+            neotest_part("passed", "", "#6fbe80"), -- luna ok
+            neotest_part("running", "", "#75a1c7"), -- luna blue
             lazy_updates,
             lsp,
             encoding,

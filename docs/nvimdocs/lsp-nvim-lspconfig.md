@@ -76,7 +76,7 @@ undercurl→underline loop provided.
 
 **Inlay hints** are enabled here with `vim.lsp.inlay_hint.enable(true)` — they ship with 0.12 but
 stay off until asked for, and vtsls / basedpyright / rust-analyzer / dartls all produce them.
-`LspInlayHint` is restyled (italic, no background) in [ui-moonfly](ui-moonfly.md); toggle per
+`LspInlayHint` is restyled (italic, no background) in [ui-luna](ui-luna.md); toggle per
 buffer with `<leader>uh`.
 
 ## Keymaps

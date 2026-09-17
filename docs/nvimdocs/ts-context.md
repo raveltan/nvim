@@ -43,7 +43,7 @@ Pins the line(s) introducing the current scope (function, class, if-block, etc.)
 - `trim_scope = "outer"` — when the context exceeds `max_lines`, drop outer scopes first and keep the innermost one you're actually editing.
 - `multiline_threshold = 1` — collapse a multi-line signature to its first line instead of spending the whole 3-line budget on one declaration.
 - `line_numbers` left at its `true` default.
-- `TreesitterContext` is re-coloured from moonfly's near-black `#121212` to `#212121` (the float surface) in [ui-moonfly](ui-moonfly.md) — the default is invisible against a transparent editor over a black terminal.
+- `TreesitterContext` is re-coloured from luna's cleared background to `#262626` (one step above the float surface) in [ui-luna](ui-luna.md) — the default is invisible against a transparent editor over a black terminal.
 
 ## Keymaps
 | Key | Mode | Action | Desc |

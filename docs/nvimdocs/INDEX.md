@@ -150,7 +150,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 
 ## UI
 
-- [ui-moonfly](ui-moonfly.md) — colorscheme + the transparency/contrast contract (transparent editor, solid overlays)
+- [ui-luna](ui-luna.md) — colorscheme + the transparency/contrast contract (transparent editor, solid overlays)
 - [ui-lualine](ui-lualine.md) — statusline (mode/git/diagnostics + harpoon marks + lazy updates)
 - [ui-noice](ui-noice.md) — cmdline + LSP hover/messages
 - [ui-mini-icons](ui-mini-icons.md) — icon provider

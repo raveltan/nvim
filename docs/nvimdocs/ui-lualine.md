@@ -6,7 +6,7 @@
 **Tags:** statusline, ui, lsp, git
 
 ## Scope
-Configures a single global statusline (one bar across all splits) themed to `moonfly`. Adds custom components — a red `REC @x` macro indicator, an LSP-clients list, a pending-plugin-updates counter — plus harpoon marks and conditional `encoding`/`fileformat` components that only render when non-default. Disabled on dashboard-like buffers.
+Configures a single global statusline (one bar across all splits) themed to `auto` (derived from the active colorscheme). Adds custom components — a red `REC @x` macro indicator, an LSP-clients list, a pending-plugin-updates counter — plus harpoon marks and conditional `encoding`/`fileformat` components that only render when non-default. Disabled on dashboard-like buffers.
 
 With `showtabline = 0` and no bufferline, this bar is the **only** persistent UI chrome, which is why the harpoon component lives here rather than in a tabline.
 
@@ -41,7 +41,7 @@ Section keys: `lualine_a`/`b`/`c`/`x`/`y`/`z` for sections, `tabline`/`winbar`/`
 Standard components: `mode`, `branch`, `diff`, `diagnostics`, `filename`, `filetype`, `filesize`, `encoding`, `fileformat`, `progress`, `location`, `searchcount`, `selectioncount`, `tabs`, `buffers`, `windows`, `hostname`, `lsp_status`. Each accepts `{ <name>, icon = ..., separator = ..., padding = ..., cond = fn, color = {...}, symbols = {...} }`.
 
 ## Our config
-- `theme = "moonfly"`, `globalstatus = true`.
+- `theme = "auto"`, `globalstatus = true`. lualine ships no luna theme, and the bar is transparent anyway.
 - **Flat separators** — both `section_separators` and `component_separators` are empty strings.
   This is deliberate and is the correct choice for a transparent theme: powerline slant glyphs
   need solid background fills on both sides, which clash with terminal transparency.
@@ -60,10 +60,10 @@ Sections:
 Custom components:
 - **macro** — reads `vim.fn.reg_recording()`, prints `REC @<reg>` in `#ff5555` bold. `cond` hides it when not recording.
 - **lsp** — iterates `vim.lsp.get_clients({ bufnr = 0 })`, joins names with comma, prefixed by . Empty string → component hides.
-- **lazy_updates** — `require("lazy.status").updates()` behind a `has_updates()` `cond`, in moonfly
+- **lazy_updates** — `require("lazy.status").updates()` behind a `has_updates()` `cond`, in luna
   yellow `#e3c78a`. Renders nothing when everything is up to date.
 - **harpoon2** — from `letieu/harpoon-lualine`. Renders `1 2 [3] 4`; brackets mark the current
-  file, `no_harpoon = ""` hides it entirely when the list is empty, coloured moonfly sky
+  file, `no_harpoon = ""` hides it entirely when the list is empty, coloured luna blue
   `#74b2ff`. Added because `showtabline = 0` left harpoon marks invisible everywhere.
 - **encoding** — `cond` only renders if `fileencoding` is set and non-`utf-8`.
 - **fileformat** — `cond` only renders if `fileformat ~= "unix"`.
@@ -80,7 +80,7 @@ None.
 - README: https://github.com/nvim-lualine/lualine.nvim/blob/master/README.md
 - Component docs: https://github.com/nvim-lualine/lualine.nvim/blob/master/doc/lualine.txt
 - harpoon-lualine: https://github.com/letieu/harpoon-lualine
-- Related: [nav-harpoon](nav-harpoon.md), [ui-moonfly](ui-moonfly.md), [ui-edgy](ui-edgy.md)
+- Related: [nav-harpoon](nav-harpoon.md), [ui-luna](ui-luna.md), [ui-edgy](ui-edgy.md)
 
 ## Notes
 - `globalstatus = true` requires Neovim ≥ 0.7 and effectively forces `laststatus=3`; per-window statuslines are gone.

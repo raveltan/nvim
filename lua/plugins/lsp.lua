@@ -80,7 +80,14 @@ return {
 			-- One global default for LSP capabilities (blink.cmp); per-server
 			-- vim.lsp.config() tables below only override what they need.
 			local capabilities = require("blink.cmp").get_lsp_capabilities()
-			vim.lsp.config("*", { capabilities = capabilities })
+			-- Full-document sync for every server, plus the shared blink.cmp
+			-- capabilities. Neovim 0.12's incremental sync (runtime
+			-- lua/vim/lsp/sync.lua) asserts in compute_start_range when a buffer
+			-- mutates in ways its tracker can't reconcile (neovim/neovim#33224).
+			vim.lsp.config("*", {
+				capabilities = capabilities,
+				flags = { allow_incremental_sync = false },
+			})
 
 			-- Lua LSP for editing this config. lazydev.nvim feeds it the vim API +
 			-- plugin types. stylua formatting stays opt-in per project (formatting.lua).
@@ -97,10 +104,20 @@ return {
 			-- typescript-tools.nvim, which is in maintenance drift (its issue #273
 			-- recommends vtsls). Same features, via LSP code actions + workspace
 			-- commands — keymaps below.
+			-- Under GAF, run webapp's own typescript (5.5.4) instead of the 5.9.x
+			-- bundled with vtsls: the Angular decorator-heavy tree trips checker
+			-- assertions on the newer version, surfacing as tsserver crash/restart
+			-- loops. vtsls only honours typescript.tsdk when autoUseWorkspaceTsdk is
+			-- on (default off — it mirrors VS Code's "select workspace version"
+			-- prompt). tsdk is relative to the vtsls root (webapp/, found via
+			-- yarn.lock). tsserver.log writes $TMPDIR/tsserver-log-*/tsserver.log so
+			-- the next crash leaves a reason behind.
 			vim.lsp.config("vtsls", {
 				settings = {
+					vtsls = { autoUseWorkspaceTsdk = vim.g.gaf == true },
 					typescript = {
-						tsserver = { maxTsServerMemory = 8192 },
+						tsdk = vim.g.gaf and "node_modules/typescript/lib" or nil,
+						tsserver = { maxTsServerMemory = 8192, log = vim.g.gaf and "normal" or nil },
 						preferences = {
 							-- fl-gaf (GAF=1) bans relative @freelancer imports
 							-- (eslint local-rules/validate-freelancer-imports) but still
@@ -170,8 +187,8 @@ return {
 					run = "onSave",
 					packageManager = "yarn",
 				},
+				-- allow_incremental_sync is off globally above.
 				flags = {
-					allow_incremental_sync = false,
 					debounce_text_changes = 1000,
 				},
 			})
@@ -564,7 +581,7 @@ return {
 		},
 		config = function(_, opts)
 			require("nvim-lightbulb").setup(opts)
-			vim.api.nvim_set_hl(0, "LightBulbSign", { fg = "#e3c78a" }) -- moonfly yellow
+			vim.api.nvim_set_hl(0, "LightBulbSign", { fg = "#d9a35a" }) -- luna warning
 		end,
 	},
 
@@ -581,7 +598,7 @@ return {
 			},
 			notification = {
 				window = {
-					winblend = 0, -- no blend: moonfly's float surface is already readable
+					winblend = 0, -- no blend: the float surface set in ui.lua is already readable
 					border = "rounded", -- match 'winborder' / 'pumborder'
 				},
 				x_padding = 1, -- breathing room inside the rounded border

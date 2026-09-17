@@ -295,6 +295,7 @@ return {
     event = "VeryLazy",
     opts = function()
       local spec = {
+        { "<leader>a",  group = "agent review" },
         { "<leader>b",  group = "buffer" },
         { "<leader>c",  group = "code" },
         { "<leader>cs", group = "swap" },

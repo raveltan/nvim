@@ -54,4 +54,17 @@ return {
       })
     end or nil,
   },
+
+  -- Review agent output, comment on lines, paste the batch into the agent's tmux
+  -- pane. tmux.target "!" is the last active pane, which is the pane nvim was
+  -- launched from.
+  {
+    "vuki656/review.nvim",
+    cmd = "Review",
+    keys = {
+      { "<leader>av", "<cmd>Review<cr>", desc = "Review diff" },
+      { "<leader>as", "<cmd>Review send<cr>", desc = "Send comments to agent" },
+    },
+    opts = {},
+  },
 }

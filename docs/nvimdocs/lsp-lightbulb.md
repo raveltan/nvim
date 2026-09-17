@@ -26,7 +26,7 @@ for them, so there was previously no signal that an action existed at all.
   },
   config = function(_, opts)
     require("nvim-lightbulb").setup(opts)
-    vim.api.nvim_set_hl(0, "LightBulbSign", { fg = "#e3c78a" }) -- moonfly yellow
+    vim.api.nvim_set_hl(0, "LightBulbSign", { fg = "#d9a35a" }) -- luna warning
   end,
 }
 ```
@@ -51,7 +51,7 @@ for them, so there was previously no signal that an action existed at all.
 - `autocmd.enabled = true`, inheriting `updatetime = 500` from
   [config-options](config-options.md).
 - `ignore.ft` skips prose buffers where an action is either always or never present.
-- `LightBulbSign` is set to moonfly yellow `#e3c78a` explicitly so the bulb is not confused with
+- `LightBulbSign` is set to luna warning `#d9a35a` explicitly so the bulb is not confused with
   a diagnostic sign.
 
 ## Gutter budget

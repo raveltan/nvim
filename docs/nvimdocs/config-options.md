@@ -12,7 +12,7 @@ search, folding, splits, diff, and a handful of behavioural switches (`confirm`,
 
 Several options here only produce a visible effect in combination with something outside this
 file — the terminal (see [terminal-ghostty-tmux](terminal-ghostty-tmux.md)) or the colorscheme
-(see [ui-moonfly](ui-moonfly.md)). Those are called out below.
+(see [ui-luna](ui-luna.md)). Those are called out below.
 
 ## Highlights
 
@@ -56,7 +56,7 @@ There is **no** `clipboard = "unnamedplus"`: the system clipboard is synced thro
   filler reads as absence rather than content.
 - `textwidth = 150`, `colorcolumn = "+1"` — one rule, tracking `'textwidth'` per buffer, so prose
   ftplugins (gitcommit at 72) get their own correct edge. `ColorColumn` is re-coloured in
-  [ui-moonfly](ui-moonfly.md) because moonfly's default is invisible against a black terminal.
+  [ui-luna](ui-luna.md) because luna's default is invisible against a black terminal.
 - `smoothscroll = true` — wrapped-line aware `<C-d>`/`<C-u>`.
 - `wrap = true` — soft-wrap long lines.
 
@@ -104,7 +104,7 @@ There is **no** `clipboard = "unnamedplus"`: the system clipboard is synced thro
 `vim.hl.priorities.semantic_tokens = 95` — treesitter extmarks are 100 and LSP semantic tokens
 default to 125, so `@lsp.type.*` overpainted every treesitter capture it overlapped
 (neovim/neovim#33614, open). Demoting keeps tokens only where treesitter has nothing to say.
-Must be set before the colorscheme loads. See [ui-moonfly](ui-moonfly.md).
+Must be set before the colorscheme loads. See [ui-luna](ui-luna.md).
 
 ### Misc behaviour
 
@@ -123,7 +123,7 @@ Must be set before the colorscheme loads. See [ui-moonfly](ui-moonfly.md).
 ## Links
 
 - Related [config-init](config-init.md), [config-keymaps](config-keymaps.md), [config-autocmds](config-autocmds.md)
-- Appearance depends on: [ui-moonfly](ui-moonfly.md), [terminal-ghostty-tmux](terminal-ghostty-tmux.md)
+- Appearance depends on: [ui-luna](ui-luna.md), [terminal-ghostty-tmux](terminal-ghostty-tmux.md)
 - Gutter co-owners: [lsp-lightbulb](lsp-lightbulb.md), [git-gitsigns](git-gitsigns.md), [editor-marks](editor-marks.md)
 - Folding detail: [editor-folding](editor-folding.md)
 - Filetype-local overrides: `after/ftplugin/*.lua` (e.g. [ftplugin-php](ftplugin-php.md))

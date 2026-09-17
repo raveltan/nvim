@@ -127,5 +127,5 @@ Top-level keymaps registered on the snacks spec — see per-module docs for the 
   ships `winblend = 5`, and any blend over a transparent `Normal` muddies the notification against
   the buffer text behind it. Borders are not set here — `'winborder'` already propagates globally.
 - Snacks floats inherit `NormalFloat`, which is deliberately kept **solid** — see
-  [ui-moonfly](ui-moonfly.md).
+  [ui-luna](ui-luna.md).
 - The `vim.g.gaf` flag (set by `GAF=1 nvim`, see auto-memory `nvim_gaf_profile.md`) gates GAF-specific additions inside picker/projects — see [snacks-picker](snacks-picker.md).

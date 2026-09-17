@@ -49,7 +49,7 @@ Lazy-loaded on `LspAttach` so it only starts once an LSP client is actually atta
 
 - `render_limit = 5` — keep the stack short; large LSPs (intelephense, ts_ls) emit many concurrent tasks.
 - `done_ttl = 2` — fade completed tasks quickly.
-- `winblend = 0` — no blend; moonfly's float surface is already readable, and blending over a
+- `winblend = 0` — no blend; the float surface set in ui.lua is already readable, and blending over a
   transparent `Normal` would show buffer text through the progress window.
 - `border = "rounded"` + `x_padding = 1` — matches `'winborder'`/`'pumborder'` so progress reads
   as the same class of surface as every other float.

@@ -23,7 +23,12 @@ return {
         css = { "stylelint", "prettierd", "prettier", stop_after_first = true },
         -- html LSP has provideFormatter = false (lsp.lua), so conform owns html
         html = { "prettierd", "prettier", stop_after_first = true },
-        python = { "ruff_organize_imports", "ruff_format" },
+        -- api-mono's tox.ini `fix` target (every service) is plain `black`, and
+        -- setup.cfg's flake8 never sorts imports (no isort, no ruff anywhere in
+        -- the repo) — ruff_organize_imports has no counterpart there and would
+        -- reorder unrelated imports on every save. Everywhere else keeps ruff,
+        -- which is what those repos actually run.
+        python = vim.g.gaf and { "black" } or { "ruff_organize_imports", "ruff_format" },
         dart = { "dart_format" },
         rust = { "rustfmt" },
         swift = { "swiftformat" },
@@ -33,6 +38,12 @@ return {
         -- stylua's defaults clobber it. Only run stylua in projects that opt
         -- in with a stylua config file; elsewhere lua saves are left alone
         -- (no lua LSP is set up, so the lsp fallback below is a no-op too).
+        -- No pyproject.toml anywhere in api-mono, so black falls back to its own
+        -- default (88) instead of the 119 every service's setup.cfg lints to —
+        -- confirmed against the real column widths of committed files, not just
+        -- the ignored-E501 comment. Without this, black wraps lines that were
+        -- never too long to begin with.
+        black = { prepend_args = { "--line-length", "119" } },
         stylua = {
           condition = function(_, ctx)
             return #vim.fs.find({ ".stylua.toml", "stylua.toml" }, { path = ctx.dirname, upward = true }) > 0

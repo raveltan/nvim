@@ -18,7 +18,7 @@ require("lazy").setup({
   spec = {
     { import = "plugins" },
   },
-  install = { colorscheme = { "moonfly" } },
+  install = { colorscheme = { "luna" } },
   checker = {
     enabled = false,
   },

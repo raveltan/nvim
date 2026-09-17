@@ -23,7 +23,7 @@ installed on this machine.
 ## The transparency contract
 
 **This is the part that silently breaks.** `lua/plugins/ui.lua` sets
-`vim.g.moonflyTransparent = true` and force-clears `bg` on Normal/NormalNC/SignColumn/
+`require("luna").setup({ transparent = true })` and force-clears `bg` on Normal/NormalNC/SignColumn/
 StatusLine/StatusLineNC/WinSeparator. That only produces a visible effect if the terminal
 underneath is itself translucent. Before Aug 2026 the Ghostty config had `background-opacity`
 commented out, so nvim was drawing "transparent" onto an opaque black window and the entire
@@ -42,12 +42,12 @@ macos-titlebar-style = hidden
   silently ignored by Ghostty 1.3.x; a config using it looks like transparency is broken for no
   reason. Takes an integer, or `true` (= 20).
 - `minimum-contrast = 1.2` — the actual fix for the "washed-out" complaint people usually blame
-  on opacity. Forces a WCAG contrast floor so moonfly's dim comment/hint greys stay legible
+  on opacity. Forces a WCAG contrast floor so luna's dim comment/hint greys stay legible
   against a blurred wallpaper. Lower toward `1.0` if colors start looking punched-up.
 - `unfocused-split-opacity` — dims the inactive pane; meaningful because vim-tmux-navigator
   means several panes are usually open.
 - Anything nvim deliberately keeps **opaque** (floats, Pmenu, TreesitterContext) is documented
-  in [ui-moonfly](ui-moonfly.md) — transparent editor, solid overlays.
+  in [ui-luna](ui-luna.md) — transparent editor, solid overlays.
 
 ## tmux capability overrides
 
@@ -57,7 +57,7 @@ Each override below re-adds one thing Neovim depends on:
 | Setting | What breaks without it |
 |---|---|
 | `default-terminal "tmux-256color"` | baseline |
-| `terminal-overrides ",*256col*:Tc"` | 24-bit color — without it moonfly renders banded/wrong-hued |
+| `terminal-overrides ",*256col*:Tc"` | 24-bit color — without it luna renders banded/wrong-hued |
 | `terminal-overrides ',*:Smulx=\E[4::%p1%dm'` | undercurl, and with it the four **distinct** diagnostic underline styles (undercurl/underdouble/underdotted/underdashed) set in `lua/plugins/lsp.lua` |
 | `terminal-overrides ',*:Setulc=...'` | undercurl *color* (severity color on the squiggle) |
 | `terminal-overrides ',*:Ss=\E[%p1%d q:Se=\E[2 q'` | **DECSCUSR passthrough.** Without it `'guicursor'` never reaches Ghostty, so the block/bar-by-mode and the blink timings in `lua/config/options.lua` do nothing inside tmux. |
@@ -100,9 +100,9 @@ Run `:checkhealth snacks` to re-verify; a missing converter is a silent no-rende
 ## Known mismatch (open, deliberate)
 
 Ghostty's 16-color palette is **Rose Pine Moon** (`cursor-color = a277ff` = iris, matching
-`tmux.conf`'s `@rose_pine_variant 'moon'`), while Neovim runs **moonfly**. Anywhere ANSI colors
+`tmux.conf`'s `@rose_pine_variant 'moon'`), while Neovim runs **luna**. Anywhere ANSI colors
 pass through unmapped — `:terminal`, lazygit, `Snacks.terminal`, fidget spinners — you see Rose
-Pine, not moonfly. Fixing it means either repainting the 16 palette entries to moonfly (and
+Pine, not luna. Fixing it means either repainting the 16 palette entries to luna (and
 desyncing the tmux rose-pine statusline) or switching the nvim colorscheme. Left as-is.
 
 ## Gotchas
@@ -126,7 +126,7 @@ desyncing the tmux rose-pine statusline) or switching the nvim colorscheme. Left
 - Ghostty 1.2.0 notes (Nerd Font fallback): https://ghostty.org/docs/install/release-notes/1-2-0
 - Ghostty terminfo over SSH: https://ghostty.org/docs/help/terminfo
 - snacks.image requirements: https://github.com/folke/snacks.nvim/blob/main/docs/image.md
-- Related: [ui-moonfly](ui-moonfly.md), [config-options](config-options.md), [nav-vim-tmux-navigator](nav-vim-tmux-navigator.md), [snacks-misc](snacks-misc.md)
+- Related: [ui-luna](ui-luna.md), [config-options](config-options.md), [nav-vim-tmux-navigator](nav-vim-tmux-navigator.md), [snacks-misc](snacks-misc.md)
 
 ## Notes
 

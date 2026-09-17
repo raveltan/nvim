@@ -138,7 +138,13 @@ return {
         },
         component_aliases = {
           default = {
-            { "open_output", on_start = "always", direction = "float", focus = true },
+            -- Not the builtin open_output: task:start() (from the <leader>or
+            -- picker callback) can still be inside a floating window at that
+            -- instant, which defers overseer's real terminal attach (see
+            -- lua/overseer/component/open_output_delayed.lua) until the float
+            -- that would show it is closed. The delayed variant opens one tick
+            -- later, after that attach has had a chance to happen.
+            { "open_output_delayed", direction = "float", focus = true },
             "on_exit_set_status",
             "on_complete_notify",
             { "on_complete_dispose", require_view = { "SUCCESS", "FAILURE" } },

@@ -51,7 +51,7 @@ opt.winborder = "rounded"
 -- 0.12 added 'pumborder': 'winborder' only covers floats, so the BUILTIN popup
 -- menu (i_CTRL-X completion, cmdline/wildmenu-as-pum) stayed square. blink.cmp
 -- draws its own rounded menu, this matches everything blink does not own.
--- ('pumblend' left at 0 — moonfly's transparency means a blended pum would show
+-- ('pumblend' left at 0 — the transparent theme means a blended pum would show
 -- buffer text through the menu.)
 opt.pumborder = "rounded"
 opt.laststatus = 3
@@ -120,7 +120,9 @@ opt.textwidth = 150
 -- prose ftplugins (markdown, gitcommit at 72) get their own correct edge.
 opt.colorcolumn = "+1"
 opt.formatoptions:remove("t")
-vim.lsp.log.set_level(vim.log.levels.OFF)
+-- WARN keeps client exit codes ("Client vtsls quit with exit code N") in
+-- :LspLog without the DEBUG firehose. OFF left server deaths unexplained.
+vim.lsp.log.set_level(vim.log.levels.WARN)
 
 -- No remote-plugin hosts in use; disabling skips provider probing and the
 -- perl/ruby/node/python checkhealth warnings.
