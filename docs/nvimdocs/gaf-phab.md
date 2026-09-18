@@ -22,13 +22,21 @@ Resolved per worktree, first hit wins:
 2. a `D<digits>` ancestor directory (`.../fl-gaf-worktree/D225194/...`) — that
    directory is also the root comment paths resolve against, and no git call is
    made
-3. an `arcpatch-D<id>` branch, which is what `arc patch` creates
-4. the `Differential Revision: <url>/D<id>` trailer of a recent commit — the
-   last 50 are scanned, since the tip is often a local fixup that has not been
-   amended into the revision commit yet
-5. asking: a `vim.ui.input` prompt, once per worktree per session. An empty
+3. the `Differential Revision: <url>/D<id>` trailer of **HEAD itself** — the
+   revision whose code the worktree is actually showing
+4. an `arcpatch-D<id>` branch, which is what `arc patch` creates
+5. the same trailer anywhere in the last 50 commits, for a tip that is a local
+   fixup not yet amended into the revision commit
+
+6. asking: a `vim.ui.input` prompt, once per worktree per session. An empty
    answer skips, and is remembered too (no nagging). Set
    `prompt_on_open = false` to only be asked from the commands themselves.
+
+HEAD's trailer outranks the branch name because a patched stack keeps the
+branch of the revision it started from: `arc patch D229985` on top of D229984
+leaves the branch called `arcpatch-D229984` while HEAD is D229985's commit.
+Targeting the branch there shows the parent's comments and refuses inline
+comments on the child's files, since those files are not in the parent's diff.
 
 Outside (2), the worktree top level (`git rev-parse --show-toplevel`) is the
 root comment paths resolve against, so an ordinary `fl-gaf` checkout works —
@@ -74,6 +82,12 @@ and the last one asked for becomes the revision's *active* set — `]p`/`[p`,
 | `<leader>pd` | description float: summary + test plan (`s`/`t` to edit, `q`/`<Esc>` close) |
 | `<leader>pS` | edit the diff summary |
 | `<leader>pP` | edit the diff test plan |
+| `<leader>pa` | draft an inline comment on this line (visual: on the selection) |
+| `<leader>pe` | draft a suggested rewrite of this line / selection |
+| `<leader>pE` | edit the draft on this line |
+| `<leader>pX` | discard the draft on this line |
+| `<leader>ps` | publish this session's drafts (asks for a cover message) |
+| `<leader>pD` | picker: unpublished drafts |
 | `]p` / `[p` | next / previous inline comment in the buffer (wraps) |
 
 `]p`/`[p` shadow the builtin put-with-indent mappings; drop those entries in
@@ -84,11 +98,94 @@ and the last one asked for becomes the revision's *active* set — `]p`/`[p`,
 `:PhabRevision [Dxxx]` · `:PhabOpen [Dxxx]` · `:PhabRefresh [status] [Dxxx]` ·
 `:PhabFiles [status] [Dxxx]` · `:PhabList [status] [Dxxx]` · `:PhabClear` ·
 `:PhabToggle` · `:PhabNext` · `:PhabPrev` · `:PhabComments[!] [Dxxx]` ·
-`:PhabDescription[!] [Dxxx]` · `:PhabEditSummary` · `:PhabEditTestPlan`
+`:PhabDescription[!] [Dxxx]` · `:PhabEditSummary` · `:PhabEditTestPlan` ·
+`:PhabComment[!]` (range) · `:PhabSuggest[!]` (range) · `:PhabSubmit` ·
+`:PhabDrafts` · `:PhabDraftEdit` · `:PhabDraftDelete`
 
 Arguments are order-free: a status word (`incomplete`/`done`/`all`) and/or a
 revision (`D229985`, `229985`, or a Phabricator URL). `!` busts the cache and
 refetches. A revision passed to a command becomes the worktree's revision.
+
+## Writing inline comments
+
+`:PhabComment` (`<leader>pa`, or a visual selection for a multi-line comment)
+opens a **compose float** — a markdown scratch buffer named
+`phab://D<id>/inline/<path>:<line>` in a `Snacks.win`. The buffer is `acwrite`,
+so it works like any other buffer: **`:w` saves** (and `:wq`), **`:q` discards**
+— no unsaved-changes complaint, a draft that was never written is meant to go.
+`q` and `<Esc>` are there as quick discards. No key is bound in insert mode.
+
+`compose = { save = "<cr>", discard = { "q", "<esc>" } }` binds an extra
+normal-mode save key and replaces the quick-discard keys; each takes a key, a
+list, or `false`. By default `save` is `false` — `:w` is the save.
+
+Saving stores the comment as a **local draft**: nothing has reached Phabricator
+yet. Drafts carry their own decoration — a `+>` sign and a `draft: …`
+end-of-line preview in the `gaf_phab_draft` namespace — next to the fetched
+comments, and can be rewritten or discarded freely:
+
+| Action | How |
+|---|---|
+| edit the draft on this line | `<leader>pE` / `:PhabDraftEdit` |
+| discard the draft on this line | `<leader>pX` / `:PhabDraftDelete` |
+| browse every draft | `<leader>pD` / `:PhabDrafts` — `<CR>` edits, `<C-d>` discards, `<C-o>` jumps |
+
+`:PhabSubmit` (`<leader>ps`) is the only step that writes: it pushes each draft
+with `differential.createinline`, then publishes them with
+`differential.createcomment` and `attach_inlines`, which is what turns pending
+inlines into visible comments. If one `createinline` fails the run stops and
+says how many are already pending, so the rest can be finished in the web UI.
+
+**Publishing is verified, not trusted.** `differential.createcomment` reports
+success for a call that applied nothing, so after it runs the revision is read
+back with `transaction.search` and our own new transactions are counted:
+
+| What came back | What happens |
+|---|---|
+| `inline` transactions | published; the local drafts are dropped |
+| a `comment` but no inlines | the instance did not attach them — drafts kept, no second comment is posted |
+| nothing at all | retried once through `differential.revision.edit`, then verified again |
+| still nothing | drafts kept, with an error naming both endpoints |
+
+Whenever the drafts are kept they are still sitting on the revision as
+**unsubmitted inline comments** — open it in the browser and press Submit, and
+they go out as they are.
+
+Drafts are local to the session — closing Neovim drops them, and there is no
+undo after publishing. That design is deliberate: Conduit exposes
+`differential.createinline` and no method to edit or delete an inline comment,
+so a comment that reached the server can only be changed from the web UI.
+Keeping drafts in the editor is what makes editing and discarding possible at
+all.
+
+## Suggesting a code change
+
+`:PhabSuggest` (`<leader>pe`, range-aware) opens the same float with the
+commented lines already in a fenced block:
+
+````
+Prefer a guard clause here.
+
+```lang=typescript
+    if (a) {
+      return 1;
+    }
+```
+````
+
+Rewrite what is inside the fence and save; the comment above it is optional.
+Leaving the block untouched is refused rather than posting a no-op. The
+language tag comes from the buffer's filetype.
+
+`suggest_style` picks how the block is rendered:
+
+- `"code"` (default) — the replacement alone, which is what reviewers on this
+  instance already post by hand
+- `"diff"` — `lang=diff` with the original lines as `-` and the rewrite as `+`
+
+Phabricator has no structured suggestion field — `differential.createinline`
+takes a `content` string and nothing else — so a suggestion is remarkup in the
+comment body, not the "accept this change" widget GitHub has.
 
 ## Editing summary / test plan
 
@@ -104,4 +201,8 @@ field is overwritten — there is no merge with a concurrent edit by someone els
 
 ## Not implemented
 
-Marking a comment done, and replying. Both are read-only here today.
+Marking a comment done, replying to one, and editing or deleting a comment that
+has already been published — Conduit has no method for any of them on this
+instance (`conduit.query` lists only `differential.createinline` for inlines).
+Published comments are changed from the web UI; `<leader>po` opens the
+revision.

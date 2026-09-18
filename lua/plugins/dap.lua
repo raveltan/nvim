@@ -172,7 +172,9 @@ return {
       end
 
       local dap = require("dap")
-      for _, ft in ipairs({ "typescript", "javascript" }) do
+      -- `vue`: nvim-dap looks the configuration list up by the buffer's
+      -- filetype, so without it <leader>dc in an SFC offers nothing.
+      for _, ft in ipairs({ "typescript", "javascript", "vue" }) do
         dap.configurations[ft] = {
           {
             type = "pwa-node",
@@ -197,6 +199,10 @@ return {
             sourceMaps = true,
           },
         }
+        -- Appended rather than listed: three dead picker entries under GAF.
+        if not vim.g.gaf then
+          vim.list_extend(dap.configurations[ft], require("nuxtdev").dap_configurations())
+        end
       end
 
       dap.configurations.rust = {

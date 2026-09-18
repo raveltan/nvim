@@ -14,6 +14,7 @@ Full VS Code TS feature set over LSP: completions, diagnostics, source actions (
 - `typescript.preferences.includePackageJsonAutoImports = "auto"`.
 - `typescript/javascript.updateImportsOnFileMove.enabled = "always"`.
 - Formatting stays with conform (prettierd); linting stays with the eslint LSP.
+- `vue` filetype + `@vue/typescript-plugin` in `vtsls.tsserver.globalPlugins` outside GAF — see [[nuxt-vue]].
 
 ## Keymaps (buffer-local, ts/tsx/js/jsx)
 | Key | Action | Mechanism |

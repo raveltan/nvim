@@ -20,6 +20,8 @@
 --   nav.lua         ]p / [p inside a buffer
 --   pick.lua        Snacks pickers over commented files / comments
 --   float.lua       shared read-only markdown float (Snacks.win)
+--   post.lua        writing inline comments back: local drafts, the compose
+--                   float, code suggestions, and publishing
 --   comments.lua    general (non-inline) revision comments
 --   description.lua diff summary + test plan, incl. editing them back
 --   commands.lua    :Phab* commands, keymaps, toggle registration, autocmd
@@ -117,6 +119,8 @@ function M.on_buf(buf)
   revision.resolve({ buf = buf, prompt_once = config.get().prompt_on_open }, function(rev, root)
     local status = state.get_active(rev) or "incomplete"
     state.set_active(rev, status)
+    -- Unpublished drafts are decorated separately, and survive a re-render.
+    require("gaf.phab.post").render(buf)
     if state.get_slot(rev, status) then
       render.render(buf, rev, status)
     else
@@ -133,6 +137,13 @@ function M.open_browser(opts)
     vim.ui.open(base .. "/" .. rev)
   end)
 end
+
+function M.comment(opts) require("gaf.phab.post").add(opts) end
+function M.suggest(opts) require("gaf.phab.post").suggest(opts) end
+function M.draft_edit(opts) require("gaf.phab.post").at_cursor("edit", opts) end
+function M.draft_delete(opts) require("gaf.phab.post").at_cursor("delete", opts) end
+function M.submit(opts) require("gaf.phab.post").submit(opts) end
+function M.drafts(opts) require("gaf.phab.post").list(opts) end
 
 function M.show_comments(opts) require("gaf.phab.comments").show(opts) end
 function M.show_description(opts) require("gaf.phab.description").show(opts) end

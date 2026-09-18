@@ -55,6 +55,10 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [laravel-nvim](laravel-nvim.md) — artisan, Tinker, pickers, Eloquent code actions (`<leader>l*`)
 - [laravel-tooling](laravel-tooling.md) — Pint, phpstan/larastan, Pest, Xdebug, Livewire navigation
 
+## Nuxt / Vue
+
+- [nuxt-vue](nuxt-vue.md) — `vue_ls` + vtsls SFC pair, `:NuxtPrepare`/`:NuxtDev`, dev-server debugging
+
 ## Completion
 
 - [cmp-blink](cmp-blink.md) — blink.cmp completion engine

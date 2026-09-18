@@ -10,8 +10,10 @@ return {
       require("nvim-treesitter").install({
         "angular", "bash", "blade", "css", "dart", "diff", "embedded_template", "html", "javascript", "json", "lua",
         "markdown", "markdown_inline", "php", "php_only", "python", "regex",
-        "ruby", "rust", "scss", "swift", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
+        "ruby", "rust", "scss", "swift", "toml", "tsx", "typescript", "vim", "vimdoc", "vue", "yaml",
       })
+      -- `vue`: the SFC parser injects css/typescript into <style>/<script>, so
+      -- those parsers (already listed) highlight inside each block.
       -- `diff`: actions-preview.nvim renders the code-action preview in a `diff`
       -- filetype buffer and calls vim.treesitter.start, which asserts hard if the
       -- parser is missing. LSP code actions (e.g. phpantom_lsp quickfixes) hit this.

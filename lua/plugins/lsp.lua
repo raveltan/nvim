@@ -14,6 +14,7 @@ return {
 			-- from `brew install phpantom-lsp` and is enabled by hand below.
 			local servers = {
 				"vtsls",
+				"vue_ls",
 				"eslint",
 				"basedpyright",
 				"ruff",
@@ -112,9 +113,24 @@ return {
 			-- prompt). tsdk is relative to the vtsls root (webapp/, found via
 			-- yarn.lock). tsserver.log writes $TMPDIR/tsserver-log-*/tsserver.log so
 			-- the next crash leaves a reason behind.
+			-- Vue SFCs need vtsls + @vue/typescript-plugin for <script> and vue_ls for
+			-- the rest (lua/nuxtdev/init.lua). Never under GAF: that vtsls runs the
+			-- webapp's pinned typescript over an Angular tree and sees no .vue file.
+			local vue_plugin = not vim.g.gaf and require("nuxtdev").vue_tsserver_plugin() or nil
+
 			vim.lsp.config("vtsls", {
+				-- `vue` listed even before the server finishes installing: vue_ls
+				-- hard-errors when no ts client is attached to the same buffer.
+				filetypes = not vim.g.gaf
+						and { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" }
+					or nil,
 				settings = {
-					vtsls = { autoUseWorkspaceTsdk = vim.g.gaf == true },
+					vtsls = {
+						autoUseWorkspaceTsdk = vim.g.gaf == true,
+						-- vtsls.tsserver, not typescript.tsserver: the VS Code namespace
+						-- vtsls forwards verbatim has no plugin key.
+						tsserver = vue_plugin and { globalPlugins = { vue_plugin } } or nil,
+					},
 					typescript = {
 						tsdk = vim.g.gaf and "node_modules/typescript/lib" or nil,
 						tsserver = { maxTsServerMemory = 8192, log = vim.g.gaf and "normal" or nil },
@@ -399,7 +415,7 @@ return {
 				vim.list_extend(tailwind_class_regex, require("artisan.lsp").tailwind_class_regex)
 			end
 			vim.lsp.config("tailwindcss", {
-				filetypes = { "html", "css", "javascript", "typescript", "javascriptreact", "typescriptreact", "blade" },
+				filetypes = { "html", "css", "javascript", "typescript", "javascriptreact", "typescriptreact", "blade", "vue" },
 				settings = {
 					tailwindCSS = {
 						experimental = {
@@ -458,6 +474,32 @@ return {
 					showExpandedAbbreviation = "always",
 				},
 			})
+
+			vim.lsp.config("vue_ls", {
+				-- Rooted on the app, not the lockfile default: in a monorepo a .vue file
+				-- belongs to one app whose tsconfig/.nuxt the server reads. Earlier
+				-- markers win; package.json is the plain-Vue fallback.
+				root_markers = {
+					"nuxt.config.ts",
+					"nuxt.config.mts",
+					"nuxt.config.js",
+					"nuxt.config.mjs",
+					"vite.config.ts",
+					"vite.config.js",
+					"package.json",
+				},
+				on_attach = function(client, _)
+					-- conform's prettier owns vue formatting; one owner per filetype.
+					client.server_capabilities.documentFormattingProvider = false
+					client.server_capabilities.documentRangeFormattingProvider = false
+				end,
+			})
+
+			-- Registered here because this spec loads on BufReadPre, early enough for
+			-- nuxtdev's FileType autocmd to catch the session's first buffer.
+			if not vim.g.gaf then
+				require("nuxtdev").setup()
+			end
 
 			-- Typos LSP — fast spell/typo checker (Rust). Hint severity to stay quiet.
 			vim.lsp.config("typos_lsp", {

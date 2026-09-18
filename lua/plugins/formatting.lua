@@ -15,6 +15,9 @@ return {
         typescript = { "prettierd", "prettier", stop_after_first = true },
         javascriptreact = { "prettierd", "prettier", stop_after_first = true },
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
+        -- vue_ls's own formatter is switched off in lsp.lua, so prettier (which
+        -- parses SFCs natively) is the single owner.
+        vue = { "prettierd", "prettier", stop_after_first = true },
         -- stylelint first: the GAF webapp formats scss via `stylelint --fix`
         -- (its prettier only covers *.ts). conform resolves stylelint from
         -- node_modules and skips it when a project doesn't ship it, falling

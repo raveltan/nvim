@@ -2,8 +2,11 @@ local M = {}
 
 local API_ROOT = vim.fn.expand("~/freelancer-dev/api")
 
+-- Neither has anything to attach to in fl-gaf: no tailwind config, no .vue.
+local UNUSED_SERVERS = { tailwindcss = true, vue_ls = true }
+
 function M.filter_mason_servers(servers)
-  return vim.tbl_filter(function(s) return s ~= "tailwindcss" end, servers)
+  return vim.tbl_filter(function(s) return not UNUSED_SERVERS[s] end, servers)
 end
 
 -- The api repo is a multi-package monorepo: each top-level service dir is its

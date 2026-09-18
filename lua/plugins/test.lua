@@ -62,8 +62,10 @@ return {
       local opts = {
         adapters = {
           require("neotest-vitest")({
+            -- .nuxt/.output hold generated copies of the source: scanning them
+            -- surfaces a phantom duplicate of every real test file.
             filter_dir = function(name, _, _)
-              return name ~= "node_modules" and name ~= "ui-tests"
+              return name ~= "node_modules" and name ~= "ui-tests" and name ~= ".nuxt" and name ~= ".output"
             end,
             -- Filename match ONLY. neotest-vitest already AND-wraps this with its
             -- built-in hasVitestDependency() check, so re-reading package.json here

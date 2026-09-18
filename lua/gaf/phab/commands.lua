@@ -83,6 +83,44 @@ function M.install(api)
     nargs = "*",
     desc = "Show the diff summary and test plan in a float (! to refetch)",
   })
+  cmd("PhabComment", function(o)
+    local args = parse(o.args)
+    args.line1 = o.line1
+    args.line2 = o.line2
+    args.refresh = o.bang
+    api.comment(args)
+  end, {
+    bang = true,
+    range = true,
+    nargs = "*",
+    desc = "Draft an inline comment on this line / selection (! refetches the diff)",
+  })
+  cmd("PhabSuggest", function(o)
+    local args = parse(o.args)
+    args.line1 = o.line1
+    args.line2 = o.line2
+    args.refresh = o.bang
+    api.suggest(args)
+  end, {
+    bang = true,
+    range = true,
+    nargs = "*",
+    desc = "Draft an inline comment suggesting a rewrite of this line / selection",
+  })
+  cmd("PhabDraftEdit", function() api.draft_edit() end, {
+    desc = "Re-open the unpublished draft on this line",
+  })
+  cmd("PhabDraftDelete", function() api.draft_delete() end, {
+    desc = "Discard the unpublished draft on this line",
+  })
+  cmd("PhabSubmit", function(o) api.submit(parse(o.args)) end, {
+    nargs = "*",
+    desc = "Publish this session's inline comment drafts (asks for a cover message)",
+  })
+  cmd("PhabDrafts", function(o) api.drafts(parse(o.args)) end, {
+    nargs = "*",
+    desc = "Pick among the unpublished inline comment drafts",
+  })
   cmd("PhabEditSummary", function() api.edit_summary() end, {
     desc = "Edit the diff summary (:w saves to Phabricator)",
   })
@@ -99,6 +137,19 @@ function M.install(api)
     end
   end
 
+  -- Commenting and suggesting have a visual-mode meaning: the selection is the
+  -- comment's line range, so the commands carry the range through.
+  local function map_range(lhs, command, what)
+    if not lhs or lhs == "" then return end
+    vim.keymap.set("n", lhs, "<cmd>" .. command .. "<cr>",
+      { silent = true, desc = "Phab: " .. what .. " on this line" })
+    vim.keymap.set("x", lhs, ":" .. command .. "<cr>",
+      { silent = true, desc = "Phab: " .. what .. " on this selection" })
+  end
+
+  map_range(keys.comment, "PhabComment", "comment")
+  map_range(keys.suggest, "PhabSuggest", "suggest a change")
+
   map(keys.open_all,       function() api.open_all() end,        "Phab: files with inline comments")
   map(keys.revision,       function() api.set_revision() end,    "Phab: set revision for this worktree")
   map(keys.browser,        function() api.open_browser() end,    "Phab: open revision in browser")
@@ -109,6 +160,10 @@ function M.install(api)
   map(keys.description,    function() api.show_description() end, "Phab: description (summary + test plan)")
   map(keys.edit_summary,   function() api.edit_summary() end,    "Phab: edit summary")
   map(keys.edit_test_plan, function() api.edit_test_plan() end,  "Phab: edit test plan")
+  map(keys.draft_edit,     function() api.draft_edit() end,      "Phab: edit the draft on this line")
+  map(keys.draft_delete,   function() api.draft_delete() end,    "Phab: discard the draft on this line")
+  map(keys.submit,         function() api.submit() end,          "Phab: publish inline comment drafts")
+  map(keys.drafts,         function() api.drafts() end,          "Phab: unpublished drafts")
   map(keys.next,           api.goto_next,                        "Phab: next inline comment")
   map(keys.prev,           api.goto_prev,                        "Phab: previous inline comment")
 

@@ -4,9 +4,15 @@
 -- Sources, in order:
 --   1. an explicit id the user set for this root (:PhabRevision / the prompt)
 --   2. a D<digits> ancestor directory (the arc-patch worktree layout)
---   3. an `arcpatch-D<id>` branch name
---   4. the `Differential Revision: <url>/D<id>` trailer of a recent commit
---   5. asking, when the caller allows it (interactive commands only)
+--   3. the `Differential Revision:` trailer of HEAD itself
+--   4. an `arcpatch-D<id>` branch name
+--   5. the same trailer anywhere in the last 50 commits
+--   6. asking, when the caller allows it (interactive commands only)
+--
+-- HEAD's own trailer outranks the branch name because a patched stack keeps
+-- the branch of the revision it started from: `arc patch` of D229985 on top of
+-- D229984 leaves the branch called arcpatch-D229984 while HEAD is D229985's
+-- commit. The tip is what the worktree actually shows, so it wins.
 --
 -- Everything but (1) and (5) is cached per repo root, so the git calls run once
 -- per root per session rather than on every BufEnter.
@@ -98,6 +104,15 @@ function M.git_root(path)
   return roots[dir] or nil
 end
 
+-- The trailer of HEAD alone. This is the revision whose code the worktree is
+-- showing, which the branch name can disagree with on a patched stack.
+function M.from_head(root)
+  local out = git(root, { "log", "-1", "--format=%B" })
+  if not out then return nil end
+  local id = out:match("Differential Revision:%s*%S-/D(%d+)")
+  return id and ("D" .. id) or nil
+end
+
 -- `arcpatch-D229984` is what `arc patch` names the branch it creates.
 function M.from_branch(root)
   local branch = git(root, { "rev-parse", "--abbrev-ref", "HEAD" })
@@ -147,7 +162,7 @@ function M.detect(buf)
     return resolved[root] or nil, root
   end
 
-  local rev = M.from_branch(root) or M.from_log(root)
+  local rev = M.from_head(root) or M.from_branch(root) or M.from_log(root)
   resolved[root] = rev or false
   return rev, root
 end
