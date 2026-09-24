@@ -119,16 +119,16 @@ return {
 			local vue_plugin = not vim.g.gaf and require("nuxtdev").vue_tsserver_plugin() or nil
 
 			vim.lsp.config("vtsls", {
-				-- Full document sync instead of incremental. tsserver keeps its own
-				-- line map per open file and hard-fails ("Debug Failure. Bad line
-				-- number. Line: N, lineStarts.length: N") the moment an incremental
-				-- range lands past its copy's last line, taking the whole server down
-				-- with exit code 1. The drift comes from @vue/typescript-plugin: volar
-				-- proxies the project service globally, so every file — .ts as much as
-				-- .vue — is exposed, and a crash costs the session's TS support. Sending
-				-- the whole buffer removes the range arithmetic, so the copies cannot
-				-- diverge.
-				flags = not vim.g.gaf and { allow_incremental_sync = false } or nil,
+				-- Incremental sync, overriding the full-sync default above. vtsls
+				-- 0.3.0 turns a full-text didChange into a tsserver edit ending at
+				-- the NEW text's line count (language-service $changeTextDocument
+				-- reads doc.lineCount after applying the update). tsserver clamps
+				-- that for most files, but a file already loaded into the program
+				-- and opened unmodified keeps its disk snapshot, which is checked
+				-- strictly: the first edit fails "Debug Failure. Bad line number.
+				-- Line: N, lineStarts.length: N" and tsserver exits 1. Only
+				-- nvim-computed ranges avoid that branch.
+				flags = { allow_incremental_sync = true },
 				-- `vue` listed even before the server finishes installing: vue_ls
 				-- hard-errors when no ts client is attached to the same buffer.
 				filetypes = not vim.g.gaf
