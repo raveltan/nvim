@@ -16,7 +16,7 @@
 --                   branch, commit trailer, or by asking) + path helpers
 --   fetch.lua       vim.system + JSON parsing + PHID -> author resolution
 --   lookup.lua      buffer -> cached comments, and comment field accessors
---   render.lua      extmark signs, end-of-line preview, virtual-line bodies
+--   render.lua      extmark signs, virtual-line bodies
 --   nav.lua         ]p / [p inside a buffer
 --   pick.lua        Snacks pickers over commented files / comments
 --   float.lua       shared read-only markdown float (Snacks.win)

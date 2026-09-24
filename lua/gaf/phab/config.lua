@@ -19,8 +19,6 @@ M.script_path = script
 local defaults = {
   script = script("phab-inline-comments.sh"),
   comments_script = script("phab-comments.sh"),
-  -- Truncate the end-of-line preview of a comment body at this width.
-  virt_text_max = 100,
   -- Fetch and render on BufReadPost / BufEnter once a revision is known.
   auto = true,
   -- When entering a worktree whose revision nothing identifies, ask for it.

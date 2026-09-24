@@ -1,9 +1,8 @@
--- Buffer decoration: one extmark per comment carrying the gutter sign, the
--- end-of-line preview and the full body as virtual lines. Extmark signs (not
+-- Buffer decoration: one extmark per comment carrying the gutter sign and the
+-- full body as virtual lines. Extmark signs (not
 -- sign_place) so a single clear of the namespace removes everything.
 
 local state  = require("gaf.phab.state")
-local config = require("gaf.phab.config")
 local lookup = require("gaf.phab.lookup")
 local revision = require("gaf.phab.revision")
 
@@ -36,14 +35,9 @@ function M.render(buf, rev, status)
   local comments = slot.by_path[rel]
   if not comments or #comments == 0 then return end
 
-  local max = config.get().virt_text_max
-
   for _, c in ipairs(comments) do
     local row = lookup.line_in(buf, c) - 1
     local author = lookup.author(c)
-
-    local preview = lookup.headline(c)
-    if #preview > max then preview = preview:sub(1, max - 1) .. "…" end
 
     local virt_lines = {
       { { "▌ ", "DiagnosticWarn" }, { "phab(" .. author .. "): ", "DiagnosticHint" } },
@@ -55,8 +49,6 @@ function M.render(buf, rev, status)
     pcall(vim.api.nvim_buf_set_extmark, buf, ns, row, 0, {
       sign_text = ">>",
       sign_hl_group = "DiagnosticWarn",
-      virt_text = { { "  " .. author .. ": " .. preview, "DiagnosticVirtualTextWarn" } },
-      virt_text_pos = "eol",
       virt_lines = virt_lines,
       priority = 10,
     })
