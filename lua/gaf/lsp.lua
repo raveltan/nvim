@@ -2,7 +2,11 @@ local M = {}
 
 local API_ROOT = vim.fn.expand("~/freelancer-dev/api")
 
--- Neither has anything to attach to in fl-gaf: no tailwind config, no .vue.
+-- Not auto-installed under GAF: vue_ls has no .vue to attach to, and tailwind is
+-- left to the non-GAF profile's install. Both still attach where their root
+-- markers match -- webapp/tailwind.config.ts exists, so tailwindcss does attach
+-- to webapp TS buffers (utility classes are used in inline templates; the
+-- blink `(`-trigger cache fix in lua/plugins/lsp.lua is what makes that safe).
 local UNUSED_SERVERS = { tailwindcss = true, vue_ls = true }
 
 function M.filter_mason_servers(servers)

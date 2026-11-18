@@ -13,7 +13,7 @@
 - **Bootstrap clone** is hard-pinned to `--branch=stable` and uses `--filter=blob:none` so the initial clone is quick. On failure it prints the git output and waits for a keypress before `os.exit(1)` — fatal, by design, since nothing downstream works without lazy.
 - **Single spec import** — `{ import = "plugins" }` — keeps the bootstrap file tiny. Every plugin lives in its own file under `lua/plugins/` and lazy's importer auto-discovers them.
 - **`install.colorscheme = { "gruvbox-baby", "habamax" }`** — the colorscheme list lazy uses while installing on first launch, before any real config has loaded. `habamax` is the always-available built-in fallback.
-- **`checker.enabled = false`** — no background `git fetch` against every plugin. Updates happen manually via `:Lazy update`.
+- **`checker.enabled = true, notify = false`** — silent hourly `git fetch` so lualine's pending-update count (lua/plugins/ui.lua `lazy_updates`) has data. No popup; apply with `:Lazy update`.
 - **`change_detection.enabled = false`** — editing a plugin spec file doesn't trigger an auto-reload prompt. We restart Neovim explicitly when needed.
 - **`performance.rtp.disabled_plugins`** — disables `gzip`, `tarPlugin`, `tohtml`, `tutor`, `zipPlugin`. We don't edit archives in-place and we never run `:Tutor`, so skipping their rtp scan shaves a few ms off startup.
 
@@ -42,7 +42,8 @@ require("lazy").setup({
   },
   install = { colorscheme = { "gruvbox-baby", "habamax" } },
   checker = {
-    enabled = false,
+    enabled = true,
+    notify = false,
   },
   change_detection = {
     enabled = false,
@@ -70,5 +71,4 @@ require("lazy").setup({
 ## Notes
 
 - New plugins: drop a file in `lua/plugins/`, no edit to this file required.
-- To temporarily re-enable update checks: `:lua require("lazy").check()` instead of flipping `checker.enabled`.
 - `netrwPlugin` is **not** in the disabled list — `gx` falls back to `vim.ui.open` which depends on netrw being available.

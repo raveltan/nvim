@@ -13,8 +13,8 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 | `<S-h>` | n | Prev buffer | config/keymaps.lua |
 | `<S-l>` | n | Next buffer | config/keymaps.lua |
 | `<leader>bo` | n | Close other buffers | config/keymaps.lua |
-| `<leader>bd` | n | Delete buffer | mini.bufremove |
-| `<leader>bD` | n | Delete buffer (force) | mini.bufremove |
+| `<leader>bd` | n | Delete buffer | snacks.bufdelete |
+| `<leader>bD` | n | Delete buffer (force) | snacks.bufdelete |
 | `<C-Up>` / `<C-Down>` | n | Resize height | config/keymaps.lua |
 | `<C-Left>` / `<C-Right>` | n | Resize width | config/keymaps.lua |
 | `<leader>ur` | n | Resize submode (hjkl, H/J/K/L=×5, ==equal, q=quit) | config/keymaps.lua |
@@ -102,6 +102,7 @@ Leader: `<space>`. Local leader: `\`. Modes: `n` normal, `i` insert, `v` visual,
 |-----|------|-------------|--------|
 | `<leader>gg` | n | Lazygit | snacks |
 | `<leader>/` | n | Toggle bottom-docked terminal (hide/show, session kept) | snacks.terminal |
+| `<leader>ao` | n | Toggle Oh My Pi terminal (right-docked, 40%); omp.nvim streams active file/cursor/selection to the session | omp.nvim |
 | `<leader>gl` | n | Line history — commits touching current line; `<CR>` opens commit read-only (`:Gedit <sha>`, no checkout) | util.line_history |
 | `<leader>gl` | v | Range history — commits touching the selection | util.line_history |
 | `<leader>gf` | n | File history — commits touching current file (`--follow`); `<CR>` opens commit read-only | util.line_history |

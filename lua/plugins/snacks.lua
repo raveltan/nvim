@@ -191,6 +191,9 @@ return {
       { "<leader>fr", function() Snacks.picker.recent() end, desc = "Recent files" },
       { "<leader>fp", function() Snacks.picker.projects() end, desc = "Projects" },
       { "<leader>,", function() Snacks.picker.buffers() end, desc = "Buffers" },
+      -- Buffer delete that keeps the window layout (was mini.bufremove).
+      { "<leader>bd", function() Snacks.bufdelete() end, desc = "Delete buffer" },
+      { "<leader>bD", function() Snacks.bufdelete({ force = true }) end, desc = "Delete buffer (force)" },
       -- Search
       -- Workspace grep lives on snacks (async rg, streams full results).
       -- fff live_grep is synchronous per keystroke with a time budget, so on

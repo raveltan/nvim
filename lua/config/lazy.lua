@@ -19,8 +19,11 @@ require("lazy").setup({
     { import = "plugins" },
   },
   install = { colorscheme = { "luna" } },
+  -- Silent hourly update check; lualine renders the pending count
+  -- (lua/plugins/ui.lua lazy_updates). No popup, update via :Lazy.
   checker = {
-    enabled = false,
+    enabled = true,
+    notify = false,
   },
   change_detection = {
     enabled = false,

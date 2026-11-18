@@ -129,6 +129,21 @@ return {
 				-- Line: N, lineStarts.length: N" and tsserver exits 1. Only
 				-- nvim-computed ranges avoid that branch.
 				flags = { allow_incremental_sync = true },
+				-- With tsserver.log on (GAF, below) vtsls raises a
+				-- window/showMessageRequest "TS Server logging is currently enabled
+				-- which may impact performance" / "Disable logging" on the first TS
+				-- buffer of every session, which the default handler turns into a
+				-- vim.ui.select popup. The logging is deliberate (crash forensics), so
+				-- answer that one request with "no choice" (vim.NIL is what the
+				-- default handler returns on cancel) and pass everything else through.
+				handlers = {
+					["window/showMessageRequest"] = function(err, params, ctx)
+						if params and params.message and params.message:find("TS Server logging", 1, true) then
+							return vim.NIL
+						end
+						return vim.lsp.handlers["window/showMessageRequest"](err, params, ctx)
+					end,
+				},
 				-- `vue` listed even before the server finishes installing: vue_ls
 				-- hard-errors when no ts client is attached to the same buffer.
 				filetypes = not vim.g.gaf
@@ -631,10 +646,7 @@ return {
 			virtual_text = { enabled = false }, -- sign only; nothing writes end-of-line text
 			ignore = { ft = { "markdown", "text", "gitcommit" } },
 		},
-		config = function(_, opts)
-			require("nvim-lightbulb").setup(opts)
-			vim.api.nvim_set_hl(0, "LightBulbSign", { fg = "#d9a35a" }) -- luna warning
-		end,
+		-- LightBulbSign is defined in luna's overrides() (lua/plugins/ui.lua).
 	},
 
 	-- LSP progress indicator

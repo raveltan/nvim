@@ -13,7 +13,10 @@
 return {
   {
     "mrcjkb/rustaceanvim",
-    version = "^5",
+    -- ^9: v6-v9 breaking changes (edition opt, rust-analyzer.json, ra-multiplex,
+    -- .vscode/settings.json, auto-registered capabilities, nvim <0.12) touch
+    -- nothing used below; capabilities are already passed explicitly.
+    version = "^9",
     -- Upstream: "This plugin is already lazy" — it is a filetype plugin, and
     -- lazy-loading it with ft = "rust" races its own ftplugin against this
     -- spec's config. No dependencies either: listing blink/dap/lspconfig here

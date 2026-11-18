@@ -107,6 +107,14 @@ return {
         vim.api.nvim_set_hl(0, "SnacksPicker", { link = "NormalFloat" })
         vim.api.nvim_set_hl(0, "SnacksPickerInputBorder", { link = "SnacksPickerBorder" })
         vim.api.nvim_set_hl(0, "SnacksPickerTitle", { link = "FloatTitle" })
+
+        -- Plugin groups that ship as `default = true` links (satellite ->
+        -- Visual, nvim-lightbulb -> DiagnosticSignInfo): an explicit definition
+        -- here wins whenever the plugin loads, and the ColorScheme hook below
+        -- re-applies it after a theme reload.
+        vim.api.nvim_set_hl(0, "SatelliteBar", { bg = "#30363d" })
+        vim.api.nvim_set_hl(0, "SatelliteBackground", { bg = "NONE" })
+        vim.api.nvim_set_hl(0, "LightBulbSign", { fg = "#d9a35a" }) -- luna warning
       end
 
       vim.cmd.colorscheme("luna")
@@ -443,20 +451,6 @@ return {
         quickfix    = { enable = true, signs = { "-", "=", "≡" } },
       },
     },
-    config = function(_, opts)
-      require("satellite").setup(opts)
-      -- Match transparent theme
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        callback = function()
-          vim.api.nvim_set_hl(0, "SatelliteBar", { bg = "#30363d" })
-          vim.api.nvim_set_hl(0, "SatelliteBackground", { bg = "NONE" })
-        end,
-      })
-      pcall(function()
-        vim.api.nvim_set_hl(0, "SatelliteBar", { bg = "#30363d" })
-        vim.api.nvim_set_hl(0, "SatelliteBackground", { bg = "NONE" })
-      end)
-    end,
   },
 
   -- Colored function arguments via Treesitter

@@ -31,16 +31,13 @@ return {
             vim.opt_local.textwidth = 0
             return
           end
+          -- Soft wrap only: wrapping.nvim's set_nvim_opt_defaults turns the
+          -- global 'wrap' off, so re-assert it per buffer. textwidth and
+          -- formatoptions are NOT touched here — options.lua removes `t` so code
+          -- never auto-hard-wraps while typing, and the prose ftplugins
+          -- (gitcommit 72, markdown) set their own. Re-adding `t` here undid that
+          -- for every code buffer.
           vim.opt_local.wrap = true
-          -- Commit messages: keep the ftplugin's textwidth=72 / fo+=tl so they
-          -- hard-wrap at the conventional width. Still re-assert soft wrap above,
-          -- because wrapping.nvim's set_nvim_opt_defaults turns global 'wrap' off.
-          if ev.match == "gitcommit" or ev.match == "NeogitCommitMessage" then
-            return
-          end
-          vim.opt_local.textwidth = 150
-          vim.opt_local.formatoptions:append("t")
-          vim.opt_local.formatoptions:append("l")
         end,
       })
     end,
@@ -147,14 +144,8 @@ return {
     },
   },
 
-  -- Better buffer delete (preserves window layout)
-  {
-    "echasnovski/mini.bufremove",
-    keys = {
-      { "<leader>bd", function() require("mini.bufremove").delete(0, false) end, desc = "Delete buffer" },
-      { "<leader>bD", function() require("mini.bufremove").delete(0, true) end,  desc = "Delete buffer (force)" },
-    },
-  },
+  -- Buffer delete that preserves window layout: Snacks.bufdelete, bound to
+  -- <leader>bd/bD in lua/plugins/snacks.lua (mini.bufremove was a 1:1 duplicate).
 
   -- Enhanced text objects (around/inside)
   {
@@ -295,6 +286,7 @@ return {
     event = "VeryLazy",
     opts = function()
       local spec = {
+        { "<leader>a",  group = "ai (omp)" },
         { "<leader>b",  group = "buffer" },
         { "<leader>c",  group = "code" },
         { "<leader>cs", group = "swap" },
