@@ -47,6 +47,8 @@ return {
         -- the ignored-E501 comment. Without this, black wraps lines that were
         -- never too long to begin with.
         black = { prepend_args = { "--line-length", "119" } },
+        -- Loose .rs files without a Cargo.toml; conform's own default is 2021.
+        rustfmt = { options = { default_edition = "2024" } },
         stylua = {
           condition = function(_, ctx)
             return #vim.fs.find({ ".stylua.toml", "stylua.toml" }, { path = ctx.dirname, upward = true }) > 0

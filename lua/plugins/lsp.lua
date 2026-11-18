@@ -572,6 +572,46 @@ return {
 				vim.lsp.enable("sourcekit")
 			end
 
+			-- clangd from PATH, not mason: on macOS Apple's /usr/bin/clangd finds the
+			-- SDK headers, upstream builds report <stdio.h> not found on loose files.
+			if vim.fn.executable("clangd") == 1 then
+				local function has_compile_db(file)
+					for dir in vim.fs.parents(file) do
+						for _, f in ipairs({ "compile_commands.json", "compile_flags.txt", "build/compile_commands.json" }) do
+							if vim.uv.fs_stat(dir .. "/" .. f) then return true end
+						end
+					end
+					return false
+				end
+				vim.lsp.config("clangd", {
+					cmd = {
+						"clangd",
+						"--background-index",
+						"--clang-tidy",
+						"--header-insertion=iwyu",
+						"--completion-style=detailed",
+						"--function-arg-placeholders=1",
+						"--fallback-style=llvm",
+					},
+					-- One clangd fallbackFlags list serves C and C++, and -std=c++23 is a
+					-- hard error on a .c file. So loose files (no compile DB) get a per-file
+					-- command with the newest ISO standard; projects keep their build's -std.
+					on_attach = function(client, buf)
+						local file = vim.api.nvim_buf_get_name(buf)
+						if file == "" or has_compile_db(file) then return end
+						local std = vim.bo[buf].filetype == "c" and "-std=c23" or "-std=c++23"
+						client:notify("workspace/didChangeConfiguration", {
+							settings = {
+								compilationDatabaseChanges = {
+									[file] = { workingDirectory = vim.fs.dirname(file), compilationCommand = { "clang", std, file } },
+								},
+							},
+						})
+					end,
+				})
+				vim.lsp.enable("clangd")
+			end
+
 			-- mason-lspconfig 2.x `automatic_enable=true` (default) enables every
 			-- server in `ensure_installed` automatically — no manual vim.lsp.enable.
 

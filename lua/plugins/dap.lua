@@ -241,6 +241,31 @@ return {
         },
       }
 
+      local native = {
+        {
+          name = "codelldb: launch executable (prompt)",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/build/", "file")
+          end,
+          args = function()
+            return require("dap.utils").splitstr(vim.fn.input("Args: "))
+          end,
+          cwd = "${workspaceFolder}",
+          stopOnEntry = false,
+        },
+        {
+          name = "codelldb: attach to process",
+          type = "codelldb",
+          request = "attach",
+          pid = function() return require("dap.utils").pick_process() end,
+          cwd = "${workspaceFolder}",
+        },
+      }
+      dap.configurations.c = native
+      dap.configurations.cpp = native
+
       dap.configurations.python = {
         {
           type = "python",

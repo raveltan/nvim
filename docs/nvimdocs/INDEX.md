@@ -98,6 +98,7 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [python-debug-coverage](python-debug-coverage.md) — debugpy + pytest-cov
 - [typescript-debug-coverage](typescript-debug-coverage.md) — pwa-node/chrome + jest/vitest lcov
 - [rust-debug-coverage](rust-debug-coverage.md) — codelldb + cargo-llvm-cov
+- [c-cpp](c-cpp.md) — clangd (C23/C++23 fallback) + codelldb
 - [flutter-debug-coverage](flutter-debug-coverage.md) — Dart/Flutter debug + lcov coverage
 
 ## Format / Lint

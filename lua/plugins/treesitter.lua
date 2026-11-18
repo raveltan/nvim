@@ -8,7 +8,7 @@ return {
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter").install({
-        "angular", "bash", "blade", "css", "dart", "diff", "embedded_template", "html", "javascript", "json", "lua",
+        "angular", "bash", "blade", "c", "cpp", "css", "dart", "diff", "embedded_template", "html", "javascript", "json", "lua",
         "markdown", "markdown_inline", "php", "php_only", "python", "regex",
         "ruby", "rust", "scss", "swift", "toml", "tsx", "typescript", "vim", "vimdoc", "vue", "yaml",
       })
