@@ -119,13 +119,6 @@ return {
           },
           {
             pane = 1,
-            icon = " ",
-            desc = "Obsidian guide",
-            key = "o",
-            action = ":e " .. vim.fn.stdpath("config") .. "/docs/obsidian.md",
-          },
-          {
-            pane = 1,
             icon = "󰋽 ",
             desc = "Nvim docs (pick)",
             key = "d",

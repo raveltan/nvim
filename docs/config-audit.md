@@ -69,7 +69,7 @@ Ranked by fit to the PHP-monolith / Angular / Rails / Rust / Flutter / Swift + P
 1. **AI in-editor — pick one.** `folke/sidekick.nvim` (persistent Claude-Code CLI terminal + inline Next-Edit-Suggestion diffs; matches the existing folke stack) or `coder/claudecode.nvim` (MCP/WebSocket bridge — selection + diagnostics into Claude Code, edits land as reviewable diffs). No AI plugin installed today despite living in Claude Code.
 2. **`sindrets/diffview.nvim`** — single-tabpage multi-file review across any revision/merge-base + per-file history. fugitive+gitsigns give no review-oriented multi-file diff; real gap for the Phabricator/arcanist review loop.
 3. **`stevearc/aerial.nvim`** — LSP/treesitter symbol outline sidebar. No outline installed; invaluable for huge monolith PHP classes and big Angular/TS files. (alt: `hedyhli/outline.nvim`.)
-4. **`MeanderingProgrammer/render-markdown.nvim`** — inline markdown rendering; companion to obsidian.nvim + todo-comments, nicer for reading AI output/READMEs/tickets.
+4. **`MeanderingProgrammer/render-markdown.nvim`** — inline markdown rendering; companion to todo-comments, nicer for reading AI output/READMEs/tickets.
 
 **Tier 2 — language gaps**
 5. **`saecki/crates.nvim`** — Cargo.toml versions/features/upgrades inline (rustaceanvim covers LSP, not deps).

@@ -57,7 +57,6 @@ The rest is `opts.spec`. Registered group prefixes:
 | `<leader>gc` | conflict |
 | `<leader>h` | harpoon |
 | `<leader>k` | docs (devdocs/nvimdocs) |
-| `<leader>n` | obsidian |
 | `<leader>o` | overseer/other |
 | `<leader>R` | rest (kulala) |
 | `<leader>s` | search |
@@ -83,7 +82,6 @@ resize submode in `lua/config/keymaps.lua`.
 | `<leader>cv` | case convert |
 | `<leader>d` | debug |
 | `<leader>h` | harpoon |
-| `<leader>n` | obsidian |
 | `<leader>o` | overseer |
 | `<leader>r` | rails |
 | `<leader>S` | snippets |
@@ -112,6 +110,5 @@ No explicit `keys = {}`; activation is automatic on prefix idle.
 
 ## Notes
 
-- Groups are inert containers — they only render a label in the popup. The actual `<leader>nf` etc. are bound by the respective plugin specs (obsidian, snacks.pick, gitsigns, ...).
-- `<leader>n` group label is `obsidian` because the entire `n` namespace is owned by [[editor-obsidian]].
+- Groups are inert containers — they only render a label in the popup. The actual `<leader>ff` etc. are bound by the respective plugin specs (snacks.pick, gitsigns, ...).
 - `<leader>t` is shared with [[editor-checkmate]] todo commands and neotest; group label intentionally says "todo/test".

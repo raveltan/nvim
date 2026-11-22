@@ -348,32 +348,6 @@ work in any buffer (and lazy-load the plugin); the rest are scoped to
 | `zp` | n | Peek folded lines under cursor | ufo (fold.lua) |
 | `gx` | n | Open URL/file/Phab `D####`/`T####` under cursor | config/keymaps.lua |
 
-## Obsidian — `<leader>n*`
-
-| Key | Mode | Description |
-|-----|------|-------------|
-| `<leader>nf` | n | Find note (quick switch) |
-| `<leader>ns` | n | Search vault content |
-| `<leader>ng` | n | Tags picker |
-| `<leader>nb` | n | Backlinks |
-| `<leader>nl` | n | Links in note |
-| `<leader>nF` | n | Follow link |
-| `<leader>no` | n | Open in Obsidian app |
-| `<leader>nW` | n | Switch workspace |
-| `<leader>nd` / `<leader>ny` / `<leader>nT` | n | Today / yesterday / tomorrow daily |
-| `<leader>nR` | n | Weekly review |
-| `<leader>nc` | n | Capture to inbox |
-| `<leader>nn` | n | New note (raw, inbox) |
-| `<leader>np` / `<leader>nm` / `<leader>nu` / `<leader>nD` | n | New project / meeting / bug / decision |
-| `<leader>nk` / `<leader>nP` / `<leader>nS` / `<leader>nB` | n | New concept / person / snippet / book |
-| `<leader>ni` | n | Insert template at cursor |
-| `<leader>nr` | n | Rename note (refactor links) |
-| `<leader>nI` | n | Paste image |
-| `<leader>nL` | v | Link selection |
-| `<leader>nX` | v | Extract selection → note |
-| `<leader>nt` | n | Toggle checkbox |
-| `<leader>nC` | n | Table of contents |
-
 ## Editing
 
 | Key | Mode | Description | Source |
@@ -504,7 +478,7 @@ state (green = on, yellow = off) and flipping it notifies.
 
 ## Which-key groups
 
-`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>l` laravel (no GAF=1) · `<leader>m` xcode (swift buffers) · `<leader>n` obsidian · `<leader>o` overseer/other · `<leader>p` phabricator (GAF=1) · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` test (neotest) · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile (GAF=1 only) · `g` goto · `gs` surround
+`<leader>b` buffer · `<leader>c` code · `<leader>cs` swap · `<leader>cv` case convert · `<leader>d` debug · `<leader>D` database · `<leader>f` find/files · `<leader>F` flutter (dart buffers) · `<leader>g` git · `<leader>h` harpoon · `<leader>k` docs (devdocs/nvimdocs) · `<leader>l` laravel (no GAF=1) · `<leader>m` xcode (swift buffers) · `<leader>o` overseer/other · `<leader>p` phabricator (GAF=1) · `<leader>r` redash (GAF=1) · `<leader>R` rest (kulala) · `<leader>s` search · `<leader>S` snippets · `<leader>t` test (neotest) · `<leader>u` ui · `<leader>ud` duck · `<leader>w` window · `<leader>x` diagnostics/quickfix · `<leader>X` xdebug profile (GAF=1 only) · `g` goto · `gs` surround
 
 ## Known overlaps
 

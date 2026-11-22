@@ -138,7 +138,6 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 - [editor-hlslens](editor-hlslens.md) — search match count + virt text
 - [editor-highlight-undo](editor-highlight-undo.md) — flash region on undo/redo
 - [editor-quicker](editor-quicker.md) — editable quickfix
-- [editor-obsidian](editor-obsidian.md) — obsidian vault integration
 
 ## Navigation
 
@@ -213,7 +212,6 @@ Master index of every doc in `docs/nvimdocs/`, grouped by category. One line per
 ## Util
 
 - [util-line-history](util-line-history.md) — per-line & per-file git history picker
-- [util-obsidian](util-obsidian.md) — obsidian.nvim utilities
 
 ## Docs
 
