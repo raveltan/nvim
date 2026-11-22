@@ -38,6 +38,22 @@ return {
             float_win_config = { border = "rounded" },
           },
           server = {
+            on_attach = function(_, bufnr)
+              local function bmap(lhs, cmd, desc, mode)
+                vim.keymap.set(mode or "n", lhs, function() vim.cmd.RustLsp(cmd) end,
+                  { buffer = bufnr, desc = "Rust: " .. desc })
+              end
+              bmap("K", { "hover", "actions" }, "hover actions")
+              bmap("<leader>cT", "runnables", "runnables")
+              bmap("<leader>cL", "testables", "testables")
+              bmap("<leader>cB", "debuggables", "debuggables")
+              bmap("<leader>cX", "expandMacro", "expand macro")
+              bmap("<leader>cE", "explainError", "explain error")
+              bmap("<leader>cC", "openCargo", "open Cargo.toml")
+              bmap("<leader>cP", "parentModule", "parent module")
+              bmap("<leader>cW", "reloadWorkspace", "reload workspace")
+              bmap("J", "joinLines", "join lines", { "n", "v" })
+            end,
             capabilities = require("blink.cmp").get_lsp_capabilities(),
             default_settings = {
               ["rust-analyzer"] = {
